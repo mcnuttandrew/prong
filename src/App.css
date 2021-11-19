@@ -1,38 +1,153 @@
-.App {
-  text-align: center;
+button,
+input {
+  cursor: pointer;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/*  We have our own custom color picker button */
+.pickr {
+  display: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.cm-num-widget {
+  display: inline-block;
+  font-family: monospace;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.cm-inc-widget {
+  margin-left: 5px;
+  margin-right: 1px;
+  line-height: 1;
+  padding: 0;
+}
+
+.cm-dec-widget {
+  margin-right: 3px;
+  line-height: 1;
+  padding: 0;
+}
+
+.cm-color-widget {
+  display: inline-block;
+  /*  Codemirror has white-space: pre by default
+   Resetting here fixes a visual glitch where some whitespace in the color picker code
+   makes the widget align weirdly */
+  white-space: normal;
+}
+
+.cm-bool-widget {
+  display: inline-block;
+}
+
+.cm-bool-checkbox-widget {
+  margin: 0 3px 0 0px;
+  position: relative;
+  top: 2px;
+}
+
+.cm-slider-widget {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.cm-color-name-widget {
+  display: inline-block;
+  vertical-align: super;
+}
+
+.cm-color-widget {
+  width: 10px;
+  height: 10px;
+  vertical-align: super;
+}
+
+
+.color-name-picker {
+  position: absolute;
+  background: white;
+  z-index: 100;
+  overflow: auto;
+  /*  This prevents the picker for becoming narrower
+   near the right side of the screen. It preserves its width,
+   which allows the JS code to move it left the right amount */
+  width: max-content;
+
+  /*  The React code sets the `left` and `top` properties according to the button location
+   This property moves the picker over an additional bit */
+  margin-left: 20px;
+
+
+}
+
+.color-name-picker .color-group {
+  display: inline-block;
+  width: 75px;
+  font-weight: bold;
+  margin-bottom: 0.1rem;
+  margin-top: 0.2rem;
+}
+
+.color-name-picker,
+body .pcr-app.visible {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  font-family: sans-serif;
+}
+
+
+
+.color-name-picker .color-item,
+.color-name-picker .color-group {
+  cursor: pointer;
+  user-select: none;
+}
+
+.color-name-picker .color-item {
+  font-family: monospace;
+  margin-bottom: 0px;
+  /*  To make the color strips stretch all the way across */
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.color-name-picker .color-item:first-of-type {
+  margin-top: 2px;
+}
+
+.color-name-picker .color-item:last-of-type {
+  margin-bottom: 10px;
+}
+
+.color-name-picker .selected {
+  font-weight: bold;
+}
+
+.color-name-picker .color-swatch {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 1px;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.color-name-picker .buttons {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-top: 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+.color-name-picker .buttons button:first-child {
+  margin-right: 0.5rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.cm-annotation-widget {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+  /* If you want dots under the hoverable text */
+  cursor: pointer;
+  pointer-events: all;
 }
