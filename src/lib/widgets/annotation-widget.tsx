@@ -125,7 +125,7 @@ function AnyOfPicker(props: ComponentProps) {
 function contentDescriber(props: ComponentProps) {
   return (
     <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-      <ReactMarkdown>{props?.content?.description || "?"}</ReactMarkdown>
+      <ReactMarkdown>{props?.content?.description || "?!!"}</ReactMarkdown>
     </div>
   );
 }

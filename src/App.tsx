@@ -28,11 +28,7 @@ function App() {
   const [currentCode, setCurrentCode] = useState(code2);
   return (
     <div className="App">
-      <Editor
-        schema={VegaLiteV5Schema}
-        code={currentCode}
-        onChange={setCurrentCode}
-      />
+      <Editor schema={VegaLiteV5Schema} code={code2} onChange={() => {}} />
     </div>
   );
 }

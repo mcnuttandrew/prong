@@ -16,9 +16,6 @@ import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import SimpleNumWidget from "./widgets/num-widget";
 
-import isEqual from "lodash.isequal";
-import { cmStatePlugin } from "./cmState";
-
 import { getLanguageService } from "vscode-json-languageservice";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import AnnotationWidget from "./widgets/annotation-widget";
@@ -100,6 +97,7 @@ function createWidgets(view: EditorView, schema: any) {
 }
 
 const service = getLanguageService({});
+// create event handler for all in play widgets
 const subscriptions = simpleWidgets.reduce((acc, row) => {
   Object.entries(row.eventSubscriptions).forEach(([eventName, sub]) => {
     acc[eventName] = (acc[eventName] || []).concat(sub);
@@ -116,7 +114,6 @@ const eventHandlers = Object.entries(subscriptions).reduce(
     return handlers;
   },
   {
-    // TODO connect each of the event subscription objects here
     simpleSwap: (e, view) => {
       const {
         detail: { from, value, to },
@@ -126,6 +123,7 @@ const eventHandlers = Object.entries(subscriptions).reduce(
     },
   }
 );
+// build the widgets
 export const widgetsPlugin = (schema: any) =>
   ViewPlugin.fromClass(
     class {
@@ -136,21 +134,10 @@ export const widgetsPlugin = (schema: any) =>
       }
 
       update(update: ViewUpdate) {
-        // TODO: i think this probably isn't valid now that were not toggling widgets
-        if (
-          update.docChanged ||
-          update.viewportChanged ||
-          !isEqual(
-            update.startState.field(cmStatePlugin),
-            update.state.field(cmStatePlugin)
-          )
-        )
+        if (update.docChanged || update.viewportChanged) {
           this.decorations = createWidgets(update.view, schema);
+        }
       }
     },
-    {
-      decorations: (v) => v.decorations,
-      // provide: {},
-      eventHandlers,
-    }
+    { decorations: (v) => v.decorations, eventHandlers }
   );

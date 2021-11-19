@@ -16,7 +16,6 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "lodash.isequal": "^4.5.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-markdown": "^7.1.0",
@@ -27,7 +26,8 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "REACT_APP_DISABLE_LIVE_RELOAD=true react-scripts start",
+    "trad-start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -51,7 +51,6 @@
     ]
   },
   "devDependencies": {
-    "@types/json-schema": "^7.0.9",
-    "@types/lodash.isequal": "^4.5.5"
+    "@types/json-schema": "^7.0.9"
   }
 }

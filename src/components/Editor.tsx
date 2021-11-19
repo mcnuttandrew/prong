@@ -8,7 +8,7 @@ import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 
 import { widgetsPlugin } from "../lib/widgets";
-import { cmStatePlugin } from "../lib/cmState";
+// import { cmStatePlugin } from "../lib/cmState";
 
 type Props = {
   onChange: (code: string) => void;
@@ -19,35 +19,42 @@ type Props = {
 const languageConf = new Compartment();
 
 export default function Editor(props: Props) {
-  const { schema, code, onChange } = props;
+  const {
+    schema,
+    code,
+    // onChange
+  } = props;
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
+  useEffect(() => {
+    console.log("mount", "here");
+  }, []);
+  useEffect(() => {
+    console.log("this was run");
 
-  useEffect(
-    () =>
-      setView(
-        new EditorView({
-          state: EditorState.create({
-            extensions: [
-              basicSetup,
-              languageConf.of(json()),
-              keymap.of([indentWithTab]),
-              cmStatePlugin,
-              widgetsPlugin(schema),
-              EditorView.updateListener.of((v: ViewUpdate) => {
-                if (v.docChanged) {
-                  onChange(v.state.doc.toString());
-                }
-              }),
-            ],
-            doc: code,
-          }),
-          parent: cmParent.current!,
-        })
-      ),
-    []
-  );
+    setView(
+      new EditorView({
+        state: EditorState.create({
+          extensions: [
+            basicSetup,
+            languageConf.of(json()),
+            keymap.of([indentWithTab]),
+            // cmStatePlugin,
+            widgetsPlugin(schema),
+            EditorView.updateListener.of((v: ViewUpdate) => {
+              // TODO fix
+              // if (v.docChanged) {
+              //   onChange(v.state.doc.toString());
+              // }
+            }),
+          ],
+          doc: code,
+        }),
+        parent: cmParent.current!,
+      })
+    );
+  }, [code]);
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {

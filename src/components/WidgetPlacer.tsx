@@ -55,6 +55,7 @@ export default function WidgetPlacer(props: Props): JSX.Element {
     }
   }, []);
 
+  // todo pick a more appropriate name for this
   return (
     <div
       className="color-name-picker"
