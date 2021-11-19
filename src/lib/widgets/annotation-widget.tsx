@@ -1,10 +1,13 @@
 import * as React from "react";
+import { useState } from "react";
 import * as ReactDOM from "react-dom";
 import { WidgetType } from "@codemirror/view";
 import { Thenable } from "vscode-json-languageservice";
 import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
+import isequal from "lodash.isequal";
+// import { JSONSchema7Object } from "@types/json-schema";
 
 // TODOs
 // - normalize schema
@@ -84,41 +87,139 @@ function ObjPicker(props: ComponentProps) {
   );
 }
 
+// TODO flatten nested anyOfs and remove duplicates
+function flattenAnyOf(content: any) {
+  if (!content || !content.anyOf) {
+    return content;
+  }
+  return content.anyOf.reduce(
+    (acc: any[], row: any) => acc.concat(row.anyOf ? flattenAnyOf(row) : row),
+    []
+  );
+}
+
+function removeDupsInAnyOf(content: any[]) {
+  return content.filter((row, idx) =>
+    content.slice(idx + 1).every((innerRow) => !isequal(row, innerRow))
+  );
+}
+
+function bundleConstsToEnum(content: any[]) {
+  const consts = content.filter((x) => x.const);
+  const nonConsts = content.filter((x) => !x.const);
+  return [...nonConsts, { enum: consts.map((x) => x.const) }];
+}
+
+function generateValueForObjProp(prop: any) {
+  const simple: any = { number: 0, string: "", object: {} };
+  if (prop.enum) {
+    return prop.enum[0];
+  } else if (simple.hasOwnProperty(prop.type)) {
+    return simple[prop.type];
+  } else {
+    console.log("not covered", prop.type, simple[prop.type]);
+    return null;
+  }
+}
+
+// function prepObjForSwap(content: any) {
+//   // todo this is not the whole required spec
+//   console.log(content.required);
+//   if (typeof content.require !== "object") {
+//     return {};
+//   }
+//   return content.required.reduce((acc: any, key: string) => {
+//     acc[key] = generateValueForObjProp(content.properties[key]);
+//     return acc;
+//   }, {});
+// }
+
+const addToSet = (set: Set<string>, key: string) =>
+  new Set([...Array.from(set), key]);
+
+const removeFromSet = (set: Set<string>, key: string) =>
+  new Set(Array.from(set).filter((x) => x !== key));
+
+function AnyOfObjOptionalFieldPicker(content: any, cb: any) {
+  const requiredProps = new Set<string>(
+    Array.isArray(content.required) ? content.required : []
+  );
+  const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
+    new Set(Array.from(requiredProps))
+  );
+  return (
+    <div style={{ display: "flex" }}>
+      <button
+        onClick={() => {
+          const val = Object.fromEntries(
+            Array.from(selectedOptions).map((key) => {
+              return [key, generateValueForObjProp(content.properties[key])];
+            })
+          );
+          cb({ type: "simpleSwap", payload: JSON.stringify(val) });
+        }}
+      >
+        Switch to obj with
+      </button>
+      <div>
+        {Object.keys(content.properties).map((key) => {
+          const selected = selectedOptions.has(key);
+          const onChange = requiredProps.has(key)
+            ? () => {}
+            : () =>
+                selected
+                  ? setSelectedOptions(addToSet(selectedOptions, key))
+                  : setSelectedOptions(removeFromSet(selectedOptions, key));
+          return (
+            <span>
+              <label>{key}</label>
+              <input
+                type="checkbox"
+                value={selected ? "checked" : undefined}
+                onChange={onChange}
+              />
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AnyOfPicker(props: ComponentProps) {
   const { content, cb } = props;
-  console.log({ content });
   return (
     <div>
-      {(content.anyOf as any[]).map((opt, idx) => {
-        return (
-          <div key={idx}>
-            {contentDescriber(opt.description)}
-            {opt.enum &&
-              opt.enum.map((val: string) => (
+      {bundleConstsToEnum(removeDupsInAnyOf(flattenAnyOf(content))).map(
+        (opt, idx) => {
+          return (
+            <div key={idx}>
+              {contentDescriber(opt.description)}
+              {opt.enum &&
+                opt.enum.map((val: string) => (
+                  <button
+                    key={val}
+                    onClick={() =>
+                      cb({ type: "simpleSwap", payload: `"${val}"` })
+                    }
+                  >
+                    {val}
+                  </button>
+                ))}
+              {opt.type === "object" && (
+                <div>{AnyOfObjOptionalFieldPicker(opt, cb)}</div>
+              )}
+              {opt.type === "null" && (
                 <button
-                  key={val}
-                  onClick={() =>
-                    cb({ type: "simpleSwap", payload: `"${val}"` })
-                  }
+                  onClick={() => cb({ type: "simpleSwap", payload: "null" })}
                 >
-                  {val}
+                  switch to null
                 </button>
-              ))}
-            {opt.type === "object" && (
-              <button onClick={() => cb({ type: "simpleSwap", payload: "{}" })}>
-                switch to object
-              </button>
-            )}
-            {opt.type === "null" && (
-              <button
-                onClick={() => cb({ type: "simpleSwap", payload: "null" })}
-              >
-                switch to null
-              </button>
-            )}
-          </div>
-        );
-      })}
+              )}
+            </div>
+          );
+        }
+      )}
     </div>
   );
 }
@@ -162,7 +263,7 @@ function ObjectComponent(props: ComponentProps) {
   return (
     <div>
       <div>Add field</div>
-      <div style={{ display: "flex" }}>
+      <div>
         <span>Key</span>
         <input value={keyVal} onChange={(e) => setKeyVal(e.target.value)} />
         <span>Value</span>
@@ -332,10 +433,29 @@ export default class AnnotationWidget extends WidgetType {
           }
           if (type === "removeObjectKey") {
             console.log("???", this.currentCodeSlice, this.syntaxNode);
-            // get full contents of parent (vis sliceString)
-            // create a new object
-            // replace at object position?
-            // -> this loses any formatting on this object
+
+            const objNode = this.syntaxNode!.parent!;
+            // todo: some subtlty about deleting
+            // probably need to actually delete from the end of the previous property
+            // up to the next one
+            console.log({
+              objNode,
+              pref: objNode.prevSibling,
+              next: objNode.nextSibling,
+            });
+            const delFrom = objNode.prevSibling
+              ? objNode.prevSibling.to + 1
+              : objNode.from;
+            const delTo = objNode.nextSibling
+              ? objNode.nextSibling.from - 1
+              : objNode.to;
+            // const delTo = objNode.nextSibling
+            //   ? objNode.nextSibling.from
+            //   : objNode.to;
+            event = new CustomEvent("simpleSwap", {
+              bubbles: true,
+              detail: { value: "", from: delFrom, to: delTo },
+            });
           }
           event && wrap.dispatchEvent(event);
           ReactDOM.unmountComponentAtNode(annotationWrap!);

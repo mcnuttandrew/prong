@@ -77,7 +77,7 @@ function createWidgets(
       to,
       enter: (type, from, to, get) => {
         const currentNode = get();
-        console.log(currentNode);
+        // TODO make the interface to the annotation configuration less dumb
         const annConfig = (replace: boolean) => ({
           widget: new AnnotationWidget(
             from,
@@ -122,7 +122,6 @@ const subscriptions = simpleWidgets.reduce((acc, row) => {
 const eventHandlers = Object.entries(subscriptions).reduce(
   (handlers: EventSubs, [eventName, subs]) => {
     handlers[eventName] = (event, view) => {
-      // console.log(eventName);
       subs.forEach((sub) => sub(event, view));
     };
 
@@ -132,7 +131,6 @@ const eventHandlers = Object.entries(subscriptions).reduce(
     simpleSwap: (e, view) => {
       const {
         detail: { from, value, to },
-        target,
       } = e as any;
       view.dispatch({ changes: { from, to, insert: value } });
     },
