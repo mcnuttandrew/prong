@@ -20,6 +20,11 @@ import { getLanguageService } from "vscode-json-languageservice";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import AnnotationWidget from "./widgets/annotation-widget";
 
+export interface Projection {
+  query: string[];
+  projection: (view: EditorView) => JSX.Element;
+}
+
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };
 export interface SimpleWidget {
   checkForAdd: (
@@ -44,6 +49,9 @@ const simpleWidgets: SimpleWidget[] = [
 ];
 
 function createNodeMap(view: EditorView, schema: any) {
+  // TODO also map these schemas to their names
+  // this may require forking the
+  // https://github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts#L338
   const doc = TextDocument.create("/ex.json", "json", 0, codeString(view, 0));
   return service
     .getMatchingSchemas(doc, service.parseJSONDocument(doc), schema)
@@ -56,7 +64,11 @@ function createNodeMap(view: EditorView, schema: any) {
     });
 }
 
-function createWidgets(view: EditorView, schema: any) {
+function createWidgets(
+  view: EditorView,
+  schema: any,
+  projections: Projection[]
+) {
   const schemaMapLoader = createNodeMap(view, schema);
   const widgets: Range<Decoration>[] = [];
   for (const { from, to } of view.visibleRanges) {
@@ -65,6 +77,7 @@ function createWidgets(view: EditorView, schema: any) {
       to,
       enter: (type, from, to, get) => {
         const currentNode = get();
+        console.log(currentNode);
         const annConfig = (replace: boolean) => ({
           widget: new AnnotationWidget(
             from,
@@ -84,6 +97,8 @@ function createWidgets(view: EditorView, schema: any) {
             Decoration.widget({ ...annConfig(false), side: 1 }).range(from)
           );
         }
+
+        // should there be a seperate projection widget?
         simpleWidgets.forEach(({ checkForAdd, addNode }) => {
           if (!checkForAdd(type, view, currentNode)) {
             return;
@@ -107,7 +122,7 @@ const subscriptions = simpleWidgets.reduce((acc, row) => {
 const eventHandlers = Object.entries(subscriptions).reduce(
   (handlers: EventSubs, [eventName, subs]) => {
     handlers[eventName] = (event, view) => {
-      console.log(eventName);
+      // console.log(eventName);
       subs.forEach((sub) => sub(event, view));
     };
 
@@ -124,18 +139,18 @@ const eventHandlers = Object.entries(subscriptions).reduce(
   }
 );
 // build the widgets
-export const widgetsPlugin = (schema: any) =>
+export const widgetsPlugin = (schema: any, projections: Projection[]) =>
   ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
 
       constructor(view: EditorView) {
-        this.decorations = createWidgets(view, schema);
+        this.decorations = createWidgets(view, schema, projections);
       }
 
       update(update: ViewUpdate) {
         if (update.docChanged || update.viewportChanged) {
-          this.decorations = createWidgets(update.view, schema);
+          this.decorations = createWidgets(update.view, schema, projections);
         }
       }
     },

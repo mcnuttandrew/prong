@@ -92,6 +92,7 @@ function AnyOfPicker(props: ComponentProps) {
       {(content.anyOf as any[]).map((opt, idx) => {
         return (
           <div key={idx}>
+            {contentDescriber(opt.description)}
             {opt.enum &&
               opt.enum.map((val: string) => (
                 <button
@@ -122,10 +123,13 @@ function AnyOfPicker(props: ComponentProps) {
   );
 }
 
-function contentDescriber(props: ComponentProps) {
+function contentDescriber(description: string | null) {
+  if (!description) {
+    return <div />;
+  }
   return (
     <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-      <ReactMarkdown>{props?.content?.description || "?!!"}</ReactMarkdown>
+      <ReactMarkdown>{description}</ReactMarkdown>
     </div>
   );
 }
@@ -202,7 +206,7 @@ function contentToMenuItem(content: any, type: string) {
   return function Popover(props: ComponentProps) {
     return (
       <div style={{ maxWidth: "400px" }}>
-        {content && contentDescriber(props)}
+        {content && contentDescriber(props?.content?.description)}
         {content && !!contentBasedItem && contentBasedItem(props)}
         {typeBasedProperty && typeBasedProperty(props)}
       </div>
