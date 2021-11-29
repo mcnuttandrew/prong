@@ -140,10 +140,15 @@ const addToSet = (set: Set<string>, key: string) =>
 const removeFromSet = (set: Set<string>, key: string) =>
   new Set(Array.from(set).filter((x) => x !== key));
 
-function AnyOfObjOptionalFieldPicker(content: any, cb: any) {
+function AnyOfObjOptionalFieldPicker(
+  content: any,
+  cb: any,
+  containerIdx: number
+) {
   const requiredProps = new Set<string>(
     Array.isArray(content.required) ? content.required : []
   );
+
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
     new Set(Array.from(requiredProps))
   );
@@ -164,19 +169,22 @@ function AnyOfObjOptionalFieldPicker(content: any, cb: any) {
       <div>
         {Object.keys(content.properties).map((key) => {
           const selected = selectedOptions.has(key);
-          const onChange = requiredProps.has(key)
+          const required = requiredProps.has(key);
+          const name = `${key}-${containerIdx}`;
+          const onChange = required
             ? () => {}
             : () =>
                 selected
-                  ? setSelectedOptions(addToSet(selectedOptions, key))
-                  : setSelectedOptions(removeFromSet(selectedOptions, key));
+                  ? setSelectedOptions(removeFromSet(selectedOptions, key))
+                  : setSelectedOptions(addToSet(selectedOptions, key));
           return (
             <span>
-              <label>{key}</label>
+              <label htmlFor={name}>{key}</label>
               <input
                 type="checkbox"
-                value={selected ? "checked" : undefined}
+                checked={required || selected}
                 onChange={onChange}
+                name={name}
               />
             </span>
           );
@@ -207,7 +215,7 @@ function AnyOfPicker(props: ComponentProps) {
                   </button>
                 ))}
               {opt.type === "object" && (
-                <div>{AnyOfObjOptionalFieldPicker(opt, cb)}</div>
+                <div>{AnyOfObjOptionalFieldPicker(opt, cb, idx)}</div>
               )}
               {opt.type === "null" && (
                 <button
@@ -241,9 +249,6 @@ function GenericComponent() {
 
 function PropertyNameComponent(props: ComponentProps) {
   const { parsedContent, cb } = props;
-  // TODO make this component smart
-  // so that on delete if it observes that is part of an array, then also give an option to delete
-  // all of that key in the array of objects
   return (
     <div>
       {parsedContent}
@@ -443,6 +448,7 @@ export default class AnnotationWidget extends WidgetType {
               pref: objNode.prevSibling,
               next: objNode.nextSibling,
             });
+            // TODO need to make this include logic about newlines
             const delFrom = objNode.prevSibling
               ? objNode.prevSibling.to + 1
               : objNode.from;
