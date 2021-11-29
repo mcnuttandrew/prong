@@ -1,12 +1,13 @@
 import * as React from "react";
 import { useState } from "react";
 import * as ReactDOM from "react-dom";
-import { WidgetType } from "@codemirror/view";
+import { WidgetType, EditorView } from "@codemirror/view";
 import { Thenable } from "vscode-json-languageservice";
 import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
 import isequal from "lodash.isequal";
+import { codeString } from "../utils";
 // import { JSONSchema7Object } from "@types/json-schema";
 
 // TODOs
@@ -357,14 +358,15 @@ export default class AnnotationWidget extends WidgetType {
     readonly currentCodeSlice: string,
     readonly type: NodeType,
     readonly replace: boolean,
-    readonly syntaxNode: SyntaxNode
+    readonly syntaxNode: SyntaxNode,
+    readonly view: EditorView
   ) {
     super();
   }
 
   eq(other: AnnotationWidget): boolean {
-    // return true
-    return this.currentCodeSlice === other.currentCodeSlice;
+    return false;
+    // return this.currentCodeSlice === other.currentCodeSlice;
   }
 
   toDOM(): HTMLDivElement {
@@ -374,6 +376,7 @@ export default class AnnotationWidget extends WidgetType {
     const parsedContent: any = tryToParse(this.currentCodeSlice);
 
     let active = false;
+    const view = this.view;
     this.schemaMapDelivery.then((newMap) => {
       let content = newMap[`${this.from}-${this.to}`];
 
@@ -411,14 +414,14 @@ export default class AnnotationWidget extends WidgetType {
           const { type, payload } = value;
           let event;
           if (type === "simpleSwap") {
-            console.log(
-              "simp swap",
-              value,
-              from,
-              to,
-              payload.length,
-              this.currentCodeSlice.length
-            );
+            // console.log(
+            //   "simp swap",
+            //   value,
+            //   from,
+            //   to,
+            //   payload.length,
+            //   this.currentCodeSlice.length
+            // );
             // const checkTo = Math.min(payload.length + from, to)
             event = new CustomEvent("simpleSwap", {
               bubbles: true,
@@ -437,27 +440,13 @@ export default class AnnotationWidget extends WidgetType {
             });
           }
           if (type === "removeObjectKey") {
-            console.log("???", this.currentCodeSlice, this.syntaxNode);
-
             const objNode = this.syntaxNode!.parent!;
-            // todo: some subtlty about deleting
-            // probably need to actually delete from the end of the previous property
-            // up to the next one
-            console.log({
-              objNode,
-              pref: objNode.prevSibling,
-              next: objNode.nextSibling,
-            });
-            // TODO need to make this include logic about newlines
             const delFrom = objNode.prevSibling
-              ? objNode.prevSibling.to + 1
+              ? objNode.prevSibling.to
               : objNode.from;
             const delTo = objNode.nextSibling
-              ? objNode.nextSibling.from - 1
+              ? objNode.nextSibling.from
               : objNode.to;
-            // const delTo = objNode.nextSibling
-            //   ? objNode.nextSibling.from
-            //   : objNode.to;
             event = new CustomEvent("simpleSwap", {
               bubbles: true,
               detail: { value: "", from: delFrom, to: delTo },

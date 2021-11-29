@@ -78,6 +78,7 @@ function createWidgets(
       enter: (type, from, to, get) => {
         const currentNode = get();
         // TODO make the interface to the annotation configuration less dumb
+        // console.log(view);
         const annConfig = (replace: boolean) => ({
           widget: new AnnotationWidget(
             from,
@@ -86,7 +87,8 @@ function createWidgets(
             codeString(view, from, to),
             type,
             replace,
-            currentNode
+            currentNode,
+            view
           ),
         });
         const replaceTypes = new Set(["PropertyName"]);
