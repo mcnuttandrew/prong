@@ -1,21 +1,17 @@
 import * as React from "react";
 import { useState } from "react";
 import * as ReactDOM from "react-dom";
-import { WidgetType, EditorView } from "@codemirror/view";
+import { WidgetType } from "@codemirror/view";
 import { Thenable } from "vscode-json-languageservice";
 import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
 import isequal from "lodash.isequal";
-import { codeString } from "../utils";
-// import { JSONSchema7Object } from "@types/json-schema";
 
 // TODOs
 // - normalize schema
 // - clearer standalone component
-// - menu-based tooltip component
 // - more holistic parse of json schema (i.e. use some types idiot)
-// - delete field
 
 interface ComponentProps {
   cb: ({ payload: string, value: any }: any) => void;
@@ -113,6 +109,7 @@ function bundleConstsToEnum(content: any[]) {
 
 function generateValueForObjProp(prop: any) {
   const simple: any = { number: 0, string: "", object: {} };
+  console.log("generate", prop);
   if (prop.enum) {
     return prop.enum[0];
   } else if (simple.hasOwnProperty(prop.type)) {
@@ -153,6 +150,7 @@ function AnyOfObjOptionalFieldPicker(
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
     new Set(Array.from(requiredProps))
   );
+
   return (
     <div style={{ display: "flex" }}>
       <button
@@ -168,7 +166,7 @@ function AnyOfObjOptionalFieldPicker(
         Switch to obj with
       </button>
       <div>
-        {Object.keys(content.properties).map((key) => {
+        {Object.keys(content?.properties || {}).map((key) => {
           const selected = selectedOptions.has(key);
           const required = requiredProps.has(key);
           const name = `${key}-${containerIdx}`;
@@ -195,12 +193,69 @@ function AnyOfObjOptionalFieldPicker(
   );
 }
 
+function AnyOfArray(content: any, cb: any, idx: number) {
+  const [numElements, setNumbElements] = useState<number>(1);
+  const arrayTypeDefaults: any = {
+    boolean: true,
+    string: "",
+    number: 0,
+    object: {},
+    array: [],
+  };
+  const arrayType = content?.items?.type;
+  console.log("XXX", arrayType, arrayType && arrayTypeDefaults[arrayType]);
+  const sliderName = `numElements${idx}`;
+  return (
+    <div style={{ display: "flex" }}>
+      {!arrayType && (
+        <button onClick={() => cb({ type: "simpleSwap", payload: "[]" })}>
+          Switch to array
+        </button>
+      )}
+      {arrayType && (
+        <div>
+          <button
+            onClick={() =>
+              cb({
+                type: "simpleSwap",
+                payload: JSON.stringify(
+                  [...new Array(numElements)].map(
+                    () => arrayTypeDefaults[arrayType]
+                  )
+                ),
+              })
+            }
+          >
+            {`Switch to array of ${numElements} ${JSON.stringify(
+              arrayTypeDefaults[arrayType]
+            )}s`}
+          </button>
+          <div style={{ display: "flex" }}>
+            <input
+              type="range"
+              id={sliderName}
+              name={sliderName}
+              min="0"
+              max="11"
+              value={numElements}
+              onChange={(e) => setNumbElements(Number(e.target.value))}
+            />
+            <label htmlFor={sliderName}>num</label>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AnyOfPicker(props: ComponentProps) {
   const { content, cb } = props;
+  console.log("any of", { content });
   return (
     <div>
       {bundleConstsToEnum(removeDupsInAnyOf(flattenAnyOf(content))).map(
         (opt, idx) => {
+          console.log("any of option", opt);
           return (
             <div key={idx}>
               {contentDescriber(opt.description)}
@@ -218,6 +273,7 @@ function AnyOfPicker(props: ComponentProps) {
               {opt.type === "object" && (
                 <div>{AnyOfObjOptionalFieldPicker(opt, cb, idx)}</div>
               )}
+              {opt.type === "array" && <div>{AnyOfArray(opt, cb, idx)}</div>}
               {opt.type === "null" && (
                 <button
                   onClick={() => cb({ type: "simpleSwap", payload: "null" })}
@@ -358,8 +414,7 @@ export default class AnnotationWidget extends WidgetType {
     readonly currentCodeSlice: string,
     readonly type: NodeType,
     readonly replace: boolean,
-    readonly syntaxNode: SyntaxNode,
-    readonly view: EditorView
+    readonly syntaxNode: SyntaxNode
   ) {
     super();
   }
@@ -369,6 +424,50 @@ export default class AnnotationWidget extends WidgetType {
     // return this.currentCodeSlice === other.currentCodeSlice;
   }
 
+  eventDispatch(value: { type: string; payload: any }, parsedContent: any) {
+    const from = this.from;
+    const to = this.to;
+    const { type, payload } = value;
+    if (type === "simpleSwap") {
+      // console.log(
+      //   "simp swap",
+      //   value,
+      //   from,
+      //   to,
+      //   payload.length,
+      //   this.currentCodeSlice.length
+      // );
+      // const checkTo = Math.min(payload.length + from, to)
+      return new CustomEvent("simpleSwap", {
+        bubbles: true,
+        detail: { value: payload, from, to: to },
+      });
+    }
+    if (type === "addObjectKey") {
+      // this should get smarter so that the formatting doesn't get borked
+      const value = JSON.stringify(
+        { ...parsedContent, [payload.key]: payload.value },
+        null,
+        2
+      );
+      return new CustomEvent("simpleSwap", {
+        bubbles: true,
+        detail: { value, from, to },
+      });
+    }
+    if (type === "removeObjectKey") {
+      const objNode = this.syntaxNode!.parent!;
+      const delFrom = objNode.prevSibling
+        ? objNode.prevSibling.to
+        : objNode.from;
+      const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
+      return new CustomEvent("simpleSwap", {
+        bubbles: true,
+        detail: { value: "", from: delFrom, to: delTo },
+      });
+    }
+  }
+
   toDOM(): HTMLDivElement {
     const wrap = document.createElement("div");
     wrap.className = "cm-annotation-widget";
@@ -376,7 +475,6 @@ export default class AnnotationWidget extends WidgetType {
     const parsedContent: any = tryToParse(this.currentCodeSlice);
 
     let active = false;
-    const view = this.view;
     this.schemaMapDelivery.then((newMap) => {
       let content = newMap[`${this.from}-${this.to}`];
 
@@ -407,51 +505,8 @@ export default class AnnotationWidget extends WidgetType {
           return;
         }
 
-        const from = this.from;
-        const to = this.to;
-        // todo lift this out?
         const cb = (value: { type: string; payload: any }) => {
-          const { type, payload } = value;
-          let event;
-          if (type === "simpleSwap") {
-            // console.log(
-            //   "simp swap",
-            //   value,
-            //   from,
-            //   to,
-            //   payload.length,
-            //   this.currentCodeSlice.length
-            // );
-            // const checkTo = Math.min(payload.length + from, to)
-            event = new CustomEvent("simpleSwap", {
-              bubbles: true,
-              detail: { value: payload, from, to: to },
-            });
-          }
-          if (type === "addObjectKey") {
-            const value = JSON.stringify(
-              { ...parsedContent, [payload.key]: payload.value },
-              null,
-              2
-            );
-            event = new CustomEvent("simpleSwap", {
-              bubbles: true,
-              detail: { value, from, to },
-            });
-          }
-          if (type === "removeObjectKey") {
-            const objNode = this.syntaxNode!.parent!;
-            const delFrom = objNode.prevSibling
-              ? objNode.prevSibling.to
-              : objNode.from;
-            const delTo = objNode.nextSibling
-              ? objNode.nextSibling.from
-              : objNode.to;
-            event = new CustomEvent("simpleSwap", {
-              bubbles: true,
-              detail: { value: "", from: delFrom, to: delTo },
-            });
-          }
+          const event = this.eventDispatch(value, parsedContent);
           event && wrap.dispatchEvent(event);
           ReactDOM.unmountComponentAtNode(annotationWrap!);
           active = false;

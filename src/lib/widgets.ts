@@ -8,6 +8,7 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
+// import { getMatchingSchemas } from "./validate";
 
 import { codeString } from "./utils";
 import SimpleSliderWidget from "./widgets/slider-widget";
@@ -52,7 +53,9 @@ function createNodeMap(view: EditorView, schema: any) {
   // TODO also map these schemas to their names
   // this may require forking the
   // https://github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts#L338
-  const doc = TextDocument.create("/ex.json", "json", 0, codeString(view, 0));
+  const str = codeString(view, 0);
+  // getMatchingSchemas(schema, str);
+  const doc = TextDocument.create("/ex.json", "json", 0, str);
   return service
     .getMatchingSchemas(doc, service.parseJSONDocument(doc), schema)
     .then((matches) => {
@@ -78,7 +81,6 @@ function createWidgets(
       enter: (type, from, to, get) => {
         const currentNode = get();
         // TODO make the interface to the annotation configuration less dumb
-        // console.log(view);
         const annConfig = (replace: boolean) => ({
           widget: new AnnotationWidget(
             from,
@@ -87,8 +89,7 @@ function createWidgets(
             codeString(view, from, to),
             type,
             replace,
-            currentNode,
-            view
+            currentNode
           ),
         });
         const replaceTypes = new Set(["PropertyName"]);
