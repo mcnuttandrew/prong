@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import * as ReactDOM from "react-dom";
 import { WidgetType } from "@codemirror/view";
-import { Thenable } from "vscode-json-languageservice";
+// import { Thenable } from "vscode-json-languageservice";
 import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
@@ -459,7 +459,7 @@ export default class AnnotationWidget extends WidgetType {
   constructor(
     readonly from: number,
     readonly to: number,
-    readonly schemaMapDelivery: Thenable<any>,
+    readonly schemaMapDelivery: Promise<any>,
     readonly currentCodeSlice: string,
     readonly type: NodeType,
     readonly replace: boolean,
