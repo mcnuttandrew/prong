@@ -8,7 +8,7 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
-// import { getMatchingSchemas } from "./validate";
+import { getMatchingSchemas } from "./from-vscode/validator";
 
 import { codeString } from "./utils";
 import SimpleSliderWidget from "./widgets/slider-widget";
@@ -17,8 +17,8 @@ import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import SimpleNumWidget from "./widgets/num-widget";
 
-import { getLanguageService } from "vscode-json-languageservice";
-import { TextDocument } from "vscode-languageserver-textdocument";
+// import { getLanguageService } from "vscode-json-languageservice";
+// import { TextDocument } from "vscode-languageserver-textdocument";
 import AnnotationWidget from "./widgets/annotation-widget";
 
 export interface Projection {
@@ -50,21 +50,13 @@ const simpleWidgets: SimpleWidget[] = [
 ];
 
 function createNodeMap(view: EditorView, schema: any) {
-  // TODO also map these schemas to their names
-  // this may require forking the
-  // https://github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts#L338
-  const str = codeString(view, 0);
-  // getMatchingSchemas(schema, str);
-  const doc = TextDocument.create("/ex.json", "json", 0, str);
-  return service
-    .getMatchingSchemas(doc, service.parseJSONDocument(doc), schema)
-    .then((matches) => {
-      return matches.reduce((acc, { node, schema }) => {
-        const [from, to] = [node.offset, node.offset + node.length];
-        acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
-        return acc;
-      }, {} as { [x: string]: any });
-    });
+  return getMatchingSchemas(schema, codeString(view, 0)).then((matches) => {
+    return matches.reduce((acc, { node, schema }) => {
+      const [from, to] = [node.offset, node.offset + node.length];
+      acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
+      return acc;
+    }, {} as { [x: string]: any });
+  });
 }
 
 function createWidgets(
@@ -114,7 +106,6 @@ function createWidgets(
   return Decoration.set(widgets);
 }
 
-const service = getLanguageService({});
 // create event handler for all in play widgets
 const subscriptions = simpleWidgets.reduce((acc, row) => {
   Object.entries(row.eventSubscriptions).forEach(([eventName, sub]) => {

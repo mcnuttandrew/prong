@@ -1,6 +1,6 @@
-type JSONSchemaRef = JSONSchema | boolean;
+export type JSONSchemaRef = JSONSchema | boolean;
 
-interface JSONSchemaMap {
+export interface JSONSchemaMap {
   [name: string]: JSONSchemaRef;
 }
 
@@ -72,4 +72,7 @@ export interface JSONSchema {
   suggestSortText?: string; // VSCode extension
   allowComments?: boolean; // VSCode extension
   allowTrailingCommas?: boolean; // VSCode extension
+
+  // local extensions
+  $$labeledType?: string;
 }

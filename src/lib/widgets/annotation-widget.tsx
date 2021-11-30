@@ -2,7 +2,6 @@ import * as React from "react";
 import { useState } from "react";
 import * as ReactDOM from "react-dom";
 import { WidgetType } from "@codemirror/view";
-import { Thenable } from "vscode-json-languageservice";
 import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
@@ -374,7 +373,6 @@ const NullComponent: Component = (props) => {
 
 const menuSwitch: componentContainer = {
   EnumPicker,
-  // InteractionComponent,
   ObjPicker,
   AnyOfPicker,
   GenericComponent,
@@ -391,10 +389,11 @@ const typeBasedComponents: componentContainer = {
 const parentResponses: componentContainer = {
   Property: ParentIsPropretyComponent,
   Array: ParentIsArrayComponent,
+  // TODO: do i need to fill in all the other options for this?
 };
 function contentToMenuItem(content: JSONSchema, type: string) {
   let typeBasedProperty: any;
-  console.log("here here", { type });
+  console.log("here here", { type, content });
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
   } else if (!content) {
@@ -459,7 +458,7 @@ export default class AnnotationWidget extends WidgetType {
   constructor(
     readonly from: number,
     readonly to: number,
-    readonly schemaMapDelivery: Thenable<any>,
+    readonly schemaMapDelivery: Promise<any>,
     readonly currentCodeSlice: string,
     readonly type: NodeType,
     readonly replace: boolean,

@@ -1,68 +1,51 @@
 // forked from
 // https:github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
-import * as Json from "jsonc-parser";
 import * as nls from "vscode-nls";
-import { JSONSchema } from "./JSONSchemaTypes";
+import { JSONSchema, JSONSchemaRef } from "../JSONSchemaTypes";
+// import $RefParser from "@apidevtools/json-schema-ref-parser";
+import {
+  ASTNode,
+  parse,
+  NumberASTNode,
+  StringASTNode,
+  ArrayASTNode,
+  ObjectASTNode,
+  PropertyASTNode,
+} from "./parser";
+import { resolveSchemaContent } from "./resolve-schema";
+import {
+  asSchema,
+  contains,
+  getNodeValue,
+  equals,
+  isDefined,
+  isNumber,
+  isBoolean,
+  isString,
+  ErrorCode,
+} from "./utils";
 
 let localize = nls.loadMessageBundle();
 
-export type ASTNode =
-  | ObjectASTNode
-  | PropertyASTNode
-  | ArrayASTNode
-  | StringASTNode
-  | NumberASTNode
-  | BooleanASTNode
-  | NullASTNode;
-
-export interface BaseASTNode {
-  readonly type:
-    | "object"
-    | "array"
-    | "property"
-    | "string"
-    | "number"
-    | "boolean"
-    | "null";
-  readonly parent?: ASTNode;
-  readonly offset: number;
-  readonly length: number;
-  readonly children?: ASTNode[];
-  readonly value?: string | boolean | number | null;
-}
-export interface ObjectASTNode extends BaseASTNode {
-  readonly type: "object";
-  readonly properties: PropertyASTNode[];
-  readonly children: ASTNode[];
-}
-export interface PropertyASTNode extends BaseASTNode {
-  readonly type: "property";
-  readonly keyNode: StringASTNode;
-  readonly valueNode?: ASTNode;
-  readonly colonOffset?: number;
-  readonly children: ASTNode[];
-}
-export interface ArrayASTNode extends BaseASTNode {
-  readonly type: "array";
-  readonly items: ASTNode[];
-  readonly children: ASTNode[];
-}
-export interface StringASTNode extends BaseASTNode {
-  readonly type: "string";
-  readonly value: string;
-}
-export interface NumberASTNode extends BaseASTNode {
-  readonly type: "number";
-  readonly value: number;
-  readonly isInteger: boolean;
-}
-export interface BooleanASTNode extends BaseASTNode {
-  readonly type: "boolean";
-  readonly value: boolean;
-}
-export interface NullASTNode extends BaseASTNode {
-  readonly type: "null";
-  readonly value: null;
+export function getMatchingSchemas(
+  schema: JSONSchema,
+  code: string
+): Promise<IApplicableSchema[]> {
+  // todo the vscode version does some stuff with filteirng for invert?
+  // watch out for that as a bug
+  return resolveSchemaContent(schema, "./", new Set()).then(
+    (resolvedSchema: any) => {
+      const parseTree = parse(code)!;
+      const matchingSchemas = new SchemaCollector(-1);
+      validate(
+        parseTree.root,
+        resolvedSchema.schema,
+        new ValidationResult(),
+        matchingSchemas
+      );
+      return matchingSchemas.schemas;
+    }
+  );
 }
 
 export interface MatchingSchema {
@@ -70,39 +53,18 @@ export interface MatchingSchema {
   schema: JSONSchema;
 }
 
-interface IRange {
+export interface IRange {
   offset: number;
   length: number;
 }
-
+export type Severity = "Error" | "Warning" | "None";
 interface IProblem {
   location: IRange;
-  severity?: "Error" | "Warning" | "None";
+  severity?: Severity;
   code?: ErrorCode;
   message: string;
 }
 
-enum ErrorCode {
-  Undefined = 0,
-  EnumValueMismatch = 1,
-  Deprecated = 2,
-  UnexpectedEndOfComment = 0x101,
-  UnexpectedEndOfString = 0x102,
-  UnexpectedEndOfNumber = 0x103,
-  InvalidUnicode = 0x104,
-  InvalidEscapeCharacter = 0x105,
-  InvalidCharacter = 0x106,
-  PropertyExpected = 0x201,
-  CommaExpected = 0x202,
-  ColonExpected = 0x203,
-  ValueExpected = 0x204,
-  CommaOrCloseBacketExpected = 0x205,
-  CommaOrCloseBraceExpected = 0x206,
-  TrailingComma = 0x207,
-  DuplicateKey = 0x208,
-  CommentNotPermitted = 0x209,
-  SchemaResolveError = 0x300,
-}
 const formats = {
   "color-hex": {
     errorMessage: localize(
@@ -284,33 +246,6 @@ class ValidationResult {
   }
 }
 
-// function getMatchingSchemas(
-//   schema: JSONSchema,
-//   focusOffset: number = -1,
-//   exclude?: ASTNode
-// ): IApplicableSchema[] {
-//   const matchingSchemas = new SchemaCollector(focusOffset, exclude);
-//   if (this.root && schema) {
-//     validate(this.root, schema, new ValidationResult(), matchingSchemas);
-//   }
-//   return matchingSchemas.schemas;
-// }
-export function getMatchingSchemas(
-  schema: JSONSchema,
-  code: string
-): IApplicableSchema[] {
-  const parseTree = Json.parseTree(code)!;
-  // todo error handling
-  const matchingSchemas = new SchemaCollector(-1);
-  validate(parseTree, schema, new ValidationResult(), matchingSchemas);
-  console.log("oarsed");
-  return [];
-  //   if (this.root && schema) {
-  //     validate(this.root, schema, new ValidationResult(), matchingSchemas);
-  //   }
-  //   return matchingSchemas.schemas;
-}
-
 export function validate(
   n: ASTNode | undefined,
   schema: JSONSchema,
@@ -343,7 +278,6 @@ export function validate(
       );
   }
   _validateNode();
-
   matchingSchemas.add({ node: node, schema: schema });
 
   function _validateNode() {
@@ -1190,103 +1124,4 @@ export function validate(
       }
     }
   }
-}
-
-
-
-export function equals(one: any, other: any): boolean {
-  if (one === other) {
-    return true;
-  }
-  if (
-    one === null ||
-    one === undefined ||
-    other === null ||
-    other === undefined
-  ) {
-    return false;
-  }
-  if (typeof one !== typeof other) {
-    return false;
-  }
-  if (typeof one !== "object") {
-    return false;
-  }
-  if (Array.isArray(one) !== Array.isArray(other)) {
-    return false;
-  }
-
-  var i: number, key: string;
-
-  if (Array.isArray(one)) {
-    if (one.length !== other.length) {
-      return false;
-    }
-    for (i = 0; i < one.length; i++) {
-      if (!equals(one[i], other[i])) {
-        return false;
-      }
-    }
-  } else {
-    var oneKeys: string[] = [];
-
-    for (key in one) {
-      oneKeys.push(key);
-    }
-    oneKeys.sort();
-    var otherKeys: string[] = [];
-    for (key in other) {
-      otherKeys.push(key);
-    }
-    otherKeys.sort();
-    if (!equals(oneKeys, otherKeys)) {
-      return false;
-    }
-    for (i = 0; i < oneKeys.length; i++) {
-      if (!equals(one[oneKeys[i]], other[oneKeys[i]])) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-////UTILS????
-
-function isNumber(val: any): val is number {
-  return typeof val === "number";
-}
-
-function isDefined(val: any): val is object {
-  return typeof val !== "undefined";
-}
-
-function isBoolean(val: any): val is boolean {
-  return typeof val === "boolean";
-}
-
-function isString(val: any): val is string {
-  return typeof val === "string";
-}
-
-function getNodeValue(node: ASTNode): any {
-  return Json.getNodeValue(node);
-}
-
-function asSchema(schema: JSONSchemaRef | undefined): JSONSchema | undefined {
-  if (isBoolean(schema)) {
-    return schema ? {} : { not: {} };
-  }
-  return schema;
-}
-
-function contains(
-  node: ASTNode,
-  offset: number,
-  includeRightBound = false
-): boolean {
-  return (
-    (offset >= node.offset && offset < node.offset + node.length) ||
-    (includeRightBound && offset === node.offset + node.length)
-  );
 }
