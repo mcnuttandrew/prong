@@ -74,5 +74,5 @@ export interface JSONSchema {
   allowTrailingCommas?: boolean; // VSCode extension
 
   // local extensions
-  $$labeledType?: string | number | undefined;
+  $$labeledType?: string;
 }

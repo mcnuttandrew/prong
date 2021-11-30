@@ -170,7 +170,11 @@ export function resolveSchemaContent(
             const key = k as keyof JSONSchemaMap;
             const entry = map[key];
             if (typeof entry === "object") {
-              entry.$$labeledType = key;
+              // THE WHOLE PURPOSE OF VENDORING THIS GIANT LIBRARY,
+              // JUST TO ADD THIS ONE LINE BASICALLY
+              if (key) {
+                entry.$$labeledType = `${key}`;
+              }
               toWalk.push(entry);
             }
           }

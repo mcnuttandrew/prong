@@ -50,34 +50,13 @@ const simpleWidgets: SimpleWidget[] = [
 ];
 
 function createNodeMap(view: EditorView, schema: any) {
-  // TODO also map these schemas to their names
-  // this may require forking the
-  // https://github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts#L338
-  const str = codeString(view, 0);
-  // console.log(
-  //   "ugh",
-
-  // );
-  // const doc = TextDocument.create("/ex.json", "json", 0, str);
-  return getMatchingSchemas(schema, str).then((matches) => {
-    // console.log("here i am ", x);
-    console.log("real one", matches);
+  return getMatchingSchemas(schema, codeString(view, 0)).then((matches) => {
     return matches.reduce((acc, { node, schema }) => {
       const [from, to] = [node.offset, node.offset + node.length];
       acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
       return acc;
     }, {} as { [x: string]: any });
   });
-  // return service
-  //   .getMatchingSchemas(doc, service.parseJSONDocument(doc), schema)
-  //   .then((matches) => {
-  //     console.log("real one", matches);
-  //     return matches.reduce((acc, { node, schema }) => {
-  //       const [from, to] = [node.offset, node.offset + node.length];
-  //       acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
-  //       return acc;
-  //     }, {} as { [x: string]: any });
-  //   });
 }
 
 function createWidgets(
@@ -127,7 +106,6 @@ function createWidgets(
   return Decoration.set(widgets);
 }
 
-// const service = getLanguageService({});
 // create event handler for all in play widgets
 const subscriptions = simpleWidgets.reduce((acc, row) => {
   Object.entries(row.eventSubscriptions).forEach(([eventName, sub]) => {
