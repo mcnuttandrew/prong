@@ -38,6 +38,7 @@ export default function Editor(props: Props) {
             languageConf.of(json()),
             keymap.of([indentWithTab]),
             widgetsPlugin(schema, projections || []),
+            // TODO move language analysis stuff to here as a facet (?)
             EditorView.updateListener.of((v: ViewUpdate) => {
               // TODO fix
               if (v.docChanged) {

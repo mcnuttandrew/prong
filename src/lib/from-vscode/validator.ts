@@ -101,6 +101,7 @@ class SchemaCollector implements ISchemaCollector {
   schemas: IApplicableSchema[] = [];
   constructor(private focusOffset = -1, private exclude?: ASTNode) {}
   add(schema: IApplicableSchema) {
+    console.log("schemin", schema);
     this.schemas.push(schema);
   }
   merge(other: ISchemaCollector) {
@@ -241,9 +242,10 @@ export function getMatchingSchemas(
   const parseTree = parse(code)!;
   // todo error handling
   const matchingSchemas = new SchemaCollector(-1);
-  validate(parseTree, schema, new ValidationResult(), matchingSchemas);
-  console.log("oarsed");
-  return [];
+  console.log({ parseTree });
+  validate(parseTree.root, schema, new ValidationResult(), matchingSchemas);
+  // console.log("oarsed", result);
+  return matchingSchemas.schemas;
   //   if (this.root && schema) {
   //     validate(this.root, schema, new ValidationResult(), matchingSchemas);
   //   }
@@ -260,6 +262,7 @@ export function validate(
     return;
   }
   const node = n;
+  console.log("node type", node.type);
   switch (node.type) {
     case "object":
       _validateObjectNode(node, schema, validationResult, matchingSchemas);
@@ -886,6 +889,7 @@ export function validate(
     validationResult: ValidationResult,
     matchingSchemas: ISchemaCollector
   ): void {
+    console.log("validating object ", node);
     const seenKeys: { [key: string]: ASTNode | undefined } =
       Object.create(null);
     const unprocessedProperties: string[] = [];

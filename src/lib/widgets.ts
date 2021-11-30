@@ -8,7 +8,7 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
-// import { getMatchingSchemas } from "./validate";
+import { getMatchingSchemas } from "./from-vscode/validator";
 
 import { codeString } from "./utils";
 import SimpleSliderWidget from "./widgets/slider-widget";
@@ -54,11 +54,15 @@ function createNodeMap(view: EditorView, schema: any) {
   // this may require forking the
   // https://github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts#L338
   const str = codeString(view, 0);
-  // getMatchingSchemas(schema, str);
+  console.log(
+    "ugh",
+    getMatchingSchemas(schema.definitions[schema["$ref"]], str)
+  );
   const doc = TextDocument.create("/ex.json", "json", 0, str);
   return service
     .getMatchingSchemas(doc, service.parseJSONDocument(doc), schema)
     .then((matches) => {
+      console.log("real one", matches);
       return matches.reduce((acc, { node, schema }) => {
         const [from, to] = [node.offset, node.offset + node.length];
         acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
