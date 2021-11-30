@@ -195,7 +195,6 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
     array: [],
   };
   const arrayType = content?.items?.type;
-  console.log("XXX", arrayType, arrayType && arrayTypeDefaults[arrayType]);
   const sliderName = `numElements${idx}`;
   return (
     <div style={{ display: "flex" }}>
@@ -242,12 +241,10 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
 
 const AnyOfPicker: Component = (props) => {
   const { content, cb } = props;
-  console.log("any of", { content });
   return (
     <div>
       {bundleConstsToEnum(removeDupsInAnyOf(flattenAnyOf(content))).map(
         (opt, idx) => {
-          console.log("any of option", opt);
           return (
             <div key={idx}>
               {contentDescriber(opt.description)}
@@ -355,6 +352,26 @@ const ParentIsArrayComponent: Component = (props) => {
   );
 };
 
+const ArrayComponent: Component = (props) => {
+  return <div> hi array </div>;
+};
+
+const StringComponent: Component = (props) => {
+  return <div> hi string </div>;
+};
+
+const NumberComponent: Component = (props) => {
+  return <div> hi number </div>;
+};
+
+const BooleanComponent: Component = (props) => {
+  return <div> hi boolean </div>;
+};
+
+const NullComponent: Component = (props) => {
+  return <div> hi null </div>;
+};
+
 const menuSwitch: componentContainer = {
   EnumPicker,
   // InteractionComponent,
@@ -363,8 +380,13 @@ const menuSwitch: componentContainer = {
   GenericComponent,
 };
 const typeBasedComponents: componentContainer = {
-  PropertyName: PropertyNameComponent,
   Object: ObjectComponent,
+  PropertyName: PropertyNameComponent,
+  Array: ArrayComponent,
+  String: StringComponent,
+  Number: NumberComponent,
+  BooleanComponent: BooleanComponent,
+  Null: NullComponent,
 };
 const parentResponses: componentContainer = {
   Property: ParentIsPropretyComponent,
@@ -372,10 +394,13 @@ const parentResponses: componentContainer = {
 };
 function contentToMenuItem(content: JSONSchema, type: string) {
   let typeBasedProperty: any;
+  console.log("here here", { type });
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
   } else if (!content) {
     console.log("missing imp for", type);
+  } else if (!typeBasedProperty[type]) {
+    console.log("missing type imp for", type);
   }
 
   let contentBasedItem: any;
