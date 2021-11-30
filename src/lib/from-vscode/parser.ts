@@ -1,36 +1,123 @@
+// forked from
+// https:github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
+import * as Json from "jsonc-parser";
+import { SyntaxKind } from "jsonc-parser";
+import { ErrorCode } from "./utils";
+import { IRange, Severity } from "./validator";
+
+import * as nls from "vscode-nls";
+let localize = nls.loadMessageBundle();
+
+export type ASTNode =
+  | ObjectASTNode
+  | PropertyASTNode
+  | ArrayASTNode
+  | StringASTNode
+  | NumberASTNode
+  | BooleanASTNode
+  | NullASTNode;
+
+export interface BaseASTNode {
+  readonly type:
+    | "object"
+    | "array"
+    | "property"
+    | "string"
+    | "number"
+    | "boolean"
+    | "null";
+  readonly parent?: ASTNode;
+  readonly offset: number;
+  readonly length: number;
+  readonly children?: ASTNode[];
+  readonly value?: string | boolean | number | null;
+}
+export interface ObjectASTNode extends BaseASTNode {
+  readonly type: "object";
+  readonly properties: PropertyASTNode[];
+  readonly children: ASTNode[];
+}
+export interface PropertyASTNode extends BaseASTNode {
+  readonly type: "property";
+  readonly keyNode: StringASTNode;
+  readonly valueNode?: ASTNode;
+  readonly colonOffset?: number;
+  readonly children: ASTNode[];
+}
+export interface ArrayASTNode extends BaseASTNode {
+  readonly type: "array";
+  readonly items: ASTNode[];
+  readonly children: ASTNode[];
+}
+export interface StringASTNode extends BaseASTNode {
+  readonly type: "string";
+  readonly value: string;
+}
+export interface NumberASTNode extends BaseASTNode {
+  readonly type: "number";
+  readonly value: number;
+  readonly isInteger: boolean;
+}
+export interface BooleanASTNode extends BaseASTNode {
+  readonly type: "boolean";
+  readonly value: boolean;
+}
+export interface NullASTNode extends BaseASTNode {
+  readonly type: "null";
+  readonly value: null;
+}
+
+const Range = {
+  create: (start: number, end: number): IRange => ({
+    offset: start,
+    length: end - start,
+  }),
+};
+
+interface Diagnostic {
+  range: IRange;
+  message: string;
+  severity: Severity;
+  code: ErrorCode;
+  language: "json";
+  // textDocument.languageId
+}
+
 export function parse(
-  textDocument: TextDocument,
-  config?: JSONDocumentConfig
-): JSONDocument {
+  // textDocument: TextDocument
+  text: string
+  // config?: JSONDocumentConfig
+) {
   const problems: Diagnostic[] = [];
   let lastProblemOffset = -1;
-  const text = textDocument.getText();
+  // const text = textDocument.getText();
   const scanner = Json.createScanner(text, false);
 
-  const commentRanges: Range[] | undefined =
-    config && config.collectComments ? [] : undefined;
+  // const commentRanges: Range[] | undefined =
+  //   config && config.collectComments ? [] : undefined;
+  const commentRanges = undefined;
 
   function _scanNext(): Json.SyntaxKind {
     while (true) {
       const token = scanner.scan();
       _checkScanError();
       switch (token) {
-        case Json.SyntaxKind.LineCommentTrivia:
-        case Json.SyntaxKind.BlockCommentTrivia:
-          if (Array.isArray(commentRanges)) {
-            commentRanges.push(
-              Range.create(
-                textDocument.positionAt(scanner.getTokenOffset()),
-                textDocument.positionAt(
-                  scanner.getTokenOffset() + scanner.getTokenLength()
-                )
-              )
-            );
-          }
-          break;
-        case Json.SyntaxKind.Trivia:
-        case Json.SyntaxKind.LineBreakTrivia:
-          break;
+        // case Json.SyntaxKind.LineCommentTrivia:
+        // case Json.SyntaxKind.BlockCommentTrivia:
+        //   if (Array.isArray(commentRanges)) {
+        //     commentRanges.push(
+        //       Range.create(
+        //         textDocument.positionAt(scanner.getTokenOffset()),
+        //         textDocument.positionAt(
+        //           scanner.getTokenOffset() + scanner.getTokenLength()
+        //         )
+        //       )
+        //     );
+        //   }
+        //   break;
+        // case Json.SyntaxKind.Trivia:
+        // case Json.SyntaxKind.LineBreakTrivia:
+        //   break;
         default:
           return token;
       }
@@ -50,21 +137,24 @@ export function parse(
     code: ErrorCode,
     startOffset: number,
     endOffset: number,
-    severity: DiagnosticSeverity = DiagnosticSeverity.Error
+    // severity: DiagnosticSeverity = DiagnosticSeverity.Error
+    severity: Severity = "Error"
   ): void {
     if (problems.length === 0 || startOffset !== lastProblemOffset) {
-      const range = Range.create(
-        textDocument.positionAt(startOffset),
-        textDocument.positionAt(endOffset)
-      );
+      // const range = Range.create(
+      //   textDocument.positionAt(startOffset),
+      //   textDocument.positionAt(endOffset)
+      // );
+      const range = Range.create(startOffset, endOffset);
       problems.push(
-        Diagnostic.create(
-          range,
-          message,
-          severity,
-          code,
-          textDocument.languageId
-        )
+        { range, message, severity, code, language: "json" }
+        // Diagnostic.create(
+        //   range,
+        //   message,
+        //   severity,
+        //   code
+        //   // textDocument.languageId
+        // )
       );
       lastProblemOffset = startOffset;
     }
@@ -273,7 +363,7 @@ export function parse(
         ErrorCode.DuplicateKey,
         node.keyNode.offset,
         node.keyNode.offset + node.keyNode.length,
-        DiagnosticSeverity.Warning
+        "Warning"
       );
       if (typeof seen === "object") {
         _errorAtRange(
@@ -281,7 +371,7 @@ export function parse(
           ErrorCode.DuplicateKey,
           seen.keyNode.offset,
           seen.keyNode.offset + seen.keyNode.length,
-          DiagnosticSeverity.Warning
+          "Warning"
         );
       }
       keysSeen[key.value] = true; // if the same key is duplicate again, avoid duplicate error reporting
@@ -481,5 +571,137 @@ export function parse(
       );
     }
   }
-  return new JSONDocument(_root, problems, commentRanges);
+  return { root: _root, problems };
+  // return new JSONDocument(_root, problems, commentRanges);
+}
+
+export abstract class ASTNodeImpl {
+  public abstract readonly type:
+    | "object"
+    | "property"
+    | "array"
+    | "number"
+    | "boolean"
+    | "null"
+    | "string";
+
+  public offset: number;
+  public length: number;
+  public readonly parent: ASTNode | undefined;
+
+  constructor(parent: ASTNode | undefined, offset: number, length: number = 0) {
+    this.offset = offset;
+    this.length = length;
+    this.parent = parent;
+  }
+
+  public get children(): ASTNode[] {
+    return [];
+  }
+
+  public toString(): string {
+    return (
+      "type: " +
+      this.type +
+      " (" +
+      this.offset +
+      "/" +
+      this.length +
+      ")" +
+      (this.parent ? " parent: {" + this.parent.toString() + "}" : "")
+    );
+  }
+}
+
+export class NullASTNodeImpl extends ASTNodeImpl implements NullASTNode {
+  public type: "null" = "null";
+  public value: null = null;
+  constructor(parent: ASTNode | undefined, offset: number) {
+    super(parent, offset);
+  }
+}
+
+export class BooleanASTNodeImpl extends ASTNodeImpl implements BooleanASTNode {
+  public type: "boolean" = "boolean";
+  public value: boolean;
+
+  constructor(parent: ASTNode | undefined, boolValue: boolean, offset: number) {
+    super(parent, offset);
+    this.value = boolValue;
+  }
+}
+
+export class ArrayASTNodeImpl extends ASTNodeImpl implements ArrayASTNode {
+  public type: "array" = "array";
+  public items: ASTNode[];
+
+  constructor(parent: ASTNode | undefined, offset: number) {
+    super(parent, offset);
+    this.items = [];
+  }
+
+  public get children(): ASTNode[] {
+    return this.items;
+  }
+}
+
+export class NumberASTNodeImpl extends ASTNodeImpl implements NumberASTNode {
+  public type: "number" = "number";
+  public isInteger: boolean;
+  public value: number;
+
+  constructor(parent: ASTNode | undefined, offset: number) {
+    super(parent, offset);
+    this.isInteger = true;
+    this.value = Number.NaN;
+  }
+}
+
+export class StringASTNodeImpl extends ASTNodeImpl implements StringASTNode {
+  public type: "string" = "string";
+  public value: string;
+
+  constructor(parent: ASTNode | undefined, offset: number, length?: number) {
+    super(parent, offset, length);
+    this.value = "";
+  }
+}
+
+export class PropertyASTNodeImpl
+  extends ASTNodeImpl
+  implements PropertyASTNode
+{
+  public type: "property" = "property";
+  public keyNode: StringASTNode;
+  public valueNode?: ASTNode;
+  public colonOffset: number;
+
+  constructor(
+    parent: ObjectASTNode | undefined,
+    offset: number,
+    keyNode: StringASTNode
+  ) {
+    super(parent, offset);
+    this.colonOffset = -1;
+    this.keyNode = keyNode;
+  }
+
+  public get children(): ASTNode[] {
+    return this.valueNode ? [this.keyNode, this.valueNode] : [this.keyNode];
+  }
+}
+
+export class ObjectASTNodeImpl extends ASTNodeImpl implements ObjectASTNode {
+  public type: "object" = "object";
+  public properties: PropertyASTNode[];
+
+  constructor(parent: ASTNode | undefined, offset: number) {
+    super(parent, offset);
+
+    this.properties = [];
+  }
+
+  public get children(): ASTNode[] {
+    return this.properties;
+  }
 }

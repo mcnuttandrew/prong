@@ -374,7 +374,6 @@ const NullComponent: Component = (props) => {
 
 const menuSwitch: componentContainer = {
   EnumPicker,
-  // InteractionComponent,
   ObjPicker,
   AnyOfPicker,
   GenericComponent,
@@ -391,6 +390,7 @@ const typeBasedComponents: componentContainer = {
 const parentResponses: componentContainer = {
   Property: ParentIsPropretyComponent,
   Array: ParentIsArrayComponent,
+  // TODO: do i need to fill in all the other options for this?
 };
 function contentToMenuItem(content: JSONSchema, type: string) {
   let typeBasedProperty: any;

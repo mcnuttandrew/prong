@@ -1,6 +1,6 @@
-type JSONSchemaRef = JSONSchema | boolean;
+export type JSONSchemaRef = JSONSchema | boolean;
 
-interface JSONSchemaMap {
+export interface JSONSchemaMap {
   [name: string]: JSONSchemaRef;
 }
 
