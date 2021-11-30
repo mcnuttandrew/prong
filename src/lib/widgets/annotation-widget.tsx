@@ -7,6 +7,8 @@ import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
 import isequal from "lodash.isequal";
+// import {JSONSchema} from '../JSONSchemaTypes';
+type JSONSchema = any;
 
 // TODOs
 // - normalize schema
@@ -15,12 +17,15 @@ import isequal from "lodash.isequal";
 
 interface ComponentProps {
   cb: ({ payload: string, value: any }: any) => void;
-  content: any;
+  content: JSONSchema;
   wrap: HTMLElement;
   parsedContent: any;
+  parentType: string; // todo this type can be improved
 }
+type Component = (props: ComponentProps) => JSX.Element;
+type componentContainer = { [x: string]: Component };
 
-function EnumPicker(props: ComponentProps) {
+const EnumPicker: Component = (props) => {
   const { content, cb } = props;
   return (
     <div>
@@ -34,9 +39,9 @@ function EnumPicker(props: ComponentProps) {
       ))}
     </div>
   );
-}
+};
 
-function simpleFillout(content: any) {
+function simpleFillout(content: JSONSchema) {
   const simpleTypes: { [x: string]: any } = {
     string: "",
     object: {},
@@ -57,7 +62,7 @@ function simpleFillout(content: any) {
   }
 }
 
-function ObjPicker(props: ComponentProps) {
+const ObjPicker: Component = (props) => {
   const { content, parsedContent, cb } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
   const newKeyVal = (key: string, value: any) =>
@@ -82,10 +87,10 @@ function ObjPicker(props: ComponentProps) {
       </div>
     </div>
   );
-}
+};
 
 // TODO flatten nested anyOfs and remove duplicates
-function flattenAnyOf(content: any) {
+function flattenAnyOf(content: JSONSchema) {
   if (!content || !content.anyOf) {
     return content;
   }
@@ -95,13 +100,13 @@ function flattenAnyOf(content: any) {
   );
 }
 
-function removeDupsInAnyOf(content: any[]) {
+function removeDupsInAnyOf(content: JSONSchema[]) {
   return content.filter((row, idx) =>
     content.slice(idx + 1).every((innerRow) => !isequal(row, innerRow))
   );
 }
 
-function bundleConstsToEnum(content: any[]) {
+function bundleConstsToEnum(content: JSONSchema[]) {
   const consts = content.filter((x) => x.const);
   const nonConsts = content.filter((x) => !x.const);
   return [...nonConsts, { enum: consts.map((x) => x.const) }];
@@ -119,19 +124,6 @@ function generateValueForObjProp(prop: any) {
     return null;
   }
 }
-
-// function prepObjForSwap(content: any) {
-//   // todo this is not the whole required spec
-//   console.log(content.required);
-//   if (typeof content.require !== "object") {
-//     return {};
-//   }
-//   return content.required.reduce((acc: any, key: string) => {
-//     acc[key] = generateValueForObjProp(content.properties[key]);
-//     return acc;
-//   }, {});
-// }
-
 const addToSet = (set: Set<string>, key: string) =>
   new Set([...Array.from(set), key]);
 
@@ -139,7 +131,7 @@ const removeFromSet = (set: Set<string>, key: string) =>
   new Set(Array.from(set).filter((x) => x !== key));
 
 function AnyOfObjOptionalFieldPicker(
-  content: any,
+  content: JSONSchema,
   cb: any,
   containerIdx: number
 ) {
@@ -193,7 +185,7 @@ function AnyOfObjOptionalFieldPicker(
   );
 }
 
-function AnyOfArray(content: any, cb: any, idx: number) {
+function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
   const [numElements, setNumbElements] = useState<number>(1);
   const arrayTypeDefaults: any = {
     boolean: true,
@@ -248,7 +240,7 @@ function AnyOfArray(content: any, cb: any, idx: number) {
   );
 }
 
-function AnyOfPicker(props: ComponentProps) {
+const AnyOfPicker: Component = (props) => {
   const { content, cb } = props;
   console.log("any of", { content });
   return (
@@ -287,7 +279,7 @@ function AnyOfPicker(props: ComponentProps) {
       )}
     </div>
   );
-}
+};
 
 function contentDescriber(description: string | null) {
   if (!description) {
@@ -300,11 +292,11 @@ function contentDescriber(description: string | null) {
   );
 }
 
-function GenericComponent() {
+const GenericComponent: Component = () => {
   return <div>hi</div>;
-}
+};
 
-function PropertyNameComponent(props: ComponentProps) {
+const PropertyNameComponent: Component = (props) => {
   const { parsedContent, cb } = props;
   return (
     <div>
@@ -314,9 +306,9 @@ function PropertyNameComponent(props: ComponentProps) {
       </button>
     </div>
   );
-}
+};
 
-function ObjectComponent(props: ComponentProps) {
+const ObjectComponent: Component = (props) => {
   const { cb } = props;
   const [keyVal, setKeyVal] = React.useState("");
   const [valueVal, setValueVal] = React.useState("");
@@ -336,21 +328,49 @@ function ObjectComponent(props: ComponentProps) {
       </div>
     </div>
   );
-}
+};
 
-const menuSwitch = {
+const ParentIsPropretyComponent: Component = (props) => {
+  return <div>hi property</div>;
+};
+const ParentIsArrayComponent: Component = (props) => {
+  const { cb } = props;
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex" }}>
+        <button onClick={() => cb({ type: "removeElementFromArray" })}>
+          Remove Item
+        </button>
+        <button onClick={() => cb({ type: "duplicateElementInArray" })}>
+          Duplicate
+        </button>
+      </div>
+      <div style={{ display: "flex" }}>
+        <button>Set item as First</button>
+        <button>Move item forward</button>
+        <button>Move item backward</button>
+        <button>Set item as Last</button>
+      </div>
+    </div>
+  );
+};
+
+const menuSwitch: componentContainer = {
   EnumPicker,
   // InteractionComponent,
   ObjPicker,
   AnyOfPicker,
   GenericComponent,
 };
-const typeBasedComponents: any = {
+const typeBasedComponents: componentContainer = {
   PropertyName: PropertyNameComponent,
   Object: ObjectComponent,
 };
-
-function contentToMenuItem(content: any, type: string) {
+const parentResponses: componentContainer = {
+  Property: ParentIsPropretyComponent,
+  Array: ParentIsArrayComponent,
+};
+function contentToMenuItem(content: JSONSchema, type: string) {
   let typeBasedProperty: any;
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
@@ -359,6 +379,7 @@ function contentToMenuItem(content: any, type: string) {
   }
 
   let contentBasedItem: any;
+  // TODO work through options listed in the validate wip
   if (content && content.enum) {
     contentBasedItem = menuSwitch.EnumPicker;
   } else if (content && content.type === "object") {
@@ -367,11 +388,14 @@ function contentToMenuItem(content: any, type: string) {
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
   return function Popover(props: ComponentProps) {
+    console.log(props.parentType);
     return (
       <div style={{ maxWidth: "400px" }}>
         {content && contentDescriber(props?.content?.description)}
         {content && !!contentBasedItem && contentBasedItem(props)}
         {typeBasedProperty && typeBasedProperty(props)}
+        {parentResponses[props.parentType] &&
+          parentResponses[props.parentType](props)}
       </div>
     );
   };
@@ -391,7 +415,7 @@ function tryToParse(currentCodeSlice: string) {
   }
 }
 
-function SchemaContentToIndicator(content: any) {
+function SchemaContentToIndicator(content: JSONSchema) {
   if (!content) {
     return "";
   }
@@ -424,24 +448,15 @@ export default class AnnotationWidget extends WidgetType {
     // return this.currentCodeSlice === other.currentCodeSlice;
   }
 
-  eventDispatch(value: { type: string; payload: any }, parsedContent: any) {
+  eventDispatch(
+    value: { type: string; payload: any },
+    parsedContent: any
+  ): { value: string; from: number; to: number } | undefined {
     const from = this.from;
     const to = this.to;
     const { type, payload } = value;
     if (type === "simpleSwap") {
-      // console.log(
-      //   "simp swap",
-      //   value,
-      //   from,
-      //   to,
-      //   payload.length,
-      //   this.currentCodeSlice.length
-      // );
-      // const checkTo = Math.min(payload.length + from, to)
-      return new CustomEvent("simpleSwap", {
-        bubbles: true,
-        detail: { value: payload, from, to: to },
-      });
+      return { value: payload, from, to: to };
     }
     if (type === "addObjectKey") {
       // this should get smarter so that the formatting doesn't get borked
@@ -450,10 +465,7 @@ export default class AnnotationWidget extends WidgetType {
         null,
         2
       );
-      return new CustomEvent("simpleSwap", {
-        bubbles: true,
-        detail: { value, from, to },
-      });
+      return { value, from, to };
     }
     if (type === "removeObjectKey") {
       const objNode = this.syntaxNode!.parent!;
@@ -461,10 +473,21 @@ export default class AnnotationWidget extends WidgetType {
         ? objNode.prevSibling.to
         : objNode.from;
       const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
-      return new CustomEvent("simpleSwap", {
-        bubbles: true,
-        detail: { value: "", from: delFrom, to: delTo },
-      });
+      return { value: "", from: delFrom, to: delTo };
+    }
+    // TODO THESE ARE NOT YET WORKING
+    if (type === "removeElementFromArray") {
+      const objNode = this.syntaxNode;
+      const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
+      return { value: "", from: objNode.from, to: delTo };
+    }
+    if (type === "duplicateElementInArray") {
+      const codeSlice = this.currentCodeSlice;
+      return {
+        value: `, ${codeSlice}`,
+        from: to,
+        to: to + codeSlice.length,
+      };
     }
   }
 
@@ -490,6 +513,9 @@ export default class AnnotationWidget extends WidgetType {
       }
 
       wrap.onclick = () => {
+        // TODO pick up the parent type and supply that to the element
+        console.log(parsedContent, this.syntaxNode);
+        const parentType = this.syntaxNode.parent?.type?.name || "null";
         active = !active;
 
         let annotationWrap = document.getElementById("annotation-widget");
@@ -506,8 +532,14 @@ export default class AnnotationWidget extends WidgetType {
         }
 
         const cb = (value: { type: string; payload: any }) => {
-          const event = this.eventDispatch(value, parsedContent);
-          event && wrap.dispatchEvent(event);
+          const eventDetails = this.eventDispatch(value, parsedContent);
+          eventDetails &&
+            wrap.dispatchEvent(
+              new CustomEvent("simpleSwap", {
+                bubbles: true,
+                detail: eventDetails,
+              })
+            );
           ReactDOM.unmountComponentAtNode(annotationWrap!);
           active = false;
         };
@@ -518,6 +550,7 @@ export default class AnnotationWidget extends WidgetType {
           wrap,
           WrappedComponent: contentToMenuItem(content, this.type.name),
           content,
+          parentType,
           parsedContent,
           offsetTop: 20,
           offsetLeft: -20,

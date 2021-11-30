@@ -2,10 +2,9 @@
 // https:github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
 import * as Json from "jsonc-parser";
 import * as nls from "vscode-nls";
+import { JSONSchema } from "./JSONSchemaTypes";
 
 let localize = nls.loadMessageBundle();
-
-type JSONSchemaRef = JSONSchema | boolean;
 
 export type ASTNode =
   | ObjectASTNode
@@ -144,80 +143,6 @@ const formats = {
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
   },
 };
-
-interface JSONSchemaMap {
-  [name: string]: JSONSchemaRef;
-}
-
-interface JSONSchema {
-  id?: string;
-  $id?: string;
-  $schema?: string;
-  type?: string | string[];
-  title?: string;
-  default?: any;
-  definitions?: { [name: string]: JSONSchema };
-  description?: string;
-  properties?: JSONSchemaMap;
-  patternProperties?: JSONSchemaMap;
-  additionalProperties?: boolean | JSONSchemaRef;
-  minProperties?: number;
-  maxProperties?: number;
-  dependencies?: JSONSchemaMap | { [prop: string]: string[] };
-  items?: JSONSchemaRef | JSONSchemaRef[];
-  minItems?: number;
-  maxItems?: number;
-  uniqueItems?: boolean;
-  additionalItems?: boolean | JSONSchemaRef;
-  pattern?: string;
-  minLength?: number;
-  maxLength?: number;
-  minimum?: number;
-  maximum?: number;
-  exclusiveMinimum?: boolean | number;
-  exclusiveMaximum?: boolean | number;
-  multipleOf?: number;
-  required?: string[];
-  $ref?: string;
-  anyOf?: JSONSchemaRef[];
-  allOf?: JSONSchemaRef[];
-  oneOf?: JSONSchemaRef[];
-  not?: JSONSchemaRef;
-  enum?: any[];
-  format?: string;
-
-  // schema draft 06
-  const?: any;
-  contains?: JSONSchemaRef;
-  propertyNames?: JSONSchemaRef;
-  examples?: any[];
-
-  // schema draft 07
-  $comment?: string;
-  if?: JSONSchemaRef;
-  then?: JSONSchemaRef;
-  else?: JSONSchemaRef;
-
-  // VSCode extensions
-
-  defaultSnippets?: {
-    label?: string;
-    description?: string;
-    markdownDescription?: string;
-    body?: any;
-    bodyText?: string;
-  }[]; // VSCode extension: body: a object that will be converted to a JSON string. bodyText: text with \t and \n
-  errorMessage?: string; // VSCode extension
-  patternErrorMessage?: string; // VSCode extension
-  deprecationMessage?: string; // VSCode extension
-  enumDescriptions?: string[]; // VSCode extension
-  markdownEnumDescriptions?: string[]; // VSCode extension
-  markdownDescription?: string; // VSCode extension
-  doNotSuggest?: boolean; // VSCode extension
-  suggestSortText?: string; // VSCode extension
-  allowComments?: boolean; // VSCode extension
-  allowTrailingCommas?: boolean; // VSCode extension
-}
 
 interface IApplicableSchema {
   node: ASTNode;
@@ -1266,6 +1191,8 @@ export function validate(
     }
   }
 }
+
+
 
 export function equals(one: any, other: any): boolean {
   if (one === other) {
