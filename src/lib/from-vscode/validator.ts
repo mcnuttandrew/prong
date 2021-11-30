@@ -2,6 +2,7 @@
 // https:github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
 import * as nls from "vscode-nls";
 import { JSONSchema, JSONSchemaRef } from "../JSONSchemaTypes";
+// import $RefParser from "@apidevtools/json-schema-ref-parser";
 import {
   ASTNode,
   parse,
@@ -11,6 +12,7 @@ import {
   ObjectASTNode,
   PropertyASTNode,
 } from "./parser";
+import { resolveSchemaContent } from "./resolve-schema";
 import {
   asSchema,
   contains,
@@ -101,7 +103,6 @@ class SchemaCollector implements ISchemaCollector {
   schemas: IApplicableSchema[] = [];
   constructor(private focusOffset = -1, private exclude?: ASTNode) {}
   add(schema: IApplicableSchema) {
-    console.log("schemin", schema);
     this.schemas.push(schema);
   }
   merge(other: ISchemaCollector) {
@@ -224,32 +225,23 @@ class ValidationResult {
   }
 }
 
-// function getMatchingSchemas(
-//   schema: JSONSchema,
-//   focusOffset: number = -1,
-//   exclude?: ASTNode
-// ): IApplicableSchema[] {
-//   const matchingSchemas = new SchemaCollector(focusOffset, exclude);
-//   if (this.root && schema) {
-//     validate(this.root, schema, new ValidationResult(), matchingSchemas);
-//   }
-//   return matchingSchemas.schemas;
-// }
 export function getMatchingSchemas(
   schema: JSONSchema,
   code: string
-): IApplicableSchema[] {
-  const parseTree = parse(code)!;
-  // todo error handling
-  const matchingSchemas = new SchemaCollector(-1);
-  console.log({ parseTree });
-  validate(parseTree.root, schema, new ValidationResult(), matchingSchemas);
-  // console.log("oarsed", result);
-  return matchingSchemas.schemas;
-  //   if (this.root && schema) {
-  //     validate(this.root, schema, new ValidationResult(), matchingSchemas);
-  //   }
-  //   return matchingSchemas.schemas;
+): Promise<IApplicableSchema[]> {
+  return resolveSchemaContent(schema, "./", new Set()).then(
+    (resolvedSchema: any) => {
+      const parseTree = parse(code)!;
+      const matchingSchemas = new SchemaCollector(-1);
+      validate(
+        parseTree.root,
+        resolvedSchema.schema,
+        new ValidationResult(),
+        matchingSchemas
+      );
+      return matchingSchemas.schemas;
+    }
+  );
 }
 
 export function validate(
@@ -262,7 +254,6 @@ export function validate(
     return;
   }
   const node = n;
-  console.log("node type", node.type);
   switch (node.type) {
     case "object":
       _validateObjectNode(node, schema, validationResult, matchingSchemas);
@@ -889,7 +880,6 @@ export function validate(
     validationResult: ValidationResult,
     matchingSchemas: ISchemaCollector
   ): void {
-    console.log("validating object ", node);
     const seenKeys: { [key: string]: ASTNode | undefined } =
       Object.create(null);
     const unprocessedProperties: string[] = [];
