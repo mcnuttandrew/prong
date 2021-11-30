@@ -7,23 +7,20 @@ import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 
-import { widgetsPlugin } from "../lib/widgets";
+import { widgetsPlugin, Projection } from "../lib/widgets";
 // import { cmStatePlugin } from "../lib/cmState";
 
 type Props = {
   onChange: (code: string) => void;
   code: string;
   schema: any; // TODO fix
+  projections?: Projection[];
 };
 
 const languageConf = new Compartment();
 
 export default function Editor(props: Props) {
-  const {
-    schema,
-    code,
-    // onChange
-  } = props;
+  const { schema, code, onChange, projections } = props;
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
@@ -40,13 +37,12 @@ export default function Editor(props: Props) {
             basicSetup,
             languageConf.of(json()),
             keymap.of([indentWithTab]),
-            // cmStatePlugin,
-            widgetsPlugin(schema),
+            widgetsPlugin(schema, projections || []),
             EditorView.updateListener.of((v: ViewUpdate) => {
               // TODO fix
-              // if (v.docChanged) {
-              //   onChange(v.state.doc.toString());
-              // }
+              if (v.docChanged) {
+                onChange(v.state.doc.toString());
+              }
             }),
           ],
           doc: code,

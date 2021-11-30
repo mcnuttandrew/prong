@@ -8,6 +8,7 @@ type Props = {
   offsetLeft?: number;
   offsetTop?: number;
   parsedContent: any;
+  parentType: string;
 };
 
 export default function WidgetPlacer(props: Props): JSX.Element {
@@ -19,6 +20,7 @@ export default function WidgetPlacer(props: Props): JSX.Element {
     offsetLeft = 0,
     offsetTop = 0,
     parsedContent,
+    parentType,
   } = props;
   const { left: parentLeft, top: parentTop } = useMemo(
     () => wrap.getBoundingClientRect(),
@@ -70,6 +72,7 @@ export default function WidgetPlacer(props: Props): JSX.Element {
         content={content}
         wrap={wrap}
         parsedContent={parsedContent}
+        parentType={parentType}
       />
     </div>
   );

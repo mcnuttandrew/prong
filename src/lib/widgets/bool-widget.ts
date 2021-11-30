@@ -36,9 +36,11 @@ class BoolWidget extends WidgetType {
   }
 }
 
-const SimpleColorNameWidget: SimpleWidget = {
-  checkForAdd: (type, view, currentNode) => type.name === "BooleanLiteral",
+const SimpleBooleanWidget: SimpleWidget = {
+  checkForAdd: (type, view, currentNode) =>
+    type.name === "True" || type.name === "False",
   addNode: (view, from, to) => {
+    console.log("adding boolean");
     const initVal = codeString(view, from).startsWith("true");
     const deco = Decoration.widget({
       widget: new BoolWidget(initVal, from),
@@ -69,4 +71,4 @@ const SimpleColorNameWidget: SimpleWidget = {
     },
   },
 };
-export default SimpleColorNameWidget;
+export default SimpleBooleanWidget;

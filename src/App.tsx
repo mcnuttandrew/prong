@@ -22,13 +22,20 @@ const code2 = `
     "y": {"field": "b", "type": "quantitative"}
   }
 }
-
 `;
+
 function App() {
   const [currentCode, setCurrentCode] = useState(code2);
   return (
     <div className="App">
-      <Editor schema={VegaLiteV5Schema} code={code2} onChange={() => {}} />
+      <Editor
+        schema={VegaLiteV5Schema}
+        code={code2}
+        onChange={() => {}}
+        projections={[
+          { query: ["data", "values"], projection: (view) => <div>hi</div> },
+        ]}
+      />
     </div>
   );
 }
