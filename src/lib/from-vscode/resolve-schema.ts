@@ -170,6 +170,7 @@ export function resolveSchemaContent(
             const key = k as keyof JSONSchemaMap;
             const entry = map[key];
             if (typeof entry === "object") {
+              entry.$$labeledType = key;
               toWalk.push(entry);
             }
           }

@@ -17,8 +17,8 @@ import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import SimpleNumWidget from "./widgets/num-widget";
 
-import { getLanguageService } from "vscode-json-languageservice";
-import { TextDocument } from "vscode-languageserver-textdocument";
+// import { getLanguageService } from "vscode-json-languageservice";
+// import { TextDocument } from "vscode-languageserver-textdocument";
 import AnnotationWidget from "./widgets/annotation-widget";
 
 export interface Projection {
@@ -127,7 +127,7 @@ function createWidgets(
   return Decoration.set(widgets);
 }
 
-const service = getLanguageService({});
+// const service = getLanguageService({});
 // create event handler for all in play widgets
 const subscriptions = simpleWidgets.reduce((acc, row) => {
   Object.entries(row.eventSubscriptions).forEach(([eventName, sub]) => {

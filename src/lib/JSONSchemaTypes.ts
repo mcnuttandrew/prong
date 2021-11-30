@@ -72,4 +72,7 @@ export interface JSONSchema {
   suggestSortText?: string; // VSCode extension
   allowComments?: boolean; // VSCode extension
   allowTrailingCommas?: boolean; // VSCode extension
+
+  // local extensions
+  $$labeledType?: string | number | undefined;
 }

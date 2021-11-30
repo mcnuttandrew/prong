@@ -394,7 +394,7 @@ const parentResponses: componentContainer = {
 };
 function contentToMenuItem(content: JSONSchema, type: string) {
   let typeBasedProperty: any;
-  console.log("here here", { type });
+  console.log("here here", { type, content });
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
   } else if (!content) {

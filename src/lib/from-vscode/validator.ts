@@ -27,6 +27,27 @@ import {
 
 let localize = nls.loadMessageBundle();
 
+export function getMatchingSchemas(
+  schema: JSONSchema,
+  code: string
+): Promise<IApplicableSchema[]> {
+  // todo the vscode version does some stuff with filteirng for invert?
+  // watch out for that as a bug
+  return resolveSchemaContent(schema, "./", new Set()).then(
+    (resolvedSchema: any) => {
+      const parseTree = parse(code)!;
+      const matchingSchemas = new SchemaCollector(-1);
+      validate(
+        parseTree.root,
+        resolvedSchema.schema,
+        new ValidationResult(),
+        matchingSchemas
+      );
+      return matchingSchemas.schemas;
+    }
+  );
+}
+
 export interface MatchingSchema {
   node: ASTNode;
   schema: JSONSchema;
@@ -225,25 +246,6 @@ class ValidationResult {
   }
 }
 
-export function getMatchingSchemas(
-  schema: JSONSchema,
-  code: string
-): Promise<IApplicableSchema[]> {
-  return resolveSchemaContent(schema, "./", new Set()).then(
-    (resolvedSchema: any) => {
-      const parseTree = parse(code)!;
-      const matchingSchemas = new SchemaCollector(-1);
-      validate(
-        parseTree.root,
-        resolvedSchema.schema,
-        new ValidationResult(),
-        matchingSchemas
-      );
-      return matchingSchemas.schemas;
-    }
-  );
-}
-
 export function validate(
   n: ASTNode | undefined,
   schema: JSONSchema,
@@ -276,7 +278,6 @@ export function validate(
       );
   }
   _validateNode();
-
   matchingSchemas.add({ node: node, schema: schema });
 
   function _validateNode() {

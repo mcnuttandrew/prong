@@ -1,8 +1,6 @@
 import * as Json from "jsonc-parser";
 import { JSONSchemaRef, JSONSchema } from "../JSONSchemaTypes";
 import { ASTNode } from "./parser";
-import * as nls from "vscode-nls";
-let localize = nls.loadMessageBundle();
 
 export function isNumber(val: any): val is number {
   return typeof val === "number";
