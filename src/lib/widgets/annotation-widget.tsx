@@ -141,44 +141,49 @@ function AnyOfObjOptionalFieldPicker(
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
     new Set(Array.from(requiredProps))
   );
-
+  console.log("any of option zone", content);
   return (
-    <div style={{ display: "flex" }}>
-      <button
-        onClick={() => {
-          const val = Object.fromEntries(
-            Array.from(selectedOptions).map((key) => {
-              return [key, generateValueForObjProp(content.properties[key])];
-            })
-          );
-          cb({ type: "simpleSwap", payload: JSON.stringify(val) });
-        }}
-      >
-        Switch to obj with
-      </button>
-      <div>
-        {Object.keys(content?.properties || {}).map((key) => {
-          const selected = selectedOptions.has(key);
-          const required = requiredProps.has(key);
-          const name = `${key}-${containerIdx}`;
-          const onChange = required
-            ? () => {}
-            : () =>
-                selected
-                  ? setSelectedOptions(removeFromSet(selectedOptions, key))
-                  : setSelectedOptions(addToSet(selectedOptions, key));
-          return (
-            <span>
-              <label htmlFor={name}>{key}</label>
-              <input
-                type="checkbox"
-                checked={required || selected}
-                onChange={onChange}
-                name={name}
-              />
-            </span>
-          );
-        })}
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {content.$$labeledType && (
+        <span style={{ fontSize: "9px" }}>{content.$$labeledType}</span>
+      )}
+      <div style={{ display: "flex" }}>
+        <button
+          onClick={() => {
+            const val = Object.fromEntries(
+              Array.from(selectedOptions).map((key) => {
+                return [key, generateValueForObjProp(content.properties[key])];
+              })
+            );
+            cb({ type: "simpleSwap", payload: JSON.stringify(val) });
+          }}
+        >
+          Switch to obj with
+        </button>
+        <div>
+          {Object.keys(content?.properties || {}).map((key) => {
+            const selected = selectedOptions.has(key);
+            const required = requiredProps.has(key);
+            const name = `${key}-${containerIdx}`;
+            const onChange = required
+              ? () => {}
+              : () =>
+                  selected
+                    ? setSelectedOptions(removeFromSet(selectedOptions, key))
+                    : setSelectedOptions(addToSet(selectedOptions, key));
+            return (
+              <span>
+                <label htmlFor={name}>{key}</label>
+                <input
+                  type="checkbox"
+                  checked={required || selected}
+                  onChange={onChange}
+                  name={name}
+                />
+              </span>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -240,39 +245,59 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
 
 const AnyOfPicker: Component = (props) => {
   const { content, cb } = props;
+  const simpleType = new Set(["string", "number", "boolean", "null"]);
+  const simpleTypeMap: any = {
+    string: '""',
+    number: "0",
+    boolean: "true",
+    null: "null",
+  };
+  const anyOptions = bundleConstsToEnum(
+    removeDupsInAnyOf(flattenAnyOf(content))
+  );
+  console.log(anyOptions);
   return (
     <div>
-      {bundleConstsToEnum(removeDupsInAnyOf(flattenAnyOf(content))).map(
-        (opt, idx) => {
-          return (
-            <div key={idx}>
-              {contentDescriber(opt.description)}
-              {opt.enum &&
-                opt.enum.map((val: string) => (
-                  <button
-                    key={val}
-                    onClick={() =>
-                      cb({ type: "simpleSwap", payload: `"${val}"` })
-                    }
-                  >
-                    {val}
-                  </button>
-                ))}
-              {opt.type === "object" && (
-                <div>{AnyOfObjOptionalFieldPicker(opt, cb, idx)}</div>
-              )}
-              {opt.type === "array" && <div>{AnyOfArray(opt, cb, idx)}</div>}
-              {opt.type === "null" && (
+      {anyOptions.map((opt, idx) => {
+        return (
+          <div key={idx}>
+            {contentDescriber(opt.description)}
+            {opt.enum &&
+              opt.enum.map((val: string) => (
                 <button
-                  onClick={() => cb({ type: "simpleSwap", payload: "null" })}
+                  key={val}
+                  onClick={() =>
+                    cb({ type: "simpleSwap", payload: `"${val}"` })
+                  }
                 >
-                  switch to null
+                  {val}
                 </button>
-              )}
-            </div>
-          );
-        }
-      )}
+              ))}
+            {opt.type === "object" && (
+              <div>{AnyOfObjOptionalFieldPicker(opt, cb, idx)}</div>
+            )}
+            {opt.type === "array" && <div>{AnyOfArray(opt, cb, idx)}</div>}
+            {simpleType.has(opt.type) && (
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {opt.$$labeledType && (
+                  <span style={{ fontSize: "9px" }}>{opt.$$labeledType}</span>
+                )}
+                <button
+                  onClick={() =>
+                    cb({
+                      type: "simpleSwap",
+                      // payload: "null"
+                      payload: simpleTypeMap[opt.type],
+                    })
+                  }
+                >
+                  {`switch to ${opt.type}`}
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
