@@ -7,6 +7,8 @@ import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 
+import { ASTKeyBinding } from "../lib/ASTKeyBinding";
+
 import { widgetsPlugin, Projection } from "../lib/widgets";
 // import { cmStatePlugin } from "../lib/cmState";
 
@@ -34,9 +36,10 @@ export default function Editor(props: Props) {
       new EditorView({
         state: EditorState.create({
           extensions: [
+            keymap.of(ASTKeyBinding),
             basicSetup,
             languageConf.of(json()),
-            keymap.of([indentWithTab]),
+            // keymap.of([indentWithTab]),
             widgetsPlugin(schema, projections || []),
             // TODO move language analysis stuff to here as a facet (?)
             EditorView.updateListener.of((v: ViewUpdate) => {
