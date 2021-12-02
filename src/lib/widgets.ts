@@ -84,13 +84,17 @@ function createWidgets(
             currentNode
           ),
         });
-        const replaceTypes = new Set(["PropertyName"]);
-        if (replaceTypes.has(type.name)) {
-          widgets.push(Decoration.replace(annConfig(true)).range(from, to));
-        } else {
-          widgets.push(
-            Decoration.widget({ ...annConfig(false), side: 1 }).range(from)
-          );
+        try {
+          const replaceTypes = new Set(["PropertyName"]);
+          if (replaceTypes.has(type.name)) {
+            widgets.push(Decoration.replace(annConfig(true)).range(from, to));
+          } else {
+            widgets.push(
+              Decoration.widget({ ...annConfig(false), side: 1 }).range(from)
+            );
+          }
+        } catch (e) {
+          console.log("widget creation failed for", currentNode);
         }
 
         // should there be a seperate projection widget?
