@@ -81,7 +81,8 @@ function createWidgets(
             codeString(view, from, to),
             type,
             replace,
-            currentNode
+            currentNode,
+            view
           ),
         });
         try {

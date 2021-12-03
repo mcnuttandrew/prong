@@ -1,17 +1,18 @@
 import * as React from "react";
 import { useState } from "react";
 import * as ReactDOM from "react-dom";
-import { WidgetType } from "@codemirror/view";
+import { WidgetType, EditorView } from "@codemirror/view";
 import ReactMarkdown from "react-markdown";
 import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
 import isequal from "lodash.isequal";
+import { Dictionary } from "ts-essentials";
+import { codeString } from "../utils";
 // import {JSONSchema} from '../JSONSchemaTypes';
 type JSONSchema = any;
 
 // TODOs
 // - normalize schema
-// - clearer standalone component
 // - more holistic parse of json schema (i.e. use some types idiot)
 
 interface ComponentProps {
@@ -51,7 +52,6 @@ function simpleFillout(content: JSONSchema) {
     return simpleTypes[content.type];
   } else if (content.anyOf && content.anyOf.length) {
     const childTypes = content.anyOf.map((x: any) => x.type);
-    console.log("??", childTypes);
     return childTypes.every((x: string) => childTypes[0] === x) &&
       childTypes[0] in simpleTypes
       ? simpleTypes[childTypes[0]]
@@ -73,7 +73,6 @@ const ObjPicker: Component = (props) => {
         {Object.entries(content.properties || {})
           .filter((x) => !currentKeys.has(x[0]))
           .map(([propName, prop]) => {
-            console.log(prop);
             return (
               <button
                 key={propName}
@@ -113,7 +112,6 @@ function bundleConstsToEnum(content: JSONSchema[]) {
 
 function generateValueForObjProp(prop: any) {
   const simple: any = { number: 0, string: "", object: {} };
-  console.log("generate", prop);
   if (prop.enum) {
     return prop.enum[0];
   } else if (simple.hasOwnProperty(prop.type)) {
@@ -141,7 +139,6 @@ function AnyOfObjOptionalFieldPicker(
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
     new Set(Array.from(requiredProps))
   );
-  console.log("any of option zone", content);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       {content.$$labeledType && (
@@ -255,7 +252,6 @@ const AnyOfPicker: Component = (props) => {
   const anyOptions = bundleConstsToEnum(
     removeDupsInAnyOf(flattenAnyOf(content))
   );
-  console.log(anyOptions);
   return (
     <div>
       {anyOptions.map((opt, idx) => {
@@ -416,9 +412,12 @@ const parentResponses: componentContainer = {
   Array: ParentIsArrayComponent,
   // TODO: do i need to fill in all the other options for this?
 };
-function contentToMenuItem(content: JSONSchema, type: string) {
+function contentToMenuItem(
+  content: JSONSchema,
+  type: string,
+  keyPath: (string | number)[]
+) {
   let typeBasedProperty: any;
-  console.log("here here", { type, content });
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
   } else if (!content) {
@@ -437,7 +436,7 @@ function contentToMenuItem(content: JSONSchema, type: string) {
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
   return function Popover(props: ComponentProps) {
-    console.log(props.parentType);
+    // console.log(props.parentType);
     return (
       <div style={{ maxWidth: "400px" }}>
         {content && contentDescriber(props?.content?.description)}
@@ -464,6 +463,76 @@ function tryToParse(currentCodeSlice: string) {
   }
 }
 
+type AbsPathItem = { nodeType: string; index: number; node: SyntaxNode };
+function syntaxNodeToAbsPath(
+  node: SyntaxNode,
+  view: EditorView
+): AbsPathItem[] {
+  const nodeType = node.name;
+
+  const parent = node.parent;
+  const siblings = (parent && parent.getChildren(nodeType)) || [];
+  const selfIndex: number = siblings.findIndex(
+    (sib) => sib.from === node.from && sib.to === node.to
+  );
+  const add = [{ nodeType, index: selfIndex, node }];
+  return (parent ? syntaxNodeToAbsPath(parent, view) : []).concat(add);
+}
+
+function absPathToKeyPath(
+  absPath: AbsPathItem[],
+  root: any
+): (string | number)[] {
+  const keyPath: (string | number)[] = [];
+  const pointerLog = [];
+  let pointer = root;
+  let idx = 1;
+  console.log("abs path", absPath);
+  while (idx < absPath.length) {
+    // for (let idx = 1; idx < absPath.length; idx++) {
+    const item = absPath[idx];
+    pointerLog.push(pointer);
+    if (item.nodeType === "Object" && absPath[idx + 1]) {
+      const nextItem = absPath[idx + 1]; // a property node
+      const targetIndex = nextItem.index;
+      const key = Object.keys(pointer)[targetIndex];
+
+      if (typeof pointer[key] === "object") {
+        pointer = pointer[key];
+      }
+      keyPath.push(key);
+      idx++;
+    } else if (item.nodeType === "Array" && absPath[idx + 1]) {
+      const key = absPath[idx + 1].index;
+      keyPath.push(key);
+      if (typeof pointer[key] === "object") {
+        pointer = pointer[key];
+      }
+      idx++;
+    }
+    idx++;
+  }
+  if (absPath[absPath.length - 1].nodeType === "PropertyName") {
+    const parent = absPath[absPath.length - 2];
+    const val = Object.keys(pointerLog[pointerLog.length - 1])[parent.index];
+    keyPath.push(`${val}-key`);
+  }
+  return keyPath;
+}
+
+function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
+  const absPath = syntaxNodeToAbsPath(node, view);
+  const root = absPath[0];
+  let parsedRoot = {};
+  try {
+    parsedRoot = JSON.parse(codeString(view, root.node.from, root.node.to));
+  } catch (e) {
+    return [];
+  }
+
+  return absPathToKeyPath(absPath, parsedRoot);
+}
+
 function SchemaContentToIndicator(content: JSONSchema) {
   if (!content) {
     return "";
@@ -483,16 +552,19 @@ export default class AnnotationWidget extends WidgetType {
   constructor(
     readonly from: number,
     readonly to: number,
-    readonly schemaMapDelivery: Promise<any>,
+    // readonly schemaMapDelivery: Promise<Dictionary<JSONSchema[]>>,
+    readonly schemaMapDelivery: Promise<Dictionary<any>>,
     readonly currentCodeSlice: string,
     readonly type: NodeType,
     readonly replace: boolean,
-    readonly syntaxNode: SyntaxNode
+    readonly syntaxNode: SyntaxNode,
+    readonly view: EditorView
   ) {
     super();
   }
 
   eq(other: AnnotationWidget): boolean {
+    // todo this is definately wrong
     return false;
     // return this.currentCodeSlice === other.currentCodeSlice;
   }
@@ -548,14 +620,19 @@ export default class AnnotationWidget extends WidgetType {
 
     let active = false;
     this.schemaMapDelivery.then((newMap) => {
-      let content = newMap[`${this.from}-${this.to}`];
-
+      // let contentContainer = newMap[`${this.from}-${this.to}`];
       // merge ambiguous labels into a single blob
+      let content = newMap[`${this.from}-${this.to}`];
       if (content?.length > 1) {
         content = { anyOf: content };
       } else if (content?.length === 1) {
         content = content[0];
       }
+      // const content =
+      //   contentContainer?.length > 1
+      //     ? { anyOf: contentContainer }
+      //     : contentContainer[0];
+
       // add markers to relevant indicators
       if (content && !this.replace) {
         wrap.innerText = SchemaContentToIndicator(content);
@@ -563,7 +640,7 @@ export default class AnnotationWidget extends WidgetType {
 
       wrap.onclick = () => {
         // TODO pick up the parent type and supply that to the element
-        console.log(parsedContent, this.syntaxNode);
+        const keyPath = syntaxNodeToKeyPath(this.syntaxNode, this.view);
         const parentType = this.syntaxNode.parent?.type?.name || "null";
         active = !active;
 
@@ -597,7 +674,7 @@ export default class AnnotationWidget extends WidgetType {
         const widgProps = {
           cb,
           wrap,
-          WrappedComponent: contentToMenuItem(content, this.type.name),
+          WrappedComponent: contentToMenuItem(content, this.type.name, keyPath),
           content,
           parentType,
           parsedContent,

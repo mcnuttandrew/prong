@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@types/json-schema": "^7.0.9",
-    "@types/lodash.isequal": "^4.5.5"
+    "@types/lodash.isequal": "^4.5.5",
+    "ts-essentials": "^9.0.0"
   }
 }

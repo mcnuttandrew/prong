@@ -11371,6 +11371,11 @@ tryer@^1.0.1:
   resolved "https://registry.yarnpkg.com/tryer/-/tryer-1.0.1.tgz#f2c85406800b9b0f74c9f7465b81eaad241252f8"
   integrity sha512-c3zayb8/kWWpycWYg87P71E1S1ZL6b6IJxfb5fvsUgsf0S2MVGaDhDXXjDMpdCpfWXqptc+4mXwmiy1ypXqRAA==
 
+ts-essentials@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-9.0.0.tgz#6196b7f390926429256c70951c8edd260e8e5097"
+  integrity sha512-pow5YBSknf/PyoDhr8vsb93+hZah/jSzhdHA3GMjSzUuZIDZH+rV7tvN5DCbN4hi7QJXdteDv8D9HdDCSwXBUw==
+
 ts-pnp@1.2.0, ts-pnp@^1.1.6:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/ts-pnp/-/ts-pnp-1.2.0.tgz#a500ad084b0798f1c3071af391e65912c86bca92"
