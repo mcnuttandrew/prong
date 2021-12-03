@@ -1,7 +1,6 @@
 import { linter } from "@codemirror/lint";
 import { produceLintValidations } from "../lib/from-vscode/validator";
 import { codeString } from "../lib/utils";
-import { JSONSchema } from "./JSONSchemaTypes";
 import { cmStatePlugin } from "./cmState";
 
 const errorCodeToErrorType: any = {

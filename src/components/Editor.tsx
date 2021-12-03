@@ -37,7 +37,6 @@ export default function Editor(props: Props) {
       new EditorView({
         state: EditorState.create({
           extensions: [
-            // TODO integrate the schema as state
             jsonLinter,
             keymap.of(ASTKeyBinding),
             basicSetup,
@@ -45,7 +44,6 @@ export default function Editor(props: Props) {
             keymap.of([indentWithTab]),
             cmStatePlugin,
             widgetsPlugin,
-            // widgetsPlugin(schema, projections || []),
             // TODO move language analysis stuff to here as a facet (?)
             // computeN? how does async work such a thing?
             EditorView.updateListener.of((v: ViewUpdate) => {
@@ -53,6 +51,9 @@ export default function Editor(props: Props) {
               if (v.docChanged) {
                 onChange(v.state.doc.toString());
               }
+
+              // move analysis here?, doc changes -> recompute annotations
+              // dispatch annotations into state
             }),
           ],
           doc: code,
@@ -63,7 +64,6 @@ export default function Editor(props: Props) {
   }, [code]);
 
   useEffect(() => {
-    console.log("trying to update schema");
     if (view) {
       view.dispatch({ effects: [setSchema.of(schema)] });
     }

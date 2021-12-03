@@ -4,7 +4,6 @@ import { Projection } from "./widgets";
 
 export const setSchema = StateEffect.define<JSONSchema>();
 export const setProjections = StateEffect.define<Projection[]>();
-// export type CmState = {};
 
 export const initialCmState = {
   schema: {} as JSONSchema,

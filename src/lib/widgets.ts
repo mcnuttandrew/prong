@@ -19,8 +19,6 @@ import SimpleColorWidget from "./widgets/color-picker";
 import SimpleNumWidget from "./widgets/num-widget";
 import { cmStatePlugin } from "./cmState";
 
-// import { getLanguageService } from "vscode-json-languageservice";
-// import { TextDocument } from "vscode-languageserver-textdocument";
 import AnnotationWidget from "./widgets/annotation-widget";
 
 export interface Projection {
@@ -142,7 +140,6 @@ const eventHandlers = Object.entries(subscriptions).reduce(
   }
 );
 // build the widgets
-// (schema: any, projections: Projection[]) =>
 export const widgetsPlugin = ViewPlugin.fromClass(
   class {
     decorations: DecorationSet;
