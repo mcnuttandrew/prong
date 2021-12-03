@@ -39,9 +39,10 @@ export default function Editor(props: Props) {
             keymap.of(ASTKeyBinding),
             basicSetup,
             languageConf.of(json()),
-            // keymap.of([indentWithTab]),
+            keymap.of([indentWithTab]),
             widgetsPlugin(schema, projections || []),
             // TODO move language analysis stuff to here as a facet (?)
+            // computeN? how does async work such a thing?
             EditorView.updateListener.of((v: ViewUpdate) => {
               // TODO fix
               if (v.docChanged) {

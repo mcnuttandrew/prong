@@ -107,7 +107,12 @@ function createWidgets(
       },
     });
   }
-  return Decoration.set(widgets);
+  try {
+    return Decoration.set(widgets);
+  } catch (e) {
+    console.log("problem creating widgets");
+    return Decoration.set([]);
+  }
 }
 
 // create event handler for all in play widgets
