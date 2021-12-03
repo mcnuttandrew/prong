@@ -21,9 +21,15 @@ import { cmStatePlugin } from "./cmState";
 
 import AnnotationWidget from "./widgets/annotation-widget";
 
+interface ProjectionProps {
+  view: EditorView;
+  node: SyntaxNode;
+  keyPath: (string | number)[];
+}
+
 export interface Projection {
   query: string[];
-  projection: (view: EditorView) => JSX.Element;
+  projection: (props: ProjectionProps) => JSX.Element;
 }
 
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };
@@ -81,7 +87,9 @@ function createWidgets(
             codeString(view, from, to),
             type,
             replace,
-            currentNode
+            currentNode,
+            view,
+            projections
           ),
         });
         try {

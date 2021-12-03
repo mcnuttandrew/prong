@@ -33,7 +33,12 @@ function App() {
         code={code2}
         onChange={() => {}}
         projections={[
-          { query: ["data", "values"], projection: (view) => <div>hi</div> },
+          {
+            query: ["data", "values", "*"],
+            projection: ({ keyPath }) => {
+              return <div>hi annotation projection {keyPath.join(",")}</div>;
+            },
+          },
         ]}
       />
     </div>

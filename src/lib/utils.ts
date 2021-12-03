@@ -370,3 +370,90 @@ export const colorGroups = {
     "black",
   ],
 };
+
+type AbsPathItem = { nodeType: string; index: number; node: SyntaxNode };
+function syntaxNodeToAbsPath(
+  node: SyntaxNode,
+  view: EditorView
+): AbsPathItem[] {
+  const nodeType = node.name;
+
+  const parent = node.parent;
+  const siblings = (parent && parent.getChildren(nodeType)) || [];
+  const selfIndex: number = siblings.findIndex(
+    (sib) => sib.from === node.from && sib.to === node.to
+  );
+  const add = [{ nodeType, index: selfIndex, node }];
+  return (parent ? syntaxNodeToAbsPath(parent, view) : []).concat(add);
+}
+
+function absPathToKeyPath(
+  absPath: AbsPathItem[],
+  root: any
+): (string | number)[] {
+  const keyPath: (string | number)[] = [];
+  const pointerLog = [];
+  let pointer = root;
+  let idx = 1;
+  while (idx < absPath.length) {
+    const item = absPath[idx];
+    pointerLog.push(pointer);
+    if (item.nodeType === "Object" && absPath[idx + 1]) {
+      const nextItem = absPath[idx + 1]; // a property node
+      const targetIndex = nextItem.index;
+      const key = Object.keys(pointer)[targetIndex];
+
+      if (typeof pointer[key] === "object") {
+        pointer = pointer[key];
+      }
+      keyPath.push(key);
+      idx++;
+    } else if (item.nodeType === "Array" && absPath[idx + 1]) {
+      const key = absPath[idx + 1].index;
+      keyPath.push(key);
+      if (typeof pointer[key] === "object") {
+        pointer = pointer[key];
+      }
+      idx++;
+    }
+    idx++;
+  }
+  if (absPath[absPath.length - 1].nodeType === "PropertyName") {
+    const parent = absPath[absPath.length - 2];
+    const val = Object.keys(pointerLog[pointerLog.length - 1])[parent.index];
+    keyPath.push(`${val}-key`);
+  }
+  return keyPath;
+}
+
+export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
+  const absPath = syntaxNodeToAbsPath(node, view);
+  const root = absPath[0];
+  let parsedRoot = {};
+  try {
+    parsedRoot = JSON.parse(codeString(view, root.node.from, root.node.to));
+  } catch (e) {
+    return [];
+  }
+
+  return absPathToKeyPath(absPath, parsedRoot);
+}
+
+export function keyPathMatchesQuery(
+  query: (string | number)[],
+  keyPath: (string | number)[]
+): boolean {
+  if (query.length !== keyPath.length) {
+    return false;
+  }
+  for (let idx = 0; idx < query.length; idx++) {
+    if (query[idx] === "*") {
+      continue;
+    }
+    if (query[idx] !== keyPath[idx]) {
+      return false;
+    }
+  }
+
+  return true;
+}
