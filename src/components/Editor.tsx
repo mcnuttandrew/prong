@@ -6,11 +6,12 @@ import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
+import { jsonLinter } from "../lib/Linter";
 
 import { ASTKeyBinding } from "../lib/ASTKeyBinding";
 
 import { widgetsPlugin, Projection } from "../lib/widgets";
-// import { cmStatePlugin } from "../lib/cmState";
+import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
 
 type Props = {
   onChange: (code: string) => void;
@@ -36,11 +37,13 @@ export default function Editor(props: Props) {
       new EditorView({
         state: EditorState.create({
           extensions: [
+            jsonLinter,
             keymap.of(ASTKeyBinding),
             basicSetup,
             languageConf.of(json()),
             keymap.of([indentWithTab]),
-            widgetsPlugin(schema, projections || []),
+            cmStatePlugin,
+            widgetsPlugin,
             // TODO move language analysis stuff to here as a facet (?)
             // computeN? how does async work such a thing?
             EditorView.updateListener.of((v: ViewUpdate) => {
@@ -48,6 +51,9 @@ export default function Editor(props: Props) {
               if (v.docChanged) {
                 onChange(v.state.doc.toString());
               }
+
+              // move analysis here?, doc changes -> recompute annotations
+              // dispatch annotations into state
             }),
           ],
           doc: code,
@@ -56,6 +62,17 @@ export default function Editor(props: Props) {
       })
     );
   }, [code]);
+
+  useEffect(() => {
+    if (view) {
+      view.dispatch({ effects: [setSchema.of(schema)] });
+    }
+  }, [schema, view]);
+  useEffect(() => {
+    if (view) {
+      view.dispatch({ effects: [setProjections.of(projections || [])] });
+    }
+  }, [projections, view]);
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {

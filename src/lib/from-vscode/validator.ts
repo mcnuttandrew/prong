@@ -48,6 +48,23 @@ export function getMatchingSchemas(
   );
 }
 
+export function produceLintValidations(
+  schema: JSONSchema,
+  code: string
+): Promise<ValidationResult> {
+  // todo the vscode version does some stuff with filteirng for invert?
+  // watch out for that as a bug
+  return resolveSchemaContent(schema, "./", new Set()).then(
+    (resolvedSchema: any) => {
+      const parseTree = parse(code)!;
+      const matchingSchemas = new SchemaCollector(-1);
+      const val = new ValidationResult();
+      validate(parseTree.root, resolvedSchema.schema, val, matchingSchemas);
+      return val;
+    }
+  );
+}
+
 export interface MatchingSchema {
   node: ASTNode;
   schema: JSONSchema;
