@@ -450,7 +450,7 @@ function contentToMenuItem(
           parentResponses[props.parentType](props)}
         {projections
           .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-          .map((proj) => proj.projection(view, syntaxNode, keyPath))}
+          .map((proj) => proj.projection({ view, node: syntaxNode, keyPath }))}
       </div>
     );
   };

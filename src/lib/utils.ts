@@ -396,7 +396,6 @@ function absPathToKeyPath(
   let pointer = root;
   let idx = 1;
   while (idx < absPath.length) {
-    // for (let idx = 1; idx < absPath.length; idx++) {
     const item = absPath[idx];
     pointerLog.push(pointer);
     if (item.nodeType === "Object" && absPath[idx + 1]) {

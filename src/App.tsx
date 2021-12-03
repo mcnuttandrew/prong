@@ -35,7 +35,7 @@ function App() {
         projections={[
           {
             query: ["data", "values", "*"],
-            projection: (view, node, keyPath) => {
+            projection: ({ keyPath }) => {
               return <div>hi annotation projection {keyPath.join(",")}</div>;
             },
           },

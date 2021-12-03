@@ -21,14 +21,15 @@ import { cmStatePlugin } from "./cmState";
 
 import AnnotationWidget from "./widgets/annotation-widget";
 
+interface ProjectionProps {
+  view: EditorView;
+  node: SyntaxNode;
+  keyPath: (string | number)[];
+}
+
 export interface Projection {
   query: string[];
-  // maybe have key path here too?
-  projection: (
-    view: EditorView,
-    node: SyntaxNode,
-    keyPath: (string | number)[]
-  ) => JSX.Element;
+  projection: (props: ProjectionProps) => JSX.Element;
 }
 
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };
