@@ -8,14 +8,16 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
-import { getMatchingSchemas } from "./from-vscode/validator";
+import isEqual from "lodash.isequal";
 
+import { getMatchingSchemas } from "./from-vscode/validator";
 import { codeString } from "./utils";
 import SimpleSliderWidget from "./widgets/slider-widget";
 import SimpleBoolWidget from "./widgets/bool-widget";
 import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import SimpleNumWidget from "./widgets/num-widget";
+import { cmStatePlugin } from "./cmState";
 
 // import { getLanguageService } from "vscode-json-languageservice";
 // import { TextDocument } from "vscode-languageserver-textdocument";
@@ -140,20 +142,26 @@ const eventHandlers = Object.entries(subscriptions).reduce(
   }
 );
 // build the widgets
-export const widgetsPlugin = (schema: any, projections: Projection[]) =>
-  ViewPlugin.fromClass(
-    class {
-      decorations: DecorationSet;
+// (schema: any, projections: Projection[]) =>
+export const widgetsPlugin = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
 
-      constructor(view: EditorView) {
-        this.decorations = createWidgets(view, schema, projections);
-      }
+    constructor(view: EditorView) {
+      const { schema, projections } = view.state.field(cmStatePlugin);
+      this.decorations = createWidgets(view, schema, projections);
+    }
 
-      update(update: ViewUpdate) {
-        if (update.docChanged || update.viewportChanged) {
-          this.decorations = createWidgets(update.view, schema, projections);
-        }
+    update(update: ViewUpdate) {
+      const stateValuesChanged = !isEqual(
+        update.startState.field(cmStatePlugin),
+        update.state.field(cmStatePlugin)
+      );
+      if (update.docChanged || update.viewportChanged || stateValuesChanged) {
+        const { schema, projections } = update.state.field(cmStatePlugin);
+        this.decorations = createWidgets(update.view, schema, projections);
       }
-    },
-    { decorations: (v) => v.decorations, eventHandlers }
-  );
+    }
+  },
+  { decorations: (v) => v.decorations, eventHandlers }
+);

@@ -11,7 +11,7 @@ import { jsonLinter } from "../lib/Linter";
 import { ASTKeyBinding } from "../lib/ASTKeyBinding";
 
 import { widgetsPlugin, Projection } from "../lib/widgets";
-// import { cmStatePlugin } from "../lib/cmState";
+import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
 
 type Props = {
   onChange: (code: string) => void;
@@ -38,12 +38,14 @@ export default function Editor(props: Props) {
         state: EditorState.create({
           extensions: [
             // TODO integrate the schema as state
-            jsonLinter(schema),
+            jsonLinter,
             keymap.of(ASTKeyBinding),
             basicSetup,
             languageConf.of(json()),
             keymap.of([indentWithTab]),
-            widgetsPlugin(schema, projections || []),
+            cmStatePlugin,
+            widgetsPlugin,
+            // widgetsPlugin(schema, projections || []),
             // TODO move language analysis stuff to here as a facet (?)
             // computeN? how does async work such a thing?
             EditorView.updateListener.of((v: ViewUpdate) => {
@@ -59,6 +61,18 @@ export default function Editor(props: Props) {
       })
     );
   }, [code]);
+
+  useEffect(() => {
+    console.log("trying to update schema");
+    if (view) {
+      view.dispatch({ effects: [setSchema.of(schema)] });
+    }
+  }, [schema, view]);
+  useEffect(() => {
+    if (view) {
+      view.dispatch({ effects: [setProjections.of(projections || [])] });
+    }
+  }, [projections, view]);
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
