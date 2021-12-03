@@ -418,7 +418,8 @@ function contentToMenuItem(
   type: string,
   keyPath: (string | number)[],
   projections: Projection[],
-  view: EditorView
+  view: EditorView,
+  syntaxNode: SyntaxNode
 ) {
   let typeBasedProperty: any;
   if (typeBasedComponents[type]) {
@@ -449,7 +450,7 @@ function contentToMenuItem(
           parentResponses[props.parentType](props)}
         {projections
           .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-          .map((proj) => proj.projection(view))}
+          .map((proj) => proj.projection(view, syntaxNode, keyPath))}
       </div>
     );
   };
@@ -616,7 +617,8 @@ export default class AnnotationWidget extends WidgetType {
             this.type.name,
             keyPath,
             this.projections,
-            this.view
+            this.view,
+            this.syntaxNode
           ),
           content,
           parentType,

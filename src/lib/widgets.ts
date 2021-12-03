@@ -23,7 +23,12 @@ import AnnotationWidget from "./widgets/annotation-widget";
 
 export interface Projection {
   query: string[];
-  projection: (view: EditorView) => JSX.Element;
+  // maybe have key path here too?
+  projection: (
+    view: EditorView,
+    node: SyntaxNode,
+    keyPath: (string | number)[]
+  ) => JSX.Element;
 }
 
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };

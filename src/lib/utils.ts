@@ -444,6 +444,17 @@ export function keyPathMatchesQuery(
   query: (string | number)[],
   keyPath: (string | number)[]
 ): boolean {
-  // dumb and fast
-  return JSON.stringify(query) === JSON.stringify(keyPath);
+  if (query.length !== keyPath.length) {
+    return false;
+  }
+  for (let idx = 0; idx < query.length; idx++) {
+    if (query[idx] === "*") {
+      continue;
+    }
+    if (query[idx] !== keyPath[idx]) {
+      return false;
+    }
+  }
+
+  return true;
 }
