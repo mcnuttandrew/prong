@@ -6,6 +6,7 @@ import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
+import { jsonLinter } from "../lib/Linter";
 
 import { ASTKeyBinding } from "../lib/ASTKeyBinding";
 
@@ -36,6 +37,8 @@ export default function Editor(props: Props) {
       new EditorView({
         state: EditorState.create({
           extensions: [
+            // TODO integrate the schema as state
+            jsonLinter(schema),
             keymap.of(ASTKeyBinding),
             basicSetup,
             languageConf.of(json()),
