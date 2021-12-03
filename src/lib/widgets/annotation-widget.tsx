@@ -7,7 +7,8 @@ import WidgetPlacer from "../../components/WidgetPlacer";
 import { SyntaxNode, NodeType } from "@lezer/common";
 import isequal from "lodash.isequal";
 import { Dictionary } from "ts-essentials";
-import { codeString } from "../utils";
+import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
+import { Projection } from "../widgets";
 // import {JSONSchema} from '../JSONSchemaTypes';
 type JSONSchema = any;
 
@@ -415,7 +416,9 @@ const parentResponses: componentContainer = {
 function contentToMenuItem(
   content: JSONSchema,
   type: string,
-  keyPath: (string | number)[]
+  keyPath: (string | number)[],
+  projections: Projection[],
+  view: EditorView
 ) {
   let typeBasedProperty: any;
   if (typeBasedComponents[type]) {
@@ -444,6 +447,9 @@ function contentToMenuItem(
         {typeBasedProperty && typeBasedProperty(props)}
         {parentResponses[props.parentType] &&
           parentResponses[props.parentType](props)}
+        {projections
+          .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+          .map((proj) => proj.projection(view))}
       </div>
     );
   };
@@ -461,76 +467,6 @@ function tryToParse(currentCodeSlice: string) {
       return null;
     }
   }
-}
-
-type AbsPathItem = { nodeType: string; index: number; node: SyntaxNode };
-function syntaxNodeToAbsPath(
-  node: SyntaxNode,
-  view: EditorView
-): AbsPathItem[] {
-  const nodeType = node.name;
-
-  const parent = node.parent;
-  const siblings = (parent && parent.getChildren(nodeType)) || [];
-  const selfIndex: number = siblings.findIndex(
-    (sib) => sib.from === node.from && sib.to === node.to
-  );
-  const add = [{ nodeType, index: selfIndex, node }];
-  return (parent ? syntaxNodeToAbsPath(parent, view) : []).concat(add);
-}
-
-function absPathToKeyPath(
-  absPath: AbsPathItem[],
-  root: any
-): (string | number)[] {
-  const keyPath: (string | number)[] = [];
-  const pointerLog = [];
-  let pointer = root;
-  let idx = 1;
-  console.log("abs path", absPath);
-  while (idx < absPath.length) {
-    // for (let idx = 1; idx < absPath.length; idx++) {
-    const item = absPath[idx];
-    pointerLog.push(pointer);
-    if (item.nodeType === "Object" && absPath[idx + 1]) {
-      const nextItem = absPath[idx + 1]; // a property node
-      const targetIndex = nextItem.index;
-      const key = Object.keys(pointer)[targetIndex];
-
-      if (typeof pointer[key] === "object") {
-        pointer = pointer[key];
-      }
-      keyPath.push(key);
-      idx++;
-    } else if (item.nodeType === "Array" && absPath[idx + 1]) {
-      const key = absPath[idx + 1].index;
-      keyPath.push(key);
-      if (typeof pointer[key] === "object") {
-        pointer = pointer[key];
-      }
-      idx++;
-    }
-    idx++;
-  }
-  if (absPath[absPath.length - 1].nodeType === "PropertyName") {
-    const parent = absPath[absPath.length - 2];
-    const val = Object.keys(pointerLog[pointerLog.length - 1])[parent.index];
-    keyPath.push(`${val}-key`);
-  }
-  return keyPath;
-}
-
-function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
-  const absPath = syntaxNodeToAbsPath(node, view);
-  const root = absPath[0];
-  let parsedRoot = {};
-  try {
-    parsedRoot = JSON.parse(codeString(view, root.node.from, root.node.to));
-  } catch (e) {
-    return [];
-  }
-
-  return absPathToKeyPath(absPath, parsedRoot);
 }
 
 function SchemaContentToIndicator(content: JSONSchema) {
@@ -558,7 +494,8 @@ export default class AnnotationWidget extends WidgetType {
     readonly type: NodeType,
     readonly replace: boolean,
     readonly syntaxNode: SyntaxNode,
-    readonly view: EditorView
+    readonly view: EditorView,
+    readonly projections: Projection[]
   ) {
     super();
   }
@@ -674,7 +611,13 @@ export default class AnnotationWidget extends WidgetType {
         const widgProps = {
           cb,
           wrap,
-          WrappedComponent: contentToMenuItem(content, this.type.name, keyPath),
+          WrappedComponent: contentToMenuItem(
+            content,
+            this.type.name,
+            keyPath,
+            this.projections,
+            this.view
+          ),
           content,
           parentType,
           parsedContent,

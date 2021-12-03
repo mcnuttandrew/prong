@@ -35,7 +35,6 @@ function findAstNode(
   const { from, to } = view.visibleRanges[0];
   let smallestContainer: SyntaxNode | null = null;
   let smallestContainerSize = Infinity;
-  const log: any = [];
   syntaxTree(view.state).iterate({
     from,
     to,
@@ -48,11 +47,9 @@ function findAstNode(
       ) {
         smallestContainerSize = rangeSize;
         smallestContainer = get();
-        log.push(smallestContainer);
       }
     },
   });
-  console.log(log);
   return smallestContainer;
 }
 

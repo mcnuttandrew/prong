@@ -35,7 +35,10 @@ function App() {
         projections={[
           {
             query: ["data", "values"],
-            projection: (view) => <div>hi annotation projection</div>,
+            projection: (view) => {
+              console.log(view);
+              return <div>hi annotation projection</div>;
+            },
           },
         ]}
       />

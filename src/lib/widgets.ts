@@ -82,7 +82,8 @@ function createWidgets(
             type,
             replace,
             currentNode,
-            view
+            view,
+            projections
           ),
         });
         try {
