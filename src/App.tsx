@@ -27,10 +27,6 @@ const code2 = `
   }
 }
 `;
-interface DropResult {
-  name: string;
-}
-
 const Pill: FC<{
   name: string;
   setCurrentCode: (x: any) => void;
@@ -40,14 +36,6 @@ const Pill: FC<{
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "PILL",
     item: { name },
-    end: (item, monitor) => {
-      const dropResult = monitor.getDropResult<DropResult>();
-      console.log(item, monitor);
-      if (item && dropResult) {
-        // const newCode = JSON.stringify(setIn());
-        // alert(`You dropped ${item.name} into ${dropResult.name}!`);
-      }
-    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
       handlerId: monitor.getHandlerId(),
@@ -84,8 +72,11 @@ const Shelf: FC<{
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
-      console.log("target", props.content, x);
-      const update = setIn(props.content.keyPath, x.name, props.currentCode);
+      const update = setIn(
+        props.content.keyPath,
+        x.name,
+        JSON.parse(props.currentCode)
+      );
       props.setCurrentCode(JSON.stringify(update, null, 2));
       return { name: "Dustbin" };
     },

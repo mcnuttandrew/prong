@@ -150,7 +150,6 @@ export default function Editor(props: Props) {
       });
       view.dispatch(tr);
     }
-    console.log("here");
   }, [code]);
 
   return (
