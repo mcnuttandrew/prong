@@ -19,9 +19,10 @@ import SimpleColorWidget from "./widgets/color-picker";
 import SimpleNumWidget from "./widgets/num-widget";
 import { cmStatePlugin } from "./cmState";
 
+import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
 import AnnotationWidget from "./widgets/annotation-widget";
 
-interface ProjectionProps {
+export interface ProjectionProps {
   view: EditorView;
   node: SyntaxNode;
   keyPath: (string | number)[];
@@ -29,6 +30,7 @@ interface ProjectionProps {
 
 export interface Projection {
   query: string[];
+  type: "tooltip" | "inline";
   projection: (props: ProjectionProps) => JSX.Element;
 }
 
@@ -49,10 +51,10 @@ export interface SimpleWidget {
 }
 const simpleWidgets: SimpleWidget[] = [
   SimpleBoolWidget,
-  SimpleNumWidget,
+  // SimpleNumWidget,
   SimpleColorNameWidget,
   SimpleColorWidget,
-  SimpleSliderWidget,
+  // SimpleSliderWidget,
 ];
 
 function createNodeMap(view: EditorView, schema: any) {
@@ -78,34 +80,65 @@ function createWidgets(
       to,
       enter: (type, from, to, get) => {
         const currentNode = get();
+        const inlineProjections = projections.filter(
+          (proj) => proj.type === "inline"
+        );
+        const currentCodeSlice = codeString(view, from, to);
+        // calculate inline projection
+        let hasProjection = false;
+        inlineProjections.forEach((projection) => {
+          const projWidget = InlineProjectWidgetFactory(
+            projection,
+            currentCodeSlice,
+            currentNode,
+            view
+          );
+          if (!projWidget.checkForAdd(type, view, currentNode)) {
+            return;
+          }
+          hasProjection = true;
+          projWidget
+            .addNode(view, from, to, currentNode)
+            .forEach((w) => widgets.push(w));
+        });
+        if (hasProjection) {
+          return;
+        }
         // TODO make the interface to the annotation configuration less dumb
-        const annConfig = (replace: boolean) => ({
+
+        const annotationWidgetConfig = (replace: boolean) => ({
           widget: new AnnotationWidget(
             from,
             to,
-            schemaMapLoader,
-            codeString(view, from, to),
-            type,
-            replace,
-            currentNode,
-            view,
-            projections
+            schemaMapLoader, // schemaMapDelivery
+            currentCodeSlice, // currentCodeSlice
+            type, // type
+            replace, // replace
+            currentNode, // syntaxNode
+            view, // view
+            projections // projections
           ),
         });
         try {
           const replaceTypes = new Set(["PropertyName"]);
           if (replaceTypes.has(type.name)) {
-            widgets.push(Decoration.replace(annConfig(true)).range(from, to));
+            widgets.push(
+              Decoration.replace(annotationWidgetConfig(true)).range(from, to)
+            );
           } else {
             widgets.push(
-              Decoration.widget({ ...annConfig(false), side: 1 }).range(from)
+              Decoration.widget({
+                ...annotationWidgetConfig(false),
+                side: 1,
+              }).range(from)
             );
           }
         } catch (e) {
           console.log("widget creation failed for", currentNode);
         }
 
-        // should there be a seperate projection widget?
+        // should there be a seperate projection widget? yes wip
+
         simpleWidgets.forEach(({ checkForAdd, addNode }) => {
           if (!checkForAdd(type, view, currentNode)) {
             return;
@@ -118,6 +151,7 @@ function createWidgets(
   try {
     return Decoration.set(widgets);
   } catch (e) {
+    console.log(e);
     console.log("problem creating widgets");
     return Decoration.set([]);
   }

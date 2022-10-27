@@ -439,7 +439,7 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
   return absPathToKeyPath(absPath, parsedRoot);
 }
 
-export function keyPathMatchesQuery(
+function keyPathMatchesQueryCore(
   query: (string | number)[],
   keyPath: (string | number)[]
 ): boolean {
@@ -457,3 +457,21 @@ export function keyPathMatchesQuery(
 
   return true;
 }
+
+function keyPathMatchesQueryMemoizer() {
+  const pathMatchCache: Record<string, boolean> = {};
+  return function (
+    query: (string | number)[],
+    keyPath: (string | number)[]
+  ): boolean {
+    const accessKey = `${query.join("XXXXX")}_________${keyPath.join("XXXXX")}`;
+    if (pathMatchCache[accessKey]) {
+      return pathMatchCache[accessKey];
+    }
+    const result = keyPathMatchesQueryCore(query, keyPath);
+    pathMatchCache[accessKey] = result;
+    return result;
+  };
+}
+
+export const keyPathMatchesQuery = keyPathMatchesQueryMemoizer();

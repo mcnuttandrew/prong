@@ -3,6 +3,7 @@ import "./App.css";
 
 import VegaLiteV5Schema from "./constants/vega-lite-v5-schema.json";
 import Editor from "./components/Editor";
+import { ProjectionProps } from "../src/lib/widgets";
 // bundling tail wind with component?
 
 const code2 = `
@@ -24,6 +25,19 @@ const code2 = `
 }
 `;
 
+function ExampleProjection(props: ProjectionProps) {
+  const [count, setCount] = useState(0);
+  return (
+    <div
+      onClick={(e) => {
+        setCount(count + 1);
+      }}
+    >
+      counter-{count}
+    </div>
+  );
+}
+
 function App() {
   const [currentCode, setCurrentCode] = useState(code2);
   return (
@@ -35,9 +49,16 @@ function App() {
         projections={[
           {
             query: ["data", "values", "*"],
+            type: "tooltip",
             projection: ({ keyPath }) => {
               return <div>hi annotation projection {keyPath.join(",")}</div>;
             },
+          },
+          {
+            // query: ["data", "values", "*"],
+            query: ["description", "description-key"],
+            type: "inline",
+            projection: ExampleProjection,
           },
         ]}
       />

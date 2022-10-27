@@ -143,11 +143,15 @@ body .pcr-app.visible {
   margin-right: 0.5rem;
 }
 
-.cm-annotation-widget {
+.cm-annotation-widget, .cm-projection-widget {
   position: relative;
   display: inline-block;
-  border-bottom: 1px dotted black;
-  /* If you want dots under the hoverable text */
   cursor: pointer;
   pointer-events: all;
+}
+
+.cm-annotation-widget {
+  border-bottom: 1px dotted black;
+  /* If you want dots under the hoverable text */
+
 }

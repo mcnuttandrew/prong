@@ -450,6 +450,7 @@ function contentToMenuItem(
           parentResponses[props.parentType](props)}
         {projections
           .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+          .filter((proj) => proj.type === "tooltip")
           .map((proj) => proj.projection({ view, node: syntaxNode, keyPath }))}
       </div>
     );
@@ -551,9 +552,11 @@ export default class AnnotationWidget extends WidgetType {
   }
 
   toDOM(): HTMLDivElement {
+    // console.log(this)
     const wrap = document.createElement("div");
     wrap.className = "cm-annotation-widget";
     wrap.innerText = this.replace ? this.currentCodeSlice : "";
+    wrap.setAttribute("contenteditable", "true");
     const parsedContent: any = tryToParse(this.currentCodeSlice);
 
     let active = false;
@@ -573,7 +576,8 @@ export default class AnnotationWidget extends WidgetType {
 
       // add markers to relevant indicators
       if (content && !this.replace) {
-        wrap.innerText = SchemaContentToIndicator(content);
+        // ADDS MARKERS
+        // wrap.innerText = SchemaContentToIndicator(content);
       }
 
       wrap.onclick = () => {
@@ -609,7 +613,7 @@ export default class AnnotationWidget extends WidgetType {
         };
 
         // actually do the rendering
-        const widgProps = {
+        const widgetProps = {
           cb,
           wrap,
           WrappedComponent: contentToMenuItem(
@@ -627,7 +631,7 @@ export default class AnnotationWidget extends WidgetType {
           offsetLeft: -20,
         };
         ReactDOM.render(
-          React.createElement(WidgetPlacer, widgProps),
+          React.createElement(WidgetPlacer, widgetProps),
           annotationWrap
         );
       };

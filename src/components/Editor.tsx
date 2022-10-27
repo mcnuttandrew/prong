@@ -87,5 +87,9 @@ export default function Editor(props: Props) {
     }
   }, [code]);
 
-  return <div ref={cmParent} />;
+  return (
+    <div>
+      <div ref={cmParent} />
+    </div>
+  );
 }
