@@ -387,6 +387,12 @@ function syntaxNodeToAbsPath(
   return (parent ? syntaxNodeToAbsPath(parent, view) : []).concat(add);
 }
 
+/**
+ * Transform an absolute path item list into our key path notation
+ * @param absPath
+ * @param root
+ * @returns
+ */
 function absPathToKeyPath(
   absPath: AbsPathItem[],
   root: any
@@ -418,10 +424,14 @@ function absPathToKeyPath(
     }
     idx++;
   }
-  if (absPath[absPath.length - 1].nodeType === "PropertyName") {
+  const isChildOfProperty =
+    absPath.length > 2 && absPath[absPath.length - 2].nodeType === "Property";
+  const isPropertyKey = absPath[absPath.length - 1].nodeType === "PropertyName";
+  // if we are looking at property name object
+  if (isChildOfProperty && pointerLog[pointerLog.length - 1]) {
     const parent = absPath[absPath.length - 2];
     const val = Object.keys(pointerLog[pointerLog.length - 1])[parent.index];
-    keyPath.push(`${val}-key`);
+    keyPath.push(isPropertyKey ? `${val}___key` : `${val}___val`);
   }
   return keyPath;
 }
@@ -437,6 +447,51 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
   }
 
   return absPathToKeyPath(absPath, parsedRoot);
+}
+
+export function setIn(
+  keyPath: (string | number)[],
+  newValue: any,
+  content: string
+): string {
+  const contentCopy = JSON.parse(content);
+  const lastKey = keyPath[keyPath.length - 1];
+  if (typeof lastKey === "string" && lastKey.includes("___val")) {
+    keyPath.pop();
+  }
+  let pointer = contentCopy;
+  const pointerStack: { pointer: any; keyPath: false | string | number }[] = [
+    { pointer, keyPath: false },
+  ];
+  for (let idx = 0; idx < keyPath.length; idx++) {
+    const key = keyPath[idx];
+    if (!(key in pointer)) {
+      return "error";
+    }
+
+    if (typeof key === "string" && key.includes("___key")) {
+      // // const objKey = keyPath[idx - 2] as string | number;
+      // // const propertyKey = keyPath[idx - 1] as string | number;
+      // const object = pointerStack[pointerStack.length - 2].pointer;
+      // const value = pointer[pointerStack.length - 1];
+
+      // object[newValue] = value.pointer;
+      // delete object[value.keyPath];
+      // console.log("this branch", object);
+      // throw "Functionality not yet implemented";
+      return "error";
+    } else {
+      if (idx === keyPath.length - 1) {
+        // if its the last one were done
+        pointer[key] = newValue;
+      } else {
+        // otherwise redirect
+        pointerStack.push({ pointer, keyPath: key });
+        pointer = pointer[key];
+      }
+    }
+  }
+  return contentCopy;
 }
 
 function keyPathMatchesQueryCore(

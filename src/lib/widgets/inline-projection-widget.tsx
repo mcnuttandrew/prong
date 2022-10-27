@@ -8,6 +8,7 @@ import { SimpleWidget } from "../widgets";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
+  // todo make these less dumb
   constructor(
     readonly from: number,
     readonly to: number,
@@ -21,6 +22,7 @@ class InlineProjectionWidget extends WidgetType {
   }
 
   eq(other: InlineProjectionWidget): boolean {
+    // wrong
     return false;
   }
 
@@ -35,10 +37,10 @@ class InlineProjectionWidget extends WidgetType {
         keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view),
         node: this.syntaxNode,
         view: this.view,
+        currentValue: this.currentCodeSlice,
       }),
       wrap
     );
-
     return wrap;
   }
 
@@ -51,8 +53,6 @@ class InlineProjectionWidget extends WidgetType {
       this.widgetContainer = null;
     }
   }
-  //   to do: save the react element as class data,
-  //   on "destroy" exit it
 }
 
 const ProjectionWidgetFactor = (
@@ -91,7 +91,7 @@ const ProjectionWidgetFactor = (
     // });
     // Negative sign, if any, is not part of this Number node, so
     // check `from` - 1 (disallowing spaces after unary negation operator)
-    console.log("got here", from, to, currentCodeSlice);
+    // console.log("got here", from, to, currentCodeSlice);
     // return [decoDec.range(from), decoDec.range(to)];
     // return [decoDec.range(from)];
     // return [decoDec.range(from, to)];

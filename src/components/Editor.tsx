@@ -8,7 +8,7 @@ import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { jsonLinter } from "../lib/Linter";
 
-import { ASTKeyBinding } from "../lib/ASTKeyBinding";
+// import { ASTKeyBinding } from "../lib/ASTKeyBinding";
 
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
@@ -37,8 +37,8 @@ export default function Editor(props: Props) {
       new EditorView({
         state: EditorState.create({
           extensions: [
-            jsonLinter,
-            keymap.of(ASTKeyBinding),
+            // jsonLinter,
+            // keymap.of(ASTKeyBinding),
             basicSetup,
             languageConf.of(json()),
             keymap.of([indentWithTab]),
@@ -51,6 +51,7 @@ export default function Editor(props: Props) {
               if (v.docChanged) {
                 onChange(v.state.doc.toString());
               }
+              console.log("lister fired", v);
 
               // move analysis here?, doc changes -> recompute annotations
               // dispatch annotations into state
@@ -61,7 +62,12 @@ export default function Editor(props: Props) {
         parent: cmParent.current!,
       })
     );
-  }, [code]);
+  }, []);
+  // useEffect(() => {
+  //   view?.state.update({
+  //     changes: { from: 0, to: view.state.doc.length, insert: code },
+  //   });
+  // }, [code]);
 
   useEffect(() => {
     if (view) {
@@ -85,6 +91,7 @@ export default function Editor(props: Props) {
       });
       view.dispatch(tr);
     }
+    console.log("here");
   }, [code]);
 
   return (

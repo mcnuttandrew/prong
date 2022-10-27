@@ -8,6 +8,10 @@ input {
   display: none;
 }
 
+.flex {
+  display: flex;
+}
+
 .cm-num-widget {
   display: inline-block;
   font-family: monospace;

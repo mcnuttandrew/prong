@@ -12,11 +12,11 @@ import isEqual from "lodash.isequal";
 
 import { getMatchingSchemas } from "./from-vscode/validator";
 import { codeString } from "./utils";
-import SimpleSliderWidget from "./widgets/slider-widget";
+// import SimpleSliderWidget from "./widgets/slider-widget";
 import SimpleBoolWidget from "./widgets/bool-widget";
 import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
-import SimpleNumWidget from "./widgets/num-widget";
+// import SimpleNumWidget from "./widgets/num-widget";
 import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
@@ -26,6 +26,7 @@ export interface ProjectionProps {
   view: EditorView;
   node: SyntaxNode;
   keyPath: (string | number)[];
+  currentValue: any;
 }
 
 export interface Projection {
