@@ -147,6 +147,7 @@ body .pcr-app.visible {
   margin-right: 0.5rem;
 }
 
+/* todo no more projection widgets */
 .cm-annotation-widget, .cm-projection-widget {
   position: relative;
   display: inline-block;
@@ -158,4 +159,20 @@ body .pcr-app.visible {
   border-bottom: 1px dotted black;
   /* If you want dots under the hoverable text */
 
+}
+
+.cm-annotation-menu {
+  width: 400px;
+  height: 300px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  font-family: sans-serif;
+  border: thin solid black;
+  position: absolute;
+  z-index: 1000;
+  background: lightgray;
+}
+
+.editor-container {
+  position: relative;
 }

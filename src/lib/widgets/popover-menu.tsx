@@ -405,15 +405,25 @@ const parentResponses: componentContainer = {
   Array: ParentIsArrayComponent,
   // TODO: do i need to fill in all the other options for this?
 };
-export function contentToMenuItem(
-  content: JSONSchema,
-  type: string,
-  keyPath: (string | number)[],
-  projections: Projection[],
-  view: EditorView,
-  syntaxNode: SyntaxNode,
-  currentCodeSlice: string
-) {
+
+interface MenuProps {
+  content: JSONSchema;
+  keyPath: (string | number)[];
+  projections: Projection[];
+  view: EditorView;
+  syntaxNode: SyntaxNode;
+  currentCodeSlice: string;
+}
+export function ContentToMenuItem(props: MenuProps) {
+  const { content, keyPath, projections, view, syntaxNode, currentCodeSlice } =
+    props;
+  let localContent: JSONSchema = {};
+  if (content?.length > 1) {
+    localContent = { anyOf: content };
+  } else if (content?.length === 1) {
+    localContent = content[0];
+  }
+  const type = syntaxNode.type.name;
   let typeBasedProperty: any;
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
@@ -425,34 +435,32 @@ export function contentToMenuItem(
 
   let contentBasedItem: any;
   // TODO work through options listed in the validate wip
-  if (content && content.enum) {
+  if (localContent && localContent.enum) {
     contentBasedItem = menuSwitch.EnumPicker;
-  } else if (content && content.type === "object") {
+  } else if (localContent && localContent.type === "object") {
     contentBasedItem = menuSwitch.ObjPicker;
-  } else if (content && content.anyOf) {
+  } else if (localContent && localContent.anyOf) {
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
-  return function Popover(props: ComponentProps) {
-    // console.log(props.parentType);
-    return (
-      <div style={{ maxWidth: "400px" }}>
-        {content && contentDescriber(props?.content?.description)}
-        {content && !!contentBasedItem && contentBasedItem(props)}
-        {typeBasedProperty && typeBasedProperty(props)}
-        {parentResponses[props.parentType] &&
-          parentResponses[props.parentType](props)}
-        {projections
-          .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-          .filter((proj) => proj.type === "tooltip")
-          .map((proj) =>
-            proj.projection({
-              view,
-              node: syntaxNode,
-              keyPath,
-              currentValue: currentCodeSlice,
-            })
-          )}
-      </div>
-    );
-  };
+  return (
+    <div style={{ maxWidth: "400px" }}>
+      {localContent && contentDescriber(localContent?.description)}
+      {localContent &&
+        !!contentBasedItem &&
+        contentBasedItem({ ...props, content: localContent })}
+      {typeBasedProperty && typeBasedProperty({ ...props })}
+      {projections
+        .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+        .filter((proj) => proj.type === "tooltip")
+        .map((proj) =>
+          proj.projection({
+            view,
+            node: syntaxNode,
+            keyPath,
+            currentValue: currentCodeSlice,
+          })
+        )}
+    </div>
+  );
+  // };
 }

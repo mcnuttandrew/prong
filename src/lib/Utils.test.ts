@@ -1,14 +1,14 @@
 import { keyPathMatchesQuery, setIn } from "./utils";
 
 test.only("setIn", () => {
-  const exampleData = `{
+  const exampleData = {
     a: {
       b: [1, 2, 3],
       c: true,
     },
     d: null,
     e: [{ f: 1, g: 2 }],
-  }`;
+  };
   expect(setIn(["a"], false, exampleData)).toMatchSnapshot();
   // expect(setIn(["a", "b", "b___key"], "x", exampleData)).toMatchSnapshot();
   expect(setIn(["a", "b", 0], false, exampleData)).toMatchSnapshot();

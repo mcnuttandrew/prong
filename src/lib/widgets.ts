@@ -10,7 +10,7 @@ import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
 import isEqual from "lodash.isequal";
 
-import { getMatchingSchemas } from "./from-vscode/validator";
+// import { getMatchingSchemas } from "./from-vscode/validator";
 import { codeString } from "./utils";
 // import SimpleSliderWidget from "./widgets/slider-widget";
 import SimpleBoolWidget from "./widgets/bool-widget";
@@ -20,7 +20,7 @@ import SimpleColorWidget from "./widgets/color-picker";
 import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
-import AnnotationWidget from "./widgets/annotation-widget";
+// import AnnotationWidget from "./widgets/annotation-widget";
 
 export interface ProjectionProps {
   view: EditorView;
@@ -58,22 +58,12 @@ const simpleWidgets: SimpleWidget[] = [
   // SimpleSliderWidget,
 ];
 
-function createNodeMap(view: EditorView, schema: any) {
-  return getMatchingSchemas(schema, codeString(view, 0)).then((matches) => {
-    return matches.reduce((acc, { node, schema }) => {
-      const [from, to] = [node.offset, node.offset + node.length];
-      acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
-      return acc;
-    }, {} as { [x: string]: any });
-  });
-}
-
 function createWidgets(
   view: EditorView,
   schema: any,
   projections: Projection[]
 ) {
-  const schemaMapLoader = createNodeMap(view, schema);
+  // const schemaMapLoader = createNodeMap(view, schema);
   const widgets: Range<Decoration>[] = [];
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
@@ -105,40 +95,6 @@ function createWidgets(
         if (hasProjection) {
           return;
         }
-        // TODO make the interface to the annotation configuration less dumb
-
-        const annotationWidgetConfig = (replace: boolean) => ({
-          widget: new AnnotationWidget(
-            from,
-            to,
-            schemaMapLoader, // schemaMapDelivery
-            currentCodeSlice, // currentCodeSlice
-            type, // type
-            replace, // replace
-            currentNode, // syntaxNode
-            view, // view
-            projections // projections
-          ),
-        });
-        try {
-          const replaceTypes = new Set(["PropertyName"]);
-          if (replaceTypes.has(type.name)) {
-            widgets.push(
-              Decoration.replace(annotationWidgetConfig(true)).range(from, to)
-            );
-          } else {
-            widgets.push(
-              Decoration.widget({
-                ...annotationWidgetConfig(false),
-                side: 1,
-              }).range(from)
-            );
-          }
-        } catch (e) {
-          console.log("widget creation failed for", currentNode);
-        }
-
-        // should there be a seperate projection widget? yes wip
 
         simpleWidgets.forEach(({ checkForAdd, addNode }) => {
           if (!checkForAdd(type, view, currentNode)) {

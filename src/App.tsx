@@ -86,8 +86,7 @@ const Shelf: FC<{
     drop: (x: any) => {
       console.log("target", props.content, x);
       const update = setIn(props.content.keyPath, x.name, props.currentCode);
-      props.setCurrentCode(update);
-      // props.setCurrentCode(JSON.stringify(update, null, 2));
+      props.setCurrentCode(JSON.stringify(update, null, 2));
       return { name: "Dustbin" };
     },
     collect: (monitor) => ({
@@ -142,8 +141,7 @@ const Shelf: FC<{
                 false,
                 props.currentCode
               );
-              // props.setCurrentCode(JSON.stringify(update, null, 2));
-              props.setCurrentCode(update);
+              props.setCurrentCode(JSON.stringify(update, null, 2));
             }}
           >
             ⦻

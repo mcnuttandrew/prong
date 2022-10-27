@@ -452,9 +452,9 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
 export function setIn(
   keyPath: (string | number)[],
   newValue: any,
-  content: string
-): string {
-  const contentCopy = JSON.parse(content);
+  content: any
+) {
+  const contentCopy = JSON.parse(JSON.stringify(content));
   const lastKey = keyPath[keyPath.length - 1];
   if (typeof lastKey === "string" && lastKey.includes("___val")) {
     keyPath.pop();
