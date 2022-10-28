@@ -156,11 +156,7 @@ function ExampleProjection(props: ProjectionProps) {
         alignItems: "center",
         justifyContent: "center",
       }}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setCount(count + 1);
-      }}
+      onClick={() => setCount(count + 1)}
     >
       counter-{count}
     </div>
@@ -213,6 +209,12 @@ function App() {
             {
               // query: ["data", "values", "*"],
               query: ["description", "description___key"],
+              type: "inline",
+              projection: ExampleProjection,
+            },
+            {
+              // query: ["data", "values", "*"],
+              query: ["mark", "mark___key"],
               type: "inline",
               projection: ExampleProjection,
             },

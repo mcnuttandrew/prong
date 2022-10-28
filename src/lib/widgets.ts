@@ -77,14 +77,17 @@ function createWidgets(
         const currentCodeSlice = codeString(view, from, to);
         // calculate inline projection
         let hasProjection = false;
+        const baseRange = view.state.selection.ranges[0];
         inlineProjections.forEach((projection) => {
           const projWidget = InlineProjectWidgetFactory(
             projection,
             currentCodeSlice,
-            currentNode,
-            view
+            currentNode
           );
           if (!projWidget.checkForAdd(type, view, currentNode)) {
+            return;
+          }
+          if (baseRange && baseRange.from >= from && baseRange.from <= to) {
             return;
           }
           hasProjection = true;

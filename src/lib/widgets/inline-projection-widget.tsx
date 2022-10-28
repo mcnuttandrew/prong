@@ -45,7 +45,7 @@ class InlineProjectionWidget extends WidgetType {
   }
 
   ignoreEvent(): boolean {
-    return false;
+    return true;
   }
   destroy() {
     if (this.widgetContainer) {
@@ -58,13 +58,11 @@ class InlineProjectionWidget extends WidgetType {
 const ProjectionWidgetFactor = (
   projection: Projection,
   currentCodeSlice: string,
-  syntaxNode: SyntaxNode,
-  view: EditorView
+  syntaxNode: SyntaxNode
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
     const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
     return keyPathMatchesQuery(projection.query, keyPath);
-    // return currentNode.type.name === "String";
   },
   addNode: (view, from, to) => {
     const decoDec = Decoration.replace({
@@ -78,23 +76,6 @@ const ProjectionWidgetFactor = (
       ),
       //   side: 1,
     }).range(from, to);
-    // const decoInc = Decoration.widget({
-    //   widget: new InlineProjectionWidget(
-    //     from,
-    //     to,
-    //     projection,
-    //     syntaxNode,
-    //     view,
-    //     currentCodeSlice
-    //   ),
-    //   side: 1,
-    // });
-    // Negative sign, if any, is not part of this Number node, so
-    // check `from` - 1 (disallowing spaces after unary negation operator)
-    // console.log("got here", from, to, currentCodeSlice);
-    // return [decoDec.range(from), decoDec.range(to)];
-    // return [decoDec.range(from)];
-    // return [decoDec.range(from, to)];
     return [decoDec];
   },
   eventSubscriptions: {

@@ -25,6 +25,11 @@ export const MenuTriggerKeyBinding = (
     preventDefault: true,
   },
   {
+    key: "Cmd-.",
+    run: triggerMenuOpen(triggerSelectionCheck),
+    preventDefault: true,
+  },
+  {
     key: "Cmd-ArrowUp",
     run: triggerMenuOpen(triggerSelectionCheck),
     preventDefault: true,
