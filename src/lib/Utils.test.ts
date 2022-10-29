@@ -1,6 +1,6 @@
 import { keyPathMatchesQuery, setIn } from "./utils";
 
-test.only("setIn", () => {
+test("setIn", () => {
   const exampleData = `{
     "a": {
       "b": [1, 2, 3],
