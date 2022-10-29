@@ -8,6 +8,7 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
+
 import isEqual from "lodash.isequal";
 
 // import { getMatchingSchemas } from "./from-vscode/validator";
@@ -162,5 +163,8 @@ export const widgetsPlugin = ViewPlugin.fromClass(
       }
     }
   },
-  { decorations: (v) => v.decorations, eventHandlers }
+  {
+    decorations: (v) => v.decorations,
+    eventHandlers,
+  }
 );

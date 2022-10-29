@@ -563,7 +563,7 @@ export function parse(
     if ((scanner.getTokenError() as unknown as ScanError) === ScanError.None) {
       const tokenValue = scanner.getTokenValue();
       try {
-        const numberValue = JSON.parse(tokenValue);
+        const numberValue = Json.parse(tokenValue);
         if (!isNumber(numberValue)) {
           return _error(
             localize("InvalidNumberFormat", "Invalid number format."),

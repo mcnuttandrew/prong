@@ -1,5 +1,8 @@
 import React, { useState, FC, useEffect } from "react";
+
 import "./App.css";
+import "./stylesheets/vega-lite-example.css";
+
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -7,7 +10,6 @@ import VegaLiteV5Schema from "./constants/vega-lite-v5-schema.json";
 import Editor from "./components/Editor";
 import { ProjectionProps } from "../src/lib/widgets";
 import { setIn } from "./lib/utils";
-// bundling tail wind with component?
 
 const code2 = `
 {
@@ -27,11 +29,7 @@ const code2 = `
   }
 }
 `;
-const Pill: FC<{
-  name: string;
-  setCurrentCode: (x: any) => void;
-  currentCode: string;
-}> = function Pill(props) {
+const Pill: FC<{ name: string }> = function Pill(props) {
   const { name } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "PILL",
@@ -44,95 +42,60 @@ const Pill: FC<{
 
   const opacity = isDragging ? 0.4 : 1;
   return (
-    <div
-      ref={drag}
-      style={{
-        opacity,
-        border: "1px dashed gray",
-        backgroundColor: "white",
-        padding: "0.5rem 1rem",
-        marginRight: "1.5rem",
-        marginBottom: "1.5rem",
-        cursor: "move",
-        // float: "left",
-      }}
-      data-testid={`pill`}
-    >
+    <div ref={drag} className="pill" style={{ opacity }} data-testid={`pill`}>
       {name}
     </div>
   );
 };
 
+function lazyParse(content: string): any {
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    return content;
+  }
+}
+
 const Shelf: FC<{
-  name: string;
-  content: { currentValue: any; keyPath: string[] };
+  currentValue: any;
+  keyPath: string[];
   setCurrentCode: (x: any) => void;
   currentCode: string;
 }> = function Shelf(props) {
+  const { keyPath, currentCode, setCurrentCode, currentValue } = props;
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
-      const update = setIn(
-        props.content.keyPath,
-        x.name,
-        JSON.parse(props.currentCode)
-      );
-      props.setCurrentCode(JSON.stringify(update, null, 2));
+      const update = setIn(keyPath, x.name, currentCode);
+      setCurrentCode(update);
       return { name: "Dustbin" };
     },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
+    collect: (m) => ({ isOver: m.isOver(), canDrop: m.canDrop() }),
   }));
 
   const isActive = canDrop && isOver;
-  let backgroundColor = "#222";
-  if (isActive) {
-    backgroundColor = "darkgreen";
-  } else if (canDrop) {
-    backgroundColor = "darkkhaki";
-  }
-  const currentValue = props.content.currentValue;
-
+  const backgroundColor = isActive
+    ? "darkgreen"
+    : canDrop
+    ? "darkkhaki"
+    : "#222";
+  const parsedCurrentValue = lazyParse(currentValue);
   return (
     <div
       ref={drop}
-      style={{
-        backgroundColor,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "1em",
-        width: "12rem",
-        color: "white",
-        padding: "1em",
-        textAlign: "center",
-        borderRadius: "20px",
-      }}
+      className="shelf"
+      style={{ backgroundColor }}
       data-testid="dustbin"
     >
-      {isActive && !currentValue && "Release to drop"}
-      {!isActive && !currentValue && "Drag a box here"}
-      {!isActive && currentValue && (
-        <div
-          style={{
-            border: "1px dashed gray",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-around",
-            width: "100%",
-          }}
-        >
-          {currentValue}{" "}
+      {isActive && !parsedCurrentValue && "Release to drop"}
+      {!isActive && !parsedCurrentValue && "Drag a box here"}
+      {!isActive && parsedCurrentValue && (
+        <div className="shelf-content">
+          <div>{parsedCurrentValue}</div>
           <div
             onClick={() => {
-              const update = setIn(
-                props.content.keyPath,
-                false,
-                props.currentCode
-              );
-              props.setCurrentCode(JSON.stringify(update, null, 2));
+              const update = setIn(keyPath, false, currentCode);
+              setCurrentCode(update);
             }}
           >
             ⦻
@@ -146,18 +109,7 @@ const Shelf: FC<{
 function ExampleProjection(props: ProjectionProps) {
   const [count, setCount] = useState(0);
   return (
-    <div
-      style={{
-        width: "100px",
-        height: "100px",
-        color: "white",
-        background: "red",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      onClick={() => setCount(count + 1)}
-    >
+    <div className="counter" onClick={() => setCount(count + 1)}>
       counter-{count}
     </div>
   );
@@ -168,29 +120,20 @@ function App() {
   const shelf = (content: any) => (
     <DndProvider backend={HTML5Backend}>
       <Shelf
-        name={"test"}
-        content={content}
         setCurrentCode={setCurrentCode}
         currentCode={currentCode}
+        keyPath={content.keyPath}
+        currentValue={content.currentValue}
       />
     </DndProvider>
   );
-
-  useEffect(() => {
-    setCurrentCode(code2);
-  }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="App">
         <div className="flex">
           {["a", "b"].map((x) => (
-            <Pill
-              name={x}
-              key={x}
-              setCurrentCode={setCurrentCode}
-              currentCode={currentCode}
-            />
+            <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>
         </div>

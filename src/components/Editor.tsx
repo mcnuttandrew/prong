@@ -76,14 +76,16 @@ const triggerSelectionCheck =
           }
         },
       });
-      const smallMenuTarget = possibleMenuTargets.reduce(
+      const smallestMenuTarget = possibleMenuTargets.reduce(
         (acc, row) => {
           const dist = row.to - row.from;
           return dist < acc.dist ? { dist, target: row } : acc;
         },
         { dist: Infinity, target: null }
       );
-      setMenu(smallMenuTarget.target);
+      if (smallestMenuTarget.target) {
+        setMenu(smallestMenuTarget.target);
+      }
     }
   };
 
@@ -109,13 +111,13 @@ function calcWidgetRangeSets(v: any) {
 export default function Editor(props: Props) {
   const { schema, code, onChange, projections } = props;
   const cmParent = useRef<HTMLDivElement>(null);
-  const viewUpdate = useRef((v: ViewUpdate) => {
-    // TODO fix
-    if (v.docChanged) {
-      onChange(v.state.doc.toString());
-      setWidgetRangeSets(calcWidgetRangeSets(v));
-    }
-  });
+  // const viewUpdate = useRef((v: ViewUpdate) => {
+  //   // TODO fix
+  //   if (v.docChanged) {
+  //     onChange(v.state.doc.toString());
+  //     setWidgetRangeSets(calcWidgetRangeSets(v));
+  //   }
+  // });
 
   const [view, setView] = useState<EditorView | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
@@ -136,7 +138,8 @@ export default function Editor(props: Props) {
   ) =>
     view.dispatch(
       view!.state.update({
-        changes: { from, to, insert: view!.state.sliceDoc(from, to) },
+        // changes: { from, to, insert: view!.state.sliceDoc(from, to) },
+        changes: { from, to, insert },
       })
     );
 
@@ -234,12 +237,11 @@ export default function Editor(props: Props) {
       });
       view.dispatch(tr);
     }
-  }, [code]);
-
+  }, [code, view]);
   return (
     <div className="editor-container">
       <div ref={cmParent} />
-      {menu && (
+      {menu?.x && (
         <div
           className="cm-annotation-menu"
           style={{ top: menu.y - 30, left: menu.x }}
@@ -251,6 +253,18 @@ export default function Editor(props: Props) {
             view={view!}
             syntaxNode={menu.node}
             currentCodeSlice={""}
+            codeUpdate={(codeUpdate: {
+              from: number;
+              to: number;
+              value: string;
+            }) => {
+              simpleUpdate(
+                view!,
+                codeUpdate.from,
+                codeUpdate.to,
+                codeUpdate.value
+              );
+            }}
           />
         </div>
       )}

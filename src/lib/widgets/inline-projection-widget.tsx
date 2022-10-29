@@ -8,7 +8,6 @@ import { SimpleWidget } from "../widgets";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
-  // todo make these less dumb
   constructor(
     readonly from: number,
     readonly to: number,
@@ -22,7 +21,7 @@ class InlineProjectionWidget extends WidgetType {
   }
 
   eq(other: InlineProjectionWidget): boolean {
-    // wrong
+    // TODO: wrong
     return false;
   }
 
@@ -74,29 +73,9 @@ const ProjectionWidgetFactor = (
         view,
         currentCodeSlice
       ),
-      //   side: 1,
     }).range(from, to);
     return [decoDec];
   },
-  eventSubscriptions: {
-    // mousedown: (e, view) => {
-    //   console.log("mousedown capture");
-    //   const target = e.target as HTMLElement;
-    //   if (
-    //     target.classList.contains("cm-inc-widget") ||
-    //     target.classList.contains("cm-dec-widget")
-    //   ) {
-    //     const from = unwrap(
-    //       target.parentElement!.dataset.from,
-    //       "Missing 'from' dataset value"
-    //     );
-    //     return changeNum(
-    //       view,
-    //       target.classList.contains("cm-inc-widget"),
-    //       parseInt(from)
-    //     );
-    //   }
-    // },
-  },
+  eventSubscriptions: {},
 });
 export default ProjectionWidgetFactor;
