@@ -235,7 +235,7 @@ export default function Editor(props: Props) {
       });
       view.dispatch(tr);
     }
-  }, [code]);
+  }, [code, view]);
 
   return (
     <div className="editor-container">
@@ -257,7 +257,6 @@ export default function Editor(props: Props) {
               to: number;
               value: string;
             }) => {
-              console.log("here", codeUpdate, view);
               simpleUpdate(
                 view!,
                 codeUpdate.from,

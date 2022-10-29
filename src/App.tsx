@@ -29,11 +29,7 @@ const code2 = `
   }
 }
 `;
-const Pill: FC<{
-  name: string;
-  setCurrentCode: (x: any) => void;
-  currentCode: string;
-}> = function Pill(props) {
+const Pill: FC<{ name: string }> = function Pill(props) {
   const { name } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "PILL",
@@ -52,27 +48,29 @@ const Pill: FC<{
   );
 };
 
+function lazyParse(content: string): any {
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    return content;
+  }
+}
+
 const Shelf: FC<{
-  name: string;
-  content: { currentValue: any; keyPath: string[] };
+  currentValue: any;
+  keyPath: string[];
   setCurrentCode: (x: any) => void;
   currentCode: string;
 }> = function Shelf(props) {
+  const { keyPath, currentCode, setCurrentCode, currentValue } = props;
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
-      const update = setIn(
-        props.content.keyPath,
-        x.name,
-        JSON.parse(props.currentCode)
-      );
-      props.setCurrentCode(JSON.stringify(update, null, 2));
+      const update = setIn(keyPath, x.name, currentCode);
+      setCurrentCode(update);
       return { name: "Dustbin" };
     },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
+    collect: (m) => ({ isOver: m.isOver(), canDrop: m.canDrop() }),
   }));
 
   const isActive = canDrop && isOver;
@@ -81,8 +79,7 @@ const Shelf: FC<{
     : canDrop
     ? "darkkhaki"
     : "#222";
-  const currentValue = props.content.currentValue;
-
+  const parsedCurrentValue = lazyParse(currentValue);
   return (
     <div
       ref={drop}
@@ -90,19 +87,15 @@ const Shelf: FC<{
       style={{ backgroundColor }}
       data-testid="dustbin"
     >
-      {isActive && !currentValue && "Release to drop"}
-      {!isActive && !currentValue && "Drag a box here"}
-      {!isActive && currentValue && (
+      {isActive && !parsedCurrentValue && "Release to drop"}
+      {!isActive && !parsedCurrentValue && "Drag a box here"}
+      {!isActive && parsedCurrentValue && (
         <div className="shelf-content">
-          <div>{currentValue}</div>
+          <div>{parsedCurrentValue}</div>
           <div
             onClick={() => {
-              const update = setIn(
-                props.content.keyPath,
-                false,
-                props.currentCode
-              );
-              props.setCurrentCode(JSON.stringify(update, null, 2));
+              const update = setIn(keyPath, false, currentCode);
+              setCurrentCode(update);
             }}
           >
             ⦻
@@ -127,29 +120,20 @@ function App() {
   const shelf = (content: any) => (
     <DndProvider backend={HTML5Backend}>
       <Shelf
-        name={"test"}
-        content={content}
         setCurrentCode={setCurrentCode}
         currentCode={currentCode}
+        keyPath={content.keyPath}
+        currentValue={content.currentValue}
       />
     </DndProvider>
   );
-
-  useEffect(() => {
-    setCurrentCode(code2);
-  }, []);
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="App">
         <div className="flex">
           {["a", "b"].map((x) => (
-            <Pill
-              name={x}
-              key={x}
-              setCurrentCode={setCurrentCode}
-              currentCode={currentCode}
-            />
+            <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>
         </div>

@@ -450,49 +450,64 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
   return absPathToKeyPath(absPath, parsedRoot);
 }
 
+function findParseTargetWidth(
+  tree: Json.Node,
+  keyPath: (string | number)[]
+): { from: number; to: number } | "error" {
+  const [head, ...tail] = keyPath;
+  if ((!head || `${head}`.includes("___val")) && head !== 0 && !tail.length) {
+    return { from: tree.offset, to: tree.offset + tree.length };
+  }
+  switch (tree.type) {
+    case "boolean":
+    case "number":
+    case "null":
+    case "string":
+      return "error";
+    case "array":
+      const nextItemArray = (tree.children || [])[head as number];
+      return nextItemArray
+        ? findParseTargetWidth(nextItemArray, tail)
+        : "error";
+    case "object":
+      const itemProp = (tree.children || []).find((property) => {
+        const [key] = property.children || [];
+        return key ? key.value === head : "error";
+      });
+      return !itemProp ? "error" : findParseTargetWidth(itemProp, keyPath);
+    case "property":
+      const [key, value] = tree.children!;
+      if (`${tail[0]}`.includes("___key")) {
+        return { from: key.offset, to: key.offset + key.length };
+      }
+      return findParseTargetWidth(value, tail);
+    default:
+      return "error";
+  }
+}
+
 export function setIn(
   keyPath: (string | number)[],
   newValue: any,
-  content: any
-) {
-  const contentCopy = Json.parse(JSON.stringify(content));
-  const lastKey = keyPath[keyPath.length - 1];
-  if (typeof lastKey === "string" && lastKey.includes("___val")) {
-    keyPath.pop();
+  content: string
+): string {
+  // todo maybe replace with https://gitlab.com/WhyNotHugo/tree-sitter-jsonc
+  const parsedJson = Json.parseTree(content);
+  // fail gracefully
+  if (!parsedJson) {
+    return content;
   }
-  let pointer = contentCopy;
-  const pointerStack: { pointer: any; keyPath: false | string | number }[] = [
-    { pointer, keyPath: false },
-  ];
-  for (let idx = 0; idx < keyPath.length; idx++) {
-    const key = keyPath[idx];
-    if (!(key in pointer)) {
-      return "error";
-    }
-
-    if (typeof key === "string" && key.includes("___key")) {
-      // // const objKey = keyPath[idx - 2] as string | number;
-      // // const propertyKey = keyPath[idx - 1] as string | number;
-      // const object = pointerStack[pointerStack.length - 2].pointer;
-      // const value = pointer[pointerStack.length - 1];
-
-      // object[newValue] = value.pointer;
-      // delete object[value.keyPath];
-      // console.log("this branch", object);
-      // throw "Functionality not yet implemented";
-      return "error";
-    } else {
-      if (idx === keyPath.length - 1) {
-        // if its the last one were done
-        pointer[key] = newValue;
-      } else {
-        // otherwise redirect
-        pointerStack.push({ pointer, keyPath: key });
-        pointer = pointer[key];
-      }
-    }
+  // traverse the parsed content using the keypath to find the place for insert
+  const targetWindow = findParseTargetWidth(parsedJson, keyPath);
+  if (targetWindow === "error") {
+    return "error";
   }
-  return contentCopy;
+  const insert = typeof newValue === "string" ? `"${newValue}"` : newValue;
+  return (
+    content.slice(0, targetWindow.from) +
+    insert +
+    content.slice(targetWindow.to)
+  );
 }
 
 function keyPathMatchesQueryCore(

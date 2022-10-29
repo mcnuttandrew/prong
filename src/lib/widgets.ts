@@ -8,6 +8,7 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
+
 import isEqual from "lodash.isequal";
 
 // import { getMatchingSchemas } from "./from-vscode/validator";
