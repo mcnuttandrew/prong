@@ -321,7 +321,7 @@ const PropertyNameComponent: Component = (props) => {
   const { parsedContent, eventDispatch } = props;
   return (
     <div>
-      {parsedContent}
+      {`${parsedContent}`}
       <button
         onClick={() =>
           eventDispatch({ type: "removeObjectKey", payload: null })
@@ -460,7 +460,6 @@ export function ContentToMenuItem(props: MenuProps) {
   // else if (!typeBasedProperty[type]) {
   //   console.log("missing type imp for", type);
   // }
-
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
   if (localContent && localContent.enum) {
@@ -488,7 +487,7 @@ export function ContentToMenuItem(props: MenuProps) {
       {localContent &&
         !!contentBasedItem &&
         contentBasedItem({
-          parsedContent: {},
+          parsedContent: "",
           parentType: "unknown",
           ...props,
           content: localContent,
@@ -496,7 +495,7 @@ export function ContentToMenuItem(props: MenuProps) {
         })}
       {typeBasedProperty &&
         typeBasedProperty({
-          parsedContent: {},
+          parsedContent: "",
           parentType: "unknown",
           ...props,
           content: localContent,
