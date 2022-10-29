@@ -1,5 +1,6 @@
 import { EditorView } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
+import * as Json from "jsonc-parser";
 export function codeString(
   view: EditorView,
   from: number,
@@ -441,7 +442,7 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
   const root = absPath[0];
   let parsedRoot = {};
   try {
-    parsedRoot = JSON.parse(codeString(view, root.node.from, root.node.to));
+    parsedRoot = Json.parse(codeString(view, root.node.from, root.node.to));
   } catch (e) {
     return [];
   }
@@ -454,7 +455,7 @@ export function setIn(
   newValue: any,
   content: any
 ) {
-  const contentCopy = JSON.parse(JSON.stringify(content));
+  const contentCopy = Json.parse(JSON.stringify(content));
   const lastKey = keyPath[keyPath.length - 1];
   if (typeof lastKey === "string" && lastKey.includes("___val")) {
     keyPath.pop();

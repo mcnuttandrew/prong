@@ -79,6 +79,9 @@ const ProjectionWidgetFactor = (
     return [decoDec];
   },
   eventSubscriptions: {
+    mousedown: (e) => {
+      console.log(e, "here");
+    },
     // mousedown: (e, view) => {
     //   console.log("mousedown capture");
     //   const target = e.target as HTMLElement;

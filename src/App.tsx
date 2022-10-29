@@ -1,5 +1,8 @@
 import React, { useState, FC, useEffect } from "react";
+
 import "./App.css";
+import "./stylesheets/vega-lite-example.css";
+
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -7,7 +10,6 @@ import VegaLiteV5Schema from "./constants/vega-lite-v5-schema.json";
 import Editor from "./components/Editor";
 import { ProjectionProps } from "../src/lib/widgets";
 import { setIn } from "./lib/utils";
-// bundling tail wind with component?
 
 const code2 = `
 {
@@ -44,20 +46,7 @@ const Pill: FC<{
 
   const opacity = isDragging ? 0.4 : 1;
   return (
-    <div
-      ref={drag}
-      style={{
-        opacity,
-        border: "1px dashed gray",
-        backgroundColor: "white",
-        padding: "0.5rem 1rem",
-        marginRight: "1.5rem",
-        marginBottom: "1.5rem",
-        cursor: "move",
-        // float: "left",
-      }}
-      data-testid={`pill`}
-    >
+    <div ref={drag} className="pill" style={{ opacity }} data-testid={`pill`}>
       {name}
     </div>
   );
@@ -87,44 +76,25 @@ const Shelf: FC<{
   }));
 
   const isActive = canDrop && isOver;
-  let backgroundColor = "#222";
-  if (isActive) {
-    backgroundColor = "darkgreen";
-  } else if (canDrop) {
-    backgroundColor = "darkkhaki";
-  }
+  const backgroundColor = isActive
+    ? "darkgreen"
+    : canDrop
+    ? "darkkhaki"
+    : "#222";
   const currentValue = props.content.currentValue;
 
   return (
     <div
       ref={drop}
-      style={{
-        backgroundColor,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "1em",
-        width: "12rem",
-        color: "white",
-        padding: "1em",
-        textAlign: "center",
-        borderRadius: "20px",
-      }}
+      className="shelf"
+      style={{ backgroundColor }}
       data-testid="dustbin"
     >
       {isActive && !currentValue && "Release to drop"}
       {!isActive && !currentValue && "Drag a box here"}
       {!isActive && currentValue && (
-        <div
-          style={{
-            border: "1px dashed gray",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-around",
-            width: "100%",
-          }}
-        >
-          {currentValue}{" "}
+        <div className="shelf-content">
+          <div>{currentValue}</div>
           <div
             onClick={() => {
               const update = setIn(
@@ -146,18 +116,7 @@ const Shelf: FC<{
 function ExampleProjection(props: ProjectionProps) {
   const [count, setCount] = useState(0);
   return (
-    <div
-      style={{
-        width: "100px",
-        height: "100px",
-        color: "white",
-        background: "red",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      onClick={() => setCount(count + 1)}
-    >
+    <div className="counter" onClick={() => setCount(count + 1)}>
       counter-{count}
     </div>
   );

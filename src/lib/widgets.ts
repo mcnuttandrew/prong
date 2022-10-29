@@ -162,5 +162,8 @@ export const widgetsPlugin = ViewPlugin.fromClass(
       }
     }
   },
-  { decorations: (v) => v.decorations, eventHandlers }
+  {
+    decorations: (v) => v.decorations,
+    eventHandlers,
+  }
 );

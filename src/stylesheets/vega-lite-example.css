@@ -1,0 +1,39 @@
+.pill {
+
+    background-color: white;
+    border: 1px dashed gray;
+    cursor: move;
+    margin-bottom: 1.5rem;
+    margin-right: 1.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.shelf {
+    align-items: center;
+    border-radius: 20px;
+    color: white;
+    display: flex;
+    height: 1em;
+    justify-content: center;
+    padding: 1em;
+    text-align: center;
+    width: 12rem;
+}
+
+.shelf-content {
+    align-items: center;
+    border: 1px dashed gray;
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.counter {
+    align-items: center;
+    background: red;
+    color: white;
+    display: flex;
+    height: 100px;
+    justify-content: center;
+    width: 100px;
+}
