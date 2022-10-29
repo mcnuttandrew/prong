@@ -433,10 +433,6 @@ interface MenuProps {
   syntaxNode: SyntaxNode;
   currentCodeSlice: string;
   codeUpdate: (codeUpdate: { from: number; to: number; value: string }) => void;
-  // new props
-  // cb: ({ payload: string, value: any }: any) => void;
-  // parsedContent: any;
-  // parentType: string; // todo this type can be improved
 }
 export function ContentToMenuItem(props: MenuProps) {
   const {
