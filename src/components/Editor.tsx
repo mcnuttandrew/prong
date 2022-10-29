@@ -136,7 +136,8 @@ export default function Editor(props: Props) {
   ) =>
     view.dispatch(
       view!.state.update({
-        changes: { from, to, insert: view!.state.sliceDoc(from, to) },
+        // changes: { from, to, insert: view!.state.sliceDoc(from, to) },
+        changes: { from, to, insert },
       })
     );
 
@@ -251,6 +252,19 @@ export default function Editor(props: Props) {
             view={view!}
             syntaxNode={menu.node}
             currentCodeSlice={""}
+            codeUpdate={(codeUpdate: {
+              from: number;
+              to: number;
+              value: string;
+            }) => {
+              console.log("here", codeUpdate, view);
+              simpleUpdate(
+                view!,
+                codeUpdate.from,
+                codeUpdate.to,
+                codeUpdate.value
+              );
+            }}
           />
         </div>
       )}

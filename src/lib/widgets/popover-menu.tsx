@@ -8,10 +8,11 @@ import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
 import { Projection } from "../widgets";
 
 type JSONSchema = any;
+type MenuEvent = { payload?: any; type: string };
 interface ComponentProps {
-  cb: ({ payload: string, value: any }: any) => void;
+  eventDispatch: (menuEvent: MenuEvent) => void;
   content: JSONSchema;
-  wrap: HTMLElement;
+  // wrap: HTMLElement;
   parsedContent: any;
   parentType: string; // todo this type can be improved
 }
@@ -19,13 +20,15 @@ type Component = (props: ComponentProps) => JSX.Element;
 type componentContainer = { [x: string]: Component };
 
 const EnumPicker: Component = (props) => {
-  const { content, cb } = props;
+  const { content, eventDispatch } = props;
   return (
     <div>
       {content.enum.map((val: string) => (
         <button
           key={val}
-          onClick={() => cb({ type: "simpleSwap", payload: `"${val}"` })}
+          onClick={() =>
+            eventDispatch({ type: "simpleSwap", payload: `"${val}"` })
+          }
         >
           {val}
         </button>
@@ -55,10 +58,10 @@ function simpleFillout(content: JSONSchema) {
 }
 
 const ObjPicker: Component = (props) => {
-  const { content, parsedContent, cb } = props;
+  const { content, parsedContent, eventDispatch } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
   const newKeyVal = (key: string, value: any) =>
-    cb({ type: "addObjectKey", payload: { key, value } });
+    eventDispatch({ type: "addObjectKey", payload: { key, value } });
   return (
     <div>
       <div>Add fields</div>
@@ -122,7 +125,7 @@ const removeFromSet = (set: Set<string>, key: string) =>
 
 function AnyOfObjOptionalFieldPicker(
   content: JSONSchema,
-  cb: any,
+  eventDispatch: (menuEvent: MenuEvent) => void,
   containerIdx: number
 ) {
   const requiredProps = new Set<string>(
@@ -137,7 +140,7 @@ function AnyOfObjOptionalFieldPicker(
       {content.$$labeledType && (
         <span style={{ fontSize: "9px" }}>{content.$$labeledType}</span>
       )}
-      <div style={{ display: "flex" }}>
+      <div className="flex">
         <button
           onClick={() => {
             const val = Object.fromEntries(
@@ -145,7 +148,7 @@ function AnyOfObjOptionalFieldPicker(
                 return [key, generateValueForObjProp(content.properties[key])];
               })
             );
-            cb({ type: "simpleSwap", payload: JSON.stringify(val) });
+            eventDispatch({ type: "simpleSwap", payload: JSON.stringify(val) });
           }}
         >
           Switch to obj with
@@ -179,7 +182,11 @@ function AnyOfObjOptionalFieldPicker(
   );
 }
 
-function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
+function AnyOfArray(
+  content: JSONSchema,
+  eventDispatch: (menuEvent: MenuEvent) => void,
+  idx: number
+) {
   const [numElements, setNumbElements] = useState<number>(1);
   const arrayTypeDefaults: any = {
     boolean: true,
@@ -191,9 +198,11 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
   const arrayType = content?.items?.type;
   const sliderName = `numElements${idx}`;
   return (
-    <div style={{ display: "flex" }}>
+    <div className="flex">
       {!arrayType && (
-        <button onClick={() => cb({ type: "simpleSwap", payload: "[]" })}>
+        <button
+          onClick={() => eventDispatch({ type: "simpleSwap", payload: "[]" })}
+        >
           Switch to array
         </button>
       )}
@@ -201,7 +210,7 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
         <div>
           <button
             onClick={() =>
-              cb({
+              eventDispatch({
                 type: "simpleSwap",
                 payload: JSON.stringify(
                   [...new Array(numElements)].map(
@@ -215,7 +224,7 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
               arrayTypeDefaults[arrayType]
             )}s`}
           </button>
-          <div style={{ display: "flex" }}>
+          <div className="flex">
             <input
               type="range"
               id={sliderName}
@@ -234,7 +243,7 @@ function AnyOfArray(content: JSONSchema, cb: any, idx: number) {
 }
 
 const AnyOfPicker: Component = (props) => {
-  const { content, cb } = props;
+  const { content, eventDispatch } = props;
   const simpleType = new Set(["string", "number", "boolean", "null"]);
   const simpleTypeMap: any = {
     string: '""',
@@ -256,16 +265,18 @@ const AnyOfPicker: Component = (props) => {
                 <button
                   key={val}
                   onClick={() =>
-                    cb({ type: "simpleSwap", payload: `"${val}"` })
+                    eventDispatch({ type: "simpleSwap", payload: `"${val}"` })
                   }
                 >
                   {val}
                 </button>
               ))}
             {opt.type === "object" && (
-              <div>{AnyOfObjOptionalFieldPicker(opt, cb, idx)}</div>
+              <div>{AnyOfObjOptionalFieldPicker(opt, eventDispatch, idx)}</div>
             )}
-            {opt.type === "array" && <div>{AnyOfArray(opt, cb, idx)}</div>}
+            {opt.type === "array" && (
+              <div>{AnyOfArray(opt, eventDispatch, idx)}</div>
+            )}
             {simpleType.has(opt.type) && (
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {opt.$$labeledType && (
@@ -273,7 +284,7 @@ const AnyOfPicker: Component = (props) => {
                 )}
                 <button
                   onClick={() =>
-                    cb({
+                    eventDispatch({
                       type: "simpleSwap",
                       // payload: "null"
                       payload: simpleTypeMap[opt.type],
@@ -307,11 +318,15 @@ const GenericComponent: Component = () => {
 };
 
 const PropertyNameComponent: Component = (props) => {
-  const { parsedContent, cb } = props;
+  const { parsedContent, eventDispatch } = props;
   return (
     <div>
       {parsedContent}
-      <button onClick={() => cb({ type: "removeObjectKey", value: null })}>
+      <button
+        onClick={() =>
+          eventDispatch({ type: "removeObjectKey", payload: null })
+        }
+      >
         remove key
       </button>
     </div>
@@ -319,11 +334,11 @@ const PropertyNameComponent: Component = (props) => {
 };
 
 const ObjectComponent: Component = (props) => {
-  const { cb } = props;
+  const { eventDispatch } = props;
   const [keyVal, setKeyVal] = React.useState("");
   const [valueVal, setValueVal] = React.useState("");
   const newKeyVal = (key: string, value: any) =>
-    cb({ type: "addObjectKey", payload: { key, value } });
+    eventDispatch({ type: "addObjectKey", payload: { key, value } });
   return (
     <div>
       <div>Add field</div>
@@ -344,18 +359,22 @@ const ParentIsPropretyComponent: Component = (props) => {
   return <div>hi property</div>;
 };
 const ParentIsArrayComponent: Component = (props) => {
-  const { cb } = props;
+  const { eventDispatch } = props;
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex" }}>
-        <button onClick={() => cb({ type: "removeElementFromArray" })}>
+      <div className="flex">
+        <button
+          onClick={() => eventDispatch({ type: "removeElementFromArray" })}
+        >
           Remove Item
         </button>
-        <button onClick={() => cb({ type: "duplicateElementInArray" })}>
+        <button
+          onClick={() => eventDispatch({ type: "duplicateElementInArray" })}
+        >
           Duplicate
         </button>
       </div>
-      <div style={{ display: "flex" }}>
+      <div className="flex">
         <button>Set item as First</button>
         <button>Move item forward</button>
         <button>Move item backward</button>
@@ -413,10 +432,22 @@ interface MenuProps {
   view: EditorView;
   syntaxNode: SyntaxNode;
   currentCodeSlice: string;
+  codeUpdate: (codeUpdate: { from: number; to: number; value: string }) => void;
+  // new props
+  // cb: ({ payload: string, value: any }: any) => void;
+  // parsedContent: any;
+  // parentType: string; // todo this type can be improved
 }
 export function ContentToMenuItem(props: MenuProps) {
-  const { content, keyPath, projections, view, syntaxNode, currentCodeSlice } =
-    props;
+  const {
+    content,
+    keyPath,
+    projections,
+    view,
+    syntaxNode,
+    currentCodeSlice,
+    codeUpdate,
+  } = props;
   let localContent: JSONSchema = {};
   if (content?.length > 1) {
     localContent = { anyOf: content };
@@ -424,16 +455,17 @@ export function ContentToMenuItem(props: MenuProps) {
     localContent = content[0];
   }
   const type = syntaxNode.type.name;
-  let typeBasedProperty: any;
+  let typeBasedProperty: Component | null = null;
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
   } else if (!content) {
     console.log("missing imp for", type);
-  } else if (!typeBasedProperty[type]) {
-    console.log("missing type imp for", type);
   }
+  // else if (!typeBasedProperty[type]) {
+  //   console.log("missing type imp for", type);
+  // }
 
-  let contentBasedItem: any;
+  let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
   if (localContent && localContent.enum) {
     contentBasedItem = menuSwitch.EnumPicker;
@@ -442,13 +474,38 @@ export function ContentToMenuItem(props: MenuProps) {
   } else if (localContent && localContent.anyOf) {
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
+
+  const eventDispatch = (menuEvent: MenuEvent) => {
+    const update = outerEventDispatch(
+      menuEvent,
+      {},
+      syntaxNode,
+      currentCodeSlice
+    );
+    if (update) {
+      codeUpdate(update);
+    }
+  };
   return (
     <div style={{ maxWidth: "400px" }}>
       {localContent && contentDescriber(localContent?.description)}
       {localContent &&
         !!contentBasedItem &&
-        contentBasedItem({ ...props, content: localContent })}
-      {typeBasedProperty && typeBasedProperty({ ...props })}
+        contentBasedItem({
+          parsedContent: {},
+          parentType: "unknown",
+          ...props,
+          content: localContent,
+          eventDispatch,
+        })}
+      {typeBasedProperty &&
+        typeBasedProperty({
+          parsedContent: {},
+          parentType: "unknown",
+          ...props,
+          content: localContent,
+          eventDispatch,
+        })}
       {projections
         .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
         .filter((proj) => proj.type === "tooltip")
@@ -463,4 +520,47 @@ export function ContentToMenuItem(props: MenuProps) {
     </div>
   );
   // };
+}
+
+function outerEventDispatch(
+  value: MenuEvent,
+  parsedContent: any,
+  syntaxNode: SyntaxNode,
+  currentCodeSlice: string
+): { value: string; from: number; to: number } | undefined {
+  const from = syntaxNode.from;
+  const to = syntaxNode.to;
+  const { type, payload } = value;
+  if (type === "simpleSwap") {
+    return { value: payload, from, to: to };
+  }
+  if (type === "addObjectKey") {
+    // this should get smarter so that the formatting doesn't get borked
+    const value = JSON.stringify(
+      { ...parsedContent, [payload.key]: payload.value },
+      null,
+      2
+    );
+    return { value, from, to };
+  }
+  if (type === "removeObjectKey") {
+    const objNode = syntaxNode!.parent!;
+    const delFrom = objNode.prevSibling ? objNode.prevSibling.to : objNode.from;
+    const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
+    return { value: "", from: delFrom, to: delTo };
+  }
+  // TODO THESE ARE NOT YET WORKING
+  if (type === "removeElementFromArray") {
+    const objNode = syntaxNode;
+    const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
+    return { value: "", from: objNode.from, to: delTo };
+  }
+  if (type === "duplicateElementInArray") {
+    const codeSlice = currentCodeSlice;
+    return {
+      value: `, ${codeSlice}`,
+      from: to,
+      to: to + codeSlice.length,
+    };
+  }
 }
