@@ -2,11 +2,11 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { json } from "@codemirror/lang-json";
-import { Compartment, EditorSelection } from "@codemirror/state";
+import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { jsonLinter } from "../lib/Linter";
+// import { jsonLinter } from "../lib/Linter";
 
 import { ContentToMenuItem } from "../lib/widgets/popover-menu";
 
@@ -95,13 +95,13 @@ function calcWidgetRangeSets(v: any) {
     .filter((x: any) => x)
     .map((x: any) => x.value);
 
-  const seeet = decSets.find((decSet: any) =>
+  const possibleSetTargets = decSets.find((decSet: any) =>
     decSet.some((dec: any) => dec.widget)
   );
-  if (!seeet) {
+  if (!possibleSetTargets) {
     return {};
   }
-  const ranges = seeet.reduce((acc: any, row: any) => {
+  const ranges = possibleSetTargets.reduce((acc: any, row: any) => {
     acc[`${row.widget.from}____${row.widget.to}`] = true;
     return acc;
   }, {});
@@ -111,13 +111,6 @@ function calcWidgetRangeSets(v: any) {
 export default function Editor(props: Props) {
   const { schema, code, onChange, projections } = props;
   const cmParent = useRef<HTMLDivElement>(null);
-  // const viewUpdate = useRef((v: ViewUpdate) => {
-  //   // TODO fix
-  //   if (v.docChanged) {
-  //     onChange(v.state.doc.toString());
-  //     setWidgetRangeSets(calcWidgetRangeSets(v));
-  //   }
-  // });
 
   const [view, setView] = useState<EditorView | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
@@ -165,7 +158,7 @@ export default function Editor(props: Props) {
     }
     const [from, to] = insideDecRange.split("____").map((x) => Number(x));
     simpleUpdate(view, from, to, view!.state.sliceDoc(from, to));
-  }, [insideDecRange]);
+  }, [insideDecRange, view]);
   // reactivate them if necessary
   useEffect(() => {
     if (!insideDecRange) {
@@ -177,7 +170,7 @@ export default function Editor(props: Props) {
       setInsideRecRange(false);
       simpleUpdate(view!, from, to, view!.state.sliceDoc(from, to));
     }
-  }, [insideDecRange, selectionLocal]);
+  }, [view, insideDecRange, selectionLocal]);
 
   // primary effect, initialize the editor etc
   useEffect(() => {
@@ -217,7 +210,7 @@ export default function Editor(props: Props) {
     // we want to trigger an update after the widgets are initially computed in order to capture their ranges in the on change event
     // maybe could be an effect, but we'll see
     setTimeout(() => simpleUpdate(view, 0, view.state.doc.length, code), 500);
-  }, []);
+  }, [code, onChange, schema]);
 
   useEffect(() => {
     if (view) {

@@ -1,11 +1,4 @@
-import {
-  EditorState,
-  EditorSelection,
-  SelectionRange,
-} from "@codemirror/state";
 import { EditorView, KeyBinding } from "@codemirror/view";
-import { syntaxTree } from "@codemirror/language";
-import { SyntaxNode } from "@lezer/common";
 
 const triggerMenuOpen = (triggerSelectionCheck: any) => (view: EditorView) => {
   triggerSelectionCheck(view);

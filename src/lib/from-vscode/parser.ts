@@ -1,5 +1,6 @@
 // forked from
 // https:github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
+/* eslint-disable */
 import * as Json from "jsonc-parser";
 // import { SyntaxKind } from "jsonc-parser";
 // import { ScanError } from "jsonc-parser";

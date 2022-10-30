@@ -1,5 +1,6 @@
+/* eslint-disable */
 // forked from
-// https:github.com/microsoft/vscode-json-languageservice/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
+// https:github.com/microsoft/vscode-json-languageService/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
 import * as nls from "vscode-nls";
 import { JSONSchema, JSONSchemaRef } from "../JSONSchemaTypes";
 // import $RefParser from "@apidevtools/json-schema-ref-parser";

@@ -4,7 +4,7 @@ import { EditorView } from "@codemirror/view";
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
 
-import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
+import { keyPathMatchesQuery } from "../utils";
 import { Projection } from "../widgets";
 
 type JSONSchema = any;
@@ -456,10 +456,9 @@ export function ContentToMenuItem(props: MenuProps) {
     typeBasedProperty = typeBasedComponents[type];
   } else if (!content) {
     console.log("missing imp for", type);
+  } else if (typeBasedProperty && !typeBasedProperty[type]) {
+    console.log("missing type imp for", type);
   }
-  // else if (!typeBasedProperty[type]) {
-  //   console.log("missing type imp for", type);
-  // }
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
   if (localContent && localContent.enum) {
@@ -482,7 +481,7 @@ export function ContentToMenuItem(props: MenuProps) {
     }
   };
   return (
-    <div style={{ maxWidth: "400px" }}>
+    <div className="cm-annotation-widget-popover-container">
       {localContent && contentDescriber(localContent?.description)}
       {localContent &&
         !!contentBasedItem &&
@@ -514,7 +513,6 @@ export function ContentToMenuItem(props: MenuProps) {
         )}
     </div>
   );
-  // };
 }
 
 function outerEventDispatch(

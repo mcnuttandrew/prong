@@ -30,8 +30,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/json-schema": "^7.0.9",
-    "@types/lodash.isequal": "^4.5.5",
-    "ts-essentials": "^9.0.0"
+    "@types/lodash.isequal": "^4.5.5"
   },
   "scripts": {
     "start": "REACT_APP_DISABLE_LIVE_RELOAD=true react-scripts start",

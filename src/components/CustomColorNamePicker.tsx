@@ -57,7 +57,7 @@ export default function ColorNamePicker({
 
   const { left: parentLeft, top: parentTop } = useMemo(
     () => wrap.getBoundingClientRect(),
-    []
+    [wrap]
   );
 
   let [top, setTop] = useState(parentTop);
@@ -88,18 +88,11 @@ export default function ColorNamePicker({
       document.addEventListener("keypress", escHandler);
       return () => document.removeEventListener("keypress", escHandler);
     }
-  }, []);
+  }, [cb, left, top]);
 
   const showGroupIndicators = false;
   return (
-    <div
-      className="color-name-picker"
-      style={{
-        left,
-        top,
-      }}
-      ref={el}
-    >
+    <div className="color-name-picker" style={{ left, top }} ref={el}>
       <ul>
         {Object.entries(colorGroups).map(([groupName, colors]) => (
           <li key={groupName}>
