@@ -134,12 +134,12 @@ const eventHandlers = Object.entries(subscriptions).reduce(
     return handlers;
   },
   {
-    simpleSwap: (e, view) => {
-      const {
-        detail: { from, value, to },
-      } = e as any;
-      view.dispatch({ changes: { from, to, insert: value } });
-    },
+    // simpleSwap: (e, view) => {
+    //   const {
+    //     detail: { from, value, to },
+    //   } = e as any;
+    //   view.dispatch({ changes: { from, to, insert: value } });
+    // },
   }
 );
 // build the widgets

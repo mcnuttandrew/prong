@@ -132,7 +132,7 @@ function App() {
     <DndProvider backend={HTML5Backend}>
       <div className="App">
         <div className="flex">
-          {["a", "b"].map((x) => (
+          {["aaaa", "b"].map((x) => (
             <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>

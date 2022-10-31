@@ -8,6 +8,7 @@ import { SimpleWidget } from "../widgets";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
+  // element: any;
   constructor(
     readonly from: number,
     readonly to: number,
@@ -22,7 +23,9 @@ class InlineProjectionWidget extends WidgetType {
 
   eq(other: InlineProjectionWidget): boolean {
     // TODO: wrong
-    return false;
+    // console.log(this, other);
+    // return false;
+    return this.currentCodeSlice === other.currentCodeSlice;
   }
 
   toDOM(): HTMLDivElement {
@@ -31,15 +34,15 @@ class InlineProjectionWidget extends WidgetType {
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
 
-    ReactDOM.render(
-      React.createElement(this.projection.projection, {
-        keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view),
-        node: this.syntaxNode,
-        view: this.view,
-        currentValue: this.currentCodeSlice,
-      }),
-      wrap
-    );
+    const element = React.createElement(this.projection.projection, {
+      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view),
+      node: this.syntaxNode,
+      view: this.view,
+      currentValue: this.currentCodeSlice,
+    });
+
+    ReactDOM.render(element, wrap);
+
     return wrap;
   }
 
@@ -76,6 +79,10 @@ const ProjectionWidgetFactor = (
     }).range(from, to);
     return [decoDec];
   },
-  eventSubscriptions: {},
+  eventSubscriptions: {
+    mousedown: (e) => {
+      console.log("what", e);
+    },
+  },
 });
 export default ProjectionWidgetFactor;

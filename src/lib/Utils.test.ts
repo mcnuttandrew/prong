@@ -8,11 +8,13 @@ test("setIn", () => {
     },
     "d": null,
     "e": [{ "f": 1, "g": 2 }],
+    "I": "example",
   }`;
   const result1 = `{
     "a": false,
     "d": null,
     "e": [{ "f": 1, "g": 2 }],
+    "I": "example",
   }`;
   expect(setIn(["a"], false, exampleData)).toBe(result1);
   const result2 = `{
@@ -22,6 +24,7 @@ test("setIn", () => {
     },
     "d": null,
     "e": [{ "f": 1, "g": 2 }],
+    "I": "example",
   }`;
   expect(setIn(["a", "b", 0], false, exampleData)).toBe(result2);
   const result3 = `{
@@ -31,6 +34,7 @@ test("setIn", () => {
     },
     "d": null,
     "e": [{ "f": false, "g": 2 }],
+    "I": "example",
   }`;
   expect(setIn(["e", 0, "f"], false, exampleData)).toBe(result3);
   expect(setIn(["e", "f"], false, exampleData)).toBe("error");
@@ -43,8 +47,19 @@ test("setIn", () => {
     },
     "d": null,
     "e": [{ "f": 1, "g": 2 }],
+    "I": "example",
   }`;
   expect(setIn(["a", "b", "b___key"], "x", exampleData)).toBe(result4);
+  const result5 = `{
+    "a": {
+      "b": [1, 2, 3],
+      "c": true,
+    },
+    "d": null,
+    "e": [{ "f": 1, "g": 2 }],
+    "I": "big darn squid holy shit",
+  }`;
+  expect(setIn(["I"], "big darn squid holy shit", exampleData)).toBe(result5);
 });
 
 test("keyPathMatchesQuery", () => {

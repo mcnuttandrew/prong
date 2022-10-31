@@ -3,16 +3,18 @@ import ReactMarkdown from "react-markdown";
 import { EditorView } from "@codemirror/view";
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
+import * as Json from "jsonc-parser";
+import { codeString } from "../utils";
 
 import { keyPathMatchesQuery } from "../utils";
 import { Projection } from "../widgets";
+import { SchemaMap } from "../../components/Editor";
 
 type JSONSchema = any;
 type MenuEvent = { payload?: any; type: string };
 interface ComponentProps {
   eventDispatch: (menuEvent: MenuEvent) => void;
   content: JSONSchema;
-  // wrap: HTMLElement;
   parsedContent: any;
   parentType: string; // todo this type can be improved
 }
@@ -319,6 +321,7 @@ const GenericComponent: Component = () => {
 
 const PropertyNameComponent: Component = (props) => {
   const { parsedContent, eventDispatch } = props;
+  console.log("here");
   return (
     <div>
       {`${parsedContent}`}
@@ -425,54 +428,82 @@ const parentResponses: componentContainer = {
   // TODO: do i need to fill in all the other options for this?
 };
 
+function simpleParse(content: any) {
+  try {
+    return Json.parse(content);
+  } catch (e) {
+    return {};
+  }
+}
+function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
+  let targetNode = node;
+  if (node.type.name === "{" || node.type.name === "}") {
+    targetNode = node.parent!;
+  }
+  // else if (node.type.name === "PropertyName") {
+  //   targetNode = node.nextSibling!;
+  // }
+
+  console.log("here", node, targetNode, schemaMap);
+  const from = targetNode.from;
+  const to = targetNode.to;
+
+  let schemaChunk: JSONSchema = schemaMap[`${from}-${to}`];
+  if (schemaChunk?.length > 1) {
+    return { anyOf: schemaChunk };
+  } else if (schemaChunk?.length === 1) {
+    return schemaChunk[0];
+  }
+
+  return schemaChunk;
+}
 interface MenuProps {
-  content: JSONSchema;
+  // schemaChunk: JSONSchema;
   keyPath: (string | number)[];
   projections: Projection[];
   view: EditorView;
   syntaxNode: SyntaxNode;
-  currentCodeSlice: string;
+  schemaMap: SchemaMap;
+  // currentCodeSlice: string;
   codeUpdate: (codeUpdate: { from: number; to: number; value: string }) => void;
 }
 export function ContentToMenuItem(props: MenuProps) {
   const {
-    content,
+    // schemaChunk,
+    schemaMap,
     keyPath,
     projections,
     view,
     syntaxNode,
-    currentCodeSlice,
+    // currentCodeSlice,
     codeUpdate,
   } = props;
-  let localContent: JSONSchema = {};
-  if (content?.length > 1) {
-    localContent = { anyOf: content };
-  } else if (content?.length === 1) {
-    localContent = content[0];
-  }
+  const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
+  const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
   const type = syntaxNode.type.name;
   let typeBasedProperty: Component | null = null;
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
-  } else if (!content) {
+  } else if (!schemaChunk) {
     console.log("missing imp for", type);
   } else if (typeBasedProperty && !typeBasedProperty[type]) {
     console.log("missing type imp for", type);
   }
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
-  if (localContent && localContent.enum) {
+  if (schemaChunk && schemaChunk.enum) {
     contentBasedItem = menuSwitch.EnumPicker;
-  } else if (localContent && localContent.type === "object") {
+  } else if (schemaChunk && schemaChunk.type === "object") {
     contentBasedItem = menuSwitch.ObjPicker;
-  } else if (localContent && localContent.anyOf) {
+  } else if (schemaChunk && schemaChunk.anyOf) {
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
 
+  const parsedContent = simpleParse(currentCodeSlice);
   const eventDispatch = (menuEvent: MenuEvent) => {
     const update = outerEventDispatch(
       menuEvent,
-      {},
+      parsedContent,
       syntaxNode,
       currentCodeSlice
     );
@@ -480,24 +511,28 @@ export function ContentToMenuItem(props: MenuProps) {
       codeUpdate(update);
     }
   };
+
+  console.log(type, schemaChunk);
+
   return (
     <div className="cm-annotation-widget-popover-container">
-      {localContent && contentDescriber(localContent?.description)}
-      {localContent &&
+      <div>This is a {type}</div>
+      {schemaChunk && contentDescriber(schemaChunk?.description)}
+      {schemaChunk &&
         !!contentBasedItem &&
         contentBasedItem({
-          parsedContent: "",
+          parsedContent,
           parentType: "unknown",
           ...props,
-          content: localContent,
+          content: schemaChunk,
           eventDispatch,
         })}
       {typeBasedProperty &&
         typeBasedProperty({
-          parsedContent: "",
+          parsedContent,
           parentType: "unknown",
           ...props,
-          content: localContent,
+          content: schemaChunk,
           eventDispatch,
         })}
       {projections
