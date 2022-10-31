@@ -21,6 +21,8 @@ import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
 
+export type UpdateDispatch = { from: number; to: number; value: string };
+
 type Props = {
   onChange: (code: string) => void;
   code: string;
@@ -119,6 +121,7 @@ export default function Editor(props: Props) {
     null
   );
   const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
+  // TODO replace this with sets? Or maybe a custom data structure that makes query the ranges easier/faster
   const [widgetRangeSets, setWidgetRangeSets] = useState<
     Record<string, boolean>
   >({});
@@ -256,16 +259,10 @@ export default function Editor(props: Props) {
         >
           <ContentToMenuItem
             schemaMap={schemaMap}
-            // TODO fix key path
-            keyPath={[]}
             projections={projections || []}
             view={view!}
             syntaxNode={menu.node}
-            codeUpdate={(codeUpdate: {
-              from: number;
-              to: number;
-              value: string;
-            }) => {
+            codeUpdate={(codeUpdate: UpdateDispatch) => {
               simpleUpdate(
                 view!,
                 codeUpdate.from,

@@ -6,9 +6,9 @@ import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
 import { codeString } from "../utils";
 
-import { keyPathMatchesQuery } from "../utils";
+import { keyPathMatchesQuery, syntaxNodeToKeyPath } from "../utils";
 import { Projection } from "../widgets";
-import { SchemaMap } from "../../components/Editor";
+import { SchemaMap, UpdateDispatch } from "../../components/Editor";
 
 type JSONSchema = any;
 type MenuEvent = { payload?: any; type: string };
@@ -458,20 +458,17 @@ function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
   return schemaChunk;
 }
 interface MenuProps {
-  // schemaChunk: JSONSchema;
-  keyPath: (string | number)[];
   projections: Projection[];
   view: EditorView;
   syntaxNode: SyntaxNode;
   schemaMap: SchemaMap;
-  // currentCodeSlice: string;
-  codeUpdate: (codeUpdate: { from: number; to: number; value: string }) => void;
+  codeUpdate: (codeUpdate: UpdateDispatch) => void;
 }
 export function ContentToMenuItem(props: MenuProps) {
   const {
     // schemaChunk,
     schemaMap,
-    keyPath,
+    // keyPath,
     projections,
     view,
     syntaxNode,
@@ -480,6 +477,7 @@ export function ContentToMenuItem(props: MenuProps) {
   } = props;
   const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
   const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
+  const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
   const type = syntaxNode.type.name;
   let typeBasedProperty: Component | null = null;
   if (typeBasedComponents[type]) {
@@ -550,12 +548,13 @@ export function ContentToMenuItem(props: MenuProps) {
   );
 }
 
+// maybe want to operate on an AST level for these?
 function outerEventDispatch(
   value: MenuEvent,
   parsedContent: any,
   syntaxNode: SyntaxNode,
   currentCodeSlice: string
-): { value: string; from: number; to: number } | undefined {
+): UpdateDispatch | undefined {
   const from = syntaxNode.from;
   const to = syntaxNode.to;
   const { type, payload } = value;
