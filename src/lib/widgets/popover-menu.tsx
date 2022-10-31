@@ -4,14 +4,18 @@ import { EditorView } from "@codemirror/view";
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
-import { codeString } from "../utils";
+import { codeString, MenuEvent } from "../utils";
 
-import { keyPathMatchesQuery, syntaxNodeToKeyPath } from "../utils";
+import {
+  keyPathMatchesQuery,
+  syntaxNodeToKeyPath,
+  modifyCodeByCommand,
+} from "../utils";
 import { Projection } from "../widgets";
 import { SchemaMap, UpdateDispatch } from "../../components/Editor";
 
 type JSONSchema = any;
-type MenuEvent = { payload?: any; type: string };
+
 interface ComponentProps {
   eventDispatch: (menuEvent: MenuEvent) => void;
   content: JSONSchema;
@@ -499,11 +503,11 @@ export function ContentToMenuItem(props: MenuProps) {
 
   const parsedContent = simpleParse(currentCodeSlice);
   const eventDispatch = (menuEvent: MenuEvent) => {
-    const update = outerEventDispatch(
+    const update = modifyCodeByCommand(
       menuEvent,
-      parsedContent,
-      syntaxNode,
-      currentCodeSlice
+      // parsedContent,
+      syntaxNode
+      // currentCodeSlice
     );
     if (update) {
       codeUpdate(update);
@@ -546,48 +550,4 @@ export function ContentToMenuItem(props: MenuProps) {
         )}
     </div>
   );
-}
-
-// maybe want to operate on an AST level for these?
-function outerEventDispatch(
-  value: MenuEvent,
-  parsedContent: any,
-  syntaxNode: SyntaxNode,
-  currentCodeSlice: string
-): UpdateDispatch | undefined {
-  const from = syntaxNode.from;
-  const to = syntaxNode.to;
-  const { type, payload } = value;
-  if (type === "simpleSwap") {
-    return { value: payload, from, to: to };
-  }
-  if (type === "addObjectKey") {
-    // this should get smarter so that the formatting doesn't get borked
-    const value = JSON.stringify(
-      { ...parsedContent, [payload.key]: payload.value },
-      null,
-      2
-    );
-    return { value, from, to };
-  }
-  if (type === "removeObjectKey") {
-    const objNode = syntaxNode!.parent!;
-    const delFrom = objNode.prevSibling ? objNode.prevSibling.to : objNode.from;
-    const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
-    return { value: "", from: delFrom, to: delTo };
-  }
-  // TODO THESE ARE NOT YET WORKING
-  if (type === "removeElementFromArray") {
-    const objNode = syntaxNode;
-    const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
-    return { value: "", from: objNode.from, to: delTo };
-  }
-  if (type === "duplicateElementInArray") {
-    const codeSlice = currentCodeSlice;
-    return {
-      value: `, ${codeSlice}`,
-      from: to,
-      to: to + codeSlice.length,
-    };
-  }
 }

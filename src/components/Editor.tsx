@@ -7,6 +7,7 @@ import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { jsonLinter } from "../lib/Linter";
+import ErrorBoundary from "./ErrorBoundary";
 
 import { ContentToMenuItem } from "../lib/widgets/popover-menu";
 
@@ -253,25 +254,28 @@ export default function Editor(props: Props) {
     <div className="editor-container">
       <div ref={cmParent} />
       {menu?.x && (
-        <div
-          className="cm-annotation-menu"
-          style={{ top: menu.y - 30, left: menu.x }}
-        >
-          <ContentToMenuItem
-            schemaMap={schemaMap}
-            projections={projections || []}
-            view={view!}
-            syntaxNode={menu.node}
-            codeUpdate={(codeUpdate: UpdateDispatch) => {
-              simpleUpdate(
-                view!,
-                codeUpdate.from,
-                codeUpdate.to,
-                codeUpdate.value
-              );
-            }}
-          />
-        </div>
+        <ErrorBoundary>
+          <div
+            className="cm-annotation-menu"
+            style={{ top: menu.y - 30, left: menu.x }}
+          >
+            <ContentToMenuItem
+              schemaMap={schemaMap}
+              projections={projections || []}
+              view={view!}
+              syntaxNode={menu.node}
+              codeUpdate={(codeUpdate: UpdateDispatch) => {
+                simpleUpdate(
+                  view!,
+                  codeUpdate.from,
+                  codeUpdate.to,
+                  codeUpdate.value
+                );
+                setMenu(null);
+              }}
+            />
+          </div>
+        </ErrorBoundary>
       )}
     </div>
   );

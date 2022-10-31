@@ -1,19 +1,135 @@
-import { keyPathMatchesQuery, setIn } from "./utils";
+import {
+  keyPathMatchesQuery,
+  setIn,
+  modifyCodeByCommand,
+  MenuEvent,
+  insertSwap,
+} from "./utils";
+import { SyntaxNode } from "@lezer/common";
+import { parser } from "@lezer/json";
 
-test("setIn", () => {
-  const exampleData = `{
+// could also write one that is find by text content?
+function findNodeByLocation(
+  text: string,
+  from: number,
+  to: number
+): SyntaxNode | null {
+  let foundNode: SyntaxNode | null = null;
+  parser.parse(text).iterate({
+    enter: (node) => {
+      // console.log(node.from, node.to, node.node.type);
+      if (node.from === from && node.to === to) {
+        foundNode = node.node as unknown as SyntaxNode;
+      }
+    },
+  });
+  return foundNode;
+}
+
+function findNodeByText(text: string, matchText: string): SyntaxNode | null {
+  let foundNode: SyntaxNode | null = null;
+  parser.parse(text).iterate({
+    enter: (node) => {
+      // console.log(node.from, node.to, node.node.type);
+      const testText = text.slice(node.from, node.to);
+      if (testText === matchText) {
+        foundNode = node.node as unknown as SyntaxNode;
+      }
+    },
+  });
+  return foundNode;
+}
+
+const exampleData = `{
     "a": {
       "b": [1, 2, 3],
       "c": true,
     },
     "d": null,
-    "e": [{ "f": 1, "g": 2 }],
+    "e": [{ "f": 4, "g": 5 }],
     "I": "example",
   }`;
+test("modifyCodeByCommand - simpleSwap", () => {
+  const trueKey = findNodeByLocation(exampleData, 46, 50)!;
+  [
+    "false",
+    '"hot dog sports"',
+    "0",
+    '{"squid": ["dough", false, "bag", 0]}',
+  ].forEach((payload) => {
+    const cmd = modifyCodeByCommand({ payload, type: "simpleSwap" }, trueKey)!;
+    expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
+  });
+  // may also want to check that it swaps in arrays fine?
+  // const threeKey =
+});
+
+const copy = (x: any) => JSON.parse(JSON.stringify(x));
+
+test("modifyCodeByCommand - removeObjectKey", () => {
+  const makeCmd = (): MenuEvent =>
+    copy({ payload: "", type: "removeObjectKey" });
+
+  // test a bunch of object keys
+  ["a", "d", "I", "f", "g"].forEach((text) => {
+    const key = findNodeByText(exampleData, `"${text}"`)!;
+    const cmd = modifyCodeByCommand(makeCmd(), key)!;
+    expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
+  });
+
+  // remove all keys from an object
+  [
+    ["f", "g"],
+    ["g", "f"],
+  ].forEach(([firstKey, secondKey]) => {
+    const key1 = findNodeByText(exampleData, `"${firstKey}"`)!;
+    const updated = insertSwap(
+      exampleData,
+      modifyCodeByCommand(makeCmd(), key1)!
+    );
+    const key2 = findNodeByText(updated, `"${secondKey}"`)!;
+    const cmd = modifyCodeByCommand(makeCmd(), key2)!;
+    expect(insertSwap(updated, cmd)).toMatchSnapshot();
+  });
+});
+
+test("modifyCodeByCommand - removeElementFromArray", () => {
+  const makeCmd = (): MenuEvent =>
+    copy({ payload: "", type: "removeElementFromArray" });
+
+  // test a bunch of object keys
+  ["1", "2", "3", `{ "f": 4, "g": 5 }`].forEach((text) => {
+    const key = findNodeByText(exampleData, `${text}`)!;
+    const cmd = modifyCodeByCommand(makeCmd(), key)!;
+    expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
+  });
+
+  // remove all elements in an array
+  [
+    ["1", "2", "3"],
+    ["3", "1", "2"],
+    ["3", "2", "1"],
+  ].forEach(([firstKey, secondKey, thirdKey]) => {
+    const key1 = findNodeByText(exampleData, `${firstKey}`)!;
+    const cmd0 = modifyCodeByCommand(makeCmd(), key1);
+    const update1 = insertSwap(exampleData, cmd0!);
+    // console.log(key1);
+    const key2 = findNodeByText(update1, `${secondKey}`)!;
+    const cmd = modifyCodeByCommand(makeCmd(), key2)!;
+    const update2 = insertSwap(update1, cmd);
+
+    const key3 = findNodeByText(update2, `${thirdKey}`)!;
+    const cmd2 = modifyCodeByCommand(makeCmd(), key3)!;
+    const update3 = insertSwap(update2, cmd2);
+    expect(update3).toMatchSnapshot();
+  });
+});
+
+test("setIn", () => {
   const result1 = `{
     "a": false,
     "d": null,
-    "e": [{ "f": 1, "g": 2 }],
+    "e": [{ "f": 4, "g": 5 }],
     "I": "example",
   }`;
   expect(setIn(["a"], false, exampleData)).toBe(result1);
@@ -23,7 +139,7 @@ test("setIn", () => {
       "c": true,
     },
     "d": null,
-    "e": [{ "f": 1, "g": 2 }],
+    "e": [{ "f": 4, "g": 5 }],
     "I": "example",
   }`;
   expect(setIn(["a", "b", 0], false, exampleData)).toBe(result2);
@@ -33,7 +149,7 @@ test("setIn", () => {
       "c": true,
     },
     "d": null,
-    "e": [{ "f": false, "g": 2 }],
+    "e": [{ "f": false, "g": 5 }],
     "I": "example",
   }`;
   expect(setIn(["e", 0, "f"], false, exampleData)).toBe(result3);
@@ -46,7 +162,7 @@ test("setIn", () => {
       "c": true,
     },
     "d": null,
-    "e": [{ "f": 1, "g": 2 }],
+    "e": [{ "f": 4, "g": 5 }],
     "I": "example",
   }`;
   expect(setIn(["a", "b", "b___key"], "x", exampleData)).toBe(result4);
@@ -56,7 +172,7 @@ test("setIn", () => {
       "c": true,
     },
     "d": null,
-    "e": [{ "f": 1, "g": 2 }],
+    "e": [{ "f": 4, "g": 5 }],
     "I": "big darn squid holy shit",
   }`;
   expect(setIn(["I"], "big darn squid holy shit", exampleData)).toBe(result5);
