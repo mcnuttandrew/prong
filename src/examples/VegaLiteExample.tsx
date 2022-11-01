@@ -138,7 +138,7 @@ function VegaLiteExampleApp() {
         </div>
         <Editor
           schema={VegaLiteV5Schema}
-          code={vegaLiteCode}
+          code={currentCode}
           onChange={(x) => setCurrentCode(x)}
           projections={[
             {
