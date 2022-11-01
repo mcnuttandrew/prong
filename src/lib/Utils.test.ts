@@ -64,53 +64,37 @@ test("modifyCodeByCommand - simpleSwap", () => {
   // const threeKey =
 });
 
-test.only("modifyCodeByCommand - addElementAsSiblingInArray", () => {
+test("modifyCodeByCommand - addElementAsSiblingInArray", () => {
+  const makeCmd = (): MenuEvent =>
+    copy({ type: "addElementAsSiblingInArray", payload: "-9" });
   // insert from left
   const key1 = findNodeByText(exampleData, "1")!.prevSibling!;
-  const cmd1 = modifyCodeByCommand(
-    { type: "addElementAsSiblingInArray", payload: "-9" },
-    key1
-  )!;
-  expect(insertSwap(exampleData, cmd1)).toMatchSnapshot();
+  const cmd1 = modifyCodeByCommand(makeCmd(), key1)!;
+  const result1 = insertSwap(exampleData, cmd1);
+  expect(result1).toMatchSnapshot();
 
   // insert to right with trailing comma
-  const key2 = findNodeByText(exampleData.replace("3", "3,"), "3")!;
-  const cmd2 = modifyCodeByCommand(
-    { type: "addElementAsSiblingInArray", payload: "-9" },
-    key2
-  )!;
-  expect(insertSwap(exampleData, cmd2)).toMatchSnapshot();
+  const exampleData2 = exampleData.replace("3", "3,");
+  const key2 = findNodeByText(exampleData2, "3")!;
+  const cmd2 = modifyCodeByCommand(makeCmd(), key2)!;
+  const result2 = insertSwap(exampleData, cmd2);
+  expect(result2).toMatchSnapshot();
+
+  // test empty array
+  const exampleData3 = exampleData.replace("3", "[]");
+  const key3 = findNodeByText(exampleData3, "[]")!.firstChild!;
+  const cmd3 = modifyCodeByCommand(makeCmd(), key3)!;
+  const result3 = insertSwap(exampleData3, cmd3);
+  expect(result3).toMatchSnapshot();
 
   // insert at each place across array
   [1, 2, 3].forEach((key) => {
     const foundKey = findNodeByText(exampleData, `${key}`)!;
-    const cmd = modifyCodeByCommand(
-      { type: "addElementAsSiblingInArray", payload: "-9" },
-      foundKey
-    )!;
-    expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
+    const cmd = modifyCodeByCommand(makeCmd(), foundKey)!;
+    const result = insertSwap(exampleData, cmd);
+    expect(result).toMatchSnapshot();
   });
 
-  // [exampleData, `{ "f": 4, "g": 5 }`].forEach((targKey) => {
-  //   const rootKey = findNodeByText(exampleData, targKey)!;
-  //   const cmd = modifyCodeByCommand(
-  //     { payload: { key: `"J"`, value: "[6, 7, 8]" }, type: "addObjectKey" },
-  //     rootKey
-  //   )!;
-  //   expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
-  // });
-
-  // const cmd2 = modifyCodeByCommand(
-  //   { payload: { key: `"J"`, value: "{}" }, type: "addObjectKey" },
-  //   findNodeByText(exampleData, exampleData)!
-  // )!;
-  // const update1 = insertSwap(exampleData, cmd2);
-  // const newObjKey = findNodeByText(update1, "{}")!;
-  // const cmd3 = modifyCodeByCommand(
-  //   { payload: { key: `"X"`, value: '"Y"' }, type: "addObjectKey" },
-  //   newObjKey
-  // )!;
-  // expect(insertSwap(update1, cmd3)).toMatchSnapshot();
   expect(true).toBe(true);
 });
 

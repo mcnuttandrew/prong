@@ -545,8 +545,6 @@ export function setIn(
 }
 
 export function insertSwap(content: string, update: UpdateDispatch) {
-  // const insert =
-  //   typeof update.value === "string" ? `"${update.value}"` : update.value;
   return (
     content.slice(0, update.from) + update.value + content.slice(update.to)
   );
@@ -556,21 +554,13 @@ export function applyAllCmds(content: string, updates: UpdateDispatch[]) {
   return updates.reduce((acc, row) => insertSwap(acc, row), content);
 }
 
-// type MenuEventType =
-//   | "simpleSwap"
-//   | "addObjectKey"
-//   | "removeObjectKey"
-//   | "removeElementFromArray"
-//   | "addElementInarray"
-//   | "duplicateElementInArray";
-// export type MenuEvent = { payload?: any; type: MenuEventType };
 export type MenuEvent =
   | simpleSwapEvent
   | addObjectKeyEvent
   | addElementAsSiblingInArrayEvent
   | removeObjectKeyEvent
-  | removeElementFromArrayEvent
-  | duplicateElementInArrayEvent;
+  | removeElementFromArrayEvent;
+// | duplicateElementInArrayEvent;
 type simpleSwapEvent = { type: "simpleSwap"; payload: string };
 type addObjectKeyEvent = {
   type: "addObjectKey";
@@ -582,10 +572,10 @@ type addElementAsSiblingInArrayEvent = {
 };
 type removeObjectKeyEvent = { type: "removeObjectKey" };
 type removeElementFromArrayEvent = { type: "removeElementFromArray" };
-type duplicateElementInArrayEvent = {
-  type: "duplicateElementInArray";
-  payyload: any;
-};
+// type duplicateElementInArrayEvent = {
+//   type: "duplicateElementInArray";
+//   payload: any;
+// };
 type ModifyCmd<A extends MenuEvent> = (
   value: A,
   syntaxNode: SyntaxNode
@@ -714,7 +704,10 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
 
   // case: []
-  if (currentTypeIsBacket && nextTypeIsBracket) {
+  if (currentTypeIsBacket && nextType === "]") {
+    from = syntaxNode.from;
+    to = syntaxNode.to;
+    value = `[${payload}`;
   }
 
   // case [X1]
@@ -725,14 +718,19 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   }
 
   if (!currentTypeIsBacket && !nextTypeIsBracket) {
-    from = syntaxNode.from + 1;
-    to = syntaxNode.from + 1;
-    value = `, ${payload}, `;
+    from = syntaxNode.to + 1;
+    to = syntaxNode.to + 1;
+    value = ` ${payload},`;
   }
 
-  if (!currentTypeIsBacket && nextTypeIsBracket) {
-    from = syntaxNode.from;
-    to = syntaxNode.from + 1;
+  if (!currentTypeIsBacket && nextType === "]") {
+    from = syntaxNode.to;
+    to = syntaxNode.to;
+    value = `, ${payload}`;
+  }
+  if (!currentTypeIsBacket && nextType === "⚠") {
+    from = syntaxNode.to;
+    to = syntaxNode.to;
     value = `, ${payload}`;
   }
 
@@ -741,11 +739,6 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
     to = syntaxNode.nextSibling!.from;
   }
 
-  // // empty array or like [1,]
-  // if (currentTypeIsBacket && nextTypeIsBracket) {
-  //   from = syntaxNode.prevSibling!.to;
-  //   to = syntaxNode.nextSibling!.from;
-  // }
   return { value, from: from!, to: to! };
 };
 

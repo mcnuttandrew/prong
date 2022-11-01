@@ -15,7 +15,7 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 1`] = `
 exports[`modifyCodeByCommand - addElementAsSiblingInArray 2`] = `
 "{
     \\"a\\": {
-      \\"b\\": [1, 2, 3, -9]
+      \\"b\\": [1, 2, 3, -9],
       \\"c\\": true,
     },
     \\"d\\": null,
@@ -27,7 +27,7 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 2`] = `
 exports[`modifyCodeByCommand - addElementAsSiblingInArray 3`] = `
 "{
     \\"a\\": {
-      \\"b\\": [1, -9, 2, 3],
+      \\"b\\": [1, 2, [-9]],
       \\"c\\": true,
     },
     \\"d\\": null,
@@ -39,7 +39,7 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 3`] = `
 exports[`modifyCodeByCommand - addElementAsSiblingInArray 4`] = `
 "{
     \\"a\\": {
-      \\"b\\": [1, 2, -9, 3],
+      \\"b\\": [1, -9, 2, 3],
       \\"c\\": true,
     },
     \\"d\\": null,
@@ -49,6 +49,18 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 4`] = `
 `;
 
 exports[`modifyCodeByCommand - addElementAsSiblingInArray 5`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, -9, 3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 6`] = `
 "{
     \\"a\\": {
       \\"b\\": [1, 2, 3, -9],

@@ -325,7 +325,6 @@ const GenericComponent: Component = () => {
 
 const PropertyNameComponent: Component = (props) => {
   const { parsedContent, eventDispatch } = props;
-  console.log("here");
   return (
     <div>
       {`${parsedContent}`}
@@ -371,13 +370,14 @@ const ParentIsArrayComponent: Component = (props) => {
         >
           Remove Item
         </button>
-        <button
+        {/* <button
           onClick={() =>
-            eventDispatch({ type: "duplicateElementInArray", payyload: null })
+            // eventDispatch({ type: "duplicateElementInArray", payload: null })
+                        // eventDispatch({ type: "addElementAsSiblingInArray" })
           }
         >
           Duplicate
-        </button>
+        </button> */}
       </div>
       <div className="flex">
         <button>Set item as First</button>
@@ -446,7 +446,6 @@ function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
   //   targetNode = node.nextSibling!;
   // }
 
-  console.log("here", node, targetNode, schemaMap);
   const from = targetNode.from;
   const to = targetNode.to;
 
@@ -489,6 +488,8 @@ export function ContentToMenuItem(props: MenuProps) {
   } else if (typeBasedProperty && !typeBasedProperty[type]) {
     console.log("missing type imp for", type);
   }
+
+  const parentType = syntaxNode.parent!.type.name;
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
   if (schemaChunk && schemaChunk.enum) {
@@ -512,8 +513,6 @@ export function ContentToMenuItem(props: MenuProps) {
     }
   };
 
-  console.log(type, schemaChunk);
-
   return (
     <div className="cm-annotation-widget-popover-container">
       <div>This is a {type}</div>
@@ -522,7 +521,7 @@ export function ContentToMenuItem(props: MenuProps) {
         !!contentBasedItem &&
         contentBasedItem({
           parsedContent,
-          parentType: "unknown",
+          parentType,
           ...props,
           content: schemaChunk,
           eventDispatch,
@@ -530,7 +529,15 @@ export function ContentToMenuItem(props: MenuProps) {
       {typeBasedProperty &&
         typeBasedProperty({
           parsedContent,
-          parentType: "unknown",
+          parentType,
+          ...props,
+          content: schemaChunk,
+          eventDispatch,
+        })}
+      {parentResponses[parentType] &&
+        parentResponses[parentType]({
+          parsedContent,
+          parentType,
           ...props,
           content: schemaChunk,
           eventDispatch,
