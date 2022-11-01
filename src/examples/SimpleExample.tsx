@@ -14,13 +14,15 @@ const exampleData = `{
   }`;
 
 function VegaLiteExampleApp() {
-  const [currentCode, setCurrentCode] = useState(exampleData);
+  // const [currentCode, setCurrentCode] = useState(exampleData);
 
   return (
     <Editor
       schema={VegaLiteV5Schema}
       code={exampleData}
-      onChange={(x) => setCurrentCode(x)}
+      onChange={(x) => {
+        console.log(x);
+      }}
       projections={[]}
     />
   );

@@ -228,6 +228,7 @@ export default function Editor(props: Props) {
     // maybe could be an effect, but we'll see
     setTimeout(() => simpleUpdate(view, 0, view.state.doc.length, code), 500);
     return () => view.destroy();
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
