@@ -3,16 +3,22 @@ import ReactMarkdown from "react-markdown";
 import { EditorView } from "@codemirror/view";
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
+import * as Json from "jsonc-parser";
+import { codeString, MenuEvent } from "../utils";
 
-import { keyPathMatchesQuery } from "../utils";
+import {
+  keyPathMatchesQuery,
+  syntaxNodeToKeyPath,
+  modifyCodeByCommand,
+} from "../utils";
 import { Projection } from "../widgets";
+import { SchemaMap, UpdateDispatch } from "../../components/Editor";
 
 type JSONSchema = any;
-type MenuEvent = { payload?: any; type: string };
+
 interface ComponentProps {
   eventDispatch: (menuEvent: MenuEvent) => void;
   content: JSONSchema;
-  // wrap: HTMLElement;
   parsedContent: any;
   parentType: string; // todo this type can be improved
 }
@@ -322,11 +328,7 @@ const PropertyNameComponent: Component = (props) => {
   return (
     <div>
       {`${parsedContent}`}
-      <button
-        onClick={() =>
-          eventDispatch({ type: "removeObjectKey", payload: null })
-        }
-      >
+      <button onClick={() => eventDispatch({ type: "removeObjectKey" })}>
         remove key
       </button>
     </div>
@@ -367,11 +369,6 @@ const ParentIsArrayComponent: Component = (props) => {
           onClick={() => eventDispatch({ type: "removeElementFromArray" })}
         >
           Remove Item
-        </button>
-        <button
-          onClick={() => eventDispatch({ type: "duplicateElementInArray" })}
-        >
-          Duplicate
         </button>
       </div>
       <div className="flex">
@@ -425,79 +422,107 @@ const parentResponses: componentContainer = {
   // TODO: do i need to fill in all the other options for this?
 };
 
+function simpleParse(content: any) {
+  try {
+    return Json.parse(content);
+  } catch (e) {
+    return {};
+  }
+}
+function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
+  let targetNode = node;
+  if (node.type.name === "{" || node.type.name === "}") {
+    targetNode = node.parent!;
+  }
+  // else if (node.type.name === "PropertyName") {
+  //   targetNode = node.nextSibling!;
+  // }
+
+  const from = targetNode.from;
+  const to = targetNode.to;
+
+  let schemaChunk: JSONSchema = schemaMap[`${from}-${to}`];
+  if (schemaChunk?.length > 1) {
+    return { anyOf: schemaChunk };
+  } else if (schemaChunk?.length === 1) {
+    return schemaChunk[0];
+  }
+
+  return schemaChunk;
+}
 interface MenuProps {
-  content: JSONSchema;
-  keyPath: (string | number)[];
   projections: Projection[];
   view: EditorView;
   syntaxNode: SyntaxNode;
-  currentCodeSlice: string;
-  codeUpdate: (codeUpdate: { from: number; to: number; value: string }) => void;
+  schemaMap: SchemaMap;
+  codeUpdate: (codeUpdate: UpdateDispatch) => void;
 }
 export function ContentToMenuItem(props: MenuProps) {
-  const {
-    content,
-    keyPath,
-    projections,
-    view,
-    syntaxNode,
-    currentCodeSlice,
-    codeUpdate,
-  } = props;
-  let localContent: JSONSchema = {};
-  if (content?.length > 1) {
-    localContent = { anyOf: content };
-  } else if (content?.length === 1) {
-    localContent = content[0];
-  }
+  const { schemaMap, projections, view, syntaxNode, codeUpdate } = props;
+  const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
+  const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
+  const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
   const type = syntaxNode.type.name;
   let typeBasedProperty: Component | null = null;
   if (typeBasedComponents[type]) {
     typeBasedProperty = typeBasedComponents[type];
-  } else if (!content) {
+  } else if (!schemaChunk) {
     console.log("missing imp for", type);
   } else if (typeBasedProperty && !typeBasedProperty[type]) {
     console.log("missing type imp for", type);
   }
+
+  const parentType = syntaxNode.parent!.type.name;
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
-  if (localContent && localContent.enum) {
+  if (schemaChunk && schemaChunk.enum) {
     contentBasedItem = menuSwitch.EnumPicker;
-  } else if (localContent && localContent.type === "object") {
+  } else if (schemaChunk && schemaChunk.type === "object") {
     contentBasedItem = menuSwitch.ObjPicker;
-  } else if (localContent && localContent.anyOf) {
+  } else if (schemaChunk && schemaChunk.anyOf) {
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
 
+  const parsedContent = simpleParse(currentCodeSlice);
   const eventDispatch = (menuEvent: MenuEvent) => {
-    const update = outerEventDispatch(
+    const update = modifyCodeByCommand(
       menuEvent,
-      {},
-      syntaxNode,
-      currentCodeSlice
+      // parsedContent,
+      syntaxNode
+      // currentCodeSlice
     );
     if (update) {
       codeUpdate(update);
     }
   };
+
   return (
     <div className="cm-annotation-widget-popover-container">
-      {localContent && contentDescriber(localContent?.description)}
-      {localContent &&
+      <div>This is a {type}</div>
+      {schemaChunk && contentDescriber(schemaChunk?.description)}
+      {schemaChunk &&
         !!contentBasedItem &&
         contentBasedItem({
-          parsedContent: "",
-          parentType: "unknown",
+          parsedContent,
+          parentType,
           ...props,
-          content: localContent,
+          content: schemaChunk,
           eventDispatch,
         })}
       {typeBasedProperty &&
         typeBasedProperty({
-          parsedContent: "",
-          parentType: "unknown",
+          parsedContent,
+          parentType,
           ...props,
-          content: localContent,
+          content: schemaChunk,
+          eventDispatch,
+        })}
+      {parentResponses[parentType] &&
+        parentResponses[parentType]({
+          parsedContent,
+          parentType,
+          ...props,
+          content: schemaChunk,
           eventDispatch,
         })}
       {projections
@@ -513,47 +538,4 @@ export function ContentToMenuItem(props: MenuProps) {
         )}
     </div>
   );
-}
-
-function outerEventDispatch(
-  value: MenuEvent,
-  parsedContent: any,
-  syntaxNode: SyntaxNode,
-  currentCodeSlice: string
-): { value: string; from: number; to: number } | undefined {
-  const from = syntaxNode.from;
-  const to = syntaxNode.to;
-  const { type, payload } = value;
-  if (type === "simpleSwap") {
-    return { value: payload, from, to: to };
-  }
-  if (type === "addObjectKey") {
-    // this should get smarter so that the formatting doesn't get borked
-    const value = JSON.stringify(
-      { ...parsedContent, [payload.key]: payload.value },
-      null,
-      2
-    );
-    return { value, from, to };
-  }
-  if (type === "removeObjectKey") {
-    const objNode = syntaxNode!.parent!;
-    const delFrom = objNode.prevSibling ? objNode.prevSibling.to : objNode.from;
-    const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
-    return { value: "", from: delFrom, to: delTo };
-  }
-  // TODO THESE ARE NOT YET WORKING
-  if (type === "removeElementFromArray") {
-    const objNode = syntaxNode;
-    const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
-    return { value: "", from: objNode.from, to: delTo };
-  }
-  if (type === "duplicateElementInArray") {
-    const codeSlice = currentCodeSlice;
-    return {
-      value: `, ${codeSlice}`,
-      from: to,
-      to: to + codeSlice.length,
-    };
-  }
 }

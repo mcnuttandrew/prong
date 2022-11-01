@@ -9,6 +9,7 @@
     "@codemirror/lint": "^0.19.3",
     "@codemirror/view": "^0.19.20",
     "@lezer/common": "^0.15.8",
+    "@lezer/json": "^1.0.0",
     "@simonwep/pickr": "^1.8.2",
     "jsonc-parser": "^3.0.0",
     "lodash.isequal": "^4.5.0",
@@ -17,6 +18,8 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^17.0.2",
     "react-markdown": "^7.1.0",
+    "react-router": "^6.4.2",
+    "react-router-dom": "^6.4.2",
     "react-scripts": "4.0.3",
     "typescript": "^4.1.2",
     "vscode-nls": "^5.0.0"
@@ -26,11 +29,11 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "@types/jest": "^26.0.15",
+    "@types/json-schema": "^7.0.9",
+    "@types/lodash.isequal": "^4.5.5",
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "@types/json-schema": "^7.0.9",
-    "@types/lodash.isequal": "^4.5.5"
+    "@types/react-dom": "^17.0.0"
   },
   "scripts": {
     "start": "REACT_APP_DISABLE_LIVE_RELOAD=true react-scripts start",

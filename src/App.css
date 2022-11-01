@@ -174,3 +174,10 @@ body .pcr-app.visible {
 .cm-annotation-widget-popover-container {
   max-width: 400px;
 }
+
+.root {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

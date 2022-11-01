@@ -1,6 +1,7 @@
 import { EditorView } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
+import { UpdateDispatch } from "../components/Editor";
 export function codeString(
   view: EditorView,
   from: number,
@@ -486,30 +487,6 @@ function findParseTargetWidth(
   }
 }
 
-export function setIn(
-  keyPath: (string | number)[],
-  newValue: any,
-  content: string
-): string {
-  // todo maybe replace with https://gitlab.com/WhyNotHugo/tree-sitter-jsonc
-  const parsedJson = Json.parseTree(content);
-  // fail gracefully
-  if (!parsedJson) {
-    return content;
-  }
-  // traverse the parsed content using the keypath to find the place for insert
-  const targetWindow = findParseTargetWidth(parsedJson, keyPath);
-  if (targetWindow === "error") {
-    return "error";
-  }
-  const insert = typeof newValue === "string" ? `"${newValue}"` : newValue;
-  return (
-    content.slice(0, targetWindow.from) +
-    insert +
-    content.slice(targetWindow.to)
-  );
-}
-
 function keyPathMatchesQueryCore(
   query: (string | number)[],
   keyPath: (string | number)[]
@@ -546,3 +523,235 @@ function keyPathMatchesQueryMemoizer() {
 }
 
 export const keyPathMatchesQuery = keyPathMatchesQueryMemoizer();
+
+export function setIn(
+  keyPath: (string | number)[],
+  newValue: any,
+  content: string
+): string {
+  // todo maybe replace with https://gitlab.com/WhyNotHugo/tree-sitter-jsonc
+  const parsedJson = Json.parseTree(content);
+  // fail gracefully
+  if (!parsedJson) {
+    return content;
+  }
+  // traverse the parsed content using the keypath to find the place for insert
+  const targetWindow = findParseTargetWidth(parsedJson, keyPath);
+  if (targetWindow === "error") {
+    return "error";
+  }
+  const value = typeof newValue === "string" ? `"${newValue}"` : newValue;
+  return insertSwap(content, { ...targetWindow, value });
+}
+
+export function insertSwap(content: string, update: UpdateDispatch) {
+  return (
+    content.slice(0, update.from) + update.value + content.slice(update.to)
+  );
+}
+
+export function applyAllCmds(content: string, updates: UpdateDispatch[]) {
+  return updates.reduce((acc, row) => insertSwap(acc, row), content);
+}
+
+export type MenuEvent =
+  | simpleSwapEvent
+  | addObjectKeyEvent
+  | addElementAsSiblingInArrayEvent
+  | removeObjectKeyEvent
+  | removeElementFromArrayEvent;
+// | duplicateElementInArrayEvent;
+type simpleSwapEvent = { type: "simpleSwap"; payload: string };
+type addObjectKeyEvent = {
+  type: "addObjectKey";
+  payload: { key: string; value: string };
+};
+type addElementAsSiblingInArrayEvent = {
+  type: "addElementAsSiblingInArray";
+  payload: string;
+};
+type removeObjectKeyEvent = { type: "removeObjectKey" };
+type removeElementFromArrayEvent = { type: "removeElementFromArray" };
+// type duplicateElementInArrayEvent = {
+//   type: "duplicateElementInArray";
+//   payload: any;
+// };
+type ModifyCmd<A extends MenuEvent> = (
+  value: A,
+  syntaxNode: SyntaxNode
+) => UpdateDispatch | undefined;
+
+const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
+  value,
+  syntaxNode
+) => {
+  const objNode = syntaxNode.parent!;
+
+  let from: number;
+  let to: number;
+
+  const prevType = objNode.prevSibling!.type.name;
+  const nextType = objNode.nextSibling!.type.name;
+  const prevTypeIsCurly = new Set(["⚠", "{"]).has(prevType);
+  const nextTypeIsCurly = new Set(["⚠", "}"]).has(nextType);
+
+  if (!prevTypeIsCurly && !nextTypeIsCurly) {
+    from = objNode.from;
+    to = objNode.nextSibling!.from;
+  }
+
+  if (!prevTypeIsCurly && nextTypeIsCurly) {
+    from = objNode.prevSibling!.to;
+    to = objNode.nextSibling!.from;
+  }
+
+  if (prevTypeIsCurly && !nextTypeIsCurly) {
+    from = objNode.from;
+    to = objNode.nextSibling!.from;
+  }
+
+  if (prevTypeIsCurly && nextTypeIsCurly) {
+    from = objNode.prevSibling!.to;
+    to = objNode.nextSibling!.from;
+  }
+  return { value: "", from: from!, to: to! };
+};
+
+const removeElementFromArray: ModifyCmd<removeElementFromArrayEvent> = (
+  value,
+  syntaxNode
+) => {
+  let from: number;
+  let to: number;
+  const prevType = syntaxNode.prevSibling?.type.name || "⚠";
+  const nextType = syntaxNode.nextSibling?.type.name || "⚠";
+  const prevTypeIsBracket = new Set(["⚠", "["]).has(prevType);
+  const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
+
+  if (!prevTypeIsBracket && !nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.nextSibling!.from;
+  }
+
+  if (!prevTypeIsBracket && nextTypeIsBracket) {
+    from = syntaxNode.prevSibling!.to;
+    to = syntaxNode.nextSibling!.from;
+  }
+
+  if (prevTypeIsBracket && !nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.nextSibling!.from;
+  }
+
+  if (prevTypeIsBracket && nextTypeIsBracket) {
+    from = syntaxNode.prevSibling!.to;
+    to = syntaxNode.nextSibling!.from;
+  }
+  return { value: "", from: from!, to: to! };
+};
+
+const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
+  const from = syntaxNode.from;
+  const to = syntaxNode.to;
+  return { value: value.payload, from, to };
+};
+
+// only does the simplified case of add into the end of an object
+const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
+  { payload: { key, value } },
+  syntaxNode
+) => {
+  const rightBrace = syntaxNode.lastChild!;
+  const prevSib = rightBrace.prevSibling!;
+  // new object
+  if (prevSib.type.name === "{") {
+    return {
+      value: `{${key}: ${value}}`,
+      from: prevSib.from,
+      to: rightBrace.to,
+    };
+  }
+  // trailing comma
+  if (prevSib.type.name === "⚠") {
+    return {
+      value: `, ${key}: ${value}`,
+      from: prevSib.to - 1,
+      to: prevSib.to,
+    };
+  }
+  // regular object with stuff in it
+  return {
+    value: `, ${key}: ${value}`,
+    from: prevSib.to,
+    to: rightBrace.from,
+  };
+};
+
+// always add as sibling following the target
+// not sure how to target an empty array?
+const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
+  { payload },
+  syntaxNode
+) => {
+  // WIP
+  let from: number;
+  let to: number;
+  let value = payload;
+  const currentTypeIsBacket = syntaxNode.type.name === "[";
+  // const prevType = syntaxNode.prevSibling?.type.name || "⚠";
+  const nextType = syntaxNode.nextSibling?.type.name || "⚠";
+  // const prevTypeIsBracket = new Set(["⚠", "["]).has(prevType);
+  const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
+
+  // case: []
+  if (currentTypeIsBacket && nextType === "]") {
+    from = syntaxNode.from;
+    to = syntaxNode.to;
+    value = `[${payload}`;
+  }
+
+  // case [X1]
+  if (currentTypeIsBacket && !nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.from;
+    value = `[${payload}, `;
+  }
+
+  if (!currentTypeIsBacket && !nextTypeIsBracket) {
+    from = syntaxNode.to + 1;
+    to = syntaxNode.to + 1;
+    value = ` ${payload},`;
+  }
+
+  if (!currentTypeIsBacket && nextType === "]") {
+    from = syntaxNode.to;
+    to = syntaxNode.to;
+    value = `, ${payload}`;
+  }
+  if (!currentTypeIsBacket && nextType === "⚠") {
+    from = syntaxNode.to;
+    to = syntaxNode.to;
+    value = `, ${payload}`;
+  }
+
+  if (currentTypeIsBacket && !nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.nextSibling!.from;
+  }
+
+  return { value, from: from!, to: to! };
+};
+
+// todo fix this type string
+// todo maybe also add typings about what objects are expected???
+const CmdTable: Record<string, ModifyCmd<any>> = {
+  duplicateElementInArray: () => undefined,
+  // todo insert element into array
+  addElementAsSiblingInArray,
+  addObjectKey,
+  removeElementFromArray,
+  removeObjectKey,
+  simpleSwap,
+};
+export const modifyCodeByCommand: ModifyCmd<any> = (value, syntaxNode) =>
+  CmdTable[value.type](value, syntaxNode);

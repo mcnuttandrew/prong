@@ -6,7 +6,8 @@ import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-// import { jsonLinter } from "../lib/Linter";
+import { jsonLinter } from "../lib/Linter";
+import ErrorBoundary from "./ErrorBoundary";
 
 import { ContentToMenuItem } from "../lib/widgets/popover-menu";
 
@@ -20,6 +21,8 @@ import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
+
+export type UpdateDispatch = { from: number; to: number; value: string };
 
 type Props = {
   onChange: (code: string) => void;
@@ -43,7 +46,7 @@ function createNodeMap(view: EditorView, schema: any) {
 const triggerSelectionCheck =
   (
     setMenu: (menu: any) => void,
-    setSchemaMap: (schemaMap: any) => void,
+    setSchemaMap: (schemaMap: SchemaMap) => void,
     schema: any
   ) =>
   (view: any): void => {
@@ -108,6 +111,8 @@ function calcWidgetRangeSets(v: any) {
   return ranges;
 }
 
+export type SchemaMap = Record<string, any>;
+
 export default function Editor(props: Props) {
   const { schema, code, onChange, projections } = props;
   const cmParent = useRef<HTMLDivElement>(null);
@@ -116,7 +121,8 @@ export default function Editor(props: Props) {
   const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
     null
   );
-  const [schemaMap, setSchemaMap] = useState<Record<string, any>>({});
+  const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
+  // TODO replace this with sets? Or maybe a custom data structure that makes query the ranges easier/faster
   const [widgetRangeSets, setWidgetRangeSets] = useState<
     Record<string, boolean>
   >({});
@@ -128,13 +134,9 @@ export default function Editor(props: Props) {
     from: number,
     to: number,
     insert: string
-  ) =>
-    view.dispatch(
-      view!.state.update({
-        // changes: { from, to, insert: view!.state.sliceDoc(from, to) },
-        changes: { from, to, insert },
-      })
-    );
+  ) => {
+    view.dispatch(view!.state.update({ changes: { from, to, insert } }));
+  };
 
   // THIS TRIO OF EFFECTS HANDLES THE On/Off projection stuff, and it is very cursed, be warned
   // figure out the range sets for the projections
@@ -174,10 +176,12 @@ export default function Editor(props: Props) {
 
   // primary effect, initialize the editor etc
   useEffect(() => {
+    // let localRangeSets = {};
+    // let selection: EditorSelection | null;
     const view = new EditorView({
       state: EditorState.create({
         extensions: [
-          // jsonLinter,
+          jsonLinter,
           // keymap.of(ASTKeyBinding),
           keymap.of(
             MenuTriggerKeyBinding(
@@ -188,16 +192,29 @@ export default function Editor(props: Props) {
           languageConf.of(json()),
           keymap.of([indentWithTab]),
           cmStatePlugin,
-          // could make the projections tell us where they are
-          // and if the selection enters one of those ranges, trigger a doc change?
           widgetsPlugin,
           EditorView.updateListener.of((v: ViewUpdate) => {
-            // TODO fix
             if (v.docChanged) {
               onChange(v.state.doc.toString());
-              setWidgetRangeSets(calcWidgetRangeSets(v));
+              const localRangeSets = calcWidgetRangeSets(v);
+              setWidgetRangeSets(localRangeSets);
             } else {
-              setSelection(v.view.state.selection);
+              const newSelection = v.view.state.selection;
+              // determine if the new selection
+              // console.log(v, newSelection, selection);
+              // const clickInSideOfRange = Object.keys(localRangeSets).some(
+              //   (x) => {
+              //     const [newFrom, newTo] = x.split("____").map(Number);
+              //     const { from, to } = newSelection.ranges[0];
+              //     return from >= newFrom && to <= newTo;
+              //   }
+              // );
+              // if (clickInSideOfRange && selection) {
+              //   view.dispatch({ selection });
+              // } else {
+              setSelection(newSelection);
+              //   selection = newSelection;
+              // }
             }
           }),
         ],
@@ -210,7 +227,8 @@ export default function Editor(props: Props) {
     // we want to trigger an update after the widgets are initially computed in order to capture their ranges in the on change event
     // maybe could be an effect, but we'll see
     setTimeout(() => simpleUpdate(view, 0, view.state.doc.length, code), 500);
-  }, [code, onChange, schema]);
+    return () => view.destroy();
+  }, []);
 
   useEffect(() => {
     if (view) {
@@ -231,35 +249,33 @@ export default function Editor(props: Props) {
       view.dispatch(tr);
     }
   }, [code, view]);
+
   return (
     <div className="editor-container">
       <div ref={cmParent} />
       {menu?.x && (
-        <div
-          className="cm-annotation-menu"
-          style={{ top: menu.y - 30, left: menu.x }}
-        >
-          <ContentToMenuItem
-            content={schemaMap[`${menu.node.from}-${menu.node.to}`]}
-            keyPath={[]}
-            projections={projections || []}
-            view={view!}
-            syntaxNode={menu.node}
-            currentCodeSlice={""}
-            codeUpdate={(codeUpdate: {
-              from: number;
-              to: number;
-              value: string;
-            }) => {
-              simpleUpdate(
-                view!,
-                codeUpdate.from,
-                codeUpdate.to,
-                codeUpdate.value
-              );
-            }}
-          />
-        </div>
+        <ErrorBoundary>
+          <div
+            className="cm-annotation-menu"
+            style={{ top: menu.y - 30, left: menu.x }}
+          >
+            <ContentToMenuItem
+              schemaMap={schemaMap}
+              projections={projections || []}
+              view={view!}
+              syntaxNode={menu.node}
+              codeUpdate={(codeUpdate: UpdateDispatch) => {
+                simpleUpdate(
+                  view!,
+                  codeUpdate.from,
+                  codeUpdate.to,
+                  codeUpdate.value
+                );
+                setMenu(null);
+              }}
+            />
+          </div>
+        </ErrorBoundary>
       )}
     </div>
   );
