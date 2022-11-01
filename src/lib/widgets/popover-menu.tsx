@@ -370,14 +370,6 @@ const ParentIsArrayComponent: Component = (props) => {
         >
           Remove Item
         </button>
-        {/* <button
-          onClick={() =>
-            // eventDispatch({ type: "duplicateElementInArray", payload: null })
-                        // eventDispatch({ type: "addElementAsSiblingInArray" })
-          }
-        >
-          Duplicate
-        </button> */}
       </div>
       <div className="flex">
         <button>Set item as First</button>
@@ -466,16 +458,7 @@ interface MenuProps {
   codeUpdate: (codeUpdate: UpdateDispatch) => void;
 }
 export function ContentToMenuItem(props: MenuProps) {
-  const {
-    // schemaChunk,
-    schemaMap,
-    // keyPath,
-    projections,
-    view,
-    syntaxNode,
-    // currentCodeSlice,
-    codeUpdate,
-  } = props;
+  const { schemaMap, projections, view, syntaxNode, codeUpdate } = props;
   const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
   const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
   const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
