@@ -556,21 +556,45 @@ export function applyAllCmds(content: string, updates: UpdateDispatch[]) {
   return updates.reduce((acc, row) => insertSwap(acc, row), content);
 }
 
-type MenuEventType =
-  | "simpleSwap"
-  | "addObjectKey"
-  | "removeObjectKey"
-  | "removeElementFromArray"
-  | "addElementInarray"
-  | "duplicateElementInArray";
-export type MenuEvent = { payload?: any; type: MenuEventType };
-type ModifyCmd = (
-  value: MenuEvent,
-  syntaxNode: SyntaxNode,
-  helperText?: string
+// type MenuEventType =
+//   | "simpleSwap"
+//   | "addObjectKey"
+//   | "removeObjectKey"
+//   | "removeElementFromArray"
+//   | "addElementInarray"
+//   | "duplicateElementInArray";
+// export type MenuEvent = { payload?: any; type: MenuEventType };
+export type MenuEvent =
+  | simpleSwapEvent
+  | addObjectKeyEvent
+  | addElementAsSiblingInArrayEvent
+  | removeObjectKeyEvent
+  | removeElementFromArrayEvent
+  | duplicateElementInArrayEvent;
+type simpleSwapEvent = { type: "simpleSwap"; payload: string };
+type addObjectKeyEvent = {
+  type: "addObjectKey";
+  payload: { key: string; value: string };
+};
+type addElementAsSiblingInArrayEvent = {
+  type: "addElementAsSiblingInArray";
+  payload: string;
+};
+type removeObjectKeyEvent = { type: "removeObjectKey" };
+type removeElementFromArrayEvent = { type: "removeElementFromArray" };
+type duplicateElementInArrayEvent = {
+  type: "duplicateElementInArray";
+  payyload: any;
+};
+type ModifyCmd<A extends MenuEvent> = (
+  value: A,
+  syntaxNode: SyntaxNode
 ) => UpdateDispatch | undefined;
 
-const removeObjectKey: ModifyCmd = (value, syntaxNode) => {
+const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
+  value,
+  syntaxNode
+) => {
   const objNode = syntaxNode.parent!;
 
   let from: number;
@@ -603,7 +627,10 @@ const removeObjectKey: ModifyCmd = (value, syntaxNode) => {
   return { value: "", from: from!, to: to! };
 };
 
-const removeElementFromArray: ModifyCmd = (value, syntaxNode) => {
+const removeElementFromArray: ModifyCmd<removeElementFromArrayEvent> = (
+  value,
+  syntaxNode
+) => {
   let from: number;
   let to: number;
   const prevType = syntaxNode.prevSibling?.type.name || "⚠";
@@ -633,86 +660,105 @@ const removeElementFromArray: ModifyCmd = (value, syntaxNode) => {
   return { value: "", from: from!, to: to! };
 };
 
-const simpleSwap: ModifyCmd = (value, syntaxNode) => {
+const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
   const from = syntaxNode.from;
   const to = syntaxNode.to;
   return { value: value.payload, from, to };
 };
 
-const CmdTable: Record<MenuEventType, ModifyCmd> = {
-  addElementInarray: () => undefined,
-  addObjectKey: () => undefined,
+// only does the simplified case of add into the end of an object
+const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
+  { payload: { key, value } },
+  syntaxNode
+) => {
+  const rightBrace = syntaxNode.lastChild!;
+  const prevSib = rightBrace.prevSibling!;
+  // new object
+  if (prevSib.type.name === "{") {
+    return {
+      value: `{${key}: ${value}}`,
+      from: prevSib.from,
+      to: rightBrace.to,
+    };
+  }
+  // trailing comma
+  if (prevSib.type.name === "⚠") {
+    return {
+      value: `, ${key}: ${value}`,
+      from: prevSib.to - 1,
+      to: prevSib.to,
+    };
+  }
+  // regular object with stuff in it
+  return {
+    value: `, ${key}: ${value}`,
+    from: prevSib.to,
+    to: rightBrace.from,
+  };
+};
+
+// always add as sibling following the target
+// not sure how to target an empty array?
+const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
+  { payload },
+  syntaxNode
+) => {
+  // WIP
+  let from: number;
+  let to: number;
+  let value = payload;
+  const currentTypeIsBacket = syntaxNode.type.name === "[";
+  // const prevType = syntaxNode.prevSibling?.type.name || "⚠";
+  const nextType = syntaxNode.nextSibling?.type.name || "⚠";
+  // const prevTypeIsBracket = new Set(["⚠", "["]).has(prevType);
+  const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
+
+  // case: []
+  if (currentTypeIsBacket && nextTypeIsBracket) {
+  }
+
+  // case [X1]
+  if (currentTypeIsBacket && !nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.from;
+    value = `[${payload}, `;
+  }
+
+  if (!currentTypeIsBacket && !nextTypeIsBracket) {
+    from = syntaxNode.from + 1;
+    to = syntaxNode.from + 1;
+    value = `, ${payload}, `;
+  }
+
+  if (!currentTypeIsBacket && nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.from + 1;
+    value = `, ${payload}`;
+  }
+
+  if (currentTypeIsBacket && !nextTypeIsBracket) {
+    from = syntaxNode.from;
+    to = syntaxNode.nextSibling!.from;
+  }
+
+  // // empty array or like [1,]
+  // if (currentTypeIsBacket && nextTypeIsBracket) {
+  //   from = syntaxNode.prevSibling!.to;
+  //   to = syntaxNode.nextSibling!.from;
+  // }
+  return { value, from: from!, to: to! };
+};
+
+// todo fix this type string
+// todo maybe also add typings about what objects are expected???
+const CmdTable: Record<string, ModifyCmd<any>> = {
   duplicateElementInArray: () => undefined,
   // todo insert element into array
+  addElementAsSiblingInArray,
+  addObjectKey,
   removeElementFromArray,
   removeObjectKey,
   simpleSwap,
 };
-export const modifyCodeByCommand: ModifyCmd = (value, syntaxNode) =>
+export const modifyCodeByCommand: ModifyCmd<any> = (value, syntaxNode) =>
   CmdTable[value.type](value, syntaxNode);
-// export const modifyCodeByCommand: ModifyCmd = (value, syntaxNode) => {
-// TODO make the types be stronger / enums
-// if (type === "simpleSwap") {
-//   return { value: payload, from, to };
-// }
-// if (type === "addObjectKey") {
-
-//   let target = syntaxNode;
-
-//   // this should get smarter so that the formatting doesn't get borked
-//   // const value = JSON.stringify(
-//   //   {
-//   //     // intentionally broken
-//   //     // ...parsedContent,
-//   //     [payload.key]: payload.value,
-//   //   },
-//   //   null,
-//   //   2
-//   // );
-//   return { value, from, to };
-// }
-// if (type === "removeObjectKey") {
-//   // const objNode = syntaxNode.parent!;
-//   // console.log(objNode.type);
-//   // const delFrom = objNode.prevSibling ? objNode.prevSibling.to : objNode.from;
-//   // const delTo = objNode.nextSibling
-//   //   ? objNode.nextSibling.from + 1
-//   //   : objNode.to;
-//   // console.log(delFrom, delTo);
-//   // return [{ value: "", from: delFrom, to: delTo }];
-//   const objNode = syntaxNode.parent!;
-//   let newFrom = objNode.from;
-//   let newTo = objNode.to;
-//   if (objNode.nextSibling) {
-//     newTo = objNode.to + 1;
-//   }
-//   if (objNode.prevSibling && objNode?.nextSibling?.type.name !== "}") {
-//     newFrom = objNode.prevSibling.to + 1;
-//   }
-//   if (objNode.prevSibling && objNode?.nextSibling?.type.name === "}") {
-//     console.log("hit this branch");
-//     newFrom = objNode.prevSibling.to + 2;
-//   }
-//   return { value: "", from: newFrom, to: newTo };
-//   // keep in mind this runs on the UPDATED positions
-//   // if (objNode.nextSibling) {
-//   //   updates.push({ value: "", from: objNode.from, to: objNode.from + });
-//   // }
-//   // return updates;
-// }
-// // TODO THESE ARE NOT YET WORKING
-// if (type === "removeElementFromArray") {
-//   const objNode = syntaxNode;
-//   const delTo = objNode.nextSibling ? objNode.nextSibling.from : objNode.to;
-//   return { value: "", from: objNode.from, to: delTo };
-// }
-// // if (type === "duplicateElementInArray") {
-// //   const codeSlice = currentCodeSlice;
-// //   return {
-// //     value: `, ${codeSlice}`,
-// //     from: to,
-// //     to: to + codeSlice.length,
-// //   };
-// // }
-// return undefined;
-// };

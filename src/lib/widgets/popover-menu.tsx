@@ -329,11 +329,7 @@ const PropertyNameComponent: Component = (props) => {
   return (
     <div>
       {`${parsedContent}`}
-      <button
-        onClick={() =>
-          eventDispatch({ type: "removeObjectKey", payload: null })
-        }
-      >
+      <button onClick={() => eventDispatch({ type: "removeObjectKey" })}>
         remove key
       </button>
     </div>
@@ -376,7 +372,9 @@ const ParentIsArrayComponent: Component = (props) => {
           Remove Item
         </button>
         <button
-          onClick={() => eventDispatch({ type: "duplicateElementInArray" })}
+          onClick={() =>
+            eventDispatch({ type: "duplicateElementInArray", payyload: null })
+          }
         >
           Duplicate
         </button>
