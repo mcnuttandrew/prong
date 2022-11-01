@@ -10,6 +10,13 @@ export function codeString(
   return view.state.doc.sliceString(from, to);
 }
 
+export function classNames(input: Record<string, boolean>) {
+  return Object.entries(input)
+    .filter(([key, value]) => value)
+    .map(([key]) => key)
+    .join(" ");
+}
+
 export function argListToIntList(
   view: EditorView,
   argList: SyntaxNode[]
@@ -559,8 +566,10 @@ export type MenuEvent =
   | addObjectKeyEvent
   | addElementAsSiblingInArrayEvent
   | removeObjectKeyEvent
-  | removeElementFromArrayEvent;
+  | removeElementFromArrayEvent
+  | nullEvent;
 // | duplicateElementInArrayEvent;
+type nullEvent = { type: "nullEvent" };
 type simpleSwapEvent = { type: "simpleSwap"; payload: string };
 type addObjectKeyEvent = {
   type: "addObjectKey";

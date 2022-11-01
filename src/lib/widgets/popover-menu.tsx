@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { EditorView } from "@codemirror/view";
+import { EditorSelection } from "@codemirror/state";
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
-import { codeString, MenuEvent } from "../utils";
+import { HotKeys } from "react-hotkeys";
+
+import { codeString, MenuEvent, classNames } from "../utils";
 
 import {
   keyPathMatchesQuery,
@@ -457,8 +460,30 @@ interface MenuProps {
   schemaMap: SchemaMap;
   codeUpdate: (codeUpdate: UpdateDispatch) => void;
 }
+
+type MenuRow = { label: string; element: MenuElement[] };
+type MenuElement =
+  | { type: "display"; content: string }
+  | { type: "button"; content: string; onSelect: any };
 export function ContentToMenuItem(props: MenuProps) {
   const { schemaMap, projections, view, syntaxNode, codeUpdate } = props;
+  const [cursorRow, setRow] = useState<number>(0);
+  const [cursorCol, setCol] = useState<number>(0);
+
+  const container = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // container.current?.click();
+    // // view.dispatch({
+    // //   selection: EditorSelection.create([EditorSelection.range(-1, -1)], 1),
+    // // });
+    // view.dispatch({
+    //   selection: { anchor: 0 },
+    // });
+
+    container.current?.focus();
+
+    // view.dispatch({ selection: { from: -1, to: -1 } });
+  }, []);
   const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
   const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
   const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
@@ -496,46 +521,120 @@ export function ContentToMenuItem(props: MenuProps) {
     }
   };
 
-  return (
-    <div className="cm-annotation-widget-popover-container">
-      <div>This is a {type}</div>
-      {schemaChunk && contentDescriber(schemaChunk?.description)}
-      {schemaChunk &&
-        !!contentBasedItem &&
-        contentBasedItem({
+  const content: MenuRow[] = [
+    schemaChunk && {
+      label: "DESC",
+      element: contentDescriber(schemaChunk?.description),
+    },
+    schemaChunk &&
+      !!contentBasedItem && {
+        label: "CONTENT",
+        element: contentBasedItem({
           parsedContent,
           parentType,
           ...props,
           content: schemaChunk,
           eventDispatch,
-        })}
-      {typeBasedProperty &&
-        typeBasedProperty({
-          parsedContent,
-          parentType,
-          ...props,
-          content: schemaChunk,
-          eventDispatch,
-        })}
-      {parentResponses[parentType] &&
-        parentResponses[parentType]({
-          parsedContent,
-          parentType,
-          ...props,
-          content: schemaChunk,
-          eventDispatch,
-        })}
-      {projections
-        .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-        .filter((proj) => proj.type === "tooltip")
-        .map((proj) =>
-          proj.projection({
+        }),
+      },
+    typeBasedProperty && {
+      label: "TYPE",
+      element: typeBasedProperty({
+        parsedContent,
+        parentType,
+        ...props,
+        content: schemaChunk,
+        eventDispatch,
+      }),
+    },
+    parentResponses[parentType] && {
+      label: "PARENT",
+      element: parentResponses[parentType]({
+        parsedContent,
+        parentType,
+        ...props,
+        content: schemaChunk,
+        eventDispatch,
+      }),
+    },
+    ...projections
+      .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+      .filter((proj) => proj.type === "tooltip")
+      .map((proj) => {
+        return {
+          label: "CUSTOM",
+          element: proj.projection({
             view,
             node: syntaxNode,
             keyPath,
             currentValue: currentCodeSlice,
-          })
-        )}
-    </div>
+          }),
+        };
+      }),
+  ].filter((x) => x);
+
+  function moveCursor(dir: "up" | "left" | "right" | "down") {
+    console.log(dir, cursorRow, cursorCol);
+    switch (dir) {
+      case "down":
+        setRow(Math.min(cursorRow + 1, content.length));
+        break;
+      case "up":
+        setRow(Math.max(cursorRow - 1, 0));
+        break;
+      case "right":
+        setCol(1);
+        break;
+      case "left":
+        setCol(0);
+        break;
+      default:
+        break;
+    }
+  }
+
+  console.log("fuckkkkkk", cursorCol, cursorRow);
+  const keyMap = {
+    moveLeft: "left",
+    moveRight: "right",
+    moveDown: "down",
+    moveUp: "up",
+  };
+  const handlers = {
+    moveLeft: () => moveCursor("left"),
+    moveRight: () => moveCursor("right"),
+    moveDown: () => moveCursor("down"),
+    moveUp: () => moveCursor("up"),
+  };
+  return (
+    <HotKeys keyMap={keyMap} handlers={handlers} allowChanges={true}>
+      <div className="cm-annotation-widget-popover-container">
+        <div ref={container} tabIndex={0}></div>
+        {content.map(({ label, element }, idx) => {
+          return (
+            <div className="cm-annotation-widget-popover-container-row">
+              <div
+                className={classNames({
+                  "cm-annotation-widget-popover-container-row-label": true,
+                  "cm-annotation-widget-element-selected":
+                    cursorCol === 0 && cursorRow === idx,
+                })}
+              >
+                {label}
+              </div>
+              <div
+                className={classNames({
+                  "cm-annotation-widget-popover-container-row-content": true,
+                  "cm-annotation-widget-element-selected":
+                    cursorCol === 1 && cursorRow === idx,
+                })}
+              >
+                {element}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </HotKeys>
   );
 }

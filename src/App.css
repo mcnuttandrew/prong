@@ -7,6 +7,11 @@
   display: flex;
 }
 
+.flex-down {
+  display: flex;
+  flex-direction: column;
+}
+
 .cm-num-widget {
   display: inline-block;
   font-family: monospace;
@@ -175,9 +180,36 @@ body .pcr-app.visible {
   max-width: 400px;
 }
 
+
 .root {
   align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.cm-annotation-widget-popover-container-row {
+  border: thin solid black;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.cm-annotation-widget-popover-container-row-label {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  border: thin solid black;
+  width: 82px;
+  height: 100%;
+}
+
+.cm-annotation-widget-popover-container-row-content {
+  border: thin solid black;
+  max-width: 320px;
+  width: 100%;
+}
+
+.cm-annotation-widget-element-selected {
+  background-color: aqua;
 }
