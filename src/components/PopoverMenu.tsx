@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { EditorView } from "@codemirror/view";
-// import { EditorSelection } from "@codemirror/state";
-// import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
-// import * as Json from "jsonc-parser";
 import { HotKeys, configure } from "react-hotkeys";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import {
   generateMenuContent,
@@ -43,69 +39,51 @@ interface MenuProps {
 
 type SelectionRoute = [number, number];
 
-interface RenderMenuElementProps {
+type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent) => void;
-  //   menuElement: MenuElement;
-  menuElement: any;
+  // TODO fix this type;
+  menuElement: T;
   isSelected: boolean;
-}
+}) => JSX.Element;
 
-function RenderMenuElementDisplay(props: RenderMenuElementProps) {
-  return (
-    <div
-      style={{
-        maxHeight: "200px",
-        overflowY: "auto",
-        fontSize: "13px",
-        background: props.isSelected ? "red" : "none",
-      }}
-    >
-      <ReactMarkdown>{props.menuElement.content}</ReactMarkdown>
-    </div>
-  );
-}
+const RenderMenuElementDisplay: MenuElementRenderer<any> = (props) => (
+  <div
+    style={{
+      maxHeight: "200px",
+      overflowY: "auto",
+      fontSize: "13px",
+      background: props.isSelected ? "red" : "none",
+    }}
+  >
+    <ReactMarkdown>{props.menuElement.content}</ReactMarkdown>
+  </div>
+);
 
-function RenderMenuElementButton(props: RenderMenuElementProps) {
-  return (
-    <button
-      onClick={() => props.eventDispatch(props.menuElement.onSelect)}
-      style={{
-        background: props.isSelected ? "red" : "none",
-      }}
-    >
-      {props.menuElement.content}
-    </button>
-  );
-}
+const RenderMenuElementButton: MenuElementRenderer<any> = (props) => (
+  <button
+    onClick={() => props.eventDispatch(props.menuElement.onSelect)}
+    style={{
+      background: props.isSelected ? "red" : "none",
+    }}
+  >
+    {props.menuElement.content}
+  </button>
+);
 
-const dispatch: Record<string, (props: RenderMenuElementProps) => JSX.Element> =
-  {
-    display: RenderMenuElementDisplay,
-    button: RenderMenuElementButton,
-    // row: RenderMenuElementRow,
-    projection: (props) => props.menuElement.element,
-  };
-function RenderMenuElement(props: RenderMenuElementProps): JSX.Element {
+const dispatch: Record<string, MenuElementRenderer<any>> = {
+  display: RenderMenuElementDisplay,
+  button: RenderMenuElementButton,
+  projection: (props) => props.menuElement.element,
+};
+const RenderMenuElement: MenuElementRenderer<any> = (props) => {
   return dispatch[props.menuElement.type](props);
-}
+};
 
 const traverseContentTreeToNode: (
   tree: MenuRow[],
   path: SelectionRoute
 ) => MenuElement | MenuRow | null = (tree, [row, col]) =>
   tree[row].elements[col - 1];
-
-function sortContentTree(content: MenuRow[]) {
-  const labelWeights: Record<string, number> = {
-    content: 2,
-    custom: -1,
-  };
-  return content.sort((a, b) => {
-    const aWeight = labelWeights[a.label.toLowerCase()] || 0;
-    const bWeight = labelWeights[b.label.toLowerCase()] || 0;
-    return bWeight - aWeight;
-  });
-}
 
 type MoveDirections = "up" | "left" | "right" | "down";
 function buildMoveCursor(

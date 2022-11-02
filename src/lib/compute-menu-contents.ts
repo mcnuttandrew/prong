@@ -1,9 +1,8 @@
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
-import { EditorView } from "@codemirror/view";
 import * as Json from "jsonc-parser";
 
-import { codeString, MenuEvent } from "./utils";
+import { MenuEvent } from "./utils";
 import { SchemaMap } from "../components/Editor";
 
 type JSONSchema = any;
@@ -14,7 +13,6 @@ export type MenuElement =
   | { type: "button"; label?: string; content: string; onSelect: MenuEvent }
   | { type: "projection"; label?: string; element: JSX.Element };
 
-//   TODO revisit to see if all are necessary
 interface ComponentProps {
   content: JSONSchema;
   parsedContent: any;
@@ -25,15 +23,6 @@ type componentContainer = Record<string, Component>;
 
 const EnumPicker: Component = (props) => {
   const { content } = props;
-  //   return {
-  //     type: "row",
-  //     direction: "vertical",
-  //     element: (content.enum as any[]).map((val: string) => ({
-  //       type: "button",
-  //       content: val,
-  //       onSelect: { type: "simpleSwap", payload: `"${val}"` },
-  //     })),
-  //   };
   return [
     {
       label: "content",
@@ -117,31 +106,31 @@ function bundleConstsToEnum(content: JSONSchema[]) {
   return [...nonConsts, { enum: consts.map((x) => x.const) }];
 }
 
-function generateValueForObjProp(prop: any) {
-  const simple: any = { number: 0, string: "", object: {} };
-  if (prop.enum) {
-    return prop.enum[0];
-  } else if (simple.hasOwnProperty(prop.type)) {
-    return simple[prop.type];
-  } else {
-    console.log("not covered", prop.type, simple[prop.type]);
-    return null;
-  }
-}
-// what do these exisit
-const addToSet = (set: Set<string>, key: string) =>
-  new Set([...Array.from(set), key]);
+// function generateValueForObjProp(prop: any) {
+//   const simple: any = { number: 0, string: "", object: {} };
+//   if (prop.enum) {
+//     return prop.enum[0];
+//   } else if (simple.hasOwnProperty(prop.type)) {
+//     return simple[prop.type];
+//   } else {
+//     console.log("not covered", prop.type, simple[prop.type]);
+//     return null;
+//   }
+// }
+// // what do these exisit
+// const addToSet = (set: Set<string>, key: string) =>
+//   new Set([...Array.from(set), key]);
 
-const removeFromSet = (set: Set<string>, key: string) =>
-  new Set(Array.from(set).filter((x) => x !== key));
+// const removeFromSet = (set: Set<string>, key: string) =>
+//   new Set(Array.from(set).filter((x) => x !== key));
 
 function AnyOfObjOptionalFieldPicker(
   content: JSONSchema,
   containerIdx: number
 ): MenuElement[] {
-  const requiredProps = new Set<string>(
-    Array.isArray(content.required) ? content.required : []
-  );
+  //   const requiredProps = new Set<string>(
+  //     Array.isArray(content.required) ? content.required : []
+  //   );
 
   //   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
   //     new Set(Array.from(requiredProps))
@@ -211,7 +200,7 @@ function AnyOfArray(content: JSONSchema, idx: number): MenuElement[] {
     array: [],
   };
   const arrayType = content?.items?.type;
-  const sliderName = `numElements${idx}`;
+  //   const sliderName = `numElements${idx}`;
   return [
     !arrayType && {
       type: "button",
