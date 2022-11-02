@@ -7,6 +7,11 @@
   display: flex;
 }
 
+.flex-down {
+  display: flex;
+  flex-direction: column;
+}
+
 .cm-num-widget {
   display: inline-block;
   font-family: monospace;
@@ -173,6 +178,17 @@ body .pcr-app.visible {
 
 .cm-annotation-widget-popover-container {
   max-width: 400px;
+  outline: none;
+}
+
+.cm-annotation-menu-bg {
+  background: red;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
 }
 
 .root {
@@ -180,4 +196,36 @@ body .pcr-app.visible {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.cm-annotation-widget-popover-container-row {
+  border: thin solid black;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.cm-annotation-widget-popover-container-row-label {
+  align-items: center;
+  border: thin solid black;
+  cursor: pointer;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 82px;
+}
+
+.cm-annotation-widget-popover-container-row-content {
+  border: thin solid black;
+  max-width: 320px;
+  width: 100%;
+}
+
+.cm-annotation-widget-element-selected {
+  background-color: aqua;
+}
+
+/* TODO make more specific */
+div[tabindex="-1"]:focus {
+  outline: 0;
 }

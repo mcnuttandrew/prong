@@ -6,19 +6,13 @@ import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { jsonLinter } from "../lib/Linter";
-import ErrorBoundary from "./ErrorBoundary";
-
-import { ContentToMenuItem } from "../lib/widgets/popover-menu";
-
-import { codeString } from "../lib/utils";
-import { getMatchingSchemas } from "../lib/from-vscode/validator";
-
 import { syntaxTree } from "@codemirror/language";
 
-// import { ASTKeyBinding } from "../lib/ASTKeyBinding";
+import { jsonLinter } from "../lib/Linter";
+import ErrorBoundary from "./ErrorBoundary";
+import PopoverMenu from "./PopoverMenu";
+import { createNodeMap, codeString } from "../lib/utils";
 import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
-
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
 
@@ -33,42 +27,21 @@ type Props = {
 
 const languageConf = new Compartment();
 
-function createNodeMap(view: EditorView, schema: any) {
-  return getMatchingSchemas(schema, codeString(view, 0)).then((matches) => {
-    return matches.reduce((acc, { node, schema }) => {
-      const [from, to] = [node.offset, node.offset + node.length];
-      acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
-      return acc;
-    }, {} as { [x: string]: any });
-  });
-}
-
-const triggerSelectionCheck =
-  (
-    setMenu: (menu: any) => void,
-    setSchemaMap: (schemaMap: SchemaMap) => void,
-    schema: any
-  ) =>
-  (view: any): void => {
-    if (!view) {
-      setMenu(null);
-      return;
-    }
-
-    createNodeMap(view, schema).then((schemaMap) => setSchemaMap(schemaMap));
-    const possibleMenuTargets: any[] = [];
-    for (const { from, to } of view.visibleRanges) {
-      syntaxTree(view.state).iterate({
-        from,
-        to,
-        enter: (type, from, to, get) => {
-          const ranges = view.state.selection.ranges;
-          if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
-            return;
-          }
-          const node = get();
-          if (from <= ranges[0].from && to >= ranges[0].from) {
-            const bbox = view.coordsAtPos(from);
+function getMenuTarget(view: EditorView) {
+  const possibleMenuTargets: any[] = [];
+  for (const { from, to } of view.visibleRanges) {
+    syntaxTree(view.state).iterate({
+      from,
+      to,
+      enter: (type, from, to, get) => {
+        const ranges = view.state.selection.ranges;
+        if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
+          return;
+        }
+        const node = get();
+        if (from <= ranges[0].from && to >= ranges[0].from) {
+          const bbox = view.coordsAtPos(from);
+          if (bbox) {
             possibleMenuTargets.push({
               x: bbox.left,
               y: bbox.top,
@@ -77,22 +50,40 @@ const triggerSelectionCheck =
               to,
             });
           }
-        },
-      });
-      const smallestMenuTarget = possibleMenuTargets.reduce(
-        (acc, row) => {
-          const dist = row.to - row.from;
-          return dist < acc.dist ? { dist, target: row } : acc;
-        },
-        { dist: Infinity, target: null }
-      );
-      if (smallestMenuTarget.target) {
-        setMenu(smallestMenuTarget.target);
-      }
+        }
+      },
+    });
+    return possibleMenuTargets.reduce(
+      (acc, row) => {
+        const dist = row.to - row.from;
+        return dist < acc.dist ? { dist, target: row } : acc;
+      },
+      { dist: Infinity, target: null }
+    );
+  }
+}
+const triggerSelectionCheck =
+  (
+    setMenu: (menu: any) => void,
+    setSchemaMap: (schemaMap: SchemaMap) => void,
+    schema: any
+  ) =>
+  (view: EditorView): void => {
+    if (!view) {
+      setMenu(null);
+      return;
+    }
+
+    createNodeMap(schema, codeString(view, 0)).then((schemaMap) =>
+      setSchemaMap(schemaMap)
+    );
+    const smallestMenuTarget = getMenuTarget(view);
+    if (smallestMenuTarget.target) {
+      setMenu(smallestMenuTarget.target);
     }
   };
 
-function calcWidgetRangeSets(v: any) {
+function calcWidgetRangeSets(v: ViewUpdate) {
   const decSets = (v.view as any).docView.decorations
     .map((x: any) => x.chunk[0])
     .filter((x: any) => x)
@@ -137,6 +128,7 @@ export default function Editor(props: Props) {
   ) => {
     view.dispatch(view!.state.update({ changes: { from, to, insert } }));
   };
+  // console.log(selectionLocal?.ranges[0].from, selectionLocal?.ranges[0].to);
 
   // THIS TRIO OF EFFECTS HANDLES THE On/Off projection stuff, and it is very cursed, be warned
   // figure out the range sets for the projections
@@ -188,6 +180,10 @@ export default function Editor(props: Props) {
               triggerSelectionCheck(setMenu, setSchemaMap, schema)
             )
           ),
+          // EditorState.changeFilter.of((x) => {
+          //   console.log("xxx", x);
+          //   return true;
+          // }),
           basicSetup,
           languageConf.of(json()),
           keymap.of([indentWithTab]),
@@ -254,30 +250,31 @@ export default function Editor(props: Props) {
   return (
     <div className="editor-container">
       <div ref={cmParent} />
-      {menu?.x && (
-        <ErrorBoundary>
-          <div
-            className="cm-annotation-menu"
-            style={{ top: menu.y - 30, left: menu.x }}
-          >
-            <ContentToMenuItem
-              schemaMap={schemaMap}
-              projections={projections || []}
-              view={view!}
-              syntaxNode={menu.node}
-              codeUpdate={(codeUpdate: UpdateDispatch) => {
-                simpleUpdate(
-                  view!,
-                  codeUpdate.from,
-                  codeUpdate.to,
-                  codeUpdate.value
-                );
-                setMenu(null);
-              }}
-            />
-          </div>
-        </ErrorBoundary>
-      )}
+      <ErrorBoundary>
+        <PopoverMenu
+          schemaMap={schemaMap}
+          closeMenu={() => {
+            setMenu(null);
+            view?.contentDOM.focus();
+            // setTimeout(() => {
+            //   view?.dispatch({ selection: selectionLocal });
+            // }, 1);
+          }}
+          projections={projections || []}
+          view={view!}
+          syntaxNode={menu?.node}
+          codeUpdate={(codeUpdate: UpdateDispatch) => {
+            simpleUpdate(
+              view!,
+              codeUpdate.from,
+              codeUpdate.to,
+              codeUpdate.value
+            );
+          }}
+          xPos={menu ? menu.x : undefined}
+          yPos={menu ? menu.y : undefined}
+        />
+      </ErrorBoundary>
     </div>
   );
 }
