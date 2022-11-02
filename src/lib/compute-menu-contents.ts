@@ -8,17 +8,11 @@ import { SchemaMap } from "../components/Editor";
 
 type JSONSchema = any;
 
-export type MenuRow = { label: string; element: MenuElement };
+export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
-  | { type: "display"; content: string }
-  | { type: "button"; content: string; onSelect: MenuEvent }
-  | {
-      type: "row";
-      label?: string;
-      element: MenuElement[];
-      direction: "horizontal" | "vertical";
-    }
-  | { label: "CUSTOM"; element: JSX.Element; type: "projection" };
+  | { type: "display"; label?: string; content: string }
+  | { type: "button"; label?: string; content: string; onSelect: MenuEvent }
+  | { type: "projection"; label?: string; element: JSX.Element };
 
 //   TODO revisit to see if all are necessary
 interface ComponentProps {
@@ -26,20 +20,30 @@ interface ComponentProps {
   parsedContent: any;
   //   parentType: string; // todo this type can be improved
 }
-type Component = (props: ComponentProps) => MenuElement;
+type Component = (props: ComponentProps) => MenuRow[];
 type componentContainer = Record<string, Component>;
 
 const EnumPicker: Component = (props) => {
   const { content } = props;
-  return {
-    type: "row",
-    direction: "vertical",
-    element: (content.enum as any[]).map((val: string) => ({
-      type: "button",
-      content: val,
-      onSelect: { type: "simpleSwap", payload: `"${val}"` },
-    })),
-  };
+  //   return {
+  //     type: "row",
+  //     direction: "vertical",
+  //     element: (content.enum as any[]).map((val: string) => ({
+  //       type: "button",
+  //       content: val,
+  //       onSelect: { type: "simpleSwap", payload: `"${val}"` },
+  //     })),
+  //   };
+  return [
+    {
+      label: "content",
+      elements: (content.enum as any[]).map((val: string) => ({
+        type: "button",
+        content: val,
+        onSelect: { type: "simpleSwap", payload: `"${val}"` },
+      })),
+    },
+  ];
 };
 
 function simpleFillout(content: JSONSchema) {
@@ -65,12 +69,10 @@ function simpleFillout(content: JSONSchema) {
 const ObjPicker: Component = (props) => {
   const { content, parsedContent } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
-  return {
-    type: "row",
-    direction: "horizontal",
-    element: [
-      { type: "display", content: "add fields" },
-      ...(Object.entries(content.properties || {})
+  return [
+    {
+      label: "Add Fields",
+      elements: Object.entries(content.properties || {})
         .filter((x) => !currentKeys.has(x[0]))
         .map(([content, prop]) => ({
           type: "button",
@@ -79,9 +81,17 @@ const ObjPicker: Component = (props) => {
             type: "addObjectKey",
             payload: { key: content, value: simpleFillout(prop) as any },
           },
-        })) as MenuElement[]),
-    ],
-  };
+        })),
+    },
+  ];
+  //   return {
+  //     type: "row",
+  //     direction: "horizontal",
+  //     element: [
+  //       { type: "display", content: "add fields" },
+  //       ...,
+  //     ],
+  //   };
 };
 
 // TODO flatten nested anyOfs and remove duplicates
@@ -279,42 +289,51 @@ const AnyOfPicker: Component = (props) => {
   const anyOptions = bundleConstsToEnum(
     removeDupsInAnyOf(flattenAnyOf(content))
   );
-  return {
-    type: "row",
-    direction: "horizontal",
-    element: anyOptions.flatMap((opt, idx) => {
-      return [
-        opt.description && { type: "display", content: opt.description },
-        ...(opt.enum || []).map((val: string) => {
-          return {
+  const rows = anyOptions.flatMap((opt, idx) => {
+    return [
+      opt.description && {
+        label: "DESC",
+        elements: [{ type: "display", content: opt.description }],
+      },
+      opt.enum.length && {
+        label: "PICK",
+        elements: opt.enum.map((val: string) => ({
+          type: "button",
+          content: val,
+          onSelect: { type: "simpleSwap", payload: `"${val}"` },
+        })),
+      },
+      // think these might be wrong
+      ...(opt.type === "object" ? AnyOfObjOptionalFieldPicker(opt, idx) : []),
+      ...(opt.type === "array" ? AnyOfArray(opt, idx) : []),
+      simpleType.has(opt.type) && {
+        label: "STUFF",
+        elements: [
+          opt.$$labeledType && {
+            type: "display",
+            content: opt.$$labeledType,
+          },
+          {
             type: "button",
-            content: val,
-            onSelect: { type: "simpleSwap", payload: `"${val}"` },
-          };
-        }),
-        ...(opt.type === "object" ? AnyOfObjOptionalFieldPicker(opt, idx) : []),
-        ...(opt.type === "array" ? AnyOfArray(opt, idx) : []),
-        simpleType.has(opt.type) && {
-          direction: "vertical",
-          element: [
-            opt.$$labeledType && {
-              type: "display",
-              content: opt.$$labeledType,
+            content: `switch to ${opt.type}`,
+            onSelect: {
+              type: "simpleSwap",
+              // payload: "null"
+              payload: simpleTypeMap[opt.type],
             },
-            {
-              type: "button",
-              content: `switch to ${opt.type}`,
-              onSelect: {
-                type: "simpleSwap",
-                // payload: "null"
-                payload: simpleTypeMap[opt.type],
-              },
-            },
-          ].filter((x) => x) as MenuElement[],
-        },
-      ];
-    }),
-  };
+          },
+        ].filter((x) => x) as MenuRow[],
+      },
+    ];
+  });
+  return rows;
+  //   return {
+  //     // type: "row",
+  //     // direction: "horizontal",
+  //     label: "????",
+  //     elements: ;
+  //     }),
+  //   };
   // );
 };
 
@@ -328,25 +347,27 @@ const AnyOfPicker: Component = (props) => {
 //     </div>
 //   );
 // }
-
-const GenericComponent: Component = (props) => {
-  return { type: "display", content: "hi generic" };
+const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
+  return [{ label: "TYPE", elements: [{ type: "display", content }] }];
 };
+
+const GenericComponent = makeSimpleComponent("hi generic");
 
 const PropertyNameComponent: Component = (props) => {
   const { parsedContent } = props;
-  return {
-    type: "row",
-    direction: "horizontal",
-    element: [
-      { type: "display", content: `${parsedContent}` },
-      {
-        type: "button",
-        content: "remove key",
-        onSelect: { type: "removeObjectKey" },
-      },
-    ],
-  };
+  return [
+    {
+      label: "PROPERTY",
+      elements: [
+        { type: "display", content: `${parsedContent}` },
+        {
+          type: "button",
+          content: "remove key",
+          onSelect: { type: "removeObjectKey" },
+        },
+      ],
+    },
+  ];
 };
 
 const ObjectComponent: Component = (props) => {
@@ -356,7 +377,9 @@ const ObjectComponent: Component = (props) => {
   //     type: "addObjectKey",
   //     payload: { key, value },
   //   });
-  return { type: "display", content: "add field" };
+  return [
+    { label: "TYPE", elements: [{ type: "display", content: "add field" }] },
+  ];
   //   return (
   //     <div>
   //       <div>Add field</div>
@@ -373,74 +396,43 @@ const ObjectComponent: Component = (props) => {
   //   );
 };
 
-const ParentIsPropretyComponent: Component = (props) => {
-  return { type: "display", content: "hi property" };
-};
+const ParentIsPropertyComponent = makeSimpleComponent("hi property");
+
 const nullInsert: MenuEvent = { type: "nullEvent" };
 const ParentIsArrayComponent: Component = (props) => {
-  return {
-    direction: "horizontal",
-    type: "row",
-    element: [
-      {
-        type: "button",
-        content: "Remove Item",
-        onSelect: { type: "removeElementFromArray" },
-      },
-      {
-        direction: "vertical",
-        type: "row",
-        element: [
-          {
-            type: "button",
-            content: "Move item forward",
-            onSelect: { ...nullInsert },
-          },
-          {
-            type: "button",
-            content: "Move item backward",
-            onSelect: { ...nullInsert },
-          },
-          {
-            type: "button",
-            content: "Set item as Last",
-            onSelect: { ...nullInsert },
-          },
-          {
-            type: "button",
-            content: "Set item as First",
-            onSelect: { ...nullInsert },
-          },
-        ],
-      },
-    ],
-  };
+  return [
+    {
+      label: "PROPERTY",
+      elements: [
+        {
+          type: "button",
+          content: "Remove Item",
+          onSelect: { type: "removeElementFromArray" },
+        },
+        {
+          type: "button",
+          content: "Move item forward",
+          onSelect: { ...nullInsert },
+        },
+        {
+          type: "button",
+          content: "Move item backward",
+          onSelect: { ...nullInsert },
+        },
+        {
+          type: "button",
+          content: "Set item as Last",
+          onSelect: { ...nullInsert },
+        },
+        {
+          type: "button",
+          content: "Set item as First",
+          onSelect: { ...nullInsert },
+        },
+      ],
+    },
+  ];
 };
-
-const ArrayComponent: Component = () => ({
-  type: "display",
-  content: "hi array",
-});
-
-const StringComponent: Component = () => ({
-  type: "display",
-  content: "hi string",
-});
-
-const NumberComponent: Component = () => ({
-  type: "display",
-  content: "hi number",
-});
-
-const BooleanComponent: Component = () => ({
-  type: "display",
-  content: "hi boolean",
-});
-
-const NullComponent: Component = () => ({
-  type: "display",
-  content: "hi null",
-});
 
 const menuSwitch: componentContainer = {
   EnumPicker,
@@ -451,14 +443,14 @@ const menuSwitch: componentContainer = {
 const typeBasedComponents: componentContainer = {
   Object: ObjectComponent,
   PropertyName: PropertyNameComponent,
-  Array: ArrayComponent,
-  String: StringComponent,
-  Number: NumberComponent,
-  BooleanComponent: BooleanComponent,
-  Null: NullComponent,
+  Array: makeSimpleComponent("hi array"),
+  String: makeSimpleComponent("hi string"),
+  Number: makeSimpleComponent("hi number"),
+  BooleanComponent: makeSimpleComponent("hi boolean"),
+  Null: makeSimpleComponent("hi null"),
 };
 const parentResponses: componentContainer = {
-  Property: ParentIsPropretyComponent,
+  Property: ParentIsPropertyComponent,
   Array: ParentIsArrayComponent,
   // TODO: do i need to fill in all the other options for this?
 };
@@ -493,14 +485,13 @@ function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
 }
 
 export function generateMenuContent(
-  //   view: EditorView,
   currentCodeSlice: string,
   syntaxNode: SyntaxNode,
   schemaMap: SchemaMap
 ): MenuRow[] {
-  //   const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
   const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
 
+  //   TODO these should be functions
   const type = syntaxNode.type.name;
   let typeBasedProperty: Component | null = null;
   if (typeBasedComponents[type]) {
@@ -522,44 +513,33 @@ export function generateMenuContent(
     contentBasedItem = menuSwitch.AnyOfPicker;
   }
 
+  //   assemble the content for display
   const parsedContent = simpleParse(currentCodeSlice);
-
-  const content: MenuRow[] = [
-    schemaChunk?.description && {
+  const content: MenuRow[] = [];
+  if (schemaChunk?.description) {
+    content.push({
       label: "DESC",
-      element: {
-        type: "display",
-        content: schemaChunk.description,
-      },
-    },
-    schemaChunk &&
-      !!contentBasedItem && {
-        label: "CONTENT",
-        element: contentBasedItem({
-          parsedContent,
-          //   parentType,
-          //   ...props,
-          content: schemaChunk,
-        }),
-      },
-    typeBasedProperty && {
-      label: "TYPE",
-      element: typeBasedProperty({
-        parsedContent,
-        // parentType,
-        // ...props,
-        content: schemaChunk,
-      }),
-    },
-    parentResponses[parentType] && {
-      label: "PARENT",
-      element: parentResponses[parentType]({
-        parsedContent,
-        // parentType,
-        // ...props,
-        content: schemaChunk,
-      }),
-    },
-  ].filter((x) => x);
+      elements: [{ type: "display", content: schemaChunk.description }],
+    });
+  }
+  if (schemaChunk && !!contentBasedItem) {
+    contentBasedItem({
+      parsedContent,
+      content: schemaChunk,
+    }).forEach((x) => content.push(x));
+  }
+  if (typeBasedProperty) {
+    typeBasedProperty({
+      parsedContent,
+      content: schemaChunk,
+    }).forEach((x) => content.push(x));
+  }
+
+  if (parentResponses[parentType]) {
+    parentResponses[parentType]({
+      parsedContent,
+      content: schemaChunk,
+    }).forEach((x) => content.push(x));
+  }
   return content;
 }

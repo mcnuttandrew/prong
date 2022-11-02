@@ -13,7 +13,6 @@ import {
   MenuElement,
   MenuRow,
 } from "../lib/compute-menu-contents";
-import isEqual from "lodash.isequal";
 
 import {
   keyPathMatchesQuery,
@@ -42,12 +41,13 @@ interface MenuProps {
   yPos: number | undefined;
 }
 
+type SelectionRoute = [number, number];
+
 interface RenderMenuElementProps {
   eventDispatch: (menuEvent: MenuEvent) => void;
   //   menuElement: MenuElement;
   menuElement: any;
-  selectedRouting: number[];
-  elementRouting: number[];
+  isSelected: boolean;
 }
 
 function RenderMenuElementDisplay(props: RenderMenuElementProps) {
@@ -57,9 +57,7 @@ function RenderMenuElementDisplay(props: RenderMenuElementProps) {
         maxHeight: "200px",
         overflowY: "auto",
         fontSize: "13px",
-        background: isEqual(props.selectedRouting, props.elementRouting)
-          ? "red"
-          : "none",
+        background: props.isSelected ? "red" : "none",
       }}
     >
       <ReactMarkdown>{props.menuElement.content}</ReactMarkdown>
@@ -72,9 +70,7 @@ function RenderMenuElementButton(props: RenderMenuElementProps) {
     <button
       onClick={() => props.eventDispatch(props.menuElement.onSelect)}
       style={{
-        background: isEqual(props.selectedRouting, props.elementRouting)
-          ? "red"
-          : "none",
+        background: props.isSelected ? "red" : "none",
       }}
     >
       {props.menuElement.content}
@@ -82,77 +78,22 @@ function RenderMenuElementButton(props: RenderMenuElementProps) {
   );
 }
 
-function RenderMenuElementRow(props: RenderMenuElementProps) {
-  const dir = props.menuElement.direction;
-  return (
-    <div
-      style={{
-        background: isEqual(props.selectedRouting, props.elementRouting)
-          ? "red"
-          : "none",
-      }}
-      className={classNames({
-        flex: dir === "horizontal",
-        "flex-down": dir === "vertical",
-      })}
-    >
-      {props.menuElement.element.map(
-        (menuElement: MenuElement, idx: number) => (
-          <RenderMenuElement
-            {...props}
-            menuElement={menuElement}
-            elementRouting={[...props.elementRouting, idx]}
-            key={idx}
-          />
-        )
-      )}
-    </div>
-  );
-}
-
 const dispatch: Record<string, (props: RenderMenuElementProps) => JSX.Element> =
   {
     display: RenderMenuElementDisplay,
     button: RenderMenuElementButton,
-    row: RenderMenuElementRow,
+    // row: RenderMenuElementRow,
     projection: (props) => props.menuElement.element,
   };
 function RenderMenuElement(props: RenderMenuElementProps): JSX.Element {
   return dispatch[props.menuElement.type](props);
 }
 
-// function SpatialDisplayToTree
-
-function traverseContentTreeToNode(
+const traverseContentTreeToNode: (
   tree: MenuRow[],
-  path: number[]
-): MenuElement | MenuRow | null {
-  if (!path.length || !tree.length) {
-    return null;
-  }
-  if (path.length === 1) {
-    return tree[path[0]];
-  }
-  //   console.log(tree, path);
-  function helper(
-    node: MenuElement,
-    currentPath: number[]
-  ): MenuElement | null {
-    // console.log(node, currentPath);
-    if (!currentPath.length) {
-      return node;
-    }
-    if (node.type !== "row") {
-      return null;
-    }
-    const [head, ...tail] = currentPath.slice(1);
-    return helper(node.element[head], tail);
-  }
-  // return
-  const result = helper(tree[path[0]].element, path.slice(1));
-  //   console.log(result);
-  return result;
-}
+  path: SelectionRoute
+) => MenuElement | MenuRow | null = (tree, [row, col]) =>
+  tree[row].elements[col - 1];
 
 function sortContentTree(content: MenuRow[]) {
   const labelWeights: Record<string, number> = {
@@ -170,63 +111,57 @@ type MoveDirections = "up" | "left" | "right" | "down";
 function buildMoveCursor(
   dir: MoveDirections,
   content: MenuRow[],
-  route: number[]
-): number[] | false {
-  const target = traverseContentTreeToNode(content, route);
-  const atRoot = route.length === 1;
-  const containerDirection = atRoot
-    ? "vertical"
-    : (
-        traverseContentTreeToNode(
-          content,
-          route.slice(0, route.length - 1)
-        ) as any
-      ).direction;
-  console.log("here", containerDirection, target);
-  const atLeaf = !atRoot && (target as MenuElement).type !== "row";
-  let maxIndexValue = atRoot ? content.length - 1 : Infinity;
-  let newRoute = [...route];
-  const tailValue = newRoute[newRoute.length - 1];
-  // if (dir === "up") {
-  //   if (tailValue - 1 < 0) {
-  //     if (newRoute.length > 1) {
-  //       newRoute.pop();
-  //     } else {
-  //       closeMenu();
-  //     }
-  //   } else {
-  //     newRoute[newRoute.length - 1] = tailValue - 1;
-  //   }
-  // }
-  const negativeIndex = tailValue - 1 < 0;
-  if (dir === "up" && negativeIndex && newRoute.length > 1) {
-    newRoute.pop();
-  }
-  if (dir === "up" && negativeIndex && !(newRoute.length > 1)) {
+  route: SelectionRoute
+): SelectionRoute | false {
+  let row = route[0];
+  let col = route[1];
+  const leafGroupSize = content[row].elements.length;
+  const numRows = content.length;
+
+  if (dir === "up" && row - 1 < 0) {
     return false;
   }
-  if (dir === "up" && !negativeIndex) {
-    newRoute[newRoute.length - 1] = tailValue - 1;
+  if (dir === "up" && row - 1 >= 0) {
+    row -= 1;
+    col = 0;
+  }
+  if (dir === "down" && row < numRows) {
+    row += 1;
+    col = 0;
+  }
+  if (dir === "left") {
+    col = Math.max(col - 1, 0);
+  }
+  if (dir === "right") {
+    col = Math.min(col + 1, leafGroupSize);
   }
 
-  if (dir === "down") {
-    newRoute[newRoute.length - 1] = Math.min(tailValue + 1, maxIndexValue);
-  }
-  if (dir === "left" && !atRoot) {
-    newRoute.pop();
-  }
-  if (dir === "right" && !atLeaf) {
-    newRoute.push(0);
-  }
-
-  const moveDownTree = false;
-  const moveUpTree = false;
-  const moveToNextSibling = false;
-  const moveToPrevSibling = false;
-
-  //   setSelectedRouting(newRoute);
-  return newRoute;
+  return [row, col];
 }
+
+const prepProjections =
+  (
+    view: EditorView,
+    node: SyntaxNode,
+    keyPath: (string | number)[],
+    currentValue: string
+  ) =>
+  (proj: Projection) => {
+    return {
+      label: "CUSTOM",
+      elements: [
+        {
+          type: "projection",
+          element: proj.projection({
+            view,
+            node,
+            keyPath,
+            currentValue,
+          }),
+        },
+      ],
+    };
+  };
 
 export default function ContentToMenuItem(props: MenuProps) {
   const {
@@ -239,16 +174,15 @@ export default function ContentToMenuItem(props: MenuProps) {
     xPos,
     yPos,
   } = props;
-  const [selectedRouting, setSelectedRouting] = useState<number[]>([]);
+  const [selectedRouting, setSelectedRouting] = useState<SelectionRoute>([
+    0, 0,
+  ]);
 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    // console.log("here", syntaxNode);
     if (syntaxNode) {
       container.current!.focus();
-      setSelectedRouting([0]);
-    } else {
-      setSelectedRouting([]);
+      setSelectedRouting([0, 0]);
     }
     // todo on exit refocus
   }, [syntaxNode]);
@@ -265,31 +199,20 @@ export default function ContentToMenuItem(props: MenuProps) {
     : "";
   const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
 
-  const content: MenuRow[] =
-    !syntaxNode || !syntaxNode.parent
-      ? []
-      : sortContentTree(
-          [
-            ...generateMenuContent(currentCodeSlice, syntaxNode, schemaMap),
-            ...projections
-              .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-              .filter((proj) => proj.type === "tooltip")
-              .map((proj) => {
-                return {
-                  label: "CUSTOM",
-                  element: proj.projection({
-                    view,
-                    node: syntaxNode,
-                    keyPath,
-                    currentValue: currentCodeSlice,
-                  }),
-                };
-              }),
-          ].filter((x) => x.element) as MenuRow[]
-        );
+  let content: MenuRow[] = [];
+  if (syntaxNode && syntaxNode.parent) {
+    content = [
+      ...generateMenuContent(currentCodeSlice, syntaxNode, schemaMap),
+      ...projections
+        .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+        .filter((proj) => proj.type === "tooltip")
+        .map(prepProjections(view, syntaxNode, keyPath, currentCodeSlice)),
+    ] as MenuRow[];
+  }
 
   function selectCurrentElement() {
     let target = traverseContentTreeToNode(content, selectedRouting);
+    console.log("asd", target);
     if (!target) {
       return;
     }
@@ -299,9 +222,9 @@ export default function ContentToMenuItem(props: MenuProps) {
     target = target as MenuElement;
     if (target.type === "button") {
       eventDispatch(target.onSelect);
+      // hack
+      setTimeout(() => closeMenu(), 30);
     }
-    // hack
-    setTimeout(() => closeMenu(), 30);
   }
 
   const keyMap = {
@@ -332,7 +255,6 @@ export default function ContentToMenuItem(props: MenuProps) {
       closeMenu();
     },
   };
-  const [head, ...tail] = selectedRouting;
   //   traverseContentTreeToNode(content, selectedRouting);
 
   //   TODO figure out a signal for when hotkeys are finished rebinding, add a loader to support
@@ -359,7 +281,7 @@ export default function ContentToMenuItem(props: MenuProps) {
         }
       >
         <div className="cm-annotation-widget-popover-container">
-          {content.map(({ label, element }, idx) => {
+          {content.map(({ label, elements }, idx) => {
             return (
               <div
                 className="cm-annotation-widget-popover-container-row"
@@ -369,18 +291,23 @@ export default function ContentToMenuItem(props: MenuProps) {
                   className={classNames({
                     "cm-annotation-widget-popover-container-row-label": true,
                     "cm-annotation-widget-element-selected":
-                      head === idx && !tail.length,
+                      selectedRouting[0] === idx && selectedRouting[1] === 0,
                   })}
-                  onClick={() => setSelectedRouting([idx])}
+                  onClick={() => setSelectedRouting([idx, 0])}
                 >
                   {label}
                 </div>
-                <RenderMenuElement
-                  menuElement={element}
-                  eventDispatch={eventDispatch}
-                  selectedRouting={selectedRouting}
-                  elementRouting={[idx, 0]}
-                />
+                {elements.map((element, jdx) => (
+                  <RenderMenuElement
+                    menuElement={element}
+                    eventDispatch={eventDispatch}
+                    isSelected={
+                      selectedRouting[0] === idx &&
+                      selectedRouting[1] === jdx + 1
+                    }
+                    key={jdx}
+                  />
+                ))}
               </div>
             );
           })}
