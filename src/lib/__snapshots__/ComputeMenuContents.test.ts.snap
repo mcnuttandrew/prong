@@ -188,31 +188,29 @@ Object {
 exports[`generateMenuContent 2`] = `
 Array [
   Object {
-    "element": Object {
-      "direction": "horizontal",
-      "element": Array [
-        Object {
-          "content": "undefined",
-          "type": "display",
+    "elements": Array [
+      Object {
+        "content": "undefined",
+        "type": "display",
+      },
+      Object {
+        "content": "remove key",
+        "onSelect": Object {
+          "type": "removeObjectKey",
         },
-        Object {
-          "content": "remove key",
-          "onSelect": Object {
-            "type": "removeObjectKey",
-          },
-          "type": "button",
-        },
-      ],
-      "type": "row",
-    },
-    "label": "TYPE",
+        "type": "button",
+      },
+    ],
+    "label": "PROPERTY",
   },
   Object {
-    "element": Object {
-      "content": "hi property",
-      "type": "display",
-    },
-    "label": "PARENT",
+    "elements": Array [
+      Object {
+        "content": "hi property",
+        "type": "display",
+      },
+    ],
+    "label": "TYPE",
   },
 ]
 `;

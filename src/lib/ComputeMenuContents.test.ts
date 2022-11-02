@@ -1,5 +1,5 @@
 import { generateMenuContent } from "./compute-menu-contents";
-import { findNodeByLocation, findNodeByText } from "./test-utils";
+import { findNodeByText } from "./test-utils";
 import { createNodeMap } from "./utils";
 
 const schema = {
