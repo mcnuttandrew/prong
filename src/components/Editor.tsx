@@ -6,20 +6,13 @@ import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { jsonLinter } from "../lib/Linter";
-import ErrorBoundary from "./ErrorBoundary";
-
-// import { ContentToMenuItem } from "../lib/widgets/popover-menu";
-import PopoverMenu from "./PopoverMenu";
-
-import { codeString } from "../lib/utils";
-import { getMatchingSchemas } from "../lib/from-vscode/validator";
-
 import { syntaxTree } from "@codemirror/language";
 
-// import { ASTKeyBinding } from "../lib/ASTKeyBinding";
+import { jsonLinter } from "../lib/Linter";
+import ErrorBoundary from "./ErrorBoundary";
+import PopoverMenu from "./PopoverMenu";
+import { createNodeMap, codeString } from "../lib/utils";
 import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
-
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
 
@@ -33,16 +26,6 @@ type Props = {
 };
 
 const languageConf = new Compartment();
-
-function createNodeMap(view: EditorView, schema: any) {
-  return getMatchingSchemas(schema, codeString(view, 0)).then((matches) => {
-    return matches.reduce((acc, { node, schema }) => {
-      const [from, to] = [node.offset, node.offset + node.length];
-      acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
-      return acc;
-    }, {} as { [x: string]: any });
-  });
-}
 
 function getMenuTarget(view: EditorView) {
   const possibleMenuTargets: any[] = [];
@@ -91,7 +74,9 @@ const triggerSelectionCheck =
       return;
     }
 
-    createNodeMap(view, schema).then((schemaMap) => setSchemaMap(schemaMap));
+    createNodeMap(schema, codeString(view, 0)).then((schemaMap) =>
+      setSchemaMap(schemaMap)
+    );
     const smallestMenuTarget = getMenuTarget(view);
     if (smallestMenuTarget.target) {
       setMenu(smallestMenuTarget.target);
@@ -266,35 +251,29 @@ export default function Editor(props: Props) {
     <div className="editor-container">
       <div ref={cmParent} />
       <ErrorBoundary>
-        <div
-          className="cm-annotation-menu"
-          style={
-            menu?.x ? { top: menu.y - 30, left: menu.x } : { display: "none" }
-          }
-        >
-          <PopoverMenu
-            schemaMap={schemaMap}
-            closeMenu={() => {
-              setMenu(null);
-              view?.contentDOM.focus();
-              setTimeout(() => {
-                view?.dispatch({ selection: selectionLocal });
-              }, 1);
-            }}
-            projections={projections || []}
-            view={view!}
-            syntaxNode={menu?.node}
-            codeUpdate={(codeUpdate: UpdateDispatch) => {
-              simpleUpdate(
-                view!,
-                codeUpdate.from,
-                codeUpdate.to,
-                codeUpdate.value
-              );
-              setMenu(null);
-            }}
-          />
-        </div>
+        <PopoverMenu
+          schemaMap={schemaMap}
+          closeMenu={() => {
+            setMenu(null);
+            view?.contentDOM.focus();
+            // setTimeout(() => {
+            //   view?.dispatch({ selection: selectionLocal });
+            // }, 1);
+          }}
+          projections={projections || []}
+          view={view!}
+          syntaxNode={menu?.node}
+          codeUpdate={(codeUpdate: UpdateDispatch) => {
+            simpleUpdate(
+              view!,
+              codeUpdate.from,
+              codeUpdate.to,
+              codeUpdate.value
+            );
+          }}
+          xPos={menu ? menu.x : undefined}
+          yPos={menu ? menu.y : undefined}
+        />
       </ErrorBoundary>
     </div>
   );

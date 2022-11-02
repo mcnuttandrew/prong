@@ -1,0 +1,218 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateMenuContent 1`] = `
+Object {
+  "0-206": Array [
+    Object {
+      "$defs": Object {
+        "veggie": Object {
+          "properties": Object {
+            "veggieLike": Object {
+              "$$labeledType": "veggieLike",
+              "description": "Do I like this vegetable?",
+              "type": "boolean",
+            },
+            "veggieName": Object {
+              "$$labeledType": "veggieName",
+              "description": "The name of the vegetable.",
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "veggieName",
+            "veggieLike",
+          ],
+          "type": "object",
+        },
+      },
+      "$id": "https://example.com/arrays.schema.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "A representation of a person, company, organization, or place",
+      "properties": Object {
+        "fruits": Object {
+          "$$labeledType": "fruits",
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "vegetables": Object {
+          "$$labeledType": "vegetables",
+          "items": Object {
+            "properties": Object {
+              "veggieLike": Object {
+                "$$labeledType": "veggieLike",
+                "description": "Do I like this vegetable?",
+                "type": "boolean",
+              },
+              "veggieName": Object {
+                "$$labeledType": "veggieName",
+                "description": "The name of the vegetable.",
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "veggieName",
+              "veggieLike",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+  ],
+  "119-123": Array [
+    Object {
+      "$$labeledType": "veggieLike",
+      "description": "Do I like this vegetable?",
+      "type": "boolean",
+    },
+  ],
+  "135-200": Array [
+    Object {
+      "properties": Object {
+        "veggieLike": Object {
+          "$$labeledType": "veggieLike",
+          "description": "Do I like this vegetable?",
+          "type": "boolean",
+        },
+        "veggieName": Object {
+          "$$labeledType": "veggieName",
+          "description": "The name of the vegetable.",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "veggieName",
+        "veggieLike",
+      ],
+      "type": "object",
+    },
+  ],
+  "14-43": Array [
+    Object {
+      "$$labeledType": "fruits",
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+  ],
+  "157-167": Array [
+    Object {
+      "$$labeledType": "veggieName",
+      "description": "The name of the vegetable.",
+      "type": "string",
+    },
+  ],
+  "16-23": Array [
+    Object {
+      "type": "string",
+    },
+  ],
+  "189-194": Array [
+    Object {
+      "$$labeledType": "veggieLike",
+      "description": "Do I like this vegetable?",
+      "type": "boolean",
+    },
+  ],
+  "25-33": Array [
+    Object {
+      "type": "string",
+    },
+  ],
+  "35-41": Array [
+    Object {
+      "type": "string",
+    },
+  ],
+  "61-204": Array [
+    Object {
+      "$$labeledType": "vegetables",
+      "items": Object {
+        "properties": Object {
+          "veggieLike": Object {
+            "$$labeledType": "veggieLike",
+            "description": "Do I like this vegetable?",
+            "type": "boolean",
+          },
+          "veggieName": Object {
+            "$$labeledType": "veggieName",
+            "description": "The name of the vegetable.",
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "veggieName",
+          "veggieLike",
+        ],
+        "type": "object",
+      },
+      "type": "array",
+    },
+  ],
+  "67-129": Array [
+    Object {
+      "properties": Object {
+        "veggieLike": Object {
+          "$$labeledType": "veggieLike",
+          "description": "Do I like this vegetable?",
+          "type": "boolean",
+        },
+        "veggieName": Object {
+          "$$labeledType": "veggieName",
+          "description": "The name of the vegetable.",
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "veggieName",
+        "veggieLike",
+      ],
+      "type": "object",
+    },
+  ],
+  "89-97": Array [
+    Object {
+      "$$labeledType": "veggieName",
+      "description": "The name of the vegetable.",
+      "type": "string",
+    },
+  ],
+}
+`;
+
+exports[`generateMenuContent 2`] = `
+Array [
+  Object {
+    "element": Object {
+      "direction": "horizontal",
+      "element": Array [
+        Object {
+          "content": "undefined",
+          "type": "display",
+        },
+        Object {
+          "content": "remove key",
+          "onSelect": Object {
+            "type": "removeObjectKey",
+          },
+          "type": "button",
+        },
+      ],
+      "type": "row",
+    },
+    "label": "TYPE",
+  },
+  Object {
+    "element": Object {
+      "content": "hi property",
+      "type": "display",
+    },
+    "label": "PARENT",
+  },
+]
+`;

@@ -1,22 +1,10 @@
-// import React, { useState, useEffect, useRef } from "react";
-// import ReactMarkdown from "react-markdown";
-// import { EditorView } from "@codemirror/view";
-// import { EditorSelection } from "@codemirror/state";
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
 import { EditorView } from "@codemirror/view";
 import * as Json from "jsonc-parser";
 
-import {
-  codeString,
-  MenuEvent,
-  classNames,
-  keyPathMatchesQuery,
-  syntaxNodeToKeyPath,
-  modifyCodeByCommand,
-} from "./utils";
-// import { Projection } from "./widgets";
-import { SchemaMap, UpdateDispatch } from "../components/Editor";
+import { codeString, MenuEvent } from "./utils";
+import { SchemaMap } from "../components/Editor";
 
 type JSONSchema = any;
 
@@ -34,7 +22,6 @@ export type MenuElement =
 
 //   TODO revisit to see if all are necessary
 interface ComponentProps {
-  //   eventDispatch: (menuEvent: MenuEvent) => void;
   content: JSONSchema;
   parsedContent: any;
   //   parentType: string; // todo this type can be improved
@@ -46,7 +33,7 @@ const EnumPicker: Component = (props) => {
   const { content } = props;
   return {
     type: "row",
-    direction: "horizontal",
+    direction: "vertical",
     element: (content.enum as any[]).map((val: string) => ({
       type: "button",
       content: val,
@@ -506,11 +493,12 @@ function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
 }
 
 export function generateMenuContent(
-  view: EditorView,
+  //   view: EditorView,
+  currentCodeSlice: string,
   syntaxNode: SyntaxNode,
   schemaMap: SchemaMap
 ): MenuRow[] {
-  const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
+  //   const currentCodeSlice = codeString(view, syntaxNode.from, syntaxNode.to);
   const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
 
   const type = syntaxNode.type.name;

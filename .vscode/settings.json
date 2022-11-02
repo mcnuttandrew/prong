@@ -6,6 +6,7 @@
         "lezer",
         "linebreak",
         "pickr",
-        "simonwep"
+        "simonwep",
+        "tabindex"
     ]
 }

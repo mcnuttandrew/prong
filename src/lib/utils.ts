@@ -2,6 +2,7 @@ import { EditorView } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
 import { UpdateDispatch } from "../components/Editor";
+import { getMatchingSchemas } from "../lib/from-vscode/validator";
 export function codeString(
   view: EditorView,
   from: number,
@@ -764,3 +765,13 @@ const CmdTable: Record<string, ModifyCmd<any>> = {
 };
 export const modifyCodeByCommand: ModifyCmd<any> = (value, syntaxNode) =>
   CmdTable[value.type](value, syntaxNode);
+
+export function createNodeMap(schema: any, doc: string) {
+  return getMatchingSchemas(schema, doc).then((matches) => {
+    return matches.reduce((acc, { node, schema }) => {
+      const [from, to] = [node.offset, node.offset + node.length];
+      acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
+      return acc;
+    }, {} as { [x: string]: any });
+  });
+}
