@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { EditorView } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { HotKeys, configure } from "react-hotkeys";
+import { LintError } from "../../src/lib/Linter";
 
 import {
   generateMenuContent,
@@ -28,17 +29,6 @@ configure({
   simulateMissingKeyPressEvents: false,
   ignoreKeymapAndHandlerChangesByDefault: false,
 });
-
-interface MenuProps {
-  projections: Projection[];
-  view: EditorView;
-  syntaxNode: SyntaxNode;
-  schemaMap: SchemaMap;
-  closeMenu: () => void;
-  codeUpdate: (codeUpdate: UpdateDispatch) => void;
-  xPos: number | undefined;
-  yPos: number | undefined;
-}
 
 type SelectionRoute = [number, number];
 
@@ -105,14 +95,25 @@ const prepProjections =
     };
   };
 
-export default function ContentToMenuItem(props: MenuProps) {
+export default function ContentToMenuItem(props: {
+  projections: Projection[];
+  view: EditorView;
+  syntaxNode: SyntaxNode;
+  schemaMap: SchemaMap;
+  closeMenu: () => void;
+  codeUpdate: (codeUpdate: UpdateDispatch) => void;
+  xPos: number | undefined;
+  yPos: number | undefined;
+  lints: LintError[];
+}) {
   const {
-    schemaMap,
-    projections,
-    view,
-    syntaxNode,
-    codeUpdate,
     closeMenu,
+    codeUpdate,
+    lints,
+    projections,
+    schemaMap,
+    syntaxNode,
+    view,
     xPos,
     yPos,
   } = props;
@@ -147,7 +148,6 @@ export default function ContentToMenuItem(props: MenuProps) {
   const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
 
   useEffect(() => {
-    console.log("ere");
     if (!(syntaxNode && syntaxNode.parent)) {
       return;
     }
@@ -157,9 +157,13 @@ export default function ContentToMenuItem(props: MenuProps) {
         .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
         .filter((proj) => proj.type === "tooltip")
         .map(prepProjections(view, syntaxNode, keyPath, currentCodeSlice)),
+      ...lints.map((lint) => ({
+        label: "LINT ERROR",
+        elements: [{ type: "display", content: lint.message }],
+      })),
     ] as MenuRow[]);
     // eslint-disable-next-line
-  }, [syntaxNode, schemaMap]);
+  }, [syntaxNode, schemaMap, lints]);
 
   function selectCurrentElement() {
     let target = traverseContentTreeToNode(content, selectedRouting);
@@ -201,12 +205,9 @@ export default function ContentToMenuItem(props: MenuProps) {
     moveDown: () => moveCursor("down"),
     moveUp: () => moveCursor("up"),
     selectCurrentElement: () => selectCurrentElement(),
-    closeMenu: () => {
-      closeMenu();
-    },
+    closeMenu,
   };
-  //   traverseContentTreeToNode(content, selectedRouting);
-  //   TODO figure out a signal for when hotkeys are finished rebinding, add a loader to support
+
   return (
     <HotKeys
       className=""
@@ -237,6 +238,7 @@ export default function ContentToMenuItem(props: MenuProps) {
         }
       >
         <div className="cm-annotation-widget-popover-container">
+          <div>Menu</div>
           {content.map((row, idx) => {
             const { label, elements } = row;
             return (

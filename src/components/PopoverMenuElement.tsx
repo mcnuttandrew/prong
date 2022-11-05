@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { MenuEvent } from "../lib/utils";
+import { MenuEvent, classNames } from "../lib/utils";
 
 type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
@@ -9,20 +9,19 @@ type MenuElementRenderer<T> = (props: {
   isSelected: boolean;
 }) => JSX.Element;
 
-const RenderMenuElementDisplay: MenuElementRenderer<any> = (props) => (
+const DisplayElement: MenuElementRenderer<any> = (props) => (
   <div
-    style={{
-      maxHeight: "200px",
-      overflowY: "auto",
-      fontSize: "13px",
-      background: props.isSelected ? "red" : "none",
-    }}
+    className={classNames({
+      "cm-annotation-render-widget-display": true,
+      "cm-annotation-widget-element": !props.isSelected,
+      "cm-annotation-widget-element-selected": props.isSelected,
+    })}
   >
     <ReactMarkdown>{props.menuElement.content}</ReactMarkdown>
   </div>
 );
 
-const RenderMenuElementInput: MenuElementRenderer<any> = (props) => {
+const InputElement: MenuElementRenderer<any> = (props) => {
   const { isSelected, menuElement, eventDispatch } = props;
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -30,7 +29,6 @@ const RenderMenuElementInput: MenuElementRenderer<any> = (props) => {
       ref.current?.focus();
     }
   }, [isSelected]);
-  const background = isSelected ? "red" : "none";
   const onSubmit = () => {
     const response = {
       ...menuElement.onSelect,
@@ -42,7 +40,13 @@ const RenderMenuElementInput: MenuElementRenderer<any> = (props) => {
     eventDispatch(response, true);
   };
   return (
-    <div style={{ background }} className="flex-down">
+    <div
+      className={classNames({
+        "flex-down": true,
+        "cm-annotation-widget-element": !props.isSelected,
+        "cm-annotation-widget-element-selected": props.isSelected,
+      })}
+    >
       <input
         ref={ref}
         title={`Input element for ${menuElement.label}`}
@@ -58,22 +62,39 @@ const RenderMenuElementInput: MenuElementRenderer<any> = (props) => {
   );
 };
 
-const RenderMenuElementButton: MenuElementRenderer<any> = (props) => (
-  <button
-    onClick={() => props.eventDispatch(props.menuElement.onSelect, true)}
-    style={{
-      background: props.isSelected ? "red" : "none",
-    }}
+const ButtonElement: MenuElementRenderer<any> = (props) => (
+  <div
+    className={classNames({
+      "cm-annotation-widget-element": !props.isSelected,
+      "cm-annotation-widget-element-selected": props.isSelected,
+    })}
   >
-    {props.menuElement.content}
-  </button>
+    <button
+      onClick={() => props.eventDispatch(props.menuElement.onSelect, true)}
+    >
+      {props.menuElement.content}
+    </button>
+  </div>
 );
 
+const DropdownElement: MenuElementRenderer<any> = (props) => {
+  return (
+    <div>
+      <select title={props.menuElement.type}>
+        {props.menuElement.content.map((x: string) => {
+          return <option value={x}>{x}</option>;
+        })}
+      </select>
+    </div>
+  );
+};
+
 const dispatch: Record<string, MenuElementRenderer<any>> = {
-  display: RenderMenuElementDisplay,
-  button: RenderMenuElementButton,
+  display: DisplayElement,
+  button: ButtonElement,
   projection: (props) => props.menuElement.element,
-  "free-input": RenderMenuElementInput,
+  "free-input": InputElement,
+  dropdown: DropdownElement,
 };
 const RenderMenuElement: MenuElementRenderer<any> = (props) => {
   return dispatch[props.menuElement.type](props);

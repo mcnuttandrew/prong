@@ -8,13 +8,19 @@ import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { syntaxTree } from "@codemirror/language";
 
-import { jsonLinter } from "../lib/Linter";
+import { jsonLinter, lintCode, LintError } from "../lib/Linter";
 import ErrorBoundary from "./ErrorBoundary";
 import PopoverMenu from "./PopoverMenu";
 import { createNodeMap, codeString } from "../lib/utils";
 import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 import { widgetsPlugin, Projection } from "../lib/widgets";
-import { cmStatePlugin, setSchema, setProjections } from "../lib/cmState";
+import {
+  cmStatePlugin,
+  setSchema,
+  setProjections,
+  setSchemaTypings,
+  setDiagnostics,
+} from "../lib/cmState";
 
 export type UpdateDispatch = { from: number; to: number; value: string };
 
@@ -87,10 +93,12 @@ function calcWidgetRangeSets(v: ViewUpdate) {
   if (!possibleSetTargets) {
     return {};
   }
-  const ranges = possibleSetTargets.reduce((acc: any, row: any) => {
-    acc[`${row.widget.from}____${row.widget.to}`] = true;
-    return acc;
-  }, {});
+  const ranges = possibleSetTargets
+    .filter((x: any) => x?.widget?.to)
+    .reduce((acc: any, row: any) => {
+      acc[`${row.widget.from}____${row.widget.to}`] = true;
+      return acc;
+    }, {});
   return ranges;
 }
 
@@ -104,6 +112,7 @@ export default function Editor(props: Props) {
   const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
     null
   );
+  const [lints, setLints] = useState<LintError[]>([]);
   const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
   // TODO replace this with sets? Or maybe a custom data structure that makes query the ranges easier/faster
   const [widgetRangeSets, setWidgetRangeSets] = useState<
@@ -164,7 +173,7 @@ export default function Editor(props: Props) {
     const view = new EditorView({
       state: EditorState.create({
         extensions: [
-          jsonLinter,
+          // jsonLinter,
           keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
           basicSetup,
           languageConf.of(json()),
@@ -178,10 +187,19 @@ export default function Editor(props: Props) {
               const localRangeSets = calcWidgetRangeSets(v);
               setWidgetRangeSets(localRangeSets);
 
-              // TODO wrap this is a debounce
-              createNodeMap(schema, newCode).then((schemaMap) =>
-                setSchemaMap(schemaMap)
-              );
+              // TODO wrap these is a debounce
+              createNodeMap(schema, newCode).then((schemaMap) => {
+                setSchemaMap(schemaMap);
+                view.dispatch({
+                  effects: [setSchemaTypings.of(schemaMap)],
+                });
+              });
+              lintCode(schema, newCode).then((diagnostics) => {
+                view.dispatch({
+                  effects: [setDiagnostics.of(diagnostics)],
+                });
+                setLints(diagnostics);
+              });
             } else {
               const newSelection = v.view.state.selection;
               // determine if the new selection
@@ -240,6 +258,14 @@ export default function Editor(props: Props) {
       <ErrorBoundary>
         <PopoverMenu
           schemaMap={schemaMap}
+          lints={lints.filter((x) => {
+            return (
+              menu &&
+              menu.node &&
+              x.from === menu?.node.from &&
+              x.to === menu.node.to
+            );
+          })}
           closeMenu={() => {
             setMenu(null);
             view?.contentDOM.focus();

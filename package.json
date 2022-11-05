@@ -11,6 +11,7 @@
     "@lezer/common": "^0.15.8",
     "@lezer/json": "^1.0.0",
     "@simonwep/pickr": "^1.8.2",
+    "immer": "^9.0.16",
     "jsonc-parser": "^3.0.0",
     "lodash.isequal": "^4.5.0",
     "react": "^17.0.2",
