@@ -4,8 +4,9 @@ import * as Json from "jsonc-parser";
 
 import { MenuEvent } from "./utils";
 import { SchemaMap } from "../components/Editor";
+import { JSONSchema7 } from "json-schema";
 
-type JSONSchema = any;
+// type JSONSchema = any;
 
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
@@ -14,7 +15,7 @@ export type MenuElement =
   | { type: "projection"; label?: string; element: JSX.Element };
 
 interface ComponentProps {
-  content: JSONSchema;
+  content: JSONSchema7;
   parsedContent: any;
   //   parentType: string; // todo this type can be improved
 }
@@ -35,15 +36,15 @@ const EnumPicker: Component = (props) => {
   ];
 };
 
-function simpleFillout(content: JSONSchema) {
+function simpleFillout(content: JSONSchema7) {
   const simpleTypes: Record<string, any> = {
     string: "",
     object: {},
     number: 0,
     boolean: true,
   };
-  if (content.type in simpleTypes) {
-    return simpleTypes[content.type];
+  if ((content as any).type in simpleTypes) {
+    return simpleTypes[(content as any).type];
   } else if (content.anyOf && content.anyOf.length) {
     const childTypes = content.anyOf.map((x: any) => x.type);
     return childTypes.every((x: string) => childTypes[0] === x) &&
@@ -63,14 +64,27 @@ const ObjPicker: Component = (props) => {
       label: "Add Fields",
       elements: Object.entries(content.properties || {})
         .filter((x) => !currentKeys.has(x[0]))
-        .map(([content, prop]) => ({
+        .map(([content, prop]: any) => ({
           type: "button",
           content,
           onSelect: {
             type: "addObjectKey",
-            payload: { key: content, value: simpleFillout(prop) as any },
+            payload: { key: `"${content}"`, value: simpleFillout(prop) as any },
           },
         })),
+    },
+    {
+      label: "Add Fields XX",
+      elements: [
+        {
+          type: "button",
+          content: "XX",
+          onSelect: {
+            type: "addObjectKey",
+            payload: { key: '"squid"', value: '"dough"' },
+          },
+        },
+      ],
     },
   ];
   //   return {
@@ -84,7 +98,7 @@ const ObjPicker: Component = (props) => {
 };
 
 // TODO flatten nested anyOfs and remove duplicates
-function flattenAnyOf(content: JSONSchema) {
+function flattenAnyOf(content: JSONSchema7): any {
   if (!content || !content.anyOf) {
     return content;
   }
@@ -94,13 +108,16 @@ function flattenAnyOf(content: JSONSchema) {
   );
 }
 
-function removeDupsInAnyOf(content: JSONSchema[]) {
+function removeDupsInAnyOf(
+  // content: JSONSchema[]
+  content: JSONSchema7[]
+) {
   return content.filter((row, idx) =>
     content.slice(idx + 1).every((innerRow) => !isequal(row, innerRow))
   );
 }
 
-function bundleConstsToEnum(content: JSONSchema[]) {
+function bundleConstsToEnum(content: JSONSchema7[]) {
   const consts = content.filter((x) => x.const);
   const nonConsts = content.filter((x) => !x.const);
   return [...nonConsts, { enum: consts.map((x) => x.const) }];
@@ -125,7 +142,8 @@ function bundleConstsToEnum(content: JSONSchema[]) {
 //   new Set(Array.from(set).filter((x) => x !== key));
 
 function AnyOfObjOptionalFieldPicker(
-  content: JSONSchema,
+  // content: JSONSchema7,
+  content: any,
   containerIdx: number
 ): MenuElement[] {
   //   const requiredProps = new Set<string>(
@@ -189,7 +207,7 @@ function AnyOfObjOptionalFieldPicker(
   //   );
 }
 
-function AnyOfArray(content: JSONSchema, idx: number): MenuElement[] {
+function AnyOfArray(content: JSONSchema7, idx: number): MenuElement[] {
   //   const [numElements, setNumbElements] = useState<number>(1);
   const numElements = 5;
   const arrayTypeDefaults: any = {
@@ -199,7 +217,7 @@ function AnyOfArray(content: JSONSchema, idx: number): MenuElement[] {
     object: {},
     array: [],
   };
-  const arrayType = content?.items?.type;
+  const arrayType = (content?.items as any)?.type;
   //   const sliderName = `numElements${idx}`;
   return [
     !arrayType && {
@@ -278,13 +296,13 @@ const AnyOfPicker: Component = (props) => {
   const anyOptions = bundleConstsToEnum(
     removeDupsInAnyOf(flattenAnyOf(content))
   );
-  const rows = anyOptions.flatMap((opt, idx) => {
-    return [
+  const rows = anyOptions.flatMap((opt: any, idx) => {
+    const asd = [
       opt.description && {
         label: "DESC",
         elements: [{ type: "display", content: opt.description }],
       },
-      opt.enum.length && {
+      opt?.enum?.length && {
         label: "PICK",
         elements: opt.enum.map((val: string) => ({
           type: "button",
@@ -313,7 +331,8 @@ const AnyOfPicker: Component = (props) => {
           },
         ].filter((x) => x) as MenuRow[],
       },
-    ];
+    ].filter((x) => x);
+    return asd;
   });
   return rows;
   //   return {
@@ -451,26 +470,34 @@ function simpleParse(content: any) {
     return {};
   }
 }
-function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
+export function retargetToAppropriateNode(node: SyntaxNode): SyntaxNode {
   let targetNode = node;
-  if (node.type.name === "{" || node.type.name === "}") {
+  if (new Set(["⚠", "{", "}"]).has(node.type.name)) {
     targetNode = node.parent!;
   }
   // else if (node.type.name === "PropertyName") {
   //   targetNode = node.nextSibling!;
   // }
+  return targetNode;
+}
+
+function getSchemaForRetargetedNode(
+  node: SyntaxNode,
+  schemaMap: SchemaMap
+): JSONSchema7 {
+  let targetNode = retargetToAppropriateNode(node);
 
   const from = targetNode.from;
   const to = targetNode.to;
 
-  let schemaChunk: JSONSchema = schemaMap[`${from}-${to}`];
+  let schemaChunk: JSONSchema7[] = schemaMap[`${from}-${to}`];
   if (schemaChunk?.length > 1) {
     return { anyOf: schemaChunk };
   } else if (schemaChunk?.length === 1) {
     return schemaChunk[0];
   }
-
-  return schemaChunk;
+  // implying that its not an array?
+  return schemaChunk as any as JSONSchema7;
 }
 
 export function generateMenuContent(
@@ -478,7 +505,7 @@ export function generateMenuContent(
   syntaxNode: SyntaxNode,
   schemaMap: SchemaMap
 ): MenuRow[] {
-  const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
+  const schemaChunk = getSchemaForRetargetedNode(syntaxNode, schemaMap);
 
   //   TODO these should be functions
   const type = syntaxNode.type.name;

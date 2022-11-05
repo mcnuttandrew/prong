@@ -8,6 +8,7 @@ import {
   generateMenuContent,
   MenuElement,
   MenuRow,
+  retargetToAppropriateNode,
 } from "../lib/compute-menu-contents";
 
 import {
@@ -40,7 +41,7 @@ interface MenuProps {
 type SelectionRoute = [number, number];
 
 type MenuElementRenderer<T> = (props: {
-  eventDispatch: (menuEvent: MenuEvent) => void;
+  eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
   // TODO fix this type;
   menuElement: T;
   isSelected: boolean;
@@ -61,7 +62,7 @@ const RenderMenuElementDisplay: MenuElementRenderer<any> = (props) => (
 
 const RenderMenuElementButton: MenuElementRenderer<any> = (props) => (
   <button
-    onClick={() => props.eventDispatch(props.menuElement.onSelect)}
+    onClick={() => props.eventDispatch(props.menuElement.onSelect, true)}
     style={{
       background: props.isSelected ? "red" : "none",
     }}
@@ -93,7 +94,8 @@ function buildMoveCursor(
 ): SelectionRoute | false {
   let row = route[0];
   let col = route[1];
-  const leafGroupSize = content[row].elements.length;
+  console.log("XX", route, content);
+  const leafGroupSize = content[row].elements?.length;
   const numRows = content.length;
 
   if (dir === "up" && row - 1 < 0) {
@@ -152,9 +154,11 @@ export default function ContentToMenuItem(props: MenuProps) {
     xPos,
     yPos,
   } = props;
+  const node = syntaxNode && retargetToAppropriateNode(syntaxNode);
   const [selectedRouting, setSelectedRouting] = useState<SelectionRoute>([
     0, 0,
   ]);
+  const [content, setContent] = useState<MenuRow[]>([]);
 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -165,10 +169,13 @@ export default function ContentToMenuItem(props: MenuProps) {
     // todo on exit refocus
   }, [syntaxNode]);
 
-  const eventDispatch = (menuEvent: MenuEvent) => {
-    const update = modifyCodeByCommand(menuEvent, syntaxNode);
+  const eventDispatch = (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => {
+    const update = modifyCodeByCommand(menuEvent, node);
     if (update) {
       codeUpdate(update);
+      if (shouldCloseMenu) {
+        closeMenu();
+      }
     }
   };
 
@@ -177,20 +184,22 @@ export default function ContentToMenuItem(props: MenuProps) {
     : "";
   const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
 
-  let content: MenuRow[] = [];
-  if (syntaxNode && syntaxNode.parent) {
-    content = [
+  useEffect(() => {
+    console.log("ere");
+    if (!(syntaxNode && syntaxNode.parent)) {
+      return;
+    }
+    setContent([
       ...generateMenuContent(currentCodeSlice, syntaxNode, schemaMap),
       ...projections
         .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
         .filter((proj) => proj.type === "tooltip")
         .map(prepProjections(view, syntaxNode, keyPath, currentCodeSlice)),
-    ] as MenuRow[];
-  }
+    ] as MenuRow[]);
+  }, [syntaxNode, schemaMap]);
 
   function selectCurrentElement() {
     let target = traverseContentTreeToNode(content, selectedRouting);
-    console.log("asd", target);
     if (!target) {
       return;
     }
@@ -259,7 +268,8 @@ export default function ContentToMenuItem(props: MenuProps) {
         }
       >
         <div className="cm-annotation-widget-popover-container">
-          {content.map(({ label, elements }, idx) => {
+          {content.map((row, idx) => {
+            const { label, elements } = row;
             return (
               <div
                 className="cm-annotation-widget-popover-container-row"
@@ -275,17 +285,19 @@ export default function ContentToMenuItem(props: MenuProps) {
                 >
                   {label}
                 </div>
-                {elements.map((element, jdx) => (
-                  <RenderMenuElement
-                    menuElement={element}
-                    eventDispatch={eventDispatch}
-                    isSelected={
-                      selectedRouting[0] === idx &&
-                      selectedRouting[1] === jdx + 1
-                    }
-                    key={jdx}
-                  />
-                ))}
+                <div className="cm-annotation-widget-popover-container-row-content">
+                  {(elements || []).map((element, jdx) => (
+                    <RenderMenuElement
+                      menuElement={element}
+                      eventDispatch={eventDispatch}
+                      isSelected={
+                        selectedRouting[0] === idx &&
+                        selectedRouting[1] === jdx + 1
+                      }
+                      key={jdx}
+                    />
+                  ))}
+                </div>
               </div>
             );
           })}

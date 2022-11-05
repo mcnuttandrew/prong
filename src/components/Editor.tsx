@@ -128,7 +128,6 @@ export default function Editor(props: Props) {
   ) => {
     view.dispatch(view!.state.update({ changes: { from, to, insert } }));
   };
-  // console.log(selectionLocal?.ranges[0].from, selectionLocal?.ranges[0].to);
 
   // THIS TRIO OF EFFECTS HANDLES THE On/Off projection stuff, and it is very cursed, be warned
   // figure out the range sets for the projections

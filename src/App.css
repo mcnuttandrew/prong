@@ -148,7 +148,6 @@ body .pcr-app.visible {
   margin-right: 0.5rem;
 }
 
-/* todo no more projection widgets */
 .cm-annotation-widget, .cm-projection-widget {
   position: relative;
   display: inline-block;
@@ -217,6 +216,8 @@ body .pcr-app.visible {
 
 .cm-annotation-widget-popover-container-row-content {
   border: thin solid black;
+  display: flex;
+  flex-wrap: wrap;
   max-width: 320px;
   width: 100%;
 }
