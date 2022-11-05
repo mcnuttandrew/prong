@@ -12,6 +12,14 @@
   flex-direction: column;
 }
 
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
 .cm-num-widget {
   display: inline-block;
   font-family: monospace;
@@ -149,7 +157,6 @@ body .pcr-app.visible {
 }
 
 .cm-annotation-widget, .cm-projection-widget {
-  position: relative;
   display: inline-block;
   cursor: pointer;
   pointer-events: all;
@@ -162,11 +169,10 @@ body .pcr-app.visible {
 .cm-annotation-menu {
   width: 400px;
   height: 300px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
   padding: 1rem;
   font-family: sans-serif;
   border: thin solid black;
-  position: absolute;
   z-index: 1000;
   background: lightgray;
 }

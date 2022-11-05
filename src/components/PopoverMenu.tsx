@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import ReactMarkdown from "react-markdown";
+
 import { EditorView } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { HotKeys, configure } from "react-hotkeys";
@@ -21,10 +21,12 @@ import {
 } from "../lib/utils";
 import { Projection } from "../lib/widgets";
 import { SchemaMap, UpdateDispatch } from "./Editor";
+import PopoverMenuElement from "./PopoverMenuElement";
 
 // hotkeys config
 configure({
   simulateMissingKeyPressEvents: false,
+  ignoreKeymapAndHandlerChangesByDefault: false,
 });
 
 interface MenuProps {
@@ -40,46 +42,6 @@ interface MenuProps {
 
 type SelectionRoute = [number, number];
 
-type MenuElementRenderer<T> = (props: {
-  eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
-  // TODO fix this type;
-  menuElement: T;
-  isSelected: boolean;
-}) => JSX.Element;
-
-const RenderMenuElementDisplay: MenuElementRenderer<any> = (props) => (
-  <div
-    style={{
-      maxHeight: "200px",
-      overflowY: "auto",
-      fontSize: "13px",
-      background: props.isSelected ? "red" : "none",
-    }}
-  >
-    <ReactMarkdown>{props.menuElement.content}</ReactMarkdown>
-  </div>
-);
-
-const RenderMenuElementButton: MenuElementRenderer<any> = (props) => (
-  <button
-    onClick={() => props.eventDispatch(props.menuElement.onSelect, true)}
-    style={{
-      background: props.isSelected ? "red" : "none",
-    }}
-  >
-    {props.menuElement.content}
-  </button>
-);
-
-const dispatch: Record<string, MenuElementRenderer<any>> = {
-  display: RenderMenuElementDisplay,
-  button: RenderMenuElementButton,
-  projection: (props) => props.menuElement.element,
-};
-const RenderMenuElement: MenuElementRenderer<any> = (props) => {
-  return dispatch[props.menuElement.type](props);
-};
-
 const traverseContentTreeToNode: (
   tree: MenuRow[],
   path: SelectionRoute
@@ -94,7 +56,7 @@ function buildMoveCursor(
 ): SelectionRoute | false {
   let row = route[0];
   let col = route[1];
-  console.log("XX", route, content);
+
   const leafGroupSize = content[row].elements?.length;
   const numRows = content.length;
 
@@ -196,6 +158,7 @@ export default function ContentToMenuItem(props: MenuProps) {
         .filter((proj) => proj.type === "tooltip")
         .map(prepProjections(view, syntaxNode, keyPath, currentCodeSlice)),
     ] as MenuRow[]);
+    // eslint-disable-next-line
   }, [syntaxNode, schemaMap]);
 
   function selectCurrentElement() {
@@ -243,10 +206,10 @@ export default function ContentToMenuItem(props: MenuProps) {
     },
   };
   //   traverseContentTreeToNode(content, selectedRouting);
-
   //   TODO figure out a signal for when hotkeys are finished rebinding, add a loader to support
   return (
     <HotKeys
+      className=""
       keyMap={keyMap}
       handlers={handlers}
       allowChanges={true}
@@ -256,7 +219,7 @@ export default function ContentToMenuItem(props: MenuProps) {
         <div className="cm-annotation-menu-bg" onClick={() => closeMenu()} />
       )}
       <div
-        className="cm-annotation-menu"
+        className="cm-annotation-menu position-absolute"
         onClick={(e: any) => {
           //   click on the menu to retarget it
           if (new Set([...e.target.classList]).has("cm-annotation-menu")) {
@@ -264,7 +227,13 @@ export default function ContentToMenuItem(props: MenuProps) {
           }
         }}
         style={
-          syntaxNode ? { top: yPos! - 30, left: xPos } : { display: "none" }
+          syntaxNode
+            ? {
+                top: yPos! + 20,
+                left: xPos,
+                // transform: `translate(${xPos}px, ${yPos}px)`,
+              }
+            : { display: "none" }
         }
       >
         <div className="cm-annotation-widget-popover-container">
@@ -287,7 +256,7 @@ export default function ContentToMenuItem(props: MenuProps) {
                 </div>
                 <div className="cm-annotation-widget-popover-container-row-content">
                   {(elements || []).map((element, jdx) => (
-                    <RenderMenuElement
+                    <PopoverMenuElement
                       menuElement={element}
                       eventDispatch={eventDispatch}
                       isSelected={

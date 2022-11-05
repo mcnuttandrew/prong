@@ -89,16 +89,23 @@ const exampleData = `{
 
 function VegaLiteExampleApp() {
   // const [currentCode, setCurrentCode] = useState(exampleData);
+  const [numRows, setNumRows] = React.useState(0);
 
   return (
-    <Editor
-      schema={schema}
-      code={exampleData}
-      onChange={(x) => {
-        // console.log(x);
-      }}
-      projections={[]}
-    />
+    <div>
+      {[...new Array(numRows)].map(() => (
+        <h1>ha ha fruit</h1>
+      ))}
+      <Editor
+        schema={schema}
+        code={exampleData}
+        onChange={(x) => {
+          // console.log(x);
+        }}
+        projections={[]}
+      />
+      <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
+    </div>
   );
 }
 

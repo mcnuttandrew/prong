@@ -63,20 +63,12 @@ function getMenuTarget(view: EditorView) {
   }
 }
 const triggerSelectionCheck =
-  (
-    setMenu: (menu: any) => void,
-    setSchemaMap: (schemaMap: SchemaMap) => void,
-    schema: any
-  ) =>
+  (setMenu: (menu: any) => void) =>
   (view: EditorView): void => {
     if (!view) {
       setMenu(null);
       return;
     }
-
-    createNodeMap(schema, codeString(view, 0)).then((schemaMap) =>
-      setSchemaMap(schemaMap)
-    );
     const smallestMenuTarget = getMenuTarget(view);
     if (smallestMenuTarget.target) {
       setMenu(smallestMenuTarget.target);
@@ -173,16 +165,7 @@ export default function Editor(props: Props) {
       state: EditorState.create({
         extensions: [
           jsonLinter,
-          // keymap.of(ASTKeyBinding),
-          keymap.of(
-            MenuTriggerKeyBinding(
-              triggerSelectionCheck(setMenu, setSchemaMap, schema)
-            )
-          ),
-          // EditorState.changeFilter.of((x) => {
-          //   console.log("xxx", x);
-          //   return true;
-          // }),
+          keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
           basicSetup,
           languageConf.of(json()),
           keymap.of([indentWithTab]),
@@ -190,9 +173,15 @@ export default function Editor(props: Props) {
           widgetsPlugin,
           EditorView.updateListener.of((v: ViewUpdate) => {
             if (v.docChanged) {
-              onChange(v.state.doc.toString());
+              const newCode = v.state.doc.toString();
+              onChange(newCode);
               const localRangeSets = calcWidgetRangeSets(v);
               setWidgetRangeSets(localRangeSets);
+
+              // TODO wrap this is a debounce
+              createNodeMap(schema, newCode).then((schemaMap) =>
+                setSchemaMap(schemaMap)
+              );
             } else {
               const newSelection = v.view.state.selection;
               // determine if the new selection
@@ -245,7 +234,6 @@ export default function Editor(props: Props) {
       view.dispatch(tr);
     }
   }, [code, view]);
-
   return (
     <div className="editor-container">
       <div ref={cmParent} />
@@ -270,8 +258,16 @@ export default function Editor(props: Props) {
               codeUpdate.value
             );
           }}
-          xPos={menu ? menu.x : undefined}
-          yPos={menu ? menu.y : undefined}
+          xPos={
+            menu
+              ? menu.x - (cmParent.current?.parentElement?.offsetLeft || 0)
+              : undefined
+          }
+          yPos={
+            menu
+              ? menu.y - (cmParent.current?.parentElement?.offsetTop || 0)
+              : undefined
+          }
         />
       </ErrorBoundary>
     </div>

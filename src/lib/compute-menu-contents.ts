@@ -11,6 +11,7 @@ import { JSONSchema7 } from "json-schema";
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
   | { type: "display"; label?: string; content: string }
+  | { type: "free-input"; label: string }
   | { type: "button"; label?: string; content: string; onSelect: MenuEvent }
   | { type: "projection"; label?: string; element: JSX.Element };
 
@@ -87,14 +88,6 @@ const ObjPicker: Component = (props) => {
       ],
     },
   ];
-  //   return {
-  //     type: "row",
-  //     direction: "horizontal",
-  //     element: [
-  //       { type: "display", content: "add fields" },
-  //       ...,
-  //     ],
-  //   };
 };
 
 // TODO flatten nested anyOfs and remove duplicates
@@ -108,10 +101,7 @@ function flattenAnyOf(content: JSONSchema7): any {
   );
 }
 
-function removeDupsInAnyOf(
-  // content: JSONSchema[]
-  content: JSONSchema7[]
-) {
+function removeDupsInAnyOf(content: JSONSchema7[]) {
   return content.filter((row, idx) =>
     content.slice(idx + 1).every((innerRow) => !isequal(row, innerRow))
   );
@@ -153,6 +143,7 @@ function AnyOfObjOptionalFieldPicker(
   //   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
   //     new Set(Array.from(requiredProps))
   //   );
+  console.log("this is where i am");
   return [
     content.$$labeledType && {
       type: "display",
@@ -297,7 +288,7 @@ const AnyOfPicker: Component = (props) => {
     removeDupsInAnyOf(flattenAnyOf(content))
   );
   const rows = anyOptions.flatMap((opt: any, idx) => {
-    const asd = [
+    const optionRow = [
       opt.description && {
         label: "DESC",
         elements: [{ type: "display", content: opt.description }],
@@ -332,29 +323,11 @@ const AnyOfPicker: Component = (props) => {
         ].filter((x) => x) as MenuRow[],
       },
     ].filter((x) => x);
-    return asd;
+    return optionRow;
   });
   return rows;
-  //   return {
-  //     // type: "row",
-  //     // direction: "horizontal",
-  //     label: "????",
-  //     elements: ;
-  //     }),
-  //   };
-  // );
 };
 
-// function contentDescriber(description: string | null) {
-//   if (!description) {
-//     return null;
-//   }
-//   return (
-//     <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-//       <ReactMarkdown>{description}</ReactMarkdown>
-//     </div>
-//   );
-// }
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
   return [{ label: "TYPE", elements: [{ type: "display", content }] }];
 };
@@ -378,31 +351,21 @@ const PropertyNameComponent: Component = (props) => {
   ];
 };
 
-const ObjectComponent: Component = (props) => {
-  //   const [keyVal, setKeyVal] = React.useState("");
-  //   const [valueVal, setValueVal] = React.useState("");
-  //   const newKeyVal = (key: string, value: any) => ({
-  //     type: "addObjectKey",
-  //     payload: { key, value },
-  //   });
-  return [
-    { label: "TYPE", elements: [{ type: "display", content: "add field" }] },
-  ];
-  //   return (
-  //     <div>
-  //       <div>Add field</div>
-  //       <div>
-  //         <span>Key</span>
-  //         <input value={keyVal} onChange={(e) => setKeyVal(e.target.value)} />
-  //         <span>Value</span>
-  //         <input value={valueVal} onChange={(e) => setValueVal(e.target.value)} />
-  //         <button onClick={() => newKeyVal(keyVal, valueVal)}>
-  //           Add new entry
-  //         </button>
-  //       </div>
-  //     </div>
-  //   );
-};
+const ObjectComponent: Component = () => [
+  {
+    label: "Add Field",
+    elements: [
+      {
+        type: "free-input",
+        label: "Add field",
+        onSelect: {
+          type: "addObjectKey",
+          payload: { key: "$$INPUT_BIND", value: "null" },
+        },
+      },
+    ],
+  },
+];
 
 const ParentIsPropertyComponent = makeSimpleComponent("hi property");
 
