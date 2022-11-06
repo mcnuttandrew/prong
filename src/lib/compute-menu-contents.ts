@@ -64,6 +64,7 @@ function simpleFillOut(content: JSONSchema7) {
 const ObjPicker: Component = (props) => {
   const { content, parsedContent } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
+  // TODO this gets this wrong if coming from { / }
   return [
     {
       label: "Add Fields",
