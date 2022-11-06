@@ -1,6 +1,5 @@
 import React from "react";
 
-import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 
 const exampleData = `{
@@ -18,7 +17,7 @@ function VegaLiteExampleApp() {
 
   return (
     <Editor
-      schema={VegaLiteV5Schema}
+      schema={{}}
       code={exampleData}
       onChange={(x) => {
         console.log(x);

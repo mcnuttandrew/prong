@@ -30,7 +30,7 @@ class InlineProjectionWidget extends WidgetType {
 
   toDOM(): HTMLDivElement {
     const wrap = document.createElement("div");
-    wrap.className = "cm-projection-widget";
+    wrap.className = "cm-projection-widget position-relative";
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
 

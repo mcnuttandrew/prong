@@ -4,18 +4,21 @@ import * as Json from "jsonc-parser";
 
 import { MenuEvent } from "./utils";
 import { SchemaMap } from "../components/Editor";
+import { JSONSchema7 } from "json-schema";
 
-type JSONSchema = any;
+// type JSONSchema = any;
 
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
-  | { type: "display"; label?: string; content: string }
   | { type: "button"; label?: string; content: string; onSelect: MenuEvent }
+  | { type: "dropdown"; content: string[]; onSelect: MenuEvent }
+  | { type: "display"; label?: string; content: string }
+  | { type: "free-input"; label: string }
   | { type: "projection"; label?: string; element: JSX.Element };
-
 interface ComponentProps {
-  content: JSONSchema;
+  content: JSONSchema7;
   parsedContent: any;
+  node: SyntaxNode;
   //   parentType: string; // todo this type can be improved
 }
 type Component = (props: ComponentProps) => MenuRow[];
@@ -35,21 +38,24 @@ const EnumPicker: Component = (props) => {
   ];
 };
 
-function simpleFillout(content: JSONSchema) {
+function simpleFillOut(content: JSONSchema7) {
   const simpleTypes: Record<string, any> = {
     string: "",
     object: {},
     number: 0,
     boolean: true,
   };
-  if (content.type in simpleTypes) {
-    return simpleTypes[content.type];
+  if ((content as any).type in simpleTypes) {
+    return simpleTypes[(content as any).type];
   } else if (content.anyOf && content.anyOf.length) {
     const childTypes = content.anyOf.map((x: any) => x.type);
     return childTypes.every((x: string) => childTypes[0] === x) &&
       childTypes[0] in simpleTypes
       ? simpleTypes[childTypes[0]]
       : null;
+  } else if (content.enum) {
+    // doesn't do anything rn
+    return content.enum.filter((x) => typeof x === "string")[0];
   } else {
     return null;
   }
@@ -58,49 +64,57 @@ function simpleFillout(content: JSONSchema) {
 const ObjPicker: Component = (props) => {
   const { content, parsedContent } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
+  // TODO this gets this wrong if coming from { / }
   return [
     {
       label: "Add Fields",
       elements: Object.entries(content.properties || {})
         .filter((x) => !currentKeys.has(x[0]))
-        .map(([content, prop]) => ({
+        .map(([content, prop]: any) => ({
           type: "button",
           content,
           onSelect: {
             type: "addObjectKey",
-            payload: { key: content, value: simpleFillout(prop) as any },
+            payload: { key: `"${content}"`, value: simpleFillOut(prop) as any },
           },
         })),
     },
+    {
+      label: "Add Custom Fields",
+      elements: [
+        {
+          type: "free-input",
+          label: "Add field",
+          onSelect: {
+            type: "addObjectKey",
+            payload: { key: "$$INPUT_BIND", value: "null" },
+          },
+        },
+      ],
+    },
   ];
-  //   return {
-  //     type: "row",
-  //     direction: "horizontal",
-  //     element: [
-  //       { type: "display", content: "add fields" },
-  //       ...,
-  //     ],
-  //   };
 };
 
 // TODO flatten nested anyOfs and remove duplicates
-function flattenAnyOf(content: JSONSchema) {
+function flattenAnyOf(content: JSONSchema7): any {
   if (!content || !content.anyOf) {
     return content;
   }
-  return content.anyOf.reduce(
-    (acc: any[], row: any) => acc.concat(row.anyOf ? flattenAnyOf(row) : row),
-    []
-  );
+  return content.anyOf.reduce((acc: any[], row: any) => {
+    if (row.description) {
+      acc.push({ description: row.description });
+    }
+    return acc.concat(row.anyOf ? flattenAnyOf(row) : row);
+  }, []);
 }
 
-function removeDupsInAnyOf(content: JSONSchema[]) {
+function removeDupsInAnyOf(content: JSONSchema7[]) {
   return content.filter((row, idx) =>
     content.slice(idx + 1).every((innerRow) => !isequal(row, innerRow))
   );
 }
 
-function bundleConstsToEnum(content: JSONSchema[]) {
+function bundleConstsToEnum(content: JSONSchema7[]) {
   const consts = content.filter((x) => x.const);
   const nonConsts = content.filter((x) => !x.const);
   return [...nonConsts, { enum: consts.map((x) => x.const) }];
@@ -117,80 +131,68 @@ function bundleConstsToEnum(content: JSONSchema[]) {
 //     return null;
 //   }
 // }
-// // what do these exisit
-// const addToSet = (set: Set<string>, key: string) =>
-//   new Set([...Array.from(set), key]);
-
-// const removeFromSet = (set: Set<string>, key: string) =>
-//   new Set(Array.from(set).filter((x) => x !== key));
 
 function AnyOfObjOptionalFieldPicker(
-  content: JSONSchema,
-  containerIdx: number
-): MenuElement[] {
-  //   const requiredProps = new Set<string>(
-  //     Array.isArray(content.required) ? content.required : []
-  //   );
+  // content: JSONSchema7,
+  content: any,
+  node: SyntaxNode
+): MenuRow[] {
+  const requiredProps = new Set<string>(
+    Array.isArray(content.required) ? content.required : []
+  );
+  const requiredPropsArr = Array.from(requiredProps);
 
-  //   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(
-  //     new Set(Array.from(requiredProps))
-  //   );
+  const requiredPropObject = JSON.stringify(
+    Object.fromEntries(
+      requiredPropsArr.map((x) => [
+        x,
+        content?.properties[x] ? simpleFillOut(content.properties[x]) : "null",
+      ])
+    )
+  );
+
+  const isObject: boolean = new Set(["{", "}", "Object"]).has(node.type.name);
   return [
     content.$$labeledType && {
-      type: "display",
-      content: content.$$labeledType,
+      label: "JSON Schema Type",
+      elements: [{ type: "display", content: content.$$labeledType }],
     },
-    // {type: 'button', content: }
-  ].filter((x) => x);
-  //   return (
-  //     <div style={{ display: "flex", flexDirection: "column" }}>
-  //     //   {content.$$labeledType && (
-  //     //     <span style={{ fontSize: "9px" }}>{content.$$labeledType}</span>
-  //     //   )}
-  //       <div className="flex">
-  //         <button
-  //           onClick={() => {
-  //             const val = Object.fromEntries(
-  //               Array.from(selectedOptions).map((key) => {
-  //                 return [key, generateValueForObjProp(content.properties[key])];
-  //               })
-  //             );
-  //             eventDispatch({ type: "simpleSwap", payload: JSON.stringify(val) });
-  //           }}
-  //         >
-  //           Switch to obj with
-  //         </button>
-  //         // <div>
-  //         //   {Object.keys(content?.properties || {}).map((key) => {
-  //         //     const selected = selectedOptions.has(key);
-  //         //     const required = requiredProps.has(key);
-  //         //     const name = `${key}-${containerIdx}`;
-  //         //     const onChange = required
-  //         //       ? () => {}
-  //         //       : () =>
-  //         //           selected
-  //         //             ? setSelectedOptions(removeFromSet(selectedOptions, key))
-  //         //             : setSelectedOptions(addToSet(selectedOptions, key));
-  //         //     return (
-  //         //       <span>
-  //         //         <label htmlFor={name}>{key}</label>
-  //         //         <input
-  //         //           type="checkbox"
-  //         //           checked={required || selected}
-  //         //           onChange={onChange}
-  //         //           name={name}
-  //         //         />
-  //         //       </span>
-  //         //     );
-  //         //   })}
-  //         // </div>
-  //       </div>
-  //     </div>
-  //   );
+    !isObject && {
+      label: "Switch to",
+      elements: [
+        requiredPropsArr.length > 0 && {
+          type: "button",
+          onSelect: { type: "simpleSwap", payload: requiredPropObject },
+          content: "object with required types",
+        },
+        requiredPropsArr.length === 0 && {
+          type: "button",
+          onSelect: { type: "simpleSwap", payload: "{}" },
+          content: "blank object",
+        },
+      ],
+    },
+    {
+      label: "Add",
+      elements: deduplicateAndSortArray(
+        Object.keys(content?.properties || {}).concat(requiredPropsArr)
+      ).map((x) => ({
+        type: "button",
+        content: x,
+        onSelect: {
+          type: "addObjectKey",
+          payload: { key: "$$INPUT_BIND", value: "null" },
+        },
+      })),
+    },
+  ].filter((x) => x) as MenuRow[];
 }
 
-function AnyOfArray(content: JSONSchema, idx: number): MenuElement[] {
-  //   const [numElements, setNumbElements] = useState<number>(1);
+const deduplicateAndSortArray = (arr: string[]): string[] => {
+  return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b));
+};
+
+function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
   const numElements = 5;
   const arrayTypeDefaults: any = {
     boolean: true,
@@ -199,75 +201,48 @@ function AnyOfArray(content: JSONSchema, idx: number): MenuElement[] {
     object: {},
     array: [],
   };
-  const arrayType = content?.items?.type;
+  const arrayType = (content?.items as any)?.type;
   //   const sliderName = `numElements${idx}`;
-  return [
-    !arrayType && {
-      type: "button",
-      content: "Switch to array",
-      onSelect: { type: "simpleSwap", payload: "[]" },
+
+  const output: MenuRow[] = [
+    {
+      label: "JSON Schema Type",
+      elements: [{ type: "display", content: "TODO SLIDER" }],
     },
-    arrayType && {
-      type: "button",
-      content: `Switch to array of ${numElements} ${JSON.stringify(
-        arrayTypeDefaults[arrayType]
-      )}s`,
-      onSelect: {
-        type: "simpleSwap",
-        payload: JSON.stringify(
-          [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
-        ),
-      },
-    },
-    { type: "display", content: "TODO SLIDER" },
-  ].filter((x) => x) as MenuElement[];
-  //   return (
-  //     <div className="flex">
-  //   {!arrayType && (
-  //     <button
-  //       onClick={() => eventDispatch({ type: "simpleSwap", payload: "[]" })}
-  //     >
-  //       Switch to array
-  //     </button>
-  //   )}
-  //       {arrayType && (
-  //         <div>
-  //           <button
-  //             onClick={() =>
-  //               eventDispatch({
-  //                 type: "simpleSwap",
-  //                 payload: JSON.stringify(
-  //                   [...new Array(numElements)].map(
-  //                     () => arrayTypeDefaults[arrayType]
-  //                   )
-  //                 ),
-  //               })
-  //             }
-  //           >
-  //             {`Switch to array of ${numElements} ${JSON.stringify(
-  //               arrayTypeDefaults[arrayType]
-  //             )}s`}
-  //           </button>
-  //           <div className="flex">
-  //             <input
-  //               type="range"
-  //               id={sliderName}
-  //               name={sliderName}
-  //               min="0"
-  //               max="11"
-  //               value={numElements}
-  //               onChange={(e) => setNumbElements(Number(e.target.value))}
-  //             />
-  //             <label htmlFor={sliderName}>num</label>
-  //           </div>
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
+  ];
+  if (arrayType) {
+    output.push({
+      label: "arrr",
+      elements: [
+        {
+          type: "button",
+          content: "Switch to array",
+          onSelect: { type: "simpleSwap", payload: "[]" },
+        },
+      ],
+    });
+  } else {
+    const payload = JSON.stringify(
+      [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
+    );
+    output.push({
+      label: "arrrX",
+      elements: [
+        {
+          type: "button",
+          content: `Switch to array of ${numElements} ${JSON.stringify(
+            arrayTypeDefaults[arrayType]
+          )}s`,
+          onSelect: { type: "simpleSwap", payload },
+        },
+      ],
+    });
+  }
+  return output;
 }
 
 const AnyOfPicker: Component = (props) => {
-  const { content } = props;
+  const { content, node } = props;
   const simpleType = new Set(["string", "number", "boolean", "null"]);
   const simpleTypeMap: Record<string, string> = {
     string: '""',
@@ -278,66 +253,54 @@ const AnyOfPicker: Component = (props) => {
   const anyOptions = bundleConstsToEnum(
     removeDupsInAnyOf(flattenAnyOf(content))
   );
-  const rows = anyOptions.flatMap((opt, idx) => {
-    return [
+  const rows = anyOptions.flatMap((opt: any, idx) => {
+    const isOfDescribedType =
+      (opt?.type || "").toLowerCase() === node.type.name.toLowerCase();
+
+    const optionRow = [
       opt.description && {
-        label: "DESC",
+        label: "JSON Schema Type",
         elements: [{ type: "display", content: opt.description }],
       },
-      opt.enum.length && {
-        label: "PICK",
+      opt?.enum?.length && {
+        label: "Replace with",
         elements: opt.enum.map((val: string) => ({
           type: "button",
           content: val,
           onSelect: { type: "simpleSwap", payload: `"${val}"` },
         })),
       },
-      // think these might be wrong
-      ...(opt.type === "object" ? AnyOfObjOptionalFieldPicker(opt, idx) : []),
-      ...(opt.type === "array" ? AnyOfArray(opt, idx) : []),
-      simpleType.has(opt.type) && {
-        label: "STUFF",
-        elements: [
-          opt.$$labeledType && {
-            type: "display",
-            content: opt.$$labeledType,
-          },
-          {
-            type: "button",
-            content: `switch to ${opt.type}`,
-            onSelect: {
-              type: "simpleSwap",
-              // payload: "null"
-              payload: simpleTypeMap[opt.type],
+      ...(opt.type === "object" ? AnyOfObjOptionalFieldPicker(opt, node) : []),
+      ...(opt.type === "array" ? AnyOfArray(opt, node) : []),
+      simpleType.has(opt.type) &&
+        !isOfDescribedType && {
+          label: "STUFF",
+          elements: [
+            opt.$$labeledType && {
+              type: "display",
+              content: opt.$$labeledType,
             },
-          },
-        ].filter((x) => x) as MenuRow[],
-      },
-    ];
+            {
+              type: "button",
+              content: `switch to ${opt.type}`,
+              onSelect: {
+                type: "simpleSwap",
+                // payload: "null"
+                payload: simpleTypeMap[opt.type],
+              },
+            },
+          ].filter((x) => x) as MenuRow[],
+        },
+    ].filter((x) => x);
+    return optionRow;
   });
   return rows;
-  //   return {
-  //     // type: "row",
-  //     // direction: "horizontal",
-  //     label: "????",
-  //     elements: ;
-  //     }),
-  //   };
-  // );
 };
 
-// function contentDescriber(description: string | null) {
-//   if (!description) {
-//     return null;
-//   }
-//   return (
-//     <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-//       <ReactMarkdown>{description}</ReactMarkdown>
-//     </div>
-//   );
-// }
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
-  return [{ label: "TYPE", elements: [{ type: "display", content }] }];
+  return [
+    { label: "Inferred JSON Type", elements: [{ type: "display", content }] },
+  ];
 };
 
 const GenericComponent = makeSimpleComponent("hi generic");
@@ -359,31 +322,21 @@ const PropertyNameComponent: Component = (props) => {
   ];
 };
 
-const ObjectComponent: Component = (props) => {
-  //   const [keyVal, setKeyVal] = React.useState("");
-  //   const [valueVal, setValueVal] = React.useState("");
-  //   const newKeyVal = (key: string, value: any) => ({
-  //     type: "addObjectKey",
-  //     payload: { key, value },
-  //   });
-  return [
-    { label: "TYPE", elements: [{ type: "display", content: "add field" }] },
-  ];
-  //   return (
-  //     <div>
-  //       <div>Add field</div>
-  //       <div>
-  //         <span>Key</span>
-  //         <input value={keyVal} onChange={(e) => setKeyVal(e.target.value)} />
-  //         <span>Value</span>
-  //         <input value={valueVal} onChange={(e) => setValueVal(e.target.value)} />
-  //         <button onClick={() => newKeyVal(keyVal, valueVal)}>
-  //           Add new entry
-  //         </button>
-  //       </div>
-  //     </div>
-  //   );
-};
+const ObjectComponent: Component = () => [
+  {
+    label: "Add Field",
+    elements: [
+      {
+        type: "free-input",
+        label: "Add field",
+        onSelect: {
+          type: "addObjectKey",
+          payload: { key: "$$INPUT_BIND", value: "null" },
+        },
+      },
+    ],
+  },
+];
 
 const ParentIsPropertyComponent = makeSimpleComponent("hi property");
 
@@ -423,6 +376,17 @@ const ParentIsArrayComponent: Component = (props) => {
   ];
 };
 
+const BooleanComponent: Component = () => [
+  {
+    label: "Set to",
+    elements: ["true", "false"].map((payload) => ({
+      type: "button",
+      content: payload,
+      onSelect: { type: "simpleSwap", payload },
+    })),
+  },
+];
+
 const menuSwitch: componentContainer = {
   EnumPicker,
   ObjPicker,
@@ -432,16 +396,18 @@ const menuSwitch: componentContainer = {
 const typeBasedComponents: componentContainer = {
   Object: ObjectComponent,
   PropertyName: PropertyNameComponent,
-  Array: makeSimpleComponent("hi array"),
-  String: makeSimpleComponent("hi string"),
-  Number: makeSimpleComponent("hi number"),
-  BooleanComponent: makeSimpleComponent("hi boolean"),
-  Null: makeSimpleComponent("hi null"),
+  Array: makeSimpleComponent("array"),
+  String: makeSimpleComponent("string"),
+  Number: makeSimpleComponent("number"),
+  False: BooleanComponent,
+  True: BooleanComponent,
+  Null: makeSimpleComponent("null"),
 };
 const parentResponses: componentContainer = {
   Property: ParentIsPropertyComponent,
   Array: ParentIsArrayComponent,
   // TODO: do i need to fill in all the other options for this?
+  // what other options are there?
 };
 
 function simpleParse(content: any) {
@@ -451,26 +417,33 @@ function simpleParse(content: any) {
     return {};
   }
 }
-function retargetToAppropriateNode(node: SyntaxNode, schemaMap: SchemaMap) {
+export function retargetToAppropriateNode(node: SyntaxNode): SyntaxNode {
   let targetNode = node;
-  if (node.type.name === "{" || node.type.name === "}") {
+  if (new Set(["⚠", "{", "}", "[", "]"]).has(node.type.name)) {
     targetNode = node.parent!;
+  } else if (node.type.name === "PropertyName") {
+    targetNode = node.nextSibling!;
   }
-  // else if (node.type.name === "PropertyName") {
-  //   targetNode = node.nextSibling!;
-  // }
+  return targetNode;
+}
+
+function getSchemaForRetargetedNode(
+  node: SyntaxNode,
+  schemaMap: SchemaMap
+): JSONSchema7 {
+  let targetNode = retargetToAppropriateNode(node);
 
   const from = targetNode.from;
   const to = targetNode.to;
 
-  let schemaChunk: JSONSchema = schemaMap[`${from}-${to}`];
+  let schemaChunk: JSONSchema7[] = schemaMap[`${from}-${to}`];
   if (schemaChunk?.length > 1) {
     return { anyOf: schemaChunk };
   } else if (schemaChunk?.length === 1) {
     return schemaChunk[0];
   }
-
-  return schemaChunk;
+  // implying that its not an array?
+  return schemaChunk as any as JSONSchema7;
 }
 
 export function generateMenuContent(
@@ -478,7 +451,7 @@ export function generateMenuContent(
   syntaxNode: SyntaxNode,
   schemaMap: SchemaMap
 ): MenuRow[] {
-  const schemaChunk = retargetToAppropriateNode(syntaxNode, schemaMap);
+  const schemaChunk = getSchemaForRetargetedNode(syntaxNode, schemaMap);
 
   //   TODO these should be functions
   const type = syntaxNode.type.name;
@@ -491,7 +464,6 @@ export function generateMenuContent(
     console.log("missing type imp for", type);
   }
 
-  const parentType = syntaxNode.parent!.type.name;
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
   if (schemaChunk && schemaChunk.enum) {
@@ -507,28 +479,50 @@ export function generateMenuContent(
   const content: MenuRow[] = [];
   if (schemaChunk?.description) {
     content.push({
-      label: "DESC",
+      label: "JSON Schema Type",
       elements: [{ type: "display", content: schemaChunk.description }],
     });
   }
+  const componentProps = {
+    parsedContent,
+    content: schemaChunk,
+    node: syntaxNode,
+  };
   if (schemaChunk && !!contentBasedItem) {
-    contentBasedItem({
-      parsedContent,
-      content: schemaChunk,
-    }).forEach((x) => content.push(x));
+    contentBasedItem(componentProps).forEach((x) => content.push(x));
   }
   if (typeBasedProperty) {
-    typeBasedProperty({
-      parsedContent,
-      content: schemaChunk,
-    }).forEach((x) => content.push(x));
+    typeBasedProperty(componentProps).forEach((x) => content.push(x));
   }
 
+  // const parentType = syntaxNode.parent!.type.name;
+  const parentType = retargetToAppropriateNode(syntaxNode).parent!.type.name;
   if (parentResponses[parentType]) {
-    parentResponses[parentType]({
-      parsedContent,
-      content: schemaChunk,
-    }).forEach((x) => content.push(x));
+    parentResponses[parentType](componentProps).forEach((x) => content.push(x));
   }
-  return content;
+  return simpleMerge(content.filter((x) => x));
+}
+
+function deduplicate(rows: any[]): any[] {
+  const hasSeen: Set<string> = new Set([]);
+  return rows.filter((x) => {
+    const key = JSON.stringify(x);
+    if (hasSeen.has(key)) {
+      return false;
+    }
+    hasSeen.add(key);
+    return true;
+  });
+}
+
+function simpleMerge(content: MenuRow[]): MenuRow[] {
+  const groups = content.reduce((acc: Record<string, any[]>, row) => {
+    acc[row.label] = (acc[row.label] || []).concat(row.elements);
+    return acc;
+  }, {});
+
+  return Object.entries(groups).map(
+    ([label, elements]) =>
+      ({ label, elements: deduplicate(elements).filter((x) => x) } as MenuRow)
+  );
 }

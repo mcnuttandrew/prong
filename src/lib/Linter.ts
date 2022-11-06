@@ -11,8 +11,14 @@ const errorCodeToErrorType: any = {
 };
 
 export const jsonLinter = linter((source) => {
-  const schema = source.state.field(cmStatePlugin).schema;
-  return produceLintValidations(schema, codeString(source, 0)).then((x) => {
+  return lintCode(
+    source.state.field(cmStatePlugin).schema,
+    codeString(source, 0)
+  );
+});
+
+export const lintCode = (schema: any, code: string): Promise<LintError[]> => {
+  return produceLintValidations(schema, code).then((x) => {
     return x.problems.map((problem) => {
       const { location, message, code } = problem;
       return {
@@ -24,4 +30,12 @@ export const jsonLinter = linter((source) => {
       };
     });
   });
-});
+};
+
+export interface LintError {
+  from: number;
+  to: number;
+  severity: "error" | "warning" | "info";
+  source: string;
+  message: string;
+}

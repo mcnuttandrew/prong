@@ -210,7 +210,7 @@ Array [
         "type": "display",
       },
     ],
-    "label": "TYPE",
+    "label": "Inferred JSON Type",
   },
 ]
 `;

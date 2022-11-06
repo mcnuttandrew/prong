@@ -21,6 +21,7 @@ import SimpleColorWidget from "./widgets/color-picker";
 import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
+import Highlighter from "./widgets/highlighter";
 // import AnnotationWidget from "./widgets/annotation-widget";
 
 export interface ProjectionProps {
@@ -56,16 +57,19 @@ const simpleWidgets: SimpleWidget[] = [
   // SimpleNumWidget,
   SimpleColorNameWidget,
   SimpleColorWidget,
+  Highlighter,
   // SimpleSliderWidget,
 ];
 
 function createWidgets(
-  view: EditorView,
-  schema: any,
-  projections: Projection[]
+  view: EditorView
+  // schema: any,
+  // projections: Projection[],
+  // schemaTypings: any
 ) {
   // const schemaMapLoader = createNodeMap(view, schema);
   const widgets: Range<Decoration>[] = [];
+  const { projections } = view.state.field(cmStatePlugin);
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,
@@ -110,7 +114,11 @@ function createWidgets(
     });
   }
   try {
-    return Decoration.set(widgets);
+    return Decoration.set(
+      widgets.sort((a, b) => {
+        return a.from - b.from;
+      })
+    );
   } catch (e) {
     console.log(e);
     console.log("problem creating widgets");
@@ -141,8 +149,14 @@ export const widgetsPlugin = ViewPlugin.fromClass(
     decorations: DecorationSet;
 
     constructor(view: EditorView) {
-      const { schema, projections } = view.state.field(cmStatePlugin);
-      this.decorations = createWidgets(view, schema, projections);
+      // const { schema, projections, schemaTypings } =
+      //   view.state.field(cmStatePlugin);
+      this.decorations = createWidgets(
+        view
+        // schema,
+        // projections,
+        // schemaTypings
+      );
     }
 
     update(update: ViewUpdate) {
@@ -151,10 +165,18 @@ export const widgetsPlugin = ViewPlugin.fromClass(
         update.state.field(cmStatePlugin)
       );
       if (update.docChanged || update.viewportChanged || stateValuesChanged) {
-        const { schema, projections } = update.state.field(cmStatePlugin);
-        this.decorations = createWidgets(update.view, schema, projections);
+        // const { schema, projections, schemaTypings } =
+        //   update.state.field(cmStatePlugin);
+        this.decorations = createWidgets(
+          update.view
+          // schema,
+          // projections,
+          // schemaTypings
+        );
       }
     }
+
+    // todo maybe need to add destroy and force
   },
   {
     decorations: (v) => v.decorations,
