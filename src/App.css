@@ -171,6 +171,7 @@ body .pcr-app.visible {
   border-radius: 5px;
   width: 400px;
   height: 300px;
+  overflow-y: auto;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
   /* padding: 1rem; */
   font-family: sans-serif;
@@ -206,10 +207,13 @@ body .pcr-app.visible {
 }
 
 .cm-annotation-widget-popover-container-row {
-  /* border: thin solid black; */
   display: flex;
+  /* flex-direction: column; */
   width: 100%;
   height: 100%;
+  margin-top: 2px;
+  border-top: thin dotted black;
+  font-size: 13px;
 }
 
 .cm-annotation-widget-popover-container-row-label {
@@ -230,6 +234,8 @@ body .pcr-app.visible {
   flex-wrap: wrap;
   max-width: 320px;
   width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
   /* border-left: solid 15px floralwhite; */
 }
 
@@ -242,11 +248,11 @@ body .pcr-app.visible {
   border-left: solid 15px aqua;
 }
 
-.cm-annotation-render-widget-display {
+/* .cm-annotation-render-widget-display {
   max-height: 200px;
-  overflow-y: auto;
-  font-size: 13px;
-}
+  overflow-y: auto; */
+
+/* } */
 
 /* TODO make more specific */
 div[tabindex="-1"]:focus {

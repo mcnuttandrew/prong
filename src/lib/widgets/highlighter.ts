@@ -13,7 +13,7 @@ const Highlighter: SimpleWidget = {
     return (hasTyping && hasTyping.length) || hasDiagnosticError;
   },
   addNode: (view, from, to, node) => {
-    const { schemaTypings, diagnostics } = view.state.field(cmStatePlugin);
+    const { diagnostics } = view.state.field(cmStatePlugin);
     const hasDiagnosticError = !!diagnostics.find(
       (x) => x.from === node.from && x.to === node.to
     );

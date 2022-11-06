@@ -8,10 +8,10 @@ import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { syntaxTree } from "@codemirror/language";
 
-import { jsonLinter, lintCode, LintError } from "../lib/Linter";
+import { lintCode, LintError } from "../lib/Linter";
 import ErrorBoundary from "./ErrorBoundary";
 import PopoverMenu from "./PopoverMenu";
-import { createNodeMap, codeString } from "../lib/utils";
+import { createNodeMap } from "../lib/utils";
 import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import {

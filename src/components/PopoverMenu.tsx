@@ -57,7 +57,7 @@ function buildMoveCursor(
     row -= 1;
     col = 0;
   }
-  if (dir === "down" && row < numRows) {
+  if (dir === "down" && row < numRows - 1) {
     row += 1;
     col = 0;
   }
@@ -238,7 +238,6 @@ export default function ContentToMenuItem(props: {
         }
       >
         <div className="cm-annotation-widget-popover-container">
-          <div>Menu</div>
           {content.map((row, idx) => {
             const { label, elements } = row;
             return (
