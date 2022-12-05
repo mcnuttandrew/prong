@@ -39,6 +39,7 @@ export function isColorFunc(s: string): boolean {
   }
 }
 
+// todo: unused
 export function isSliderFunc(s: string): boolean {
   return s === "_slider";
 }
@@ -563,12 +564,17 @@ export function applyAllCmds(content: string, updates: UpdateDispatch[]) {
 }
 
 export type MenuEvent =
-  | simpleSwapEvent
-  | addObjectKeyEvent
   | addElementAsSiblingInArrayEvent
-  | removeObjectKeyEvent
+  | addObjectKeyEvent
+  | nullEvent
   | removeElementFromArrayEvent
-  | nullEvent;
+  | removeObjectKeyEvent
+  | simpleSwapEvent
+  | increaseItemIdxEvent
+  | decreaseItemIdxEvent;
+// | moveItemToEndEvent
+// | moveItemToStartEvent;
+
 // | duplicateElementInArrayEvent;
 type nullEvent = { type: "nullEvent" };
 type simpleSwapEvent = { type: "simpleSwap"; payload: string };
@@ -582,14 +588,63 @@ type addElementAsSiblingInArrayEvent = {
 };
 type removeObjectKeyEvent = { type: "removeObjectKey" };
 type removeElementFromArrayEvent = { type: "removeElementFromArray" };
+type increaseItemIdxEvent = { type: "increaseItemIdx" };
+type decreaseItemIdxEvent = { type: "decreaseItemIdx" };
+
 // type duplicateElementInArrayEvent = {
 //   type: "duplicateElementInArray";
 //   payload: any;
 // };
 type ModifyCmd<A extends MenuEvent> = (
   value: A,
-  syntaxNode: SyntaxNode
+  syntaxNode: SyntaxNode,
+  currentText: string
 ) => UpdateDispatch | undefined;
+
+export const boundCheck = (node: SyntaxNode) => {
+  const prevType = node.prevSibling?.type.name;
+  const isFirst = !prevType || new Set(["⚠", "[", "{"]).has(prevType);
+  const nextType = node.nextSibling?.type.name;
+  const isLast = !nextType || new Set(["⚠", "]", "}"]).has(nextType);
+  return { isFirst, isLast };
+};
+
+const checkAndLift =
+  (boundFunction: ModifyCmd<any>, isPrev: boolean): ModifyCmd<any> =>
+  (value, syntaxNode, currentText) => {
+    let node = syntaxNode;
+    if (syntaxNode.type.name === "PropertyName") {
+      node = syntaxNode.parent!;
+    }
+    const bound = boundCheck(node);
+    const sib = isPrev ? node.prevSibling : node.nextSibling;
+    const atBoundart = isPrev ? bound.isFirst : bound.isLast;
+    if (!sib || atBoundart) {
+      return undefined;
+    }
+    return boundFunction(value, node, currentText);
+  };
+const decreaseItemIdx: ModifyCmd<decreaseItemIdxEvent> = checkAndLift(
+  (value, node, currentText) => {
+    const sib = node.prevSibling!;
+    const prev = currentText.slice(sib.from, sib.to);
+    const curr = currentText.slice(node.from, node.to);
+    const join = currentText.slice(sib.to, node.from);
+    return { value: `${curr}${join}${prev}`, from: sib.from, to: node.to };
+  },
+  true
+);
+
+const increaseItemIdx: ModifyCmd<decreaseItemIdxEvent> = checkAndLift(
+  (value, node, currentText) => {
+    const sib = node.nextSibling!;
+    const next = currentText.slice(sib.from, sib.to);
+    const curr = currentText.slice(node.from, node.to);
+    const join = currentText.slice(node.to, sib.from);
+    return { value: `${next}${join}${curr}`, from: node.from, to: sib.to };
+  },
+  false
+);
 
 const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
   value,
@@ -756,15 +811,25 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
 // todo maybe also add typings about what objects are expected???
 const CmdTable: Record<string, ModifyCmd<any>> = {
   duplicateElementInArray: () => undefined,
-  // todo insert element into array
   addElementAsSiblingInArray,
   addObjectKey,
   removeElementFromArray,
   removeObjectKey,
   simpleSwap,
+  decreaseItemIdx,
+  increaseItemIdx,
 };
-export const modifyCodeByCommand: ModifyCmd<any> = (value, syntaxNode) =>
-  CmdTable[value.type](value, syntaxNode);
+export const modifyCodeByCommand: ModifyCmd<any> = (
+  value,
+  syntaxNode,
+  currentText
+) => {
+  if (!CmdTable[value.type]) {
+    return { from: 0, to: 0, value: "" };
+  }
+  const result = CmdTable[value.type](value, syntaxNode, currentText);
+  return result || { from: 0, to: 0, value: "" };
+};
 
 export function createNodeMap(schema: any, doc: string) {
   return getMatchingSchemas(schema, doc).then((matches) => {

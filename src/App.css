@@ -274,5 +274,6 @@ div[tabindex="-1"]:focus {
 }
 
 .cm-linter-highlight {
-  background-color: sandybrown;
+  /* background-color: sandybrown; */
+  background-color: lightcoral;
 }

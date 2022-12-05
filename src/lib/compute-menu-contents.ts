@@ -2,7 +2,7 @@ import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
 
-import { MenuEvent } from "./utils";
+import { MenuEvent, boundCheck } from "./utils";
 import { SchemaMap } from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
 
@@ -306,7 +306,7 @@ const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
 const GenericComponent = makeSimpleComponent("hi generic");
 
 const PropertyNameComponent: Component = (props) => {
-  const { parsedContent } = props;
+  const { parsedContent, node } = props;
   return [
     {
       label: "PROPERTY",
@@ -317,6 +317,7 @@ const PropertyNameComponent: Component = (props) => {
           content: "remove key",
           onSelect: { type: "removeObjectKey" },
         },
+        ...directionalMoves(node),
       ],
     },
   ];
@@ -340,7 +341,37 @@ const ObjectComponent: Component = () => [
 
 const ParentIsPropertyComponent = makeSimpleComponent("hi property");
 
-const nullInsert: MenuEvent = { type: "nullEvent" };
+const directionalMoves = (node: SyntaxNode): MenuElement[] => {
+  const outputDirections: MenuElement[] = [];
+  const bounds = boundCheck(node);
+  if (!bounds.isFirst) {
+    outputDirections.push({
+      type: "button",
+      content: "Move item left",
+      onSelect: { type: "decreaseItemIdx" },
+    });
+    // {
+    //   type: "button",
+    //   content: "Set item as Last",
+    //   onSelect: { type: "moveItemToEnd" },
+    // },
+  }
+  console.log(bounds, node);
+  if (!bounds.isLast) {
+    outputDirections.push({
+      type: "button",
+      content: "Move item right",
+      onSelect: { type: "increaseItemIdx" },
+    });
+    // {
+    //   type: "button",
+    //   content: "Set item as First",
+    //   onSelect: { type: "moveItemToStart" },
+    // },
+  }
+  return outputDirections;
+};
+
 const ParentIsArrayComponent: Component = (props) => {
   return [
     {
@@ -351,26 +382,7 @@ const ParentIsArrayComponent: Component = (props) => {
           content: "Remove Item",
           onSelect: { type: "removeElementFromArray" },
         },
-        {
-          type: "button",
-          content: "Move item forward",
-          onSelect: { ...nullInsert },
-        },
-        {
-          type: "button",
-          content: "Move item backward",
-          onSelect: { ...nullInsert },
-        },
-        {
-          type: "button",
-          content: "Set item as Last",
-          onSelect: { ...nullInsert },
-        },
-        {
-          type: "button",
-          content: "Set item as First",
-          onSelect: { ...nullInsert },
-        },
+        ...directionalMoves(props.node),
       ],
     },
   ];

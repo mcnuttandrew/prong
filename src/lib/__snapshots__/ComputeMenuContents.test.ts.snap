@@ -200,6 +200,13 @@ Array [
         },
         "type": "button",
       },
+      Object {
+        "content": "Move item right",
+        "onSelect": Object {
+          "type": "increaseItemIdx",
+        },
+        "type": "button",
+      },
     ],
     "label": "PROPERTY",
   },

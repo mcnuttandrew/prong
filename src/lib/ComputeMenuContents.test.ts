@@ -51,7 +51,7 @@ const exampleData = `{
   ]
 }`;
 
-test.only("generateMenuContent", async () => {
+test("generateMenuContent", async () => {
   const veg = findNodeByText(exampleData, `"vegetables"`)!;
   const fAndVNodeMap = await createNodeMap(schema, exampleData);
   expect(fAndVNodeMap).toMatchSnapshot();

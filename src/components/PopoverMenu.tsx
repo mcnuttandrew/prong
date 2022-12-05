@@ -132,8 +132,13 @@ export default function ContentToMenuItem(props: {
     // todo on exit refocus
   }, [syntaxNode]);
 
+  const currentCodeSlice = syntaxNode
+    ? codeString(view, syntaxNode.from, syntaxNode.to)
+    : "";
+  const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
+
   const eventDispatch = (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => {
-    const update = modifyCodeByCommand(menuEvent, node);
+    const update = modifyCodeByCommand(menuEvent, node, codeString(view, 0));
     if (update) {
       codeUpdate(update);
       if (shouldCloseMenu) {
@@ -141,11 +146,6 @@ export default function ContentToMenuItem(props: {
       }
     }
   };
-
-  const currentCodeSlice = syntaxNode
-    ? codeString(view, syntaxNode.from, syntaxNode.to)
-    : "";
-  const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
 
   useEffect(() => {
     if (!(syntaxNode && syntaxNode.parent)) {
