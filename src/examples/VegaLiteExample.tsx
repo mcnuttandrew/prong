@@ -8,7 +8,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 import { ProjectionProps } from "../../src/lib/widgets";
-import { setIn } from "../lib/utils";
+import { setIn, codeString } from "../lib/utils";
 
 const vegaLiteCode = `
 {
@@ -60,11 +60,19 @@ const Shelf: FC<{
   keyPath: string[];
   setCurrentCode: (x: any) => void;
   currentCode: string;
+  // getCurrentCode: () => string;
 }> = function Shelf(props) {
-  const { keyPath, currentCode, setCurrentCode, currentValue } = props;
+  const {
+    keyPath,
+    currentCode,
+    // getCurrentCode,
+    setCurrentCode,
+    currentValue,
+  } = props;
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
+      // const currentCode = getCurrentCode();
       const update = setIn(keyPath, x.name, currentCode);
       setCurrentCode(update);
       return { name: "Dustbin" };
@@ -93,6 +101,7 @@ const Shelf: FC<{
           <div>{parsedCurrentValue}</div>
           <div
             onClick={() => {
+              // const currentCode = getCurrentCode();
               const update = setIn(keyPath, false, currentCode);
               setCurrentCode(update);
             }}
@@ -114,18 +123,31 @@ function ExampleProjection(props: ProjectionProps) {
   );
 }
 
+const shelf =
+  (setCurrentCode: any, currentCode: any) => (content: ProjectionProps) => {
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <Shelf
+          setCurrentCode={setCurrentCode}
+          currentCode={currentCode}
+          keyPath={content.keyPath as any}
+          currentValue={content.currentValue}
+        />
+      </DndProvider>
+    );
+  };
+
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState(vegaLiteCode);
-  const shelf = (content: any) => (
-    <DndProvider backend={HTML5Backend}>
-      <Shelf
-        setCurrentCode={setCurrentCode}
-        currentCode={currentCode}
-        keyPath={content.keyPath}
-        currentValue={content.currentValue}
-      />
-    </DndProvider>
-  );
+  const [formVal, setFormVal] = useState("type some stuff");
+
+  function DynamicProjection(props: ProjectionProps) {
+    return (
+      <div className="dynamic-projection-example">
+        my content is "{formVal}"
+      </div>
+    );
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -135,6 +157,14 @@ function VegaLiteExampleApp() {
             <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>
+          <div className="flex-down">
+            <label htmlFor="example-form-val">{formVal}</label>
+            <input
+              id="example-form-val"
+              value={formVal}
+              onChange={(e) => setFormVal(e.target.value)}
+            />
+          </div>
         </div>
         <Editor
           schema={VegaLiteV5Schema}
@@ -147,24 +177,28 @@ function VegaLiteExampleApp() {
               projection: ({ keyPath }) => {
                 return <div>hi annotation projection {keyPath.join(",")}</div>;
               },
+              hasInternalState: false,
             },
             {
               // query: ["data", "values", "*"],
               query: ["description", "description___key"],
               type: "inline",
               projection: ExampleProjection,
+              hasInternalState: true,
             },
             {
               // query: ["data", "values", "*"],
               query: ["mark", "mark___key"],
               type: "inline",
-              projection: ExampleProjection,
+              projection: DynamicProjection,
+              hasInternalState: true,
             },
             {
               // query: ["data", "values", "*"],
               query: ["encoding", "*", "field", "field___val"],
               type: "inline",
-              projection: shelf,
+              projection: shelf(setCurrentCode, currentCode),
+              hasInternalState: false,
             },
           ]}
         />

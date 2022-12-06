@@ -25,7 +25,9 @@ class InlineProjectionWidget extends WidgetType {
     // TODO: wrong
     // console.log(this, other);
     // return false;
-    return this.currentCodeSlice === other.currentCodeSlice;
+    return this.projection.hasInternalState
+      ? this.currentCodeSlice === other.currentCodeSlice
+      : false;
   }
 
   toDOM(): HTMLDivElement {

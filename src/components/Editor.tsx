@@ -131,7 +131,7 @@ export default function Editor(props: Props) {
   };
 
   // THIS TRIO OF EFFECTS HANDLES THE On/Off projection stuff, and it is very cursed, be warned
-  // figure out the range sets for the projections
+  // A. figures out the range sets for the projections
   useEffect(() => {
     const baseRange = selectionLocal && selectionLocal.ranges[0];
     if (!baseRange || baseRange.from !== baseRange.to) {
@@ -145,7 +145,7 @@ export default function Editor(props: Props) {
       setInsideRecRange(insiderDecRange);
     }
   }, [widgetRangeSets, selectionLocal]);
-  // deactivate the projections if necessary
+  // B. deactivate the projections if necessary
   useEffect(() => {
     if (!view || !insideDecRange) {
       return;
@@ -153,7 +153,7 @@ export default function Editor(props: Props) {
     const [from, to] = insideDecRange.split("____").map((x) => Number(x));
     simpleUpdate(view, from, to, view!.state.sliceDoc(from, to));
   }, [insideDecRange, view]);
-  // reactivate them if necessary
+  // C. reactivate them if necessary
   useEffect(() => {
     if (!insideDecRange) {
       return;
@@ -246,6 +246,7 @@ export default function Editor(props: Props) {
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
+      console.log("here");
       const tr = view.state.update({
         changes: { from: 0, to: view.state.doc.length, insert: code },
       });

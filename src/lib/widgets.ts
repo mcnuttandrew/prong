@@ -35,6 +35,7 @@ export interface Projection {
   query: string[];
   type: "tooltip" | "inline";
   projection: (props: ProjectionProps) => JSX.Element;
+  hasInternalState: boolean;
 }
 
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };
@@ -61,13 +62,7 @@ const simpleWidgets: SimpleWidget[] = [
   // SimpleSliderWidget,
 ];
 
-function createWidgets(
-  view: EditorView
-  // schema: any,
-  // projections: Projection[],
-  // schemaTypings: any
-) {
-  // const schemaMapLoader = createNodeMap(view, schema);
+function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
   const { projections } = view.state.field(cmStatePlugin);
   for (const { from, to } of view.visibleRanges) {
@@ -92,7 +87,13 @@ function createWidgets(
           if (!projWidget.checkForAdd(type, view, currentNode)) {
             return;
           }
-          if (baseRange && baseRange.from >= from && baseRange.from <= to) {
+
+          if (
+            !projection.hasInternalState &&
+            baseRange &&
+            baseRange.from >= from &&
+            baseRange.from <= to
+          ) {
             return;
           }
           hasProjection = true;
@@ -149,14 +150,7 @@ export const widgetsPlugin = ViewPlugin.fromClass(
     decorations: DecorationSet;
 
     constructor(view: EditorView) {
-      // const { schema, projections, schemaTypings } =
-      //   view.state.field(cmStatePlugin);
-      this.decorations = createWidgets(
-        view
-        // schema,
-        // projections,
-        // schemaTypings
-      );
+      this.decorations = createWidgets(view);
     }
 
     update(update: ViewUpdate) {
@@ -165,14 +159,7 @@ export const widgetsPlugin = ViewPlugin.fromClass(
         update.state.field(cmStatePlugin)
       );
       if (update.docChanged || update.viewportChanged || stateValuesChanged) {
-        // const { schema, projections, schemaTypings } =
-        //   update.state.field(cmStatePlugin);
-        this.decorations = createWidgets(
-          update.view
-          // schema,
-          // projections,
-          // schemaTypings
-        );
+        this.decorations = createWidgets(update.view);
       }
     }
 

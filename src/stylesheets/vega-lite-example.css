@@ -38,3 +38,16 @@
     justify-content: center;
     width: 100px;
 }
+
+.dynamic-projection-example {
+    align-items: center;
+    background: rebeccapurple;
+    border-radius: 2px;
+    color: white;
+    display: flex;
+    height: 100px;
+    justify-content: center;
+    width: 100px;
+    white-space: normal;
+    text-align: center;
+}
