@@ -9,10 +9,10 @@ import { indentWithTab } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
 
 import { lintCode, LintError } from "../lib/Linter";
-import ErrorBoundary from "./ErrorBoundary";
-import PopoverMenu from "./PopoverMenu";
+// import ErrorBoundary from "./ErrorBoundary";
+// import PopoverMenu from "./PopoverMenu";
 import { createNodeMap, getMenuTarget } from "../lib/utils";
-import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
+// import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import {
   cmStatePlugin,
@@ -22,8 +22,6 @@ import {
   setDiagnostics,
 } from "../lib/cmState";
 import PopoverPlugin from "../lib/popover-menu";
-
-export type UpdateDispatch = { from: number; to: number; value: string };
 
 type Props = {
   onChange: (code: string) => void;
@@ -75,11 +73,12 @@ export default function Editor(props: Props) {
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
-  const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
-    null
-  );
-  const [lints, setLints] = useState<LintError[]>([]);
-  const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
+  // const [localCode, setLocalCode] = useState(code);
+  // const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
+  //   null
+  // );
+  // const [lints, setLints] = useState<LintError[]>([]);
+  // const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
   // TODO replace this with sets? Or maybe a custom data structure that makes query the ranges easier/faster
   const [widgetRangeSets, setWidgetRangeSets] = useState<
     Record<string, boolean>
@@ -144,8 +143,9 @@ export default function Editor(props: Props) {
         setWidgetRangeSets(localRangeSets);
 
         // TODO wrap these is a debounce
+        // TODO move these into the cmState
         createNodeMap(schema, newCode).then((schemaMap) => {
-          setSchemaMap(schemaMap);
+          // setSchemaMap(schemaMap);
           view.dispatch({
             effects: [setSchemaTypings.of(schemaMap)],
           });
@@ -154,7 +154,7 @@ export default function Editor(props: Props) {
           view.dispatch({
             effects: [setDiagnostics.of(diagnostics)],
           });
-          setLints(diagnostics);
+          // setLints(diagnostics);
         });
       } else {
         const newSelection = v.view.state.selection;
@@ -179,7 +179,7 @@ export default function Editor(props: Props) {
       extensions: [
         // jsonLinter,
         PopoverPlugin(),
-        keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
+        // keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
         basicSetup,
         languageConf.of(json()),
         // keymap.of([indentWithTab]),
@@ -210,7 +210,9 @@ export default function Editor(props: Props) {
   }, [schema, view]);
   useEffect(() => {
     if (view) {
-      view.dispatch({ effects: [setProjections.of(projections || [])] });
+      setTimeout(() => {
+        view.dispatch({ effects: [setProjections.of(projections || [])] });
+      }, 500);
     }
   }, [projections, view]);
 

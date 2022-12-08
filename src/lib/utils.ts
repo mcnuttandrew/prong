@@ -3,7 +3,7 @@ import { syntaxTree } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
-import { UpdateDispatch } from "../components/Editor";
+import { UpdateDispatch } from "../lib/popover-menu";
 import { getMatchingSchemas } from "../lib/from-vscode/validator";
 export function codeString(
   view: EditorView,
@@ -914,6 +914,15 @@ export function getMenuTargetNode(state: EditorState) {
   );
   return target.target;
 }
+
+export const simpleUpdate = (
+  view: EditorView,
+  from: number,
+  to: number,
+  insert: string
+) => {
+  view.dispatch(view.state.update({ changes: { from, to, insert } }));
+};
 
 // // see this file for examples
 // // https://github.com/codemirror/commands/blob/acab64fc3d911393b6728c1e8eacadf5c11cc9bf/src/commands.ts#L683

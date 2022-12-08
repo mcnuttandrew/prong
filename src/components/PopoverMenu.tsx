@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { EditorView } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
-import { HotKeys, configure } from "react-hotkeys";
+// import { HotKeys, configure } from "react-hotkeys";
 import { LintError } from "../../src/lib/Linter";
 
 import {
@@ -21,55 +21,21 @@ import {
   classNames,
 } from "../lib/utils";
 import { Projection } from "../lib/widgets";
-import { SchemaMap, UpdateDispatch } from "./Editor";
+import { SchemaMap } from "./Editor";
 import PopoverMenuElement from "./PopoverMenuElement";
+import { UpdateDispatch, SelectionRoute } from "../lib/popover-menu";
 
 // hotkeys config
-configure({
-  simulateMissingKeyPressEvents: false,
-  ignoreKeymapAndHandlerChangesByDefault: false,
-});
+// configure({
+//   simulateMissingKeyPressEvents: false,
+//   ignoreKeymapAndHandlerChangesByDefault: false,
+// });
 
-type SelectionRoute = [number, number];
-
-const traverseContentTreeToNode: (
-  tree: MenuRow[],
-  path: SelectionRoute
-) => MenuElement | MenuRow | null = (tree, [row, col]) =>
-  tree[row].elements[col - 1];
-
-type MoveDirections = "up" | "left" | "right" | "down";
-function buildMoveCursor(
-  dir: MoveDirections,
-  content: MenuRow[],
-  route: SelectionRoute
-): SelectionRoute | false {
-  let row = route[0];
-  let col = route[1];
-
-  const leafGroupSize = content[row].elements?.length;
-  const numRows = content.length;
-
-  if (dir === "up" && row - 1 < 0) {
-    return false;
-  }
-  if (dir === "up" && row - 1 >= 0) {
-    row -= 1;
-    col = 0;
-  }
-  if (dir === "down" && row < numRows - 1) {
-    row += 1;
-    col = 0;
-  }
-  if (dir === "left") {
-    col = Math.max(col - 1, 0);
-  }
-  if (dir === "right") {
-    col = Math.min(col + 1, leafGroupSize);
-  }
-
-  return [row, col];
-}
+// const traverseContentTreeToNode: (
+//   tree: MenuRow[],
+//   path: SelectionRoute
+// ) => MenuElement | MenuRow | null = (tree, [row, col]) =>
+//   tree[row].elements[col - 1];
 
 const prepProjections =
   (
@@ -96,32 +62,39 @@ const prepProjections =
   };
 
 export default function ContentToMenuItem(props: {
-  projections: Projection[];
-  view: EditorView;
-  syntaxNode: SyntaxNode;
-  schemaMap: SchemaMap;
+  // lints: LintError[];
+  // schemaMap: SchemaMap;
+  // xPos: number | undefined;
+  // yPos: number | undefined;
   closeMenu: () => void;
   codeUpdate: (codeUpdate: UpdateDispatch) => void;
-  xPos: number | undefined;
-  yPos: number | undefined;
-  lints: LintError[];
+  menuContents: MenuRow[];
+  projections: Projection[];
+  selectedRouting: SelectionRoute;
+  setSelectedRouting: (route: SelectionRoute) => void;
+  syntaxNode: SyntaxNode;
+  view: EditorView;
 }) {
   const {
+    // xPos,
+    // yPos,
     closeMenu,
     codeUpdate,
-    lints,
-    projections,
-    schemaMap,
+    // lints,
+    // projections,
+    // schemaMap,
+    menuContents,
+    selectedRouting,
+    setSelectedRouting,
     syntaxNode,
     view,
-    xPos,
-    yPos,
   } = props;
   const node = syntaxNode && retargetToAppropriateNode(syntaxNode);
-  const [selectedRouting, setSelectedRouting] = useState<SelectionRoute>([
-    0, 0,
-  ]);
-  const [content, setContent] = useState<MenuRow[]>([]);
+  // TODO lift this into the widget
+  // const [selectedRouting, setSelectedRouting] = useState<SelectionRoute>([
+  //   0, 0,
+  // ]);
+  // const [content, setContent] = useState<MenuRow[]>([]);
 
   // const container = useRef<HTMLDivElement>(null);
   // useEffect(() => {
@@ -132,54 +105,54 @@ export default function ContentToMenuItem(props: {
   //   // todo on exit refocus
   // }, [syntaxNode]);
 
-  const currentCodeSlice = syntaxNode
-    ? codeString(view, syntaxNode.from, syntaxNode.to)
-    : "";
-  const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
+  // const currentCodeSlice = syntaxNode
+  //   ? codeString(view, syntaxNode.from, syntaxNode.to)
+  //   : "";
+  // const keyPath = syntaxNode ? syntaxNodeToKeyPath(syntaxNode, view) : [];
 
   const eventDispatch = (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => {
     const update = modifyCodeByCommand(menuEvent, node, codeString(view, 0));
     if (update) {
       codeUpdate(update);
-      if (shouldCloseMenu) {
-        closeMenu();
-      }
+      // if (shouldCloseMenu) {
+      //   closeMenu();
+      // }
     }
   };
 
-  useEffect(() => {
-    if (!(syntaxNode && syntaxNode.parent)) {
-      return;
-    }
-    setContent([
-      ...generateMenuContent(currentCodeSlice, syntaxNode, schemaMap),
-      ...projections
-        .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-        .filter((proj) => proj.type === "tooltip")
-        .map(prepProjections(view, syntaxNode, keyPath, currentCodeSlice)),
-      ...lints.map((lint) => ({
-        label: "LINT ERROR",
-        elements: [{ type: "display", content: lint.message }],
-      })),
-    ] as MenuRow[]);
-    // eslint-disable-next-line
-  }, [syntaxNode, schemaMap, lints]);
+  // useEffect(() => {
+  //   if (!(syntaxNode && syntaxNode.parent)) {
+  //     return;
+  //   }
+  //   setContent([
+  //     ...generateMenuContent(currentCodeSlice, syntaxNode, schemaMap),
+  //     ...projections
+  //       .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+  //       .filter((proj) => proj.type === "tooltip")
+  //       .map(prepProjections(view, syntaxNode, keyPath, currentCodeSlice)),
+  //     ...lints.map((lint) => ({
+  //       label: "LINT ERROR",
+  //       elements: [{ type: "display", content: lint.message }],
+  //     })),
+  //   ] as MenuRow[]);
+  //   // eslint-disable-next-line
+  // }, [syntaxNode, schemaMap, lints]);
 
-  function selectCurrentElement() {
-    let target = traverseContentTreeToNode(content, selectedRouting);
-    if (!target) {
-      return;
-    }
-    if ((target as MenuRow).label) {
-      return;
-    }
-    target = target as MenuElement;
-    if (target.type === "button") {
-      eventDispatch(target.onSelect);
-      // hack
-      setTimeout(() => closeMenu(), 30);
-    }
-  }
+  // function selectCurrentElement() {
+  //   let target = traverseContentTreeToNode(menuContents, selectedRouting);
+  //   if (!target) {
+  //     return;
+  //   }
+  //   if ((target as MenuRow).label) {
+  //     return;
+  //   }
+  //   target = target as MenuElement;
+  //   if (target.type === "button") {
+  //     eventDispatch(target.onSelect);
+  //     // hack
+  //     setTimeout(() => closeMenu(), 30);
+  //   }
+  // }
 
   // const keyMap = {
   //   moveLeft: "left",
@@ -227,19 +200,19 @@ export default function ContentToMenuItem(props: {
           // if (new Set([...e.target.classList]).has("cm-annotation-menu")) {
           //   container.current!.focus();
           // }
+          // style={
+          //   syntaxNode
+          //     ? {
+          //         top: yPos! + 20,
+          //         left: xPos,
+          //         // transform: `translate(${xPos}px, ${yPos}px)`,
+          //       }
+          //     : { display: "none" }
+          // }
         }}
-        style={
-          syntaxNode
-            ? {
-                top: yPos! + 20,
-                left: xPos,
-                // transform: `translate(${xPos}px, ${yPos}px)`,
-              }
-            : { display: "none" }
-        }
       >
         <div className="cm-annotation-widget-popover-container">
-          {content.map((row, idx) => {
+          {menuContents.map((row, idx) => {
             const { label, elements } = row;
             return (
               <div

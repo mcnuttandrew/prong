@@ -18,9 +18,7 @@ const simpleSet = (
   key: keyof typeof initialCmState,
   value: any,
   state: typeof initialCmState
-) => {
-  return { ...state, [key]: value };
-};
+) => ({ ...state, [key]: value });
 
 export const cmStatePlugin = StateField.define({
   create: () => initialCmState,
