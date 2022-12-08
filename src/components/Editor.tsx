@@ -4,15 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { json } from "@codemirror/lang-json";
 import { Compartment } from "@codemirror/state";
 import { basicSetup } from "codemirror";
-import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
+import { EditorView, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
 
 import { lintCode, LintError } from "../lib/Linter";
-// import ErrorBoundary from "./ErrorBoundary";
-// import PopoverMenu from "./PopoverMenu";
-import { createNodeMap, getMenuTarget } from "../lib/utils";
-// import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
+import { createNodeMap } from "../lib/utils";
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import {
   cmStatePlugin,
@@ -31,19 +28,6 @@ type Props = {
 };
 
 const languageConf = new Compartment();
-
-const triggerSelectionCheck =
-  (setMenu: (menu: any) => void) =>
-  (view: EditorView): void => {
-    if (!view) {
-      setMenu(null);
-      return;
-    }
-    const smallestMenuTarget = getMenuTarget(view);
-    if (smallestMenuTarget.target) {
-      setMenu(smallestMenuTarget.target);
-    }
-  };
 
 function calcWidgetRangeSets(v: ViewUpdate) {
   const decSets = (v.view as any).docView.decorations
@@ -73,12 +57,7 @@ export default function Editor(props: Props) {
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
-  // const [localCode, setLocalCode] = useState(code);
-  // const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
-  //   null
-  // );
-  // const [lints, setLints] = useState<LintError[]>([]);
-  // const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
+
   // TODO replace this with sets? Or maybe a custom data structure that makes query the ranges easier/faster
   const [widgetRangeSets, setWidgetRangeSets] = useState<
     Record<string, boolean>
@@ -210,6 +189,7 @@ export default function Editor(props: Props) {
   }, [schema, view]);
   useEffect(() => {
     if (view) {
+      // hack :(
       setTimeout(() => {
         view.dispatch({ effects: [setProjections.of(projections || [])] });
       }, 500);
@@ -228,47 +208,6 @@ export default function Editor(props: Props) {
   return (
     <div className="editor-container">
       <div ref={cmParent} />
-      {/* <ErrorBoundary>
-        <PopoverMenu
-          schemaMap={schemaMap}
-          lints={lints.filter((x) => {
-            return (
-              menu &&
-              menu.node &&
-              x.from === menu?.node.from &&
-              x.to === menu.node.to
-            );
-          })}
-          closeMenu={() => {
-            setMenu(null);
-            view?.contentDOM.focus();
-            // setTimeout(() => {
-            //   view?.dispatch({ selection: selectionLocal });
-            // }, 1);
-          }}
-          projections={projections || []}
-          view={view!}
-          syntaxNode={menu?.node}
-          codeUpdate={(codeUpdate: UpdateDispatch) => {
-            simpleUpdate(
-              view!,
-              codeUpdate.from,
-              codeUpdate.to,
-              codeUpdate.value
-            );
-          }}
-          xPos={
-            menu
-              ? menu.x - (cmParent.current?.parentElement?.offsetLeft || 0)
-              : undefined
-          }
-          yPos={
-            menu
-              ? menu.y - (cmParent.current?.parentElement?.offsetTop || 0)
-              : undefined
-          }
-        />
-      </ErrorBoundary> */}
     </div>
   );
 }
