@@ -48,7 +48,7 @@ class InlineProjectionWidget extends WidgetType {
     return wrap;
   }
 
-  ignoreEvent(): boolean {
+  ignoreEvent(e: Event): boolean {
     return true;
   }
   destroy() {
@@ -59,7 +59,7 @@ class InlineProjectionWidget extends WidgetType {
   }
 }
 
-const ProjectionWidgetFactor = (
+const ProjectionWidgetFactory = (
   projection: Projection,
   currentCodeSlice: string,
   syntaxNode: SyntaxNode
@@ -87,4 +87,4 @@ const ProjectionWidgetFactor = (
     },
   },
 });
-export default ProjectionWidgetFactor;
+export default ProjectionWidgetFactory;

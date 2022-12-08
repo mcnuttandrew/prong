@@ -181,6 +181,7 @@ export default function Editor(props: Props) {
           cmStatePlugin,
           widgetsPlugin,
           EditorView.updateListener.of((v: ViewUpdate) => {
+            console.log("hi", v);
             if (v.docChanged) {
               const newCode = v.state.doc.toString();
               onChange(newCode);

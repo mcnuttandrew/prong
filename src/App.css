@@ -20,6 +20,8 @@
   position: absolute;
 }
 
+/* NUMBER WIDGET (todo remove) */
+
 .cm-num-widget {
   display: inline-block;
   font-family: monospace;
@@ -38,13 +40,25 @@
   padding: 0;
 }
 
-.cm-color-widget {
+/* CLICK TARGET WIDGET */
+
+.cm-container-click-target {
   display: inline-block;
-  /*  CodeMirror has white-space: pre by default
-   Resetting here fixes a visual glitch where some whitespace in the color picker code
-   makes the widget align weirdly */
-  white-space: normal;
+  font-family: monospace;
 }
+
+.cm-container-click-target button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 0.8;
+  margin-left: 0px;
+  margin-right: 5px;
+  padding: 0;
+}
+
+
+/* BOOLEAN WIDGET */
 
 .cm-bool-widget {
   display: inline-block;
@@ -61,6 +75,16 @@
   vertical-align: middle;
 }
 
+/* COLOR NAME WIDGET */
+
+.cm-color-widget {
+  display: inline-block;
+  /*  CodeMirror has white-space: pre by default
+   Resetting here fixes a visual glitch where some whitespace in the color picker code
+   makes the widget align weirdly */
+  white-space: normal;
+}
+
 .cm-color-name-widget {
   display: inline-block;
   vertical-align: super;
@@ -71,7 +95,6 @@
   height: 10px;
   vertical-align: super;
 }
-
 
 .color-name-picker {
   position: absolute;
@@ -98,8 +121,7 @@
   margin-top: 0.2rem;
 }
 
-.color-name-picker,
-body .pcr-app.visible {
+.color-name-picker {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   padding: 1rem;
   font-family: sans-serif;
@@ -156,6 +178,8 @@ body .pcr-app.visible {
   margin-right: 0.5rem;
 }
 
+/* GENERIC WIDGET STUFF */
+
 .cm-annotation-widget, .cm-projection-widget {
   display: inline-block;
   cursor: pointer;
@@ -178,6 +202,8 @@ body .pcr-app.visible {
   background: floralwhite;
   padding-left: 5px;
 }
+
+/* EDITOR STUFF */
 
 .editor-container {
   position: relative;
