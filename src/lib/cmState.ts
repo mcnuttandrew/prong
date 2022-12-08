@@ -41,4 +41,5 @@ export const cmStatePlugin = StateField.define({
     }
     return state;
   },
+  provide: (field) => [],
 });

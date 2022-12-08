@@ -1,6 +1,7 @@
 import "@simonwep/pickr/dist/themes/classic.min.css";
 import Pickr from "@simonwep/pickr";
-import { WidgetType, Decoration, Range, EditorView } from "@codemirror/view";
+import { WidgetType, Decoration, EditorView } from "@codemirror/view";
+import { Range } from "@codemirror/state";
 import { SimpleWidget } from "../widgets";
 import {
   codeString,

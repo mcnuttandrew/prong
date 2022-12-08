@@ -75,7 +75,7 @@ export const PopoverPlugin = ViewPlugin.fromClass(
     constructor() {}
     update(update: ViewUpdate) {
       const state = update.view.state;
-      const { schemaTypings } = state.field(cmStatePlugin);
+      const { schemaTypings } = state.field(cmStatePlugin)!;
       //   const possibleTargets = getMenuTargetNode(update.view);
       //   console.log(schemaTypings, update, possibleTargets);
       //   if ()

@@ -11,10 +11,11 @@ const errorCodeToErrorType: any = {
 };
 
 export const jsonLinter = linter((source) => {
-  return lintCode(
-    source.state.field(cmStatePlugin).schema,
-    codeString(source, 0)
-  );
+  return Promise.resolve([]);
+  // return lintCode(
+  //   source.state.field(cmStatePlugin as unknown as any)?.schema,
+  //   codeString(source, 0)
+  // );
 });
 
 export const lintCode = (schema: any, code: string): Promise<LintError[]> => {

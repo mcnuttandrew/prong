@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { json } from "@codemirror/lang-json";
 import { Compartment } from "@codemirror/state";
-import { basicSetup, EditorState } from "@codemirror/basic-setup";
+import { basicSetup } from "codemirror";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
+import { EditorState } from "@codemirror/state";
 
 import { lintCode, LintError } from "../lib/Linter";
 import ErrorBoundary from "./ErrorBoundary";
@@ -135,59 +136,62 @@ export default function Editor(props: Props) {
   useEffect(() => {
     // let localRangeSets = {};
     // let selection: EditorSelection | null;
-    const view = new EditorView({
-      state: EditorState.create({
-        extensions: [
-          // jsonLinter,
-          PopoverPlugin(),
-          keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
-          basicSetup,
-          languageConf.of(json()),
-          keymap.of([indentWithTab]),
-          cmStatePlugin,
-          widgetsPlugin,
-          EditorView.updateListener.of((v: ViewUpdate) => {
-            if (v.docChanged) {
-              const newCode = v.state.doc.toString();
-              onChange(newCode);
-              const localRangeSets = calcWidgetRangeSets(v);
-              setWidgetRangeSets(localRangeSets);
+    const localExtension = EditorView.updateListener.of((v: ViewUpdate) => {
+      if (v.docChanged) {
+        const newCode = v.state.doc.toString();
+        onChange(newCode);
+        const localRangeSets = calcWidgetRangeSets(v);
+        setWidgetRangeSets(localRangeSets);
 
-              // TODO wrap these is a debounce
-              createNodeMap(schema, newCode).then((schemaMap) => {
-                setSchemaMap(schemaMap);
-                view.dispatch({
-                  effects: [setSchemaTypings.of(schemaMap)],
-                });
-              });
-              lintCode(schema, newCode).then((diagnostics) => {
-                view.dispatch({
-                  effects: [setDiagnostics.of(diagnostics)],
-                });
-                setLints(diagnostics);
-              });
-            } else {
-              const newSelection = v.view.state.selection;
-              // determine if the new selection
-              // console.log(v, newSelection, selection);
-              // const clickInSideOfRange = Object.keys(localRangeSets).some(
-              //   (x) => {
-              //     const [newFrom, newTo] = x.split("____").map(Number);
-              //     const { from, to } = newSelection.ranges[0];
-              //     return from >= newFrom && to <= newTo;
-              //   }
-              // );
-              // if (clickInSideOfRange && selection) {
-              //   view.dispatch({ selection });
-              // } else {
-              setSelection(newSelection);
-              //   selection = newSelection;
-              // }
-            }
-          }),
-        ],
-        doc: code,
-      }),
+        // TODO wrap these is a debounce
+        createNodeMap(schema, newCode).then((schemaMap) => {
+          setSchemaMap(schemaMap);
+          view.dispatch({
+            effects: [setSchemaTypings.of(schemaMap)],
+          });
+        });
+        lintCode(schema, newCode).then((diagnostics) => {
+          view.dispatch({
+            effects: [setDiagnostics.of(diagnostics)],
+          });
+          setLints(diagnostics);
+        });
+      } else {
+        const newSelection = v.view.state.selection;
+        // determine if the new selection
+        // console.log(v, newSelection, selection);
+        // const clickInSideOfRange = Object.keys(localRangeSets).some(
+        //   (x) => {
+        //     const [newFrom, newTo] = x.split("____").map(Number);
+        //     const { from, to } = newSelection.ranges[0];
+        //     return from >= newFrom && to <= newTo;
+        //   }
+        // );
+        // if (clickInSideOfRange && selection) {
+        //   view.dispatch({ selection });
+        // } else {
+        setSelection(newSelection);
+        //   selection = newSelection;
+        // }
+      }
+    });
+    const editorState = EditorState.create({
+      extensions: [
+        // jsonLinter,
+        PopoverPlugin(),
+        keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
+        basicSetup,
+        languageConf.of(json()),
+        // keymap.of([indentWithTab]),
+        cmStatePlugin,
+        widgetsPlugin,
+        localExtension,
+      ],
+      doc: code,
+    })!;
+    const view = new EditorView({
+      // TODO hack
+      state: editorState as any,
       parent: cmParent.current!,
     });
     setView(view);
