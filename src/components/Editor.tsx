@@ -156,9 +156,7 @@ export default function Editor(props: Props) {
     });
     const editorState = EditorState.create({
       extensions: [
-        // jsonLinter,
         PopoverPlugin(),
-        // keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
         basicSetup,
         languageConf.of(json()),
         // keymap.of([indentWithTab]),
@@ -169,8 +167,7 @@ export default function Editor(props: Props) {
       doc: code,
     })!;
     const view = new EditorView({
-      // TODO hack
-      state: editorState as any,
+      state: editorState,
       parent: cmParent.current!,
     });
     setView(view);

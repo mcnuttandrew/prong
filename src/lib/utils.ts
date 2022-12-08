@@ -843,62 +843,16 @@ export function createNodeMap(schema: any, doc: string) {
   });
 }
 
-// old version that uses the positions
-export function getMenuTarget(view: EditorView) {
-  const possibleMenuTargets: any[] = [];
-  for (const { from, to } of view.visibleRanges) {
-    syntaxTree(view.state).iterate({
-      from,
-      to,
-      // enter: (type, from, to, get) => {
-      enter: (nodeRef) => {
-        const node = nodeRef.node;
-        const ranges = view.state.selection.ranges;
-        if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
-          return;
-        }
-        // maybe wrong
-        // const node = get();
-        if (from <= ranges[0].from && to >= ranges[0].from) {
-          const bbox = view.coordsAtPos(from);
-          if (bbox) {
-            possibleMenuTargets.push({
-              x: bbox.left,
-              y: bbox.top,
-              node,
-              from,
-              to,
-            });
-          }
-        }
-      },
-    });
-    // AM: todo not impossible that this is a bug, this should be 1 line down?
-    return possibleMenuTargets.reduce(
-      (acc, row) => {
-        const dist = row.to - row.from;
-        return dist < acc.dist ? { dist, target: row } : acc;
-      },
-      { dist: Infinity, target: null }
-    );
-  }
-}
-
-// new version that gets the nodes
 export function getMenuTargetNode(state: EditorState) {
   const possibleMenuTargets: any[] = [];
   syntaxTree(state).iterate({
-    // from,
-    // to,
-    // enter: (type, from, to, get) => {
     enter: (nodeRef) => {
       const node = nodeRef.node;
       const ranges = state.selection.ranges;
+      // todo: here is the main place where multi cursor wouldn't really work
       if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
         return;
       }
-      // maybe wrong
-      // const node = get();
       if (node.from <= ranges[0].from && node.to >= ranges[0].from) {
         possibleMenuTargets.push(node);
       }

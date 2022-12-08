@@ -108,8 +108,7 @@ function runSelection(view: EditorView) {
     if (update) {
       simpleUpdate(view, update.from, update.to, update.value);
     }
-    // hack
-    // setTimeout(() => closeMenu(), 30);
+
     view.dispatch({
       effects: [setPopoverUsage.of(false), setPopoverVisibility.of(false)],
     });

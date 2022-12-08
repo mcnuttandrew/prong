@@ -8,7 +8,6 @@ import {
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
 import { Range } from "@codemirror/state";
-// import {range}
 import isEqual from "lodash.isequal";
 
 import { codeString } from "./utils";
@@ -20,8 +19,6 @@ import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
 import Highlighter from "./widgets/highlighter";
-
-// type Range<A> = A;
 
 export interface ProjectionProps {
   view: EditorView;
@@ -69,13 +66,11 @@ function createWidgets(view: EditorView) {
     syntaxTree(view.state).iterate({
       from,
       to,
-      // enter: (type, from, to, get) => {
       enter: (currentNodeRef) => {
         const currentNode = currentNodeRef.node;
         const from = currentNodeRef.from;
         const to = currentNodeRef.to;
         const type = currentNodeRef.type;
-        // const currentNode = get();
         const inlineProjections = projections.filter(
           (proj) => proj.type === "inline"
         );
