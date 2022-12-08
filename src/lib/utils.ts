@@ -851,7 +851,8 @@ export function getMenuTarget(view: EditorView) {
       from,
       to,
       // enter: (type, from, to, get) => {
-      enter: (node) => {
+      enter: (nodeRef) => {
+        const node = nodeRef.node;
         const ranges = view.state.selection.ranges;
         if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
           return;
@@ -890,7 +891,8 @@ export function getMenuTargetNode(state: EditorState) {
     // from,
     // to,
     // enter: (type, from, to, get) => {
-    enter: (node) => {
+    enter: (nodeRef) => {
+      const node = nodeRef.node;
       const ranges = state.selection.ranges;
       if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
         return;

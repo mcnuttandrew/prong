@@ -123,14 +123,14 @@ export default function ContentToMenuItem(props: {
   ]);
   const [content, setContent] = useState<MenuRow[]>([]);
 
-  const container = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (syntaxNode) {
-      container.current!.focus();
-      setSelectedRouting([0, 0]);
-    }
-    // todo on exit refocus
-  }, [syntaxNode]);
+  // const container = useRef<HTMLDivElement>(null);
+  // useEffect(() => {
+  //   if (syntaxNode) {
+  //     container.current!.focus();
+  //     setSelectedRouting([0, 0]);
+  //   }
+  //   // todo on exit refocus
+  // }, [syntaxNode]);
 
   const currentCodeSlice = syntaxNode
     ? codeString(view, syntaxNode.from, syntaxNode.to)
@@ -181,51 +181,52 @@ export default function ContentToMenuItem(props: {
     }
   }
 
-  const keyMap = {
-    moveLeft: "left",
-    moveRight: "right",
-    moveDown: "down",
-    moveUp: "up",
-    closeMenu: "escape",
-    selectCurrentElement: "enter",
-  };
+  // const keyMap = {
+  //   moveLeft: "left",
+  //   moveRight: "right",
+  //   moveDown: "down",
+  //   moveUp: "up",
+  //   closeMenu: "escape",
+  //   selectCurrentElement: "enter",
+  // };
 
-  function moveCursor(dir: MoveDirections) {
-    const computedRoute = buildMoveCursor(dir, content, selectedRouting);
-    if (!computedRoute) {
-      closeMenu();
-      return;
-    }
-    setSelectedRouting(computedRoute);
-  }
+  // function moveCursor(dir: MoveDirections) {
+  //   const computedRoute = buildMoveCursor(dir, content, selectedRouting);
+  //   if (!computedRoute) {
+  //     closeMenu();
+  //     return;
+  //   }
+  //   setSelectedRouting(computedRoute);
+  // }
 
-  const handlers = {
-    moveLeft: () => moveCursor("left"),
-    moveRight: () => moveCursor("right"),
-    moveDown: () => moveCursor("down"),
-    moveUp: () => moveCursor("up"),
-    selectCurrentElement: () => selectCurrentElement(),
-    closeMenu,
-  };
+  // const handlers = {
+  //   moveLeft: () => moveCursor("left"),
+  //   moveRight: () => moveCursor("right"),
+  //   moveDown: () => moveCursor("down"),
+  //   moveUp: () => moveCursor("up"),
+  //   selectCurrentElement: () => selectCurrentElement(),
+  //   closeMenu,
+  // };
 
+  //   <HotKeys
+  //     className=""
+  //     keyMap={keyMap}
+  //     handlers={handlers}
+  //     allowChanges={true}
+  //     // innerRef={container}
+  //   >
   return (
-    <HotKeys
-      className=""
-      keyMap={keyMap}
-      handlers={handlers}
-      allowChanges={true}
-      innerRef={container}
-    >
-      {syntaxNode && (
+    <div>
+      {/* {syntaxNode && (
         <div className="cm-annotation-menu-bg" onClick={() => closeMenu()} />
-      )}
+      )} */}
       <div
         className="cm-annotation-menu position-absolute"
         onClick={(e: any) => {
           //   click on the menu to retarget it
-          if (new Set([...e.target.classList]).has("cm-annotation-menu")) {
-            container.current!.focus();
-          }
+          // if (new Set([...e.target.classList]).has("cm-annotation-menu")) {
+          //   container.current!.focus();
+          // }
         }}
         style={
           syntaxNode
@@ -273,6 +274,7 @@ export default function ContentToMenuItem(props: {
           })}
         </div>
       </div>
-    </HotKeys>
+      {/* </HotKeys> */}
+    </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   keymap,
   EditorView,
   showTooltip,
+  TooltipView,
 } from "@codemirror/view";
 import { cmStatePlugin } from "./cmState";
 import { getMenuTargetNode } from "./utils";
@@ -47,25 +48,21 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     const targetNode = getMenuTargetNode(tr.state);
     const targetedTypings =
       schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
-    // const possibleTargets = getMenuTargetNode(update.view);
-    // console.log(
-    //   state,
-    //   schemaTypings,
-    //   tr,
-    //   targetNode,
-    //   targetedTypings,
-    //   `${targetNode.from}-${targetNode.to}`
-    // );
+
     return {
       ...state,
       targetNode,
       targetedTypings,
-      tooltip: completionTooltip(popOverState),
+      tooltip: {
+        pos: targetNode.from,
+        create: completionTooltip(popOverState),
+        above: true,
+      },
     };
     // return state;
   },
   provide: (f) => {
-    return [];
+    return [showTooltip.from(f, (val) => val.tooltip)];
     // return [EditorView.contentAttributes.from(f, (state) => [])];
   },
 });
@@ -98,17 +95,18 @@ class CompletionTooltip {
   ) {
     this.dom = document.createElement("div");
     this.dom.className = "cm-tooltip-autocomplete";
+    this.update();
   }
 
   update() {
     const { schemaTypings, projections } = this.view.state.field(cmStatePlugin);
-    console.log("hi");
     const { targetNode } = this.view.state.field(this.stateField);
-    if (!targetNode) {
+    console.log(targetNode);
+    if (!targetNode || targetNode.type.name === "JsonText") {
       return;
     }
-    const bbox = this.view.coordsAtPos(targetNode.from);
-    console.log(bbox);
+    // const bbox = this.view.coordsAtPos(targetNode.from);
+    // console.log(bbox);
     //     let
     // if (bbox) {
     //   possibleMenuTargets.push({
@@ -125,8 +123,8 @@ class CompletionTooltip {
       schemaMap: schemaTypings,
       closeMenu: () => {},
       codeUpdate: () => {},
-      xPos: undefined,
-      yPos: undefined,
+      xPos: 0,
+      yPos: 0,
       lints: [],
     });
     // this might be too aggressive a rendering scheme?
@@ -140,8 +138,8 @@ class CompletionTooltip {
 export function completionTooltip(
   stateField: StateField<typeof popoverMenuState>
 ) {
-  // todo should be tooltip view as export?
-  return (view: EditorView): any => new CompletionTooltip(view, stateField);
+  return (view: EditorView): TooltipView =>
+    new CompletionTooltip(view, stateField);
 }
 
 export const popOverCompletionKeymap: readonly KeyBinding[] = [
