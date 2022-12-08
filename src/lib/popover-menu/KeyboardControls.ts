@@ -74,13 +74,6 @@ function buildMoveCursor(
   return [row, col];
 }
 
-function closePopover(view: EditorView) {
-  view.dispatch({
-    effects: [setPopoverUsage.of(false), setPopoverVisibility.of(false)],
-  });
-  return true;
-}
-
 const traverseContentTreeToNode: (
   tree: MenuRow[],
   path: SelectionRoute
@@ -109,15 +102,35 @@ function runSelection(view: EditorView) {
     }
 
     view.dispatch({
-      effects: [setPopoverUsage.of(false), setPopoverVisibility.of(false)],
+      effects: [
+        setPopoverUsage.of(false),
+        setPopoverVisibility.of(false),
+        setRouting.of([0, 0]),
+      ],
     });
   }
   return true;
 }
 
+function forceClose(view: EditorView) {
+  view.dispatch({
+    effects: [setPopoverUsage.of(false), setPopoverVisibility.of(false)],
+  });
+  return true;
+}
+
+function forceOpen(view: EditorView) {
+  console.log("???/");
+  view.dispatch({
+    effects: [setPopoverUsage.of(true), setPopoverVisibility.of(true)],
+  });
+  return true;
+}
+
 export const popOverCompletionKeymap: readonly KeyBinding[] = [
   //   { key: "Ctrl-Space", run: startCompletion },
-  { key: "Escape", run: closePopover },
+  { key: "Cmd-.", run: forceOpen },
+  { key: "Escape", run: forceClose },
   { key: "ArrowDown", run: changeSelectionRoute("down") },
   { key: "ArrowUp", run: changeSelectionRoute("up") },
   { key: "ArrowLeft", run: changeSelectionRoute("left") },

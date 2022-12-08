@@ -62,6 +62,15 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     const targetedTypings =
       schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
 
+    // handle multi-cursor stuff appropriately
+    const ranges = tr.state.selection.ranges;
+    let pos = ranges[0].from;
+    const moreThanOneSelection = ranges.length > 1;
+    const selectionWiderThanOne = ranges.some(({ from, to }) => from !== to);
+    if (moreThanOneSelection || selectionWiderThanOne) {
+      return { ...state, tooltip: null };
+    }
+
     const nodeIsActuallyNew = !(
       targetNode?.from === state?.targetNode?.from &&
       targetNode?.to === state?.targetNode?.to
@@ -93,7 +102,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     ] as MenuRow[];
 
     const tooltip = {
-      pos: targetNode.from,
+      pos: pos,
       create: createTooltip(popOverState),
       above: true,
     };

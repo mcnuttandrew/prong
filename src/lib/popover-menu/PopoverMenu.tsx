@@ -56,7 +56,7 @@ function PopOverMenuContents(props: {
   codeUpdate: (codeUpdate: UpdateDispatch) => void;
   menuContents: MenuRow[];
   projections: Projection[];
-  selectedRouting: SelectionRoute;
+  selectedRouting: false | SelectionRoute;
   setSelectedRouting: (route: SelectionRoute) => void;
   syntaxNode: SyntaxNode;
   view: EditorView;
@@ -82,6 +82,22 @@ function PopOverMenuContents(props: {
     }
   };
 
+  useEffect(() => {
+    if (!selectedRouting) {
+      return;
+    }
+    const num = selectedRouting[0] + 1;
+    const node = ReactDOM.findDOMNode(
+      document.querySelector(
+        `.cm-annotation-widget-popover-container > :nth-child(${num})`
+      )
+    );
+
+    if (node) {
+      (node as Element).scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+  }, [selectedRouting]);
+
   return (
     <div className="cm-annotation-menu position-absolute">
       <div className="cm-annotation-widget-popover-container">
@@ -96,7 +112,9 @@ function PopOverMenuContents(props: {
                 className={classNames({
                   "cm-annotation-widget-popover-container-row-label": true,
                   "cm-annotation-widget-element-selected":
-                    selectedRouting[0] === idx && selectedRouting[1] === 0,
+                    selectedRouting &&
+                    selectedRouting[0] === idx &&
+                    selectedRouting[1] === 0,
                 })}
                 onClick={() => setSelectedRouting([idx, 0])}
               >
@@ -108,6 +126,7 @@ function PopOverMenuContents(props: {
                     menuElement={element}
                     eventDispatch={eventDispatch}
                     isSelected={
+                      selectedRouting &&
                       selectedRouting[0] === idx &&
                       selectedRouting[1] === jdx + 1
                     }
@@ -136,8 +155,13 @@ class Tooltip {
 
   update() {
     const { projections } = this.view.state.field(cmStatePlugin);
-    const { targetNode, showPopover, selectedRouting, menuContents } =
-      this.view.state.field(this.stateField);
+    const {
+      targetNode,
+      showPopover,
+      selectedRouting,
+      menuContents,
+      popOverInUse,
+    } = this.view.state.field(this.stateField);
     // TODO: dont show if target is projection
     if (
       !targetNode ||
@@ -151,21 +175,21 @@ class Tooltip {
     // TODO add a bunch of guards to see if equivalent inputs have actually changed or not
 
     const codeUpdate = (codeUpdate: UpdateDispatch) => {
-      console.log("update?", codeUpdate);
       simpleUpdate(this.view, codeUpdate.from, codeUpdate.to, codeUpdate.value);
     };
     const closeMenu = () =>
       this.view.dispatch({ effects: [setPopoverVisibility.of(false)] });
 
-    const setSelectedRouting = (route: [number, number]) =>
+    const setSelectedRouting = (route: [number, number]) => {
       this.view.dispatch({ effects: [setRouting.of(route)] });
+    };
 
     const element = React.createElement(PopOverMenuContents, {
       closeMenu,
       codeUpdate,
       menuContents,
       projections,
-      selectedRouting,
+      selectedRouting: popOverInUse ? selectedRouting : false,
       setSelectedRouting,
       syntaxNode: targetNode,
       view: this.view,
