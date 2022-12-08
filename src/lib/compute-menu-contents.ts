@@ -152,6 +152,9 @@ function AnyOfObjOptionalFieldPicker(
   );
 
   const isObject: boolean = new Set(["{", "}", "Object"]).has(node.type.name);
+  const addProps = deduplicateAndSortArray(
+    Object.keys(content?.properties || {}).concat(requiredPropsArr)
+  );
   return [
     content.$$labeledType && {
       label: "JSON Schema Type",
@@ -172,16 +175,14 @@ function AnyOfObjOptionalFieldPicker(
         },
       ],
     },
-    {
+    isObject && {
       label: "Add",
-      elements: deduplicateAndSortArray(
-        Object.keys(content?.properties || {}).concat(requiredPropsArr)
-      ).map((x) => ({
+      elements: addProps.map((x) => ({
         type: "button",
         content: x,
         onSelect: {
           type: "addObjectKey",
-          payload: { key: "$$INPUT_BIND", value: "null" },
+          payload: { key: x, value: "null" },
         },
       })),
     },
@@ -356,7 +357,6 @@ const directionalMoves = (node: SyntaxNode): MenuElement[] => {
     //   onSelect: { type: "moveItemToEnd" },
     // },
   }
-  console.log(bounds, node);
   if (!bounds.isLast) {
     outputDirections.push({
       type: "button",
