@@ -2,13 +2,12 @@ import {
   Decoration,
   DecorationSet,
   EditorView,
-  Range,
   ViewPlugin,
   ViewUpdate,
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
-
+import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
 import { codeString } from "./utils";
@@ -67,8 +66,11 @@ function createWidgets(view: EditorView) {
     syntaxTree(view.state).iterate({
       from,
       to,
-      enter: (type, from, to, get) => {
-        const currentNode = get();
+      enter: (currentNodeRef) => {
+        const currentNode = currentNodeRef.node;
+        const from = currentNodeRef.from;
+        const to = currentNodeRef.to;
+        const type = currentNodeRef.type;
         const inlineProjections = projections.filter(
           (proj) => proj.type === "inline"
         );

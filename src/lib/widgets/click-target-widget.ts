@@ -36,11 +36,6 @@ const ClickTargetWidget: SimpleWidget = {
       widget: new ClickTarget(from, node.type.name as ContainerType),
     }).range(to),
   ],
-  eventSubscriptions: {
-    mousedown: (e, view) => {
-      console.log("mousedown capture");
-      return "X";
-    },
-  },
+  eventSubscriptions: {},
 };
 export default ClickTargetWidget;

@@ -191,16 +191,17 @@
 }
 
 .cm-annotation-menu {
+  background: floralwhite;
   border-left: 15px solid salmon;
   border-radius: 5px;
-  width: 400px;
-  height: 300px;
-  overflow-y: auto;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
   font-family: sans-serif;
-  z-index: 1000;
-  background: floralwhite;
+  height: 300px;
+  overflow-y: auto;
   padding-left: 5px;
+  top: 1em;
+  width: 400px;
+  z-index: 1000;
 }
 
 /* EDITOR STUFF */

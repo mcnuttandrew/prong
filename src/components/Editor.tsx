@@ -3,16 +3,13 @@ import { useEffect, useRef, useState } from "react";
 
 import { json } from "@codemirror/lang-json";
 import { Compartment } from "@codemirror/state";
-import { basicSetup, EditorState } from "@codemirror/basic-setup";
-import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
+import { basicSetup } from "codemirror";
+import { EditorView, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { syntaxTree } from "@codemirror/language";
+import { EditorState } from "@codemirror/state";
 
 import { lintCode, LintError } from "../lib/Linter";
-import ErrorBoundary from "./ErrorBoundary";
-import PopoverMenu from "./PopoverMenu";
 import { createNodeMap } from "../lib/utils";
-import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import {
   cmStatePlugin,
@@ -21,8 +18,7 @@ import {
   setSchemaTypings,
   setDiagnostics,
 } from "../lib/cmState";
-
-export type UpdateDispatch = { from: number; to: number; value: string };
+import PopoverPlugin from "../lib/popover-menu";
 
 type Props = {
   onChange: (code: string) => void;
@@ -32,54 +28,6 @@ type Props = {
 };
 
 const languageConf = new Compartment();
-
-function getMenuTarget(view: EditorView) {
-  const possibleMenuTargets: any[] = [];
-  for (const { from, to } of view.visibleRanges) {
-    syntaxTree(view.state).iterate({
-      from,
-      to,
-      enter: (type, from, to, get) => {
-        const ranges = view.state.selection.ranges;
-        if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
-          return;
-        }
-        const node = get();
-        if (from <= ranges[0].from && to >= ranges[0].from) {
-          const bbox = view.coordsAtPos(from);
-          if (bbox) {
-            possibleMenuTargets.push({
-              x: bbox.left,
-              y: bbox.top,
-              node,
-              from,
-              to,
-            });
-          }
-        }
-      },
-    });
-    return possibleMenuTargets.reduce(
-      (acc, row) => {
-        const dist = row.to - row.from;
-        return dist < acc.dist ? { dist, target: row } : acc;
-      },
-      { dist: Infinity, target: null }
-    );
-  }
-}
-const triggerSelectionCheck =
-  (setMenu: (menu: any) => void) =>
-  (view: EditorView): void => {
-    if (!view) {
-      setMenu(null);
-      return;
-    }
-    const smallestMenuTarget = getMenuTarget(view);
-    if (smallestMenuTarget.target) {
-      setMenu(smallestMenuTarget.target);
-    }
-  };
 
 function calcWidgetRangeSets(v: ViewUpdate) {
   const decSets = (v.view as any).docView.decorations
@@ -109,11 +57,7 @@ export default function Editor(props: Props) {
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
-  const [menu, setMenu] = useState<{ x: number; y: number; node: any } | null>(
-    null
-  );
-  const [lints, setLints] = useState<LintError[]>([]);
-  const [schemaMap, setSchemaMap] = useState<SchemaMap>({});
+
   // TODO replace this with sets? Or maybe a custom data structure that makes query the ranges easier/faster
   const [widgetRangeSets, setWidgetRangeSets] = useState<
     Record<string, boolean>
@@ -170,59 +114,60 @@ export default function Editor(props: Props) {
   useEffect(() => {
     // let localRangeSets = {};
     // let selection: EditorSelection | null;
-    const view = new EditorView({
-      state: EditorState.create({
-        extensions: [
-          // jsonLinter,
-          keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
-          basicSetup,
-          languageConf.of(json()),
-          keymap.of([indentWithTab]),
-          cmStatePlugin,
-          widgetsPlugin,
-          EditorView.updateListener.of((v: ViewUpdate) => {
-            console.log("hi", v);
-            if (v.docChanged) {
-              const newCode = v.state.doc.toString();
-              onChange(newCode);
-              const localRangeSets = calcWidgetRangeSets(v);
-              setWidgetRangeSets(localRangeSets);
+    const localExtension = EditorView.updateListener.of((v: ViewUpdate) => {
+      if (v.docChanged) {
+        const newCode = v.state.doc.toString();
+        onChange(newCode);
+        const localRangeSets = calcWidgetRangeSets(v);
+        setWidgetRangeSets(localRangeSets);
 
-              // TODO wrap these is a debounce
-              createNodeMap(schema, newCode).then((schemaMap) => {
-                setSchemaMap(schemaMap);
-                view.dispatch({
-                  effects: [setSchemaTypings.of(schemaMap)],
-                });
-              });
-              lintCode(schema, newCode).then((diagnostics) => {
-                view.dispatch({
-                  effects: [setDiagnostics.of(diagnostics)],
-                });
-                setLints(diagnostics);
-              });
-            } else {
-              const newSelection = v.view.state.selection;
-              // determine if the new selection
-              // console.log(v, newSelection, selection);
-              // const clickInSideOfRange = Object.keys(localRangeSets).some(
-              //   (x) => {
-              //     const [newFrom, newTo] = x.split("____").map(Number);
-              //     const { from, to } = newSelection.ranges[0];
-              //     return from >= newFrom && to <= newTo;
-              //   }
-              // );
-              // if (clickInSideOfRange && selection) {
-              //   view.dispatch({ selection });
-              // } else {
-              setSelection(newSelection);
-              //   selection = newSelection;
-              // }
-            }
-          }),
-        ],
-        doc: code,
-      }),
+        // TODO wrap these is a debounce
+        // TODO move these into the cmState
+        createNodeMap(schema, newCode).then((schemaMap) => {
+          // setSchemaMap(schemaMap);
+          view.dispatch({
+            effects: [setSchemaTypings.of(schemaMap)],
+          });
+        });
+        lintCode(schema, newCode).then((diagnostics) => {
+          view.dispatch({
+            effects: [setDiagnostics.of(diagnostics)],
+          });
+          // setLints(diagnostics);
+        });
+      } else {
+        const newSelection = v.view.state.selection;
+        // determine if the new selection
+        // console.log(v, newSelection, selection);
+        // const clickInSideOfRange = Object.keys(localRangeSets).some(
+        //   (x) => {
+        //     const [newFrom, newTo] = x.split("____").map(Number);
+        //     const { from, to } = newSelection.ranges[0];
+        //     return from >= newFrom && to <= newTo;
+        //   }
+        // );
+        // if (clickInSideOfRange && selection) {
+        //   view.dispatch({ selection });
+        // } else {
+        setSelection(newSelection);
+        //   selection = newSelection;
+        // }
+      }
+    });
+    const editorState = EditorState.create({
+      extensions: [
+        PopoverPlugin(),
+        basicSetup,
+        languageConf.of(json()),
+        // keymap.of([indentWithTab]),
+        cmStatePlugin,
+        widgetsPlugin,
+        localExtension,
+      ],
+      doc: code,
+    })!;
+    const view = new EditorView({
+      state: editorState,
       parent: cmParent.current!,
     });
     setView(view);
@@ -241,7 +186,10 @@ export default function Editor(props: Props) {
   }, [schema, view]);
   useEffect(() => {
     if (view) {
-      view.dispatch({ effects: [setProjections.of(projections || [])] });
+      // hack :(
+      setTimeout(() => {
+        view.dispatch({ effects: [setProjections.of(projections || [])] });
+      }, 500);
     }
   }, [projections, view]);
 
@@ -257,47 +205,6 @@ export default function Editor(props: Props) {
   return (
     <div className="editor-container">
       <div ref={cmParent} />
-      <ErrorBoundary>
-        <PopoverMenu
-          schemaMap={schemaMap}
-          lints={lints.filter((x) => {
-            return (
-              menu &&
-              menu.node &&
-              x.from === menu?.node.from &&
-              x.to === menu.node.to
-            );
-          })}
-          closeMenu={() => {
-            setMenu(null);
-            view?.contentDOM.focus();
-            // setTimeout(() => {
-            //   view?.dispatch({ selection: selectionLocal });
-            // }, 1);
-          }}
-          projections={projections || []}
-          view={view!}
-          syntaxNode={menu?.node}
-          codeUpdate={(codeUpdate: UpdateDispatch) => {
-            simpleUpdate(
-              view!,
-              codeUpdate.from,
-              codeUpdate.to,
-              codeUpdate.value
-            );
-          }}
-          xPos={
-            menu
-              ? menu.x - (cmParent.current?.parentElement?.offsetLeft || 0)
-              : undefined
-          }
-          yPos={
-            menu
-              ? menu.y - (cmParent.current?.parentElement?.offsetTop || 0)
-              : undefined
-          }
-        />
-      </ErrorBoundary>
     </div>
   );
 }
