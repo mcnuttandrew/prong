@@ -4,6 +4,7 @@ import "../stylesheets/vega-lite-example.css";
 
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import * as Json from "jsonc-parser";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
@@ -49,11 +50,43 @@ const Pill: FC<{ name: string }> = function Pill(props) {
 
 function lazyParse(content: string): any {
   try {
-    return JSON.parse(content);
+    return Json.parse(content);
   } catch (e) {
     return content;
   }
 }
+
+const DataTable = (props: ProjectionProps): JSX.Element => {
+  const parsed = lazyParse(props.currentValue);
+  console.log(props, parsed);
+  if (!Array.isArray(parsed) || !parsed.length) {
+    return <div>hi</div>;
+  }
+  const keys: string[] = Array.from(
+    parsed.reduce((acc, row: Record<string, any>) => {
+      Object.keys(row).forEach((key) => acc.add(key));
+      return acc;
+    }, new Set())
+  );
+  return (
+    <div>
+      <table>
+        <tr>
+          {keys.map((key) => (
+            <th>{key}</th>
+          ))}
+        </tr>
+        {parsed.map((row) => (
+          <tr>
+            {keys.map((key) => (
+              <td>{row[key]}</td>
+            ))}
+          </tr>
+        ))}
+      </table>
+    </div>
+  );
+};
 
 const Shelf: FC<{
   currentValue: any;
@@ -171,14 +204,20 @@ function VegaLiteExampleApp() {
           code={currentCode}
           onChange={(x) => setCurrentCode(x)}
           projections={[
-            {
-              query: ["data", "values", "*"],
-              type: "tooltip",
-              projection: ({ keyPath }) => {
-                return <div>hi annotation projection {keyPath.join(",")}</div>;
-              },
-              hasInternalState: false,
-            },
+            // {
+            //   query: ["data", "values", "*"],
+            //   type: "tooltip",
+            //   projection: ({ keyPath }) => {
+            //     return <div>hi annotation projection {keyPath.join(",")}</div>;
+            //   },
+            //   hasInternalState: false,
+            // },
+            // {
+            //   query: ["data", "values", "*"],
+            //   type: "inline",
+            //   projection: DataTable,
+            //   hasInternalState: false,
+            // },
             {
               // query: ["data", "values", "*"],
               query: ["description", "description___key"],
