@@ -6,12 +6,11 @@ import { Compartment } from "@codemirror/state";
 import { basicSetup, EditorState } from "@codemirror/basic-setup";
 import { EditorView, keymap, ViewUpdate } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { syntaxTree } from "@codemirror/language";
 
 import { lintCode, LintError } from "../lib/Linter";
 import ErrorBoundary from "./ErrorBoundary";
 import PopoverMenu from "./PopoverMenu";
-import { createNodeMap } from "../lib/utils";
+import { createNodeMap, getMenuTarget } from "../lib/utils";
 import { MenuTriggerKeyBinding } from "../lib/MenuTriggerKeyBinding";
 import { widgetsPlugin, Projection } from "../lib/widgets";
 import {
@@ -21,6 +20,7 @@ import {
   setSchemaTypings,
   setDiagnostics,
 } from "../lib/cmState";
+import PopoverPlugin from "../lib/popover-menu";
 
 export type UpdateDispatch = { from: number; to: number; value: string };
 
@@ -33,41 +33,6 @@ type Props = {
 
 const languageConf = new Compartment();
 
-function getMenuTarget(view: EditorView) {
-  const possibleMenuTargets: any[] = [];
-  for (const { from, to } of view.visibleRanges) {
-    syntaxTree(view.state).iterate({
-      from,
-      to,
-      enter: (type, from, to, get) => {
-        const ranges = view.state.selection.ranges;
-        if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
-          return;
-        }
-        const node = get();
-        if (from <= ranges[0].from && to >= ranges[0].from) {
-          const bbox = view.coordsAtPos(from);
-          if (bbox) {
-            possibleMenuTargets.push({
-              x: bbox.left,
-              y: bbox.top,
-              node,
-              from,
-              to,
-            });
-          }
-        }
-      },
-    });
-    return possibleMenuTargets.reduce(
-      (acc, row) => {
-        const dist = row.to - row.from;
-        return dist < acc.dist ? { dist, target: row } : acc;
-      },
-      { dist: Infinity, target: null }
-    );
-  }
-}
 const triggerSelectionCheck =
   (setMenu: (menu: any) => void) =>
   (view: EditorView): void => {
@@ -174,6 +139,7 @@ export default function Editor(props: Props) {
       state: EditorState.create({
         extensions: [
           // jsonLinter,
+          PopoverPlugin(),
           keymap.of(MenuTriggerKeyBinding(triggerSelectionCheck(setMenu))),
           basicSetup,
           languageConf.of(json()),
@@ -181,7 +147,6 @@ export default function Editor(props: Props) {
           cmStatePlugin,
           widgetsPlugin,
           EditorView.updateListener.of((v: ViewUpdate) => {
-            console.log("hi", v);
             if (v.docChanged) {
               const newCode = v.state.doc.toString();
               onChange(newCode);
@@ -257,7 +222,7 @@ export default function Editor(props: Props) {
   return (
     <div className="editor-container">
       <div ref={cmParent} />
-      <ErrorBoundary>
+      {/* <ErrorBoundary>
         <PopoverMenu
           schemaMap={schemaMap}
           lints={lints.filter((x) => {
@@ -297,7 +262,7 @@ export default function Editor(props: Props) {
               : undefined
           }
         />
-      </ErrorBoundary>
+      </ErrorBoundary> */}
     </div>
   );
 }

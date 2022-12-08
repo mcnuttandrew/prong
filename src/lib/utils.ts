@@ -1,4 +1,6 @@
 import { EditorView } from "@codemirror/view";
+import { syntaxTree } from "@codemirror/language";
+import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
 import { UpdateDispatch } from "../components/Editor";
@@ -839,4 +841,70 @@ export function createNodeMap(schema: any, doc: string) {
       return acc;
     }, {} as { [x: string]: any });
   });
+}
+
+// old version that uses the positions
+export function getMenuTarget(view: EditorView) {
+  const possibleMenuTargets: any[] = [];
+  for (const { from, to } of view.visibleRanges) {
+    syntaxTree(view.state).iterate({
+      from,
+      to,
+      enter: (type, from, to, get) => {
+        const ranges = view.state.selection.ranges;
+        if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
+          return;
+        }
+        const node = get();
+        if (from <= ranges[0].from && to >= ranges[0].from) {
+          const bbox = view.coordsAtPos(from);
+          if (bbox) {
+            possibleMenuTargets.push({
+              x: bbox.left,
+              y: bbox.top,
+              node,
+              from,
+              to,
+            });
+          }
+        }
+      },
+    });
+    // AM: todo not impossible that this is a bug, this should be 1 line down?
+    return possibleMenuTargets.reduce(
+      (acc, row) => {
+        const dist = row.to - row.from;
+        return dist < acc.dist ? { dist, target: row } : acc;
+      },
+      { dist: Infinity, target: null }
+    );
+  }
+}
+
+// new version that gets the nodes
+export function getMenuTargetNode(state: EditorState) {
+  const possibleMenuTargets: any[] = [];
+  syntaxTree(state).iterate({
+    // from,
+    // to,
+    enter: (type, from, to, get) => {
+      const ranges = state.selection.ranges;
+      if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
+        return;
+      }
+      const node = get();
+      if (from <= ranges[0].from && to >= ranges[0].from) {
+        possibleMenuTargets.push(node);
+      }
+    },
+  });
+
+  const target = possibleMenuTargets.reduce(
+    (acc, row) => {
+      const dist = row.to - row.from;
+      return dist < acc.dist ? { dist, target: row } : acc;
+    },
+    { dist: Infinity, target: null }
+  );
+  return target.target;
 }
