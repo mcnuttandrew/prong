@@ -18,7 +18,6 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
   if (!showPopover) {
     return false;
   }
-  console.log(direction, { showPopover, popOverInUse });
   // popover visible but not selected
   if (direction !== "down" && !popOverInUse) {
     return false;
