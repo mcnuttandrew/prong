@@ -39,11 +39,11 @@ const EnumPicker: Component = (props) => {
 };
 
 function simpleFillOut(content: JSONSchema7) {
-  const simpleTypes: Record<string, any> = {
-    string: "",
-    object: {},
-    number: 0,
-    boolean: true,
+  const simpleTypes: Record<string, string> = {
+    string: '""',
+    object: `{}`,
+    number: "0",
+    boolean: "true",
   };
   if ((content as any).type in simpleTypes) {
     return simpleTypes[(content as any).type];
@@ -70,14 +70,20 @@ const ObjPicker: Component = (props) => {
       label: "Add Fields",
       elements: Object.entries(content.properties || {})
         .filter((x) => !currentKeys.has(x[0]))
-        .map(([content, prop]: any) => ({
-          type: "button",
-          content,
-          onSelect: {
-            type: "addObjectKey",
-            payload: { key: `"${content}"`, value: simpleFillOut(prop) as any },
-          },
-        })),
+        .map(([content, prop]: any) => {
+          console.log(content, simpleFillOut(prop));
+          return {
+            type: "button",
+            content,
+            onSelect: {
+              type: "addObjectKey",
+              payload: {
+                key: `"${content}"`,
+                value: `${simpleFillOut(prop)}` as any,
+              },
+            },
+          };
+        }),
     },
     {
       label: "Add Custom Fields",
