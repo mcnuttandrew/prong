@@ -95,10 +95,12 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       //   .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
       //   .filter((proj) => proj.type === "tooltip")
       //   .map(prepProjections(view, targetNode, keyPath, currentCodeSlice)),
-      ...diagnostics.map((lint) => ({
-        label: "LINT ERROR",
-        elements: [{ type: "display", content: lint.message }],
-      })),
+      ...diagnostics
+        .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
+        .map((lint) => ({
+          label: "LINT ERROR",
+          elements: [{ type: "display", content: lint.message }],
+        })),
     ] as MenuRow[];
 
     const tooltip = {

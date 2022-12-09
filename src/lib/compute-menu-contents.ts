@@ -40,7 +40,7 @@ const EnumPicker: Component = (props) => {
 
 function simpleFillOut(content: JSONSchema7) {
   const simpleTypes: Record<string, string> = {
-    string: '""',
+    string: "",
     object: `{}`,
     number: "0",
     boolean: "true",
@@ -65,25 +65,27 @@ const ObjPicker: Component = (props) => {
   const { content, parsedContent } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
   // TODO this gets this wrong if coming from { / }
+  const addFieldEntries: MenuElement[] = Object.entries(
+    content.properties || {}
+  )
+    .filter((x) => !currentKeys.has(x[0]))
+    .map(([content, prop]: any) => {
+      return {
+        type: "button",
+        content,
+        onSelect: {
+          type: "addObjectKey",
+          payload: {
+            key: `"${content}"`,
+            value: `${simpleFillOut(prop)}` as any,
+          },
+        },
+      };
+    });
   return [
-    {
+    addFieldEntries.length && {
       label: "Add Fields",
-      elements: Object.entries(content.properties || {})
-        .filter((x) => !currentKeys.has(x[0]))
-        .map(([content, prop]: any) => {
-          console.log(content, simpleFillOut(prop));
-          return {
-            type: "button",
-            content,
-            onSelect: {
-              type: "addObjectKey",
-              payload: {
-                key: `"${content}"`,
-                value: `${simpleFillOut(prop)}` as any,
-              },
-            },
-          };
-        }),
+      elements: addFieldEntries,
     },
     {
       label: "Add Custom Fields",
@@ -98,7 +100,7 @@ const ObjPicker: Component = (props) => {
         },
       ],
     },
-  ];
+  ].filter((x) => x) as MenuRow[];
 };
 
 // TODO flatten nested anyOfs and remove duplicates
@@ -188,7 +190,7 @@ function AnyOfObjOptionalFieldPicker(
         content: x,
         onSelect: {
           type: "addObjectKey",
-          payload: { key: x, value: "null" },
+          payload: { key: `"${x}"`, value: "null" },
         },
       })),
     },
@@ -420,6 +422,7 @@ const typeBasedComponents: componentContainer = {
   False: BooleanComponent,
   True: BooleanComponent,
   Null: makeSimpleComponent("null"),
+  "⚠": makeSimpleComponent("⚠"),
 };
 const parentResponses: componentContainer = {
   Property: ParentIsPropertyComponent,

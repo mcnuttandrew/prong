@@ -189,17 +189,17 @@ export default function Editor(props: Props) {
       // hack :(
       setTimeout(() => {
         view.dispatch({ effects: [setProjections.of(projections || [])] });
-      }, 500);
+      }, 100);
     }
   }, [projections, view]);
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
-      console.log("here");
-      const tr = view.state.update({
-        changes: { from: 0, to: view.state.doc.length, insert: code },
-      });
-      view.dispatch(tr);
+      simpleUpdate(view, 0, view.state.doc.length, code);
+      // const tr = view.state.update({
+      //   changes: { from: 0, to: view.state.doc.length, insert: code },
+      // });
+      // view.dispatch(tr);
     }
   }, [code, view]);
   return (
