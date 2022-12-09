@@ -19,6 +19,7 @@ import {
   setDiagnostics,
 } from "../lib/cmState";
 import PopoverPlugin from "../lib/popover-menu";
+import ProjectionPlugin from "../lib/projections";
 
 type Props = {
   onChange: (code: string) => void;
@@ -74,41 +75,41 @@ export default function Editor(props: Props) {
     view.dispatch(view!.state.update({ changes: { from, to, insert } }));
   };
 
-  // THIS TRIO OF EFFECTS HANDLES THE On/Off projection stuff, and it is very cursed, be warned
-  // A. figures out the range sets for the projections
-  useEffect(() => {
-    const baseRange = selectionLocal && selectionLocal.ranges[0];
-    if (!baseRange || baseRange.from !== baseRange.to) {
-      return;
-    }
-    const insiderDecRange = Object.keys(widgetRangeSets).find((range) => {
-      const [from, to] = range.split("____");
-      return baseRange.from >= Number(from) && baseRange.from <= Number(to);
-    });
-    if (insiderDecRange) {
-      setInsideRecRange(insiderDecRange);
-    }
-  }, [widgetRangeSets, selectionLocal]);
-  // B. deactivate the projections if necessary
-  useEffect(() => {
-    if (!view || !insideDecRange) {
-      return;
-    }
-    const [from, to] = insideDecRange.split("____").map((x) => Number(x));
-    simpleUpdate(view, from, to, view!.state.sliceDoc(from, to));
-  }, [insideDecRange, view]);
-  // C. reactivate them if necessary
-  useEffect(() => {
-    if (!insideDecRange) {
-      return;
-    }
-    const [from, to] = insideDecRange.split("____").map((x) => Number(x));
-    const baseRange = selectionLocal.ranges[0];
-    if (baseRange.from < from || baseRange.to > to) {
-      setInsideRecRange(false);
-      simpleUpdate(view!, from, to, view!.state.sliceDoc(from, to));
-    }
-  }, [view, insideDecRange, selectionLocal]);
+  // // THIS TRIO OF EFFECTS HANDLES THE On/Off projection stuff, and it is very cursed, be warned
+  // // A. figures out the range sets for the projections
+  // useEffect(() => {
+  //   const baseRange = selectionLocal && selectionLocal.ranges[0];
+  //   if (!baseRange || baseRange.from !== baseRange.to) {
+  //     return;
+  //   }
+  //   const insiderDecRange = Object.keys(widgetRangeSets).find((range) => {
+  //     const [from, to] = range.split("____");
+  //     return baseRange.from >= Number(from) && baseRange.from <= Number(to);
+  //   });
+  //   if (insiderDecRange) {
+  //     setInsideRecRange(insiderDecRange);
+  //   }
+  // }, [widgetRangeSets, selectionLocal]);
+  // // B. deactivate the projections if necessary
+  // useEffect(() => {
+  //   if (!view || !insideDecRange) {
+  //     return;
+  //   }
+  //   const [from, to] = insideDecRange.split("____").map((x) => Number(x));
+  //   simpleUpdate(view, from, to, view!.state.sliceDoc(from, to));
+  // }, [insideDecRange, view]);
+  // // C. reactivate them if necessary
+  // useEffect(() => {
+  //   if (!insideDecRange) {
+  //     return;
+  //   }
+  //   const [from, to] = insideDecRange.split("____").map((x) => Number(x));
+  //   const baseRange = selectionLocal.ranges[0];
+  //   if (baseRange.from < from || baseRange.to > to) {
+  //     setInsideRecRange(false);
+  //     simpleUpdate(view!, from, to, view!.state.sliceDoc(from, to));
+  //   }
+  // }, [view, insideDecRange, selectionLocal]);
 
   // primary effect, initialize the editor etc
   useEffect(() => {
@@ -157,6 +158,7 @@ export default function Editor(props: Props) {
     const editorState = EditorState.create({
       extensions: [
         PopoverPlugin(),
+        ProjectionPlugin(),
         basicSetup,
         languageConf.of(json()),
         // keymap.of([indentWithTab]),
@@ -196,10 +198,6 @@ export default function Editor(props: Props) {
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
       simpleUpdate(view, 0, view.state.doc.length, code);
-      // const tr = view.state.update({
-      //   changes: { from: 0, to: view.state.doc.length, insert: code },
-      // });
-      // view.dispatch(tr);
     }
   }, [code, view]);
   return (

@@ -3,8 +3,8 @@ import { syntaxTree } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
-import { UpdateDispatch } from "../lib/popover-menu";
-import { getMatchingSchemas } from "../lib/from-vscode/validator";
+import { UpdateDispatch } from "./popover-menu";
+import { getMatchingSchemas } from "./from-vscode/validator";
 export function codeString(
   view: EditorView,
   from: number,

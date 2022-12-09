@@ -10,14 +10,13 @@ import { NodeType, SyntaxNode } from "@lezer/common";
 import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
-import { codeString } from "./utils";
 import SimpleBoolWidget from "./widgets/bool-widget";
 import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
+import { projectionState } from "./projections";
 
-import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
 import Highlighter from "./widgets/highlighter";
 
 export interface ProjectionProps {
@@ -61,65 +60,31 @@ const simpleWidgets: SimpleWidget[] = [
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
-  const { projections } = view.state.field(cmStatePlugin);
+  // const { projections } = view.state.field(cmStatePlugin);
+  const { projectionsInUse } = view.state.field(projectionState);
+  const inUseRanges = projectionsInUse.reduce((acc, row) => {
+    acc.add(`${row.from}-${row.to}`);
+    return acc;
+  }, new Set());
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,
       to,
-      enter: (currentNodeRef) => {
-        const currentNode = currentNodeRef.node;
-        const from = currentNodeRef.from;
-        const to = currentNodeRef.to;
-        const type = currentNodeRef.type;
-        const inlineProjections = projections.filter(
-          (proj) => proj.type === "inline"
-        );
-        const currentCodeSlice = codeString(view, from, to);
-        // calculate inline projection
-        let hasProjection = false;
-        const baseRange = view.state.selection.ranges[0];
-        inlineProjections.forEach((projection) => {
-          const projWidget = InlineProjectWidgetFactory(
-            projection,
-            currentCodeSlice,
-            currentNode
-          );
-          if (!projWidget.checkForAdd(type, view, currentNode)) {
-            return;
-          }
-
-          if (
-            !projection.hasInternalState &&
-            baseRange &&
-            baseRange.from >= from &&
-            baseRange.from <= to
-          ) {
-            return;
-          }
-          hasProjection = true;
-          projWidget
-            .addNode(view, from, to, currentNode)
-            .forEach((w) => widgets.push(w));
-        });
-        if (hasProjection) {
+      enter: ({ node, from, to, type }) => {
+        if (inUseRanges.has(`${from}-${to}`)) {
           return;
         }
-
         simpleWidgets.forEach(({ checkForAdd, addNode }) => {
-          if (!checkForAdd(type, view, currentNode)) {
+          if (!checkForAdd(type, view, node)) {
             return;
           }
-          addNode(view, from, to, currentNode).forEach((w) => widgets.push(w));
+          addNode(view, from, to, node).forEach((w) => widgets.push(w));
         });
       },
     });
   }
   try {
-    return Decoration.set(
-      widgets.sort((a, b) => {
-        return a.from - b.from;
-      })
-    );
+    return Decoration.set(widgets.sort((a, b) => a.from - b.from));
   } catch (e) {
     console.log(e);
     console.log("problem creating widgets");
