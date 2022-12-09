@@ -22,7 +22,7 @@ export type SelectionRoute = [number, number];
 export interface PopoverMenuState {
   showPopover: boolean;
   popOverInUse: boolean;
-  targetNode: SyntaxNode | any;
+  targetNode: SyntaxNode | null;
   targetedTypings: [];
   tooltip: any;
   selectedRouting: [number, number];

@@ -15,6 +15,7 @@ import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
+import { popOverState } from "./popover-menu/PopoverState";
 import { projectionState, getInUseRanges } from "./projections";
 
 import Highlighter from "./widgets/highlighter";
@@ -105,7 +106,16 @@ export const widgetsPlugin = ViewPlugin.fromClass(
         update.startState.field(cmStatePlugin),
         update.state.field(cmStatePlugin)
       );
-      if (update.docChanged || update.viewportChanged || stateValuesChanged) {
+      const targetChanged = !isEqual(
+        update.startState.field(popOverState).targetNode,
+        update.state.field(popOverState).targetNode
+      );
+      if (
+        update.docChanged ||
+        update.viewportChanged ||
+        stateValuesChanged ||
+        targetChanged
+      ) {
         this.decorations = createWidgets(update.view);
       }
     }

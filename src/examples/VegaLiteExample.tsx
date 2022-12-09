@@ -250,13 +250,14 @@ function VegaLiteExampleApp() {
               hasInternalState: true,
               name: "counter",
             },
-            // {
-            //   // query: ["data", "values", "*"],
-            //   query: ["mark", "mark___key"],
-            //   type: "inline",
-            //   projection: DynamicProjection,
-            //   hasInternalState: true,
-            // },
+            {
+              // query: ["data", "values", "*"],
+              query: ["mark", "mark___key"],
+              type: "inline",
+              projection: DynamicProjection,
+              hasInternalState: true,
+              name: "dynamic projection",
+            },
             {
               // query: ["data", "values", "*"],
               query: ["encoding", "*", "field", "field___val"],

@@ -52,9 +52,9 @@ function PopOverMenuContents(props: {
     const update = modifyCodeByCommand(menuEvent, node, codeString(view, 0));
     if (update) {
       codeUpdate(update);
-      if (shouldCloseMenu) {
-        closeMenu();
-      }
+    }
+    if (update && shouldCloseMenu) {
+      closeMenu();
     }
   };
 
@@ -75,7 +75,7 @@ function PopOverMenuContents(props: {
   }, [selectedRouting]);
 
   return (
-    <div className="cm-annotation-menu position-absolute">
+    <div className={"cm-annotation-menu"}>
       <div className="cm-annotation-widget-popover-container">
         {menuContents.map((row, idx) => {
           const { label, elements } = row;

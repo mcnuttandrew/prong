@@ -90,7 +90,7 @@ function runSelection(view: EditorView) {
   if (target.type === "button") {
     const update = modifyCodeByCommand(
       target.onSelect,
-      targetNode,
+      targetNode!,
       codeString(view, 0)
     );
     if (update) {
