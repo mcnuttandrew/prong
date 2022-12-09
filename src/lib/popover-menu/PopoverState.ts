@@ -2,9 +2,17 @@ import { StateField, StateEffect } from "@codemirror/state";
 import createTooltip from "./PopoverMenu";
 import { SyntaxNode } from "@lezer/common";
 
+import { Transaction } from "@codemirror/state";
 import { showTooltip } from "@codemirror/view";
 import { cmStatePlugin } from "../cmState";
-import { getMenuTargetNode } from "../utils";
+import { projectionState } from "../projections";
+import {
+  codeStringState,
+  getMenuTargetNode,
+  keyPathMatchesQuery,
+  syntaxNodeToKeyPath,
+} from "../utils";
+import { Projection } from "../projections";
 
 import { generateMenuContent, MenuRow } from "../compute-menu-contents";
 
@@ -36,6 +44,39 @@ const simpleSet = (
   state: PopoverMenuState
 ) => ({ ...state, [key]: value });
 
+function cursorBehaviorIsValid(tr: Transaction) {
+  const ranges = tr.state.selection.ranges;
+  const moreThanOneSelection = ranges.length > 1;
+  const selectionWiderThanOne = ranges.some(({ from, to }) => from !== to);
+  return !(moreThanOneSelection || selectionWiderThanOne);
+}
+
+function selectionInsideProjection(tr: Transaction, pos: number) {
+  const { projectionsInUse } = tr.state.field(projectionState);
+  const posInsideOfInUseRange = projectionsInUse.some(
+    ({ from, to }) => pos >= from && pos <= to
+  );
+  return posInsideOfInUseRange;
+}
+
+const prepProjections =
+  (node: SyntaxNode, keyPath: (string | number)[], currentValue: string) =>
+  (proj: Projection) => {
+    return {
+      label: "CUSTOM",
+      elements: [
+        {
+          type: "projection",
+          element: proj.projection({
+            node,
+            keyPath,
+            currentValue,
+          }),
+        },
+      ],
+    };
+  };
+
 export const popOverState: StateField<PopoverMenuState> = StateField.define({
   create: () => popoverMenuState,
   update(state, tr) {
@@ -50,26 +91,30 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
         return simpleSet("selectedRouting", effect.value, state);
       }
     }
+
+    // main path
     const targetNode = getMenuTargetNode(tr.state);
+    let pos = tr.state.selection.ranges[0].from;
 
     // if there isn't (a real) target then bail and don't compute the menu
     if (!targetNode || targetNode.type.name === "JsonText") {
       return { ...state };
     }
-
-    // maybe only compute this stuff if the menu is open
-    const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
-    const targetedTypings =
-      schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
-
     // handle multi-cursor stuff appropriately
-    const ranges = tr.state.selection.ranges;
-    let pos = ranges[0].from;
-    const moreThanOneSelection = ranges.length > 1;
-    const selectionWiderThanOne = ranges.some(({ from, to }) => from !== to);
-    if (moreThanOneSelection || selectionWiderThanOne) {
+    if (!cursorBehaviorIsValid(tr)) {
       return { ...state, tooltip: null };
     }
+    // dont show popover through a projection
+    if (selectionInsideProjection(tr, pos)) {
+      return { ...state, tooltip: null };
+    }
+
+    // maybe only compute this stuff if the menu is open
+    const { schemaTypings, diagnostics, projections } =
+      tr.state.field(cmStatePlugin);
+
+    const targetedTypings =
+      schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
 
     const nodeIsActuallyNew = !(
       targetNode?.from === state?.targetNode?.from &&
@@ -85,16 +130,18 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     }
     // todo probably want to get an xstate type state machine here, this interaction will get pretty intense
 
+    const keyPath = syntaxNodeToKeyPath(targetNode, tr.state);
+    const currentCodeSlice = codeStringState(
+      tr.state,
+      targetNode.from,
+      targetNode.to
+    );
     const menuContents = [
-      ...generateMenuContent(
-        tr.state.doc.sliceString(targetNode.from, targetNode.to),
-        targetNode,
-        schemaTypings
-      ),
-      // ...projections
-      //   .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-      //   .filter((proj) => proj.type === "tooltip")
-      //   .map(prepProjections(view, targetNode, keyPath, currentCodeSlice)),
+      ...generateMenuContent(currentCodeSlice, targetNode, schemaTypings),
+      ...projections
+        .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
+        .filter((proj) => proj.type === "tooltip")
+        .map(prepProjections(targetNode, keyPath, currentCodeSlice)),
       ...diagnostics
         .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
         .map((lint) => ({

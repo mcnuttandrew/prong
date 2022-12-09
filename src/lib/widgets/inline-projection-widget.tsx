@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
-import { Projection } from "../widgets";
+import { Projection } from "../projections";
 import { SimpleWidget } from "../widgets";
 
 class InlineProjectionWidget extends WidgetType {
@@ -37,7 +37,7 @@ class InlineProjectionWidget extends WidgetType {
     this.widgetContainer = wrap;
 
     const element = React.createElement(this.projection.projection, {
-      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view),
+      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view.state),
       node: this.syntaxNode,
       view: this.view,
       currentValue: this.currentCodeSlice,
@@ -65,7 +65,7 @@ const ProjectionWidgetFactory = (
   syntaxNode: SyntaxNode
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
-    const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
+    const keyPath = syntaxNodeToKeyPath(syntaxNode, view.state);
     return keyPathMatchesQuery(projection.query, keyPath);
   },
   addNode: (view, from, to) => {

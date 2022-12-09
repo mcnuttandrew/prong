@@ -12,13 +12,12 @@ import { SyntaxNode } from "@lezer/common";
 import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
-import { codeString } from "./utils";
+import { codeString, syntaxNodeToKeyPath, keyPathMatchesQuery } from "./utils";
 import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
 
 export interface ProjectionProps {
-  view: EditorView;
   node: SyntaxNode;
   keyPath: (string | number)[];
   currentValue: any;
@@ -49,9 +48,6 @@ function createWidgets(view: EditorView) {
               currentCodeSlice,
               node
             );
-            if (!projWidget.checkForAdd(type, view, node)) {
-              return;
-            }
 
             projWidget
               .addNode(view, from, to, node)
@@ -68,6 +64,12 @@ function createWidgets(view: EditorView) {
     return Decoration.set([]);
   }
 }
+
+export const getInUseRanges = (projectionsInUse: ProjectionMaterialization[]) =>
+  projectionsInUse.reduce((acc, row) => {
+    acc.add(`${row.from}-${row.to}`);
+    return acc;
+  }, new Set<`${number}-${number}`>());
 
 export const projectionView = ViewPlugin.fromClass(
   class {
@@ -115,6 +117,15 @@ export const projectionState: StateField<ProjectionState> = StateField.define({
   },
 });
 
+function shouldAddProjection(
+  syntaxNode: SyntaxNode,
+  state: EditorState,
+  projection: Projection
+) {
+  const keyPath = syntaxNodeToKeyPath(syntaxNode, state);
+  return keyPathMatchesQuery(projection.query, keyPath);
+}
+
 function identifyProjectionLocations(state: EditorState) {
   const locations: ProjectionMaterialization[] = [];
   const { projections } = state.field(cmStatePlugin);
@@ -122,7 +133,7 @@ function identifyProjectionLocations(state: EditorState) {
     (proj) => proj.type === "inline"
   );
   syntaxTree(state).iterate({
-    enter: ({ from, to }) => {
+    enter: ({ from, to, node }) => {
       const baseRange = state.selection.ranges[0];
       inlineProjections.forEach((projection) => {
         if (
@@ -133,11 +144,13 @@ function identifyProjectionLocations(state: EditorState) {
         ) {
           return;
         }
-        locations.push({ from, to, projection });
+
+        if (shouldAddProjection(node, state, projection)) {
+          locations.push({ from, to, projection });
+        }
       });
     },
   });
-  //   }
   return locations;
 }
 

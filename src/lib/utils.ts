@@ -3,14 +3,23 @@ import { syntaxTree } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
-import { UpdateDispatch } from "./popover-menu";
+import { UpdateDispatch } from "./popover-menu/PopoverState";
 import { getMatchingSchemas } from "./from-vscode/validator";
+
 export function codeString(
   view: EditorView,
   from: number,
   to?: number
 ): string {
   return view.state.doc.sliceString(from, to);
+}
+
+export function codeStringState(
+  state: EditorState,
+  from: number,
+  to?: number
+): string {
+  return state.doc.sliceString(from, to);
 }
 
 export function classNames(input: Record<string, boolean>) {
@@ -385,10 +394,7 @@ export const colorGroups = {
 };
 
 type AbsPathItem = { nodeType: string; index: number; node: SyntaxNode };
-function syntaxNodeToAbsPath(
-  node: SyntaxNode,
-  view: EditorView
-): AbsPathItem[] {
+function syntaxNodeToAbsPath(node: SyntaxNode): AbsPathItem[] {
   const nodeType = node.name;
 
   const parent = node.parent;
@@ -397,7 +403,7 @@ function syntaxNodeToAbsPath(
     (sib) => sib.from === node.from && sib.to === node.to
   );
   const add = [{ nodeType, index: selfIndex, node }];
-  return (parent ? syntaxNodeToAbsPath(parent, view) : []).concat(add);
+  return (parent ? syntaxNodeToAbsPath(parent) : []).concat(add);
 }
 
 /**
@@ -449,12 +455,14 @@ function absPathToKeyPath(
   return keyPath;
 }
 
-export function syntaxNodeToKeyPath(node: SyntaxNode, view: EditorView) {
-  const absPath = syntaxNodeToAbsPath(node, view);
+export function syntaxNodeToKeyPath(node: SyntaxNode, state: EditorState) {
+  const absPath = syntaxNodeToAbsPath(node);
   const root = absPath[0];
   let parsedRoot = {};
   try {
-    parsedRoot = Json.parse(codeString(view, root.node.from, root.node.to));
+    parsedRoot = JSON.parse(
+      codeStringState(state, root.node.from, root.node.to)
+    );
   } catch (e) {
     return [];
   }

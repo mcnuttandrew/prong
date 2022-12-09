@@ -15,23 +15,9 @@ import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
-import { projectionState } from "./projections";
+import { projectionState, getInUseRanges } from "./projections";
 
 import Highlighter from "./widgets/highlighter";
-
-export interface ProjectionProps {
-  view: EditorView;
-  node: SyntaxNode;
-  keyPath: (string | number)[];
-  currentValue: any;
-}
-
-export interface Projection {
-  query: string[];
-  type: "tooltip" | "inline";
-  projection: (props: ProjectionProps) => JSX.Element;
-  hasInternalState: boolean;
-}
 
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };
 export interface SimpleWidget {
@@ -60,12 +46,8 @@ const simpleWidgets: SimpleWidget[] = [
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
-  // const { projections } = view.state.field(cmStatePlugin);
   const { projectionsInUse } = view.state.field(projectionState);
-  const inUseRanges = projectionsInUse.reduce((acc, row) => {
-    acc.add(`${row.from}-${row.to}`);
-    return acc;
-  }, new Set());
+  const inUseRanges = getInUseRanges(projectionsInUse);
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,

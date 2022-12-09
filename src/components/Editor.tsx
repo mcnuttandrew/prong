@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { json } from "@codemirror/lang-json";
 import { Compartment } from "@codemirror/state";
 import { basicSetup } from "codemirror";
-import { EditorView, ViewUpdate } from "@codemirror/view";
+import { EditorView, ViewUpdate, keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
 
-import { lintCode, LintError } from "../lib/Linter";
+import { lintCode } from "../lib/Linter";
 import { createNodeMap } from "../lib/utils";
-import { widgetsPlugin, Projection } from "../lib/widgets";
+import { widgetsPlugin } from "../lib/widgets";
+import { Projection } from "../lib/projections";
 import {
   cmStatePlugin,
   setSchema,
@@ -72,7 +73,7 @@ export default function Editor(props: Props) {
         ProjectionPlugin(),
         basicSetup,
         languageConf.of(json()),
-        // keymap.of([indentWithTab]),
+        keymap.of([indentWithTab]),
         cmStatePlugin,
         widgetsPlugin,
         localExtension,

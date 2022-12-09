@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import { EditorView, TooltipView } from "@codemirror/view";
@@ -16,7 +16,7 @@ import {
 
 import { MenuRow, retargetToAppropriateNode } from "../compute-menu-contents";
 
-import { Projection } from "../widgets";
+import { Projection } from "../projections";
 import PopoverMenuElement from "./PopoverMenuElement";
 import {
   UpdateDispatch,
@@ -26,30 +26,6 @@ import {
   setPopoverVisibility,
   PopoverMenuState,
 } from "./PopoverState";
-
-const prepProjections =
-  (
-    view: EditorView,
-    node: SyntaxNode,
-    keyPath: (string | number)[],
-    currentValue: string
-  ) =>
-  (proj: Projection) => {
-    return {
-      label: "CUSTOM",
-      elements: [
-        {
-          type: "projection",
-          element: proj.projection({
-            view,
-            node,
-            keyPath,
-            currentValue,
-          }),
-        },
-      ],
-    };
-  };
 
 function PopOverMenuContents(props: {
   closeMenu: () => void;

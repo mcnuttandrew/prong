@@ -8,7 +8,7 @@ import * as Json from "jsonc-parser";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
-import { ProjectionProps } from "../../src/lib/widgets";
+import { ProjectionProps } from "../../src/lib/projections";
 import { setIn, codeString } from "../lib/utils";
 
 const vegaLiteCode = `
