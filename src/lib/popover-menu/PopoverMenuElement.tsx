@@ -17,7 +17,7 @@ const DisplayElement: MenuElementRenderer<any> = (props) => (
       "cm-annotation-widget-element-selected": props.isSelected,
     })}
   >
-    <ReactMarkdown>{props.menuElement.content}</ReactMarkdown>
+    <ReactMarkdown>{props.menuElement.content.trim()}</ReactMarkdown>
   </div>
 );
 

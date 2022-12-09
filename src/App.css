@@ -239,22 +239,26 @@
   margin-top: 2px;
   border-top: thin dotted black;
   font-size: 13px;
+  flex-direction: column;
 }
 
 .cm-annotation-widget-popover-container-row-label {
-  align-items: center;
+  /* align-items: center; */
   cursor: pointer;
   display: flex;
-  justify-content: center;
-  text-align: center;
-  width: 40px;
+  font-weight: bold;
+  font-size: 10px;
+  /* justify-content: center;
+  text-align: center; */
+  /* width: 40px; */
+  width: 100%;
   border-left: solid 15px floralwhite;
 }
 
 .cm-annotation-widget-popover-container-row-content {
   display: flex;
   flex-wrap: wrap;
-  max-width: 320px;
+  max-width: 100%;
   width: 100%;
   max-height: 200px;
   overflow-y: auto;

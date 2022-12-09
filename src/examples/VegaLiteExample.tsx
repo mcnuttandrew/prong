@@ -181,12 +181,13 @@ function VegaLiteExampleApp() {
       </div>
     );
   }
+  const fields = ["penguins", "flowers", "wheat", "squids"];
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="App">
         <div className="flex">
-          {["aaaa", "b"].map((x) => (
+          {fields.map((x) => (
             <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>
@@ -204,14 +205,37 @@ function VegaLiteExampleApp() {
           code={currentCode}
           onChange={(x) => setCurrentCode(x)}
           projections={[
-            // {
-            //   query: ["data", "values", "*"],
-            //   type: "tooltip",
-            //   projection: ({ keyPath }) => {
-            //     return <div>hi annotation projection {keyPath.join(",")}</div>;
-            //   },
-            //   hasInternalState: false,
-            // },
+            {
+              query: ["data", "values", "*"],
+              type: "tooltip",
+              projection: ({ keyPath }) => {
+                return <div>hi annotation projection {keyPath.join(",")}</div>;
+              },
+              hasInternalState: false,
+              name: "popover example",
+            },
+            {
+              query: ["encoding", "*", "field", "field___val"],
+              type: "tooltip",
+              projection: (props) => {
+                return (
+                  <div>
+                    {fields.map((x) => (
+                      <button
+                        onClick={() =>
+                          setCurrentCode(setIn(props.keyPath, x, currentCode))
+                        }
+                        key={x}
+                      >
+                        {x}
+                      </button>
+                    ))}
+                  </div>
+                );
+              },
+              hasInternalState: false,
+              name: "Field Picker",
+            },
             // {
             //   query: ["data", "values", "*"],
             //   type: "inline",

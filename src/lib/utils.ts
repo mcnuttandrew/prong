@@ -857,7 +857,6 @@ export function getMenuTargetNode(state: EditorState) {
     enter: (nodeRef) => {
       const node = nodeRef.node;
       const ranges = state.selection.ranges;
-      // todo: here is the main place where multi cursor wouldn't really work
       if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
         return;
       }

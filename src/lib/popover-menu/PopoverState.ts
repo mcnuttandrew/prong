@@ -61,35 +61,45 @@ function selectionInsideProjection(tr: Transaction, pos: number) {
 
 const prepProjections =
   (node: SyntaxNode, keyPath: (string | number)[], currentValue: string) =>
-  (proj: Projection) => {
-    return {
-      label: "CUSTOM",
-      elements: [
-        {
-          type: "projection",
-          element: proj.projection({
-            node,
-            keyPath,
-            currentValue,
-          }),
-        },
-      ],
-    };
-  };
+  (proj: Projection) => ({
+    label: proj.name,
+    elements: [
+      {
+        type: "projection",
+        element: proj.projection({ node, keyPath, currentValue }),
+      },
+    ],
+  });
+
+function handleSimpleUpdate(
+  state: PopoverMenuState,
+  tr: Transaction
+): { newState: PopoverMenuState; didUpdate: boolean } {
+  let newState = state;
+  let didUpdate = false;
+  for (const effect of tr.effects) {
+    if (effect.is(setPopoverVisibility)) {
+      didUpdate = true;
+      newState = simpleSet("showPopover", effect.value, newState);
+    }
+    if (effect.is(setPopoverUsage)) {
+      didUpdate = true;
+      newState = simpleSet("popOverInUse", effect.value, newState);
+    }
+    if (effect.is(setRouting)) {
+      didUpdate = true;
+      newState = simpleSet("selectedRouting", effect.value, newState);
+    }
+  }
+  return { newState, didUpdate };
+}
 
 export const popOverState: StateField<PopoverMenuState> = StateField.define({
   create: () => popoverMenuState,
   update(state, tr) {
-    for (const effect of tr.effects) {
-      if (effect.is(setPopoverVisibility)) {
-        return simpleSet("showPopover", effect.value, state);
-      }
-      if (effect.is(setPopoverUsage)) {
-        return simpleSet("popOverInUse", effect.value, state);
-      }
-      if (effect.is(setRouting)) {
-        return simpleSet("selectedRouting", effect.value, state);
-      }
+    const simpleUpdate = handleSimpleUpdate(state, tr);
+    if (simpleUpdate.didUpdate) {
+      return simpleUpdate.newState;
     }
 
     // main path
@@ -137,11 +147,11 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       targetNode.to
     );
     const menuContents = [
-      ...generateMenuContent(currentCodeSlice, targetNode, schemaTypings),
       ...projections
         .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
         .filter((proj) => proj.type === "tooltip")
         .map(prepProjections(targetNode, keyPath, currentCodeSlice)),
+      ...generateMenuContent(currentCodeSlice, targetNode, schemaTypings),
       ...diagnostics
         .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
         .map((lint) => ({
@@ -155,6 +165,10 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       create: createTooltip(popOverState),
       above: true,
     };
+    // if were not showing the popover bail
+    if (!showPopover) {
+      return { ...state, tooltip: null };
+    }
     return {
       ...state,
       menuContents,

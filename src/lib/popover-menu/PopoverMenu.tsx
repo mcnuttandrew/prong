@@ -81,17 +81,17 @@ function PopOverMenuContents(props: {
           const { label, elements } = row;
           return (
             <div
-              className="cm-annotation-widget-popover-container-row"
+              className={classNames({
+                "cm-annotation-widget-popover-container-row": true,
+                "cm-annotation-widget-element-selected":
+                  selectedRouting &&
+                  selectedRouting[0] === idx &&
+                  selectedRouting[1] === 0,
+              })}
               key={idx}
             >
               <div
-                className={classNames({
-                  "cm-annotation-widget-popover-container-row-label": true,
-                  "cm-annotation-widget-element-selected":
-                    selectedRouting &&
-                    selectedRouting[0] === idx &&
-                    selectedRouting[1] === 0,
-                })}
+                className={"cm-annotation-widget-popover-container-row-label"}
                 onClick={() => setSelectedRouting([idx, 0])}
               >
                 {label}
@@ -138,7 +138,7 @@ class Tooltip {
       menuContents,
       popOverInUse,
     } = this.view.state.field(this.stateField);
-    // TODO: dont show if target is projection
+
     if (
       !targetNode ||
       targetNode.type.name === "JsonText" ||

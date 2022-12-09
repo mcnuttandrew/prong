@@ -18,15 +18,11 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
   if (!showPopover) {
     return false;
   }
-  // popover visible but not selected
-  if (direction !== "down" && !popOverInUse) {
+
+  if (!popOverInUse) {
     return false;
   }
 
-  if (direction === "down" && !popOverInUse) {
-    view.dispatch({ effects: [setPopoverUsage.of(true)] });
-    return true;
-  }
   const updatedCursor = buildMoveCursor(
     direction,
     menuContents,
@@ -120,10 +116,14 @@ function forceClose(view: EditorView) {
 }
 
 function forceOpen(view: EditorView) {
-  console.log("???/");
   view.dispatch({
     effects: [setPopoverUsage.of(true), setPopoverVisibility.of(true)],
   });
+  return true;
+}
+
+function engageWithPopover(view: EditorView) {
+  view.dispatch({ effects: [setPopoverUsage.of(true)] });
   return true;
 }
 
@@ -131,6 +131,7 @@ export const popOverCompletionKeymap: readonly KeyBinding[] = [
   //   { key: "Ctrl-Space", run: startCompletion },
   { key: "Cmd-.", run: forceOpen },
   { key: "Escape", run: forceClose },
+  { key: "Cmd-ArrowDown", run: engageWithPopover, preventDefault: true },
   { key: "ArrowDown", run: changeSelectionRoute("down") },
   { key: "ArrowUp", run: changeSelectionRoute("up") },
   { key: "ArrowLeft", run: changeSelectionRoute("left") },
