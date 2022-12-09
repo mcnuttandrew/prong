@@ -32,6 +32,22 @@ type Props = {
 const languageConf = new Compartment();
 export type SchemaMap = Record<string, any>;
 
+function runTypings(schema: any, code: string, view: EditorView) {
+  createNodeMap(schema, code).then((schemaMap) => {
+    view.dispatch({
+      effects: [setSchemaTypings.of(schemaMap)],
+    });
+  });
+}
+
+function runLints(schema: any, code: string, view: EditorView) {
+  lintCode(schema, code).then((diagnostics) => {
+    view.dispatch({
+      effects: [setDiagnostics.of(diagnostics)],
+    });
+  });
+}
+
 export default function Editor(props: Props) {
   const { schema, code, onChange, projections } = props;
   const cmParent = useRef<HTMLDivElement>(null);
@@ -55,16 +71,8 @@ export default function Editor(props: Props) {
 
         // TODO wrap these is a debounce
         // TODO move these into the cmState
-        createNodeMap(schema, newCode).then((schemaMap) => {
-          view.dispatch({
-            effects: [setSchemaTypings.of(schemaMap)],
-          });
-        });
-        lintCode(schema, newCode).then((diagnostics) => {
-          view.dispatch({
-            effects: [setDiagnostics.of(diagnostics)],
-          });
-        });
+        runTypings(schema, newCode, view);
+        runLints(schema, newCode, view);
       }
     });
     const editorState = EditorState.create({
@@ -92,6 +100,8 @@ export default function Editor(props: Props) {
   useEffect(() => {
     if (view) {
       view.dispatch({ effects: [setSchema.of(schema)] });
+      runTypings(schema, code, view);
+      runLints(schema, code, view);
     }
   }, [schema, view]);
   useEffect(() => {
