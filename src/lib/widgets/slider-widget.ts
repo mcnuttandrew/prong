@@ -1,6 +1,6 @@
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SimpleWidget } from "../widgets";
-import { unwrap, argListToIntList } from "../utils";
+import { unwrap, argListToIntList, codeString } from "../utils";
 export class SliderWidget extends WidgetType {
   constructor(
     readonly min: number,
@@ -53,7 +53,7 @@ function changeSlider(
     changes: {
       from: from,
       to: pos,
-      insert: view.state.doc.sliceString(from, pos).replace(regex, value),
+      insert: codeString(view, from, pos).replace(regex, value),
     },
   });
   return true;

@@ -3,12 +3,11 @@ import * as ReactDOM from "react-dom";
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
-import { Projection } from "../widgets";
+import { Projection } from "../projections";
 import { SimpleWidget } from "../widgets";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
-  // element: any;
   constructor(
     readonly from: number,
     readonly to: number,
@@ -22,9 +21,7 @@ class InlineProjectionWidget extends WidgetType {
   }
 
   eq(other: InlineProjectionWidget): boolean {
-    // TODO: wrong
-    // console.log(this, other);
-    // return false;
+    // is this wrong?
     return this.projection.hasInternalState
       ? this.currentCodeSlice === other.currentCodeSlice
       : false;
@@ -37,7 +34,7 @@ class InlineProjectionWidget extends WidgetType {
     this.widgetContainer = wrap;
 
     const element = React.createElement(this.projection.projection, {
-      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view),
+      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view.state),
       node: this.syntaxNode,
       view: this.view,
       currentValue: this.currentCodeSlice,
@@ -65,7 +62,7 @@ const ProjectionWidgetFactory = (
   syntaxNode: SyntaxNode
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
-    const keyPath = syntaxNodeToKeyPath(syntaxNode, view);
+    const keyPath = syntaxNodeToKeyPath(syntaxNode, view.state);
     return keyPathMatchesQuery(projection.query, keyPath);
   },
   addNode: (view, from, to) => {

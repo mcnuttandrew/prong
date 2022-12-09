@@ -8,7 +8,7 @@ import * as Json from "jsonc-parser";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
-import { ProjectionProps } from "../../src/lib/widgets";
+import { ProjectionProps } from "../../src/lib/projections";
 import { setIn, codeString } from "../lib/utils";
 
 const vegaLiteCode = `
@@ -147,7 +147,7 @@ const Shelf: FC<{
   );
 };
 
-function ExampleProjection(props: ProjectionProps) {
+function CounterProjection(props: ProjectionProps) {
   const [count, setCount] = useState(0);
   return (
     <div className="counter" onClick={() => setCount(count + 1)}>
@@ -222,22 +222,24 @@ function VegaLiteExampleApp() {
               // query: ["data", "values", "*"],
               query: ["description", "description___key"],
               type: "inline",
-              projection: ExampleProjection,
+              projection: CounterProjection,
               hasInternalState: true,
+              name: "counter",
             },
-            {
-              // query: ["data", "values", "*"],
-              query: ["mark", "mark___key"],
-              type: "inline",
-              projection: DynamicProjection,
-              hasInternalState: true,
-            },
+            // {
+            //   // query: ["data", "values", "*"],
+            //   query: ["mark", "mark___key"],
+            //   type: "inline",
+            //   projection: DynamicProjection,
+            //   hasInternalState: true,
+            // },
             {
               // query: ["data", "values", "*"],
               query: ["encoding", "*", "field", "field___val"],
               type: "inline",
               projection: shelf(setCurrentCode, currentCode),
               hasInternalState: false,
+              name: "dnd",
             },
           ]}
         />

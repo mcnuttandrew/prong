@@ -1,6 +1,6 @@
 import { StateEffect, StateField } from "@codemirror/state";
 import { JSONSchema } from "./JSONSchemaTypes";
-import { Projection } from "./widgets";
+import { Projection } from "./projections";
 
 export const setSchema = StateEffect.define<JSONSchema>();
 export const setProjections = StateEffect.define<Projection[]>();
