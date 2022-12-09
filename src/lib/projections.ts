@@ -24,6 +24,7 @@ export interface ProjectionProps {
 }
 
 export interface Projection {
+  name: string;
   query: string[];
   type: "tooltip" | "inline";
   projection: (props: ProjectionProps) => JSX.Element;

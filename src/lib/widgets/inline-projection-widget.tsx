@@ -8,7 +8,6 @@ import { SimpleWidget } from "../widgets";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
-  // element: any;
   constructor(
     readonly from: number,
     readonly to: number,
@@ -22,9 +21,7 @@ class InlineProjectionWidget extends WidgetType {
   }
 
   eq(other: InlineProjectionWidget): boolean {
-    // TODO: wrong
-    // console.log(this, other);
-    // return false;
+    // is this wrong?
     return this.projection.hasInternalState
       ? this.currentCodeSlice === other.currentCodeSlice
       : false;
