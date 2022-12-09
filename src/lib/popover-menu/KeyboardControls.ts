@@ -1,5 +1,6 @@
 import { KeyBinding, EditorView } from "@codemirror/view";
-import { simpleUpdate, codeString, modifyCodeByCommand } from "../utils";
+import { simpleUpdate, codeString } from "../utils";
+
 import {
   popOverState,
   setPopoverUsage,
@@ -9,6 +10,7 @@ import {
 } from "./PopoverState";
 
 import { MenuRow, MenuElement } from "../compute-menu-contents";
+import { modifyCodeByCommand } from "../modify-json";
 
 type dir = "left" | "right" | "down" | "up";
 const changeSelectionRoute = (direction: dir) => (view: EditorView) => {

@@ -93,7 +93,8 @@
 .cm-color-widget {
   width: 10px;
   height: 10px;
-  vertical-align: super;
+  border: none;
+  border-radius: 100%;
 }
 
 .color-name-picker {
@@ -261,6 +262,10 @@
   border-left: solid 15px aqua;
 }
 
+.cm-annotation-render-widget-display p {
+  margin: 0;
+}
+
 /* TODO make more specific */
 div[tabindex="-1"]:focus {
   outline: 0;
@@ -274,8 +279,9 @@ div[tabindex="-1"]:focus {
 
 
 .cm-annotation-highlighter {
+  cursor: pointer;
   text-decoration: underline;
-  text-decoration-thickness: 3px;
+  text-decoration-thickness: 1px;
 }
 
 

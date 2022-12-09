@@ -3,11 +3,13 @@ import { HashRouter, Route, Routes, Link } from "react-router-dom";
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteExample";
+import VegaExampleApp from "./examples/VegaExample";
 import SimpleExample from "./examples/SimpleExample";
 import FruitExample from "./examples/FruitExample";
 
-const routes = [
+const routes: { name: string; Component: () => JSX.Element }[] = [
   { name: "vega-lite", Component: VegaLiteExampleApp },
+  { name: "vega", Component: VegaExampleApp },
   { name: "fruit", Component: FruitExample },
   { name: "simple", Component: SimpleExample },
 ];

@@ -55,6 +55,11 @@ test("generateMenuContent", async () => {
   const veg = findNodeByText(exampleData, `"vegetables"`)!;
   const fAndVNodeMap = await createNodeMap(schema, exampleData);
   expect(fAndVNodeMap).toMatchSnapshot();
-  const menuContent = generateMenuContent("vegetables", veg, fAndVNodeMap);
+  const menuContent = generateMenuContent(
+    "vegetables",
+    veg,
+    fAndVNodeMap,
+    exampleData
+  );
   expect(menuContent).toMatchSnapshot();
 });

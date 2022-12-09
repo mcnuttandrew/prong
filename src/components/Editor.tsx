@@ -7,10 +7,12 @@ import { basicSetup } from "codemirror";
 import { EditorView, ViewUpdate, keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
+import { syntaxHighlighting } from "@codemirror/language";
 
 import { lintCode } from "../lib/Linter";
 import { createNodeMap } from "../lib/utils";
 import { widgetsPlugin } from "../lib/widgets";
+import SyntaxHighlighting from "../lib/syntax-highlighting";
 import { Projection } from "../lib/projections";
 import {
   cmStatePlugin,
@@ -85,6 +87,7 @@ export default function Editor(props: Props) {
         cmStatePlugin,
         widgetsPlugin,
         localExtension,
+        syntaxHighlighting(SyntaxHighlighting),
       ],
       doc: code,
     })!;
