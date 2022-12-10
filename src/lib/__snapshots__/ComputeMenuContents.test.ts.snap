@@ -196,6 +196,7 @@ Array [
       Object {
         "content": "remove key",
         "onSelect": Object {
+          "nodeId": "47-59",
           "type": "removeObjectKey",
         },
         "type": "button",
@@ -203,6 +204,7 @@ Array [
       Object {
         "content": "Move item right",
         "onSelect": Object {
+          "nodeId": "47-59",
           "type": "increaseItemIdx",
         },
         "type": "button",
