@@ -6,13 +6,9 @@ import { StateField } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 
 import { cmStatePlugin } from "../cmState";
-import {
-  simpleUpdate,
-  codeString,
-  modifyCodeByCommand,
-  MenuEvent,
-  classNames,
-} from "../utils";
+import { simpleUpdate, codeString, classNames } from "../utils";
+
+import { modifyCodeByCommand, MenuEvent } from "../modify-json";
 
 import { MenuRow, retargetToAppropriateNode } from "../compute-menu-contents";
 
@@ -49,7 +45,12 @@ function PopOverMenuContents(props: {
   const node = syntaxNode && retargetToAppropriateNode(syntaxNode);
 
   const eventDispatch = (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => {
-    const update = modifyCodeByCommand(menuEvent, node, codeString(view, 0));
+    const update = modifyCodeByCommand(
+      menuEvent,
+      node,
+      codeString(view, 0),
+      codeString(view, 0)
+    );
     if (update) {
       codeUpdate(update);
     }

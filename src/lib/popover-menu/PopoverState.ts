@@ -140,6 +140,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     }
     // todo probably want to get an xstate type state machine here, this interaction will get pretty intense
 
+    const fullCode = tr.state.doc.toString();
     const keyPath = syntaxNodeToKeyPath(targetNode, tr.state);
     const currentCodeSlice = codeStringState(
       tr.state,
@@ -151,7 +152,12 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
         .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
         .filter((proj) => proj.type === "tooltip")
         .map(prepProjections(targetNode, keyPath, currentCodeSlice)),
-      ...generateMenuContent(currentCodeSlice, targetNode, schemaTypings),
+      ...generateMenuContent(
+        currentCodeSlice,
+        targetNode,
+        schemaTypings,
+        fullCode
+      ),
       ...diagnostics
         .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
         .map((lint) => ({

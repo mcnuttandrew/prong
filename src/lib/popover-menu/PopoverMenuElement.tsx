@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { MenuEvent, classNames } from "../utils";
+import { classNames } from "../utils";
+import { MenuEvent } from "../modify-json";
 
 type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;

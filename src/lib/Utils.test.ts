@@ -1,11 +1,6 @@
-import {
-  keyPathMatchesQuery,
-  setIn,
-  modifyCodeByCommand,
-  MenuEvent,
-  insertSwap,
-} from "./utils";
-import { findNodeByLocation, findNodeByText } from "./test-utils";
+import { keyPathMatchesQuery, setIn, insertSwap } from "./utils";
+import { modifyCodeByCommand, MenuEvent } from "./modify-json";
+import { findNodeByText } from "./test-utils";
 
 const exampleData = `{
     "a": {

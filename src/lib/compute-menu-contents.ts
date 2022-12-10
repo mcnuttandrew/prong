@@ -2,7 +2,7 @@ import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
 
-import { MenuEvent, boundCheck } from "./utils";
+import { MenuEvent, boundCheck } from "./modify-json";
 import { SchemaMap } from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
 
@@ -10,8 +10,17 @@ import { JSONSchema7 } from "json-schema";
 
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
-  | { type: "button"; label?: string; content: string; onSelect: MenuEvent }
-  | { type: "dropdown"; content: string[]; onSelect: MenuEvent }
+  | {
+      type: "button";
+      label?: string;
+      content: string;
+      onSelect: MenuEvent;
+    }
+  | {
+      type: "dropdown";
+      content: string[];
+      onSelect: MenuEvent;
+    }
   | { type: "display"; label?: string; content: string }
   | { type: "free-input"; label: string }
   | { type: "projection"; label?: string; element: JSX.Element };
@@ -19,20 +28,27 @@ interface ComponentProps {
   content: JSONSchema7;
   parsedContent: any;
   node: SyntaxNode;
+  fullCode: string;
   //   parentType: string; // todo this type can be improved
 }
 type Component = (props: ComponentProps) => MenuRow[];
 type componentContainer = Record<string, Component>;
 
+export const nodeToId = (node: SyntaxNode): `${number}-${number}` =>
+  `${node.from}-${node.to}`;
 const EnumPicker: Component = (props) => {
-  const { content } = props;
+  const { content, node } = props;
   return [
     {
       label: "content",
       elements: (content.enum as any[]).map((val: string) => ({
         type: "button",
         content: val,
-        onSelect: { type: "simpleSwap", payload: `"${val}"` },
+        onSelect: {
+          type: "simpleSwap",
+          payload: `"${val}"`,
+          nodeId: nodeToId(node),
+        },
       })),
     },
   ];
@@ -62,7 +78,7 @@ function simpleFillOut(content: JSONSchema7) {
 }
 
 const ObjPicker: Component = (props) => {
-  const { content, parsedContent } = props;
+  const { content, parsedContent, node } = props;
   const currentKeys = new Set(Object.keys(parsedContent || {}));
   // TODO this gets this wrong if coming from { / }
   const addFieldEntries: MenuElement[] = Object.entries(
@@ -79,6 +95,7 @@ const ObjPicker: Component = (props) => {
             key: `"${content}"`,
             value: `${simpleFillOut(prop)}` as any,
           },
+          nodeId: nodeToId(node),
         },
       };
     });
@@ -96,6 +113,7 @@ const ObjPicker: Component = (props) => {
           onSelect: {
             type: "addObjectKey",
             payload: { key: "$$INPUT_BIND", value: "null" },
+            nodeId: nodeToId(node),
           },
         },
       ],
@@ -140,10 +158,30 @@ function bundleConstsToEnum(content: JSONSchema7[]) {
 //   }
 // }
 
+// goes anything not an object up to it's container, only to be used below
+const getContainingObject = (node: SyntaxNode): SyntaxNode => {
+  return node.type.name === "Object" ? node : getContainingObject(node.parent!);
+};
+
+const getUsedPropertiesForContainer = (node: SyntaxNode): SyntaxNode[] => {
+  const props: SyntaxNode[] = [];
+  let pointer = node.firstChild;
+  while (pointer) {
+    props.push(pointer);
+    pointer = pointer.nextSibling;
+  }
+  return props;
+};
+
+const getIthChild = (node: SyntaxNode, targetIndex: number): SyntaxNode =>
+  getUsedPropertiesForContainer(node)[targetIndex + 1];
+
 function AnyOfObjOptionalFieldPicker(
   // content: JSONSchema7,
   content: any,
-  node: SyntaxNode
+  node: SyntaxNode,
+  parsedContent: any,
+  fullCode: string
 ): MenuRow[] {
   const requiredProps = new Set<string>(
     Array.isArray(content.required) ? content.required : []
@@ -163,6 +201,11 @@ function AnyOfObjOptionalFieldPicker(
   const addProps = deduplicateAndSortArray(
     Object.keys(content?.properties || {}).concat(requiredPropsArr)
   );
+
+  const containerNode = getContainingObject(node);
+  const containerProps = getUsedPropertiesForContainer(containerNode);
+  const slice = fullCode.slice(containerNode.from, containerNode.to);
+  const inUseKeys = new Set(Object.keys(simpleParse(slice, {})));
   return [
     content.$$labeledType && {
       label: "JSON Schema Type",
@@ -173,26 +216,48 @@ function AnyOfObjOptionalFieldPicker(
       elements: [
         requiredPropsArr.length > 0 && {
           type: "button",
-          onSelect: { type: "simpleSwap", payload: requiredPropObject },
+          onSelect: {
+            type: "simpleSwap",
+            payload: requiredPropObject,
+            nodeId: nodeToId(node),
+          },
+          // TODO this is a terrible description
           content: "object with required types",
         },
         requiredPropsArr.length === 0 && {
           type: "button",
-          onSelect: { type: "simpleSwap", payload: "{}" },
+          onSelect: {
+            type: "simpleSwap",
+            payload: "{}",
+            nodeId: nodeToId(node),
+          },
           content: "blank object",
         },
       ],
     },
     isObject && {
-      label: "Add",
-      elements: addProps.map((x) => ({
+      label: "Remove",
+      elements: Array.from(inUseKeys).map((x, idx) => ({
         type: "button",
         content: x,
         onSelect: {
-          type: "addObjectKey",
-          payload: { key: `"${x}"`, value: "null" },
+          type: "removeObjectKey",
+          nodeId: nodeToId(containerProps[idx + 1]),
         },
       })),
+    },
+    isObject && {
+      label: "Add",
+      elements: addProps
+        .filter((x) => !inUseKeys.has(x))
+        .map((x) => ({
+          type: "button",
+          content: x,
+          onSelect: {
+            type: "addObjectKey",
+            payload: { key: `"${x}"`, value: "null", nodeId: nodeToId(node) },
+          },
+        })),
     },
   ].filter((x) => x) as MenuRow[];
 }
@@ -226,7 +291,12 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
         {
           type: "button",
           content: "Switch to array",
-          onSelect: { type: "simpleSwap", payload: "[]" },
+
+          onSelect: {
+            type: "simpleSwap",
+            payload: "[]",
+            nodeId: nodeToId(node),
+          },
         },
       ],
     });
@@ -242,7 +312,7 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
           content: `Switch to array of ${numElements} ${JSON.stringify(
             arrayTypeDefaults[arrayType]
           )}s`,
-          onSelect: { type: "simpleSwap", payload },
+          onSelect: { type: "simpleSwap", payload, nodeId: nodeToId(node) },
         },
       ],
     });
@@ -251,7 +321,7 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
 }
 
 const AnyOfPicker: Component = (props) => {
-  const { content, node } = props;
+  const { content, node, parsedContent, fullCode } = props;
   const simpleType = new Set(["string", "number", "boolean", "null"]);
   const simpleTypeMap: Record<string, string> = {
     string: '""',
@@ -279,7 +349,9 @@ const AnyOfPicker: Component = (props) => {
           onSelect: { type: "simpleSwap", payload: `"${val}"` },
         })),
       },
-      ...(opt.type === "object" ? AnyOfObjOptionalFieldPicker(opt, node) : []),
+      ...(opt.type === "object"
+        ? AnyOfObjOptionalFieldPicker(opt, node, parsedContent, fullCode)
+        : []),
       ...(opt.type === "array" ? AnyOfArray(opt, node) : []),
       simpleType.has(opt.type) &&
         !isOfDescribedType && {
@@ -308,7 +380,10 @@ const AnyOfPicker: Component = (props) => {
 
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
   return [
-    { label: "Inferred JSON Type", elements: [{ type: "display", content }] },
+    {
+      label: "Inferred JSON Type",
+      elements: [{ type: "display", content }],
+    },
   ];
 };
 
@@ -324,7 +399,7 @@ const PropertyNameComponent: Component = (props) => {
         {
           type: "button",
           content: "remove key",
-          onSelect: { type: "removeObjectKey" },
+          onSelect: { type: "removeObjectKey", nodeId: nodeToId(node) },
         },
         ...directionalMoves(node),
       ],
@@ -332,13 +407,14 @@ const PropertyNameComponent: Component = (props) => {
   ];
 };
 
-const ObjectComponent: Component = () => [
+const ObjectComponent: Component = ({ node }) => [
   {
     label: "Add Field",
     elements: [
       {
         type: "free-input",
         label: "Add field",
+        nodeId: nodeToId(node),
         onSelect: {
           type: "addObjectKey",
           payload: { key: "$$INPUT_BIND", value: "null" },
@@ -357,7 +433,7 @@ const directionalMoves = (node: SyntaxNode): MenuElement[] => {
     outputDirections.push({
       type: "button",
       content: "Move item left",
-      onSelect: { type: "decreaseItemIdx" },
+      onSelect: { type: "decreaseItemIdx", nodeId: nodeToId(node) },
     });
     // {
     //   type: "button",
@@ -369,7 +445,7 @@ const directionalMoves = (node: SyntaxNode): MenuElement[] => {
     outputDirections.push({
       type: "button",
       content: "Move item right",
-      onSelect: { type: "increaseItemIdx" },
+      onSelect: { type: "increaseItemIdx", nodeId: nodeToId(node) },
     });
     // {
     //   type: "button",
@@ -380,7 +456,7 @@ const directionalMoves = (node: SyntaxNode): MenuElement[] => {
   return outputDirections;
 };
 
-const ParentIsArrayComponent: Component = (props) => {
+const ParentIsArrayComponent: Component = ({ node }) => {
   return [
     {
       label: "PROPERTY",
@@ -388,21 +464,22 @@ const ParentIsArrayComponent: Component = (props) => {
         {
           type: "button",
           content: "Remove Item",
-          onSelect: { type: "removeElementFromArray" },
+
+          onSelect: { type: "removeElementFromArray", nodeId: nodeToId(node) },
         },
-        ...directionalMoves(props.node),
+        ...directionalMoves(node),
       ],
     },
   ];
 };
 
-const BooleanComponent: Component = () => [
+const BooleanComponent: Component = ({ node }) => [
   {
     label: "Set to",
     elements: ["true", "false"].map((payload) => ({
       type: "button",
       content: payload,
-      onSelect: { type: "simpleSwap", payload },
+      onSelect: { type: "simpleSwap", payload, nodeId: nodeToId(node) },
     })),
   },
 ];
@@ -431,14 +508,16 @@ const parentResponses: componentContainer = {
   // what other options are there?
 };
 
-function simpleParse(content: any) {
+function simpleParse(content: any, defaultVal = {}) {
   try {
     return Json.parse(content);
   } catch (e) {
-    return {};
+    return defaultVal;
   }
 }
-export function retargetToAppropriateNode(node: SyntaxNode): SyntaxNode {
+export function retargetToAppropriateNode(
+  node: SyntaxNode | SyntaxNode
+): SyntaxNode | SyntaxNode {
   let targetNode = node;
   if (new Set(["⚠", "{", "}", "[", "]"]).has(node.type.name)) {
     targetNode = node.parent!;
@@ -470,7 +549,8 @@ function getSchemaForRetargetedNode(
 export function generateMenuContent(
   currentCodeSlice: string,
   syntaxNode: SyntaxNode,
-  schemaMap: SchemaMap
+  schemaMap: SchemaMap,
+  fullCode: string
 ): MenuRow[] {
   const schemaChunk = getSchemaForRetargetedNode(syntaxNode, schemaMap);
 
@@ -504,10 +584,11 @@ export function generateMenuContent(
       elements: [{ type: "display", content: schemaChunk.description }],
     });
   }
-  const componentProps = {
+  const componentProps: ComponentProps = {
     parsedContent,
     content: schemaChunk,
     node: syntaxNode,
+    fullCode,
   };
   if (schemaChunk && !!contentBasedItem) {
     contentBasedItem(componentProps).forEach((x) => content.push(x));
