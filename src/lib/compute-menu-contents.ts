@@ -9,7 +9,6 @@ import { JSONSchema7 } from "json-schema";
 // type JSONSchema = any;
 
 export type MenuRow = { label: string; elements: MenuElement[] };
-// TOOD turn on the nodeIds
 export type MenuElement =
   | {
       type: "button";
@@ -37,10 +36,6 @@ type componentContainer = Record<string, Component>;
 
 export const nodeToId = (node: SyntaxNode): `${number}-${number}` =>
   `${node.from}-${node.to}`;
-// export const nodeToId = (node: SyntaxNode): string => {
-//   return `${(node as any).index}`;
-// };
-
 const EnumPicker: Component = (props) => {
   const { content, node } = props;
   return [
@@ -209,10 +204,9 @@ function AnyOfObjOptionalFieldPicker(
 
   const containerNode = getContainingObject(node);
   const containerProps = getUsedPropertiesForContainer(containerNode);
-  console.log(containerProps);
   const slice = fullCode.slice(containerNode.from, containerNode.to);
   const inUseKeys = new Set(Object.keys(simpleParse(slice, {})));
-  const xxxx = [
+  return [
     content.$$labeledType && {
       label: "JSON Schema Type",
       elements: [{ type: "display", content: content.$$labeledType }],
@@ -243,16 +237,14 @@ function AnyOfObjOptionalFieldPicker(
     },
     isObject && {
       label: "Remove",
-      elements: addProps
-        .filter((x) => inUseKeys.has(x))
-        .map((x, idx) => ({
-          type: "button",
-          content: x,
-          onSelect: {
-            type: "removeObjectKey",
-            nodeId: nodeToId(containerProps[idx + 2]),
-          },
-        })),
+      elements: Array.from(inUseKeys).map((x, idx) => ({
+        type: "button",
+        content: x,
+        onSelect: {
+          type: "removeObjectKey",
+          nodeId: nodeToId(containerProps[idx + 1]),
+        },
+      })),
     },
     isObject && {
       label: "Add",
@@ -268,8 +260,6 @@ function AnyOfObjOptionalFieldPicker(
         })),
     },
   ].filter((x) => x) as MenuRow[];
-  console.log("hi hello", xxxx);
-  return xxxx;
 }
 
 const deduplicateAndSortArray = (arr: string[]): string[] => {

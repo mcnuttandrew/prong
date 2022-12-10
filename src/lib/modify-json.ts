@@ -94,7 +94,6 @@ const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
   value,
   syntaxNode
 ) => {
-  console.log("hello", syntaxNode, value);
   const objNode =
     syntaxNode.type.name === "Property" ? syntaxNode : syntaxNode.parent!;
 
@@ -125,9 +124,7 @@ const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
     from = objNode.prevSibling!.to;
     to = objNode.nextSibling!.from;
   }
-  const x = { value: "", from: from!, to: to! };
-  console.log("x", x);
-  return x;
+  return { value: "", from: from!, to: to! };
 };
 
 const removeElementFromArray: ModifyCmd<removeElementFromArrayEvent> = (
@@ -275,8 +272,7 @@ export const modifyCodeByCommand: ModifyCmd<any> = (
   if (!CmdTable[value.type]) {
     return { from: 0, to: 0, value: "" };
   }
-  const targetNode = possiblyModifyChosenNode(value, syntaxNode, currentText);
-  console.log("here", targetNode);
+  const targetNode = possiblyModifyChosenNode(value, syntaxNode);
   const result = CmdTable[value.type](value, targetNode, currentText);
   return result || { from: 0, to: 0, value: "" };
 };
@@ -284,47 +280,30 @@ export const modifyCodeByCommand: ModifyCmd<any> = (
 const climbToRoot = (node: SyntaxNode): SyntaxNode =>
   node.parent ? climbToRoot(node.parent) : node;
 
-function findSyntaxNodeById(
-  node: SyntaxNode,
-  id: string,
-  fullText: string
-): SyntaxNode | null {
+function findSyntaxNodeById(node: SyntaxNode, id: string): SyntaxNode | null {
   //   const root = (node as any).context as SyntaxNode;
   const root = climbToRoot(node);
   let foundNode: SyntaxNode | null = null;
-  console.log("here", id, root.tree);
   root.tree?.iterate({
     enter: ({ node }) => {
       if (foundNode) {
         return;
       }
-      console.log(
-        "????",
-        nodeToId(node),
-        id,
-        fullText.slice(node.from, node.to)
-      );
+
       if (nodeToId(node) === id) {
-        console.log("foundnode");
         foundNode = node;
       }
     },
   });
-  if (foundNode) {
-    console.log("success", foundNode);
-  } else {
-    console.log("fail");
-  }
   return foundNode;
 }
 
 const possiblyModifyChosenNode = (
   menuEvent: MenuEvent,
-  syntaxNode: SyntaxNode,
-  fullText: string
+  syntaxNode: SyntaxNode
 ) => {
   const targetNode = menuEvent.nodeId
-    ? findSyntaxNodeById(syntaxNode, menuEvent.nodeId, fullText) || syntaxNode
+    ? findSyntaxNodeById(syntaxNode, menuEvent.nodeId) || syntaxNode
     : syntaxNode;
 
   return targetNode;
