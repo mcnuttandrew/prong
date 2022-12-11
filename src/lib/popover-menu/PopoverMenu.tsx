@@ -17,10 +17,10 @@ import PopoverMenuElement from "./PopoverMenuElement";
 import {
   UpdateDispatch,
   SelectionRoute,
-  //   setPopoverUsage,
   setRouting,
-  setPopoverVisibility,
+  popoverEffectDispatch,
   PopoverMenuState,
+  visibleStates,
 } from "./PopoverState";
 
 function PopOverMenuContents(props: {
@@ -45,12 +45,7 @@ function PopOverMenuContents(props: {
   const node = syntaxNode && retargetToAppropriateNode(syntaxNode);
 
   const eventDispatch = (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => {
-    const update = modifyCodeByCommand(
-      menuEvent,
-      node,
-      codeString(view, 0),
-      codeString(view, 0)
-    );
+    const update = modifyCodeByCommand(menuEvent, node, codeString(view, 0));
     if (update) {
       codeUpdate(update);
     }
@@ -132,18 +127,14 @@ class Tooltip {
 
   update() {
     const { projections } = this.view.state.field(cmStatePlugin);
-    const {
-      targetNode,
-      showPopover,
-      selectedRouting,
-      menuContents,
-      popOverInUse,
-    } = this.view.state.field(this.stateField);
+    const { targetNode, menuState, selectedRouting, menuContents } =
+      this.view.state.field(this.stateField);
 
+    const popoverNotVisible = !visibleStates.has(menuState);
     if (
       !targetNode ||
       targetNode.type.name === "JsonText" ||
-      !showPopover ||
+      popoverNotVisible ||
       !menuContents.length
     ) {
       ReactDOM.unmountComponentAtNode(this.dom);
@@ -155,7 +146,7 @@ class Tooltip {
       simpleUpdate(this.view, codeUpdate.from, codeUpdate.to, codeUpdate.value);
     };
     const closeMenu = () =>
-      this.view.dispatch({ effects: [setPopoverVisibility.of(false)] });
+      this.view.dispatch({ effects: [popoverEffectDispatch.of("close")] });
 
     const setSelectedRouting = (route: [number, number]) => {
       this.view.dispatch({ effects: [setRouting.of(route)] });
@@ -166,7 +157,7 @@ class Tooltip {
       codeUpdate,
       menuContents,
       projections,
-      selectedRouting: popOverInUse ? selectedRouting : false,
+      selectedRouting: menuState === "inUse" ? selectedRouting : false,
       setSelectedRouting,
       syntaxNode: targetNode,
       view: this.view,

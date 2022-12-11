@@ -3,10 +3,10 @@ import { simpleUpdate, codeString } from "../utils";
 
 import {
   popOverState,
-  setPopoverUsage,
-  setPopoverVisibility,
+  popoverEffectDispatch,
   setRouting,
   SelectionRoute,
+  popoverSMEvent,
 } from "./PopoverState";
 
 import { MenuRow, MenuElement } from "../compute-menu-contents";
@@ -14,14 +14,10 @@ import { modifyCodeByCommand } from "../modify-json";
 
 type dir = "left" | "right" | "down" | "up";
 const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
-  const { showPopover, popOverInUse, selectedRouting, menuContents } =
+  const { menuState, selectedRouting, menuContents } =
     view.state.field(popOverState);
-  // pop over not visible
-  if (!showPopover) {
-    return false;
-  }
-
-  if (!popOverInUse) {
+  // pop over not actively in use
+  if (menuState !== "inUse") {
     return false;
   }
 
@@ -30,13 +26,11 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
     menuContents,
     selectedRouting
   );
-  if (!updatedCursor) {
-    view.dispatch({
-      effects: [setPopoverUsage.of(false), setPopoverVisibility.of(false)],
-    });
-  } else {
-    view.dispatch({ effects: [setRouting.of(updatedCursor)] });
-  }
+  const effect = updatedCursor
+    ? setRouting.of(updatedCursor)
+    : popoverEffectDispatch.of("stopUsing");
+  view.dispatch({ effects: [effect] });
+
   return true;
 };
 
@@ -51,9 +45,11 @@ function buildMoveCursor(
   const leafGroupSize = content[row].elements?.length;
   const numRows = content.length;
 
+  // bail out of menu use
   if (dir === "up" && row - 1 < 0) {
     return false;
   }
+  // modify menu selection
   if (dir === "up" && row - 1 >= 0) {
     row -= 1;
     col = 0;
@@ -100,32 +96,26 @@ function runSelection(view: EditorView) {
     }
 
     view.dispatch({
-      effects: [
-        setPopoverUsage.of(false),
-        setPopoverVisibility.of(false),
-        setRouting.of([0, 0]),
-      ],
+      effects: [popoverEffectDispatch.of("close"), setRouting.of([0, 0])],
     });
   }
   return true;
 }
+const simpleDispatch = (view: EditorView, action: popoverSMEvent) =>
+  view.dispatch({ effects: [popoverEffectDispatch.of(action)] });
 
 function forceClose(view: EditorView) {
-  view.dispatch({
-    effects: [setPopoverUsage.of(false), setPopoverVisibility.of(false)],
-  });
+  simpleDispatch(view, "forceClose");
   return true;
 }
 
 function forceOpen(view: EditorView) {
-  view.dispatch({
-    effects: [setPopoverUsage.of(true), setPopoverVisibility.of(true)],
-  });
+  simpleDispatch(view, "forceOpen");
   return true;
 }
 
 function engageWithPopover(view: EditorView) {
-  view.dispatch({ effects: [setPopoverUsage.of(true)] });
+  simpleDispatch(view, "use");
   return true;
 }
 
