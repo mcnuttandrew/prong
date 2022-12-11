@@ -16,14 +16,10 @@ import { Projection } from "../projections";
 
 import { generateMenuContent, MenuRow } from "../compute-menu-contents";
 
-// import { createMachine } from "xstate";
-
 export type UpdateDispatch = { from: number; to: number; value: string };
 export type SelectionRoute = [number, number];
 
 export interface PopoverMenuState {
-  // showPopover: boolean;
-  // popOverInUse: boolean;
   menuState: popOverSMState;
   targetNode: SyntaxNode | null;
   targetedTypings: [];
@@ -32,8 +28,6 @@ export interface PopoverMenuState {
   menuContents: MenuRow[];
 }
 export const popoverMenuState: PopoverMenuState = {
-  // showPopover: true,
-  // popOverInUse: false,
   menuState: "hidden",
   targetNode: null,
   targetedTypings: [],
@@ -82,14 +76,6 @@ function handleSimpleUpdate(
   let newState = state;
   let didUpdate = false;
   for (const effect of tr.effects) {
-    // if (effect.is(setPopoverVisibility)) {
-    //   didUpdate = true;
-    //   newState = simpleSet("showPopover", effect.value, newState);
-    // }
-    // if (effect.is(setPopoverUsage)) {
-    //   didUpdate = true;
-    //   newState = simpleSet("popOverInUse", effect.value, newState);
-    // }
     if (effect.is(popoverEffectDispatch)) {
       didUpdate = true;
       const newMenuState = PopoverStateMachine(state.menuState, effect.value);
@@ -179,10 +165,15 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   ] as MenuRow[];
 }
 
+function materializeTypings(tr: Transaction, targetNode: SyntaxNode) {
+  const { schemaTypings } = tr.state.field(cmStatePlugin);
+
+  return schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
+}
+
 export const popOverState: StateField<PopoverMenuState> = StateField.define({
   create: () => popoverMenuState,
   update(state, tr) {
-    console.log(state.menuState);
     const simpleUpdate = handleSimpleUpdate(state, tr);
     if (simpleUpdate.didUpdate) {
       return simpleUpdate.newState;
@@ -196,35 +187,19 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     if (!targetNode || targetNode.type.name === "JsonText") {
       return { ...state };
     }
-    // handle multi-cursor stuff appropriately
-    if (!cursorBehaviorIsValid(tr)) {
+    // handle multi-cursor stuff appropriately and dont show popover through a projection
+    if (!cursorBehaviorIsValid(tr) || selectionInsideProjection(tr, pos)) {
       return { ...state, tooltip: null };
     }
-    // dont show popover through a projection
-    if (selectionInsideProjection(tr, pos)) {
-      return { ...state, tooltip: null };
-    }
-
-    // maybe only compute this stuff if the menu is open
-    const { schemaTypings } = tr.state.field(cmStatePlugin);
-
-    const targetedTypings =
-      schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
 
     const nodeIsActuallyNew = !(
       targetNode?.from === state?.targetNode?.from &&
       targetNode?.to === state?.targetNode?.to
     );
-    // let popOverInUse: boolean = state.popOverInUse;
-    // let showPopover: boolean = state.showPopover;
-    let selectedRouting = state.selectedRouting;
-    let menuState = state.menuState;
-    if (nodeIsActuallyNew) {
-      selectedRouting = [0, 0];
-      menuState = PopoverStateMachine(state.menuState, "open");
-      // popOverInUse = false;
-      // showPopover = true;
-    }
+    const selectedRouting: SelectionRoute = nodeIsActuallyNew
+      ? [0, 0]
+      : state.selectedRouting;
+    const menuState = PopoverStateMachine(state.menuState, "open");
 
     // if were not showing the popover bail
     if (!visibleStates.has(menuState)) {
@@ -237,7 +212,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       menuState,
       selectedRouting,
       targetNode,
-      targetedTypings,
+      targetedTypings: materializeTypings(tr, targetNode),
       tooltip: {
         pos,
         create: tooltip,
