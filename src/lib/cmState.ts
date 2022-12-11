@@ -1,6 +1,10 @@
 import { StateEffect, StateField } from "@codemirror/state";
+import { ViewPlugin, EditorView, ViewUpdate } from "@codemirror/view";
 import { JSONSchema } from "./JSONSchemaTypes";
 import { Projection } from "./projections";
+import { createNodeMap } from "./utils";
+import { lintCode } from "./Linter";
+import isEqual from "lodash.isequal";
 
 export const setSchema = StateEffect.define<JSONSchema>();
 export const setProjections = StateEffect.define<Projection[]>();
@@ -41,3 +45,34 @@ export const cmStatePlugin = StateField.define({
   },
   provide: (field) => [],
 });
+
+export const cmStateView = ViewPlugin.fromClass(
+  class {
+    constructor() {
+      this.run = this.run.bind(this);
+    }
+
+    run(view: EditorView) {
+      const { schema } = view.state.field(cmStatePlugin);
+      const code = view.state.doc.toString();
+      Promise.all([
+        createNodeMap(schema, code).then((schemaMap) =>
+          setSchemaTypings.of(schemaMap)
+        ),
+        lintCode(schema, code).then((diagnostics) =>
+          setDiagnostics.of(diagnostics)
+        ),
+      ]).then((effects) => view.dispatch({ effects }));
+    }
+
+    update(update: ViewUpdate) {
+      const stateValuesChanged = !isEqual(
+        update.startState.field(cmStatePlugin),
+        update.state.field(cmStatePlugin)
+      );
+      if (stateValuesChanged || update.docChanged) {
+        this.run(update.view);
+      }
+    }
+  }
+);

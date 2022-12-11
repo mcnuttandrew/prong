@@ -9,8 +9,6 @@ import { indentWithTab } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
 import { syntaxHighlighting } from "@codemirror/language";
 
-import { lintCode } from "../lib/Linter";
-import { createNodeMap } from "../lib/utils";
 import { widgetsPlugin } from "../lib/widgets";
 import SyntaxHighlighting from "../lib/syntax-highlighting";
 import { Projection } from "../lib/projections";
@@ -18,11 +16,11 @@ import {
   cmStatePlugin,
   setSchema,
   setProjections,
-  setSchemaTypings,
-  setDiagnostics,
+  cmStateView,
 } from "../lib/cmState";
 import PopoverPlugin from "../lib/popover-menu";
 import ProjectionPlugin from "../lib/projections";
+import { simpleUpdate } from "../lib/utils";
 
 type Props = {
   onChange: (code: string) => void;
@@ -34,35 +32,11 @@ type Props = {
 const languageConf = new Compartment();
 export type SchemaMap = Record<string, any>;
 
-function runTypings(schema: any, code: string, view: EditorView) {
-  createNodeMap(schema, code).then((schemaMap) => {
-    view.dispatch({
-      effects: [setSchemaTypings.of(schemaMap)],
-    });
-  });
-}
-
-function runLints(schema: any, code: string, view: EditorView) {
-  lintCode(schema, code).then((diagnostics) => {
-    view.dispatch({
-      effects: [setDiagnostics.of(diagnostics)],
-    });
-  });
-}
-
 export default function Editor(props: Props) {
   const { schema, code, onChange, projections } = props;
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
-  const simpleUpdate = (
-    view: EditorView,
-    from: number,
-    to: number,
-    insert: string
-  ) => {
-    view.dispatch(view!.state.update({ changes: { from, to, insert } }));
-  };
 
   // primary effect, initialize the editor etc
   useEffect(() => {
@@ -70,11 +44,6 @@ export default function Editor(props: Props) {
       if (v.docChanged) {
         const newCode = v.state.doc.toString();
         onChange(newCode);
-
-        // TODO wrap these is a debounce
-        // TODO move these into the cmState
-        runTypings(schema, newCode, view);
-        runLints(schema, newCode, view);
       }
     });
     const editorState = EditorState.create({
@@ -85,6 +54,7 @@ export default function Editor(props: Props) {
         languageConf.of(json()),
         keymap.of([indentWithTab]),
         cmStatePlugin,
+        cmStateView,
         widgetsPlugin,
         localExtension,
         syntaxHighlighting(SyntaxHighlighting),
@@ -101,20 +71,13 @@ export default function Editor(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (view) {
-      view.dispatch({ effects: [setSchema.of(schema)] });
-      runTypings(schema, code, view);
-      runLints(schema, code, view);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    view?.dispatch({ effects: [setSchema.of(schema)] });
   }, [schema, view]);
   useEffect(() => {
-    if (view) {
-      // hack :(
-      setTimeout(() => {
-        view.dispatch({ effects: [setProjections.of(projections || [])] });
-      }, 100);
-    }
+    // hack :(
+    setTimeout(() => {
+      view?.dispatch({ effects: [setProjections.of(projections || [])] });
+    }, 100);
   }, [projections, view]);
 
   useEffect(() => {

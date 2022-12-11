@@ -174,7 +174,6 @@ function materializeTypings(tr: Transaction, targetNode: SyntaxNode) {
 export const popOverState: StateField<PopoverMenuState> = StateField.define({
   create: () => popoverMenuState,
   update(state, tr) {
-    console.log(state.menuState);
     const simpleUpdate = handleSimpleUpdate(state, tr);
     if (simpleUpdate.didUpdate) {
       return simpleUpdate.newState;

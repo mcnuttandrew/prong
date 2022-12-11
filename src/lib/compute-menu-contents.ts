@@ -76,12 +76,15 @@ function simpleFillOut(content: JSONSchema7) {
 }
 
 const parseContent = (node: SyntaxNode, fullCode: string, defaultVal?: any) => {
-  return simpleParse(fullCode.slice(node.from, node.to), defaultVal);
+  const slice = fullCode.slice(node.from, node.to);
+  return simpleParse(slice, defaultVal);
 };
 
 const ObjPicker: Component = (props) => {
   const { content, node, fullCode } = props;
-  const currentKeys = new Set(Object.keys(parseContent(node, fullCode, {})));
+  const containerNode = getContainingObject(node);
+  const parsedContent = parseContent(containerNode, fullCode, {});
+  const currentKeys = new Set(Object.keys(parsedContent));
   // TODO this gets this wrong if coming from { / }
   const addFieldEntries: MenuElement[] = Object.entries(
     content.properties || {}
@@ -497,6 +500,7 @@ function simpleParse(content: any, defaultVal = {}) {
   try {
     return Json.parse(content);
   } catch (e) {
+    console.log("simple parse fail", e);
     return defaultVal;
   }
 }

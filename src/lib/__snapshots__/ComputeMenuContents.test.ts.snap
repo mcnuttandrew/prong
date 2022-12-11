@@ -190,7 +190,7 @@ Array [
   Object {
     "elements": Array [
       Object {
-        "content": "undefined",
+        "content": "\\"vegetables\\"",
         "type": "display",
       },
       Object {
