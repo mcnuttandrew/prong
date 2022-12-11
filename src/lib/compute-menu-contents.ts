@@ -180,7 +180,9 @@ function AnyOfObjOptionalFieldPicker(
     Object.fromEntries(
       requiredPropsArr.map((x) => [
         x,
-        content?.properties[x] ? simpleFillOut(content.properties[x]) : "null",
+        x in (content?.properties || {})
+          ? simpleFillOut(content.properties[x])
+          : "null",
       ])
     )
   );
@@ -209,8 +211,8 @@ function AnyOfObjOptionalFieldPicker(
             payload: requiredPropObject,
             nodeId: nodeToId(node),
           },
-          // TODO this is a terrible description
-          content: "object with required types",
+          label: requiredPropObject,
+          content: `object`,
         },
         requiredPropsArr.length === 0 && {
           type: "button",

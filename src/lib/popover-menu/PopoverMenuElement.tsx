@@ -63,18 +63,20 @@ const InputElement: MenuElementRenderer<any> = (props) => {
   );
 };
 
-const ButtonElement: MenuElementRenderer<any> = (props) => (
+const ButtonElement: MenuElementRenderer<any> = ({
+  isSelected,
+  menuElement: { onSelect, content, label },
+  eventDispatch,
+}) => (
   <div
     className={classNames({
-      "cm-annotation-widget-element": !props.isSelected,
-      "cm-annotation-widget-element-selected": props.isSelected,
+      flex: true,
+      "cm-annotation-widget-element": !isSelected,
+      "cm-annotation-widget-element-selected": isSelected,
     })}
   >
-    <button
-      onClick={() => props.eventDispatch(props.menuElement.onSelect, true)}
-    >
-      {props.menuElement.content}
-    </button>
+    <button onClick={() => eventDispatch(onSelect, true)}>{content}</button>
+    {label && <div>{label}</div>}
   </div>
 );
 
