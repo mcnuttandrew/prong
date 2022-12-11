@@ -106,6 +106,7 @@ export default function Editor(props: Props) {
       runTypings(schema, code, view);
       runLints(schema, code, view);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schema, view]);
   useEffect(() => {
     if (view) {

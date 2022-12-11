@@ -9,7 +9,7 @@ import * as Json from "jsonc-parser";
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 import { ProjectionProps } from "../../src/lib/projections";
-import { setIn, codeString } from "../lib/utils";
+import { setIn } from "../lib/utils";
 
 const vegaLiteCode = `
 {
@@ -56,37 +56,37 @@ function lazyParse(content: string): any {
   }
 }
 
-const DataTable = (props: ProjectionProps): JSX.Element => {
-  const parsed = lazyParse(props.currentValue);
-  console.log(props, parsed);
-  if (!Array.isArray(parsed) || !parsed.length) {
-    return <div>hi</div>;
-  }
-  const keys: string[] = Array.from(
-    parsed.reduce((acc, row: Record<string, any>) => {
-      Object.keys(row).forEach((key) => acc.add(key));
-      return acc;
-    }, new Set())
-  );
-  return (
-    <div>
-      <table>
-        <tr>
-          {keys.map((key) => (
-            <th>{key}</th>
-          ))}
-        </tr>
-        {parsed.map((row) => (
-          <tr>
-            {keys.map((key) => (
-              <td>{row[key]}</td>
-            ))}
-          </tr>
-        ))}
-      </table>
-    </div>
-  );
-};
+// const DataTable = (props: ProjectionProps): JSX.Element => {
+//   const parsed = lazyParse(props.currentValue);
+//   console.log(props, parsed);
+//   if (!Array.isArray(parsed) || !parsed.length) {
+//     return <div>hi</div>;
+//   }
+//   const keys: string[] = Array.from(
+//     parsed.reduce((acc, row: Record<string, any>) => {
+//       Object.keys(row).forEach((key) => acc.add(key));
+//       return acc;
+//     }, new Set())
+//   );
+//   return (
+//     <div>
+//       <table>
+//         <tr>
+//           {keys.map((key) => (
+//             <th>{key}</th>
+//           ))}
+//         </tr>
+//         {parsed.map((row) => (
+//           <tr>
+//             {keys.map((key) => (
+//               <td>{row[key]}</td>
+//             ))}
+//           </tr>
+//         ))}
+//       </table>
+//     </div>
+//   );
+// };
 
 const Shelf: FC<{
   currentValue: any;

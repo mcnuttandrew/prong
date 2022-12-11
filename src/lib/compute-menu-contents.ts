@@ -26,10 +26,8 @@ export type MenuElement =
   | { type: "projection"; label?: string; element: JSX.Element };
 interface ComponentProps {
   content: JSONSchema7;
-  parsedContent: any;
   node: SyntaxNode;
   fullCode: string;
-  //   parentType: string; // todo this type can be improved
 }
 type Component = (props: ComponentProps) => MenuRow[];
 type componentContainer = Record<string, Component>;
@@ -77,9 +75,13 @@ function simpleFillOut(content: JSONSchema7) {
   }
 }
 
+const parseContent = (node: SyntaxNode, fullCode: string, defaultVal?: any) => {
+  return simpleParse(fullCode.slice(node.from, node.to), defaultVal);
+};
+
 const ObjPicker: Component = (props) => {
-  const { content, parsedContent, node } = props;
-  const currentKeys = new Set(Object.keys(parsedContent || {}));
+  const { content, node, fullCode } = props;
+  const currentKeys = new Set(Object.keys(parseContent(node, fullCode, {})));
   // TODO this gets this wrong if coming from { / }
   const addFieldEntries: MenuElement[] = Object.entries(
     content.properties || {}
@@ -146,18 +148,6 @@ function bundleConstsToEnum(content: JSONSchema7[]) {
   return [...nonConsts, { enum: consts.map((x) => x.const) }];
 }
 
-// function generateValueForObjProp(prop: any) {
-//   const simple: any = { number: 0, string: "", object: {} };
-//   if (prop.enum) {
-//     return prop.enum[0];
-//   } else if (simple.hasOwnProperty(prop.type)) {
-//     return simple[prop.type];
-//   } else {
-//     console.log("not covered", prop.type, simple[prop.type]);
-//     return null;
-//   }
-// }
-
 // goes anything not an object up to it's container, only to be used below
 const getContainingObject = (node: SyntaxNode): SyntaxNode => {
   return node.type.name === "Object" ? node : getContainingObject(node.parent!);
@@ -173,14 +163,9 @@ const getUsedPropertiesForContainer = (node: SyntaxNode): SyntaxNode[] => {
   return props;
 };
 
-const getIthChild = (node: SyntaxNode, targetIndex: number): SyntaxNode =>
-  getUsedPropertiesForContainer(node)[targetIndex + 1];
-
 function AnyOfObjOptionalFieldPicker(
-  // content: JSONSchema7,
   content: any,
   node: SyntaxNode,
-  parsedContent: any,
   fullCode: string
 ): MenuRow[] {
   const requiredProps = new Set<string>(
@@ -321,7 +306,7 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
 }
 
 const AnyOfPicker: Component = (props) => {
-  const { content, node, parsedContent, fullCode } = props;
+  const { content, node, fullCode } = props;
   const simpleType = new Set(["string", "number", "boolean", "null"]);
   const simpleTypeMap: Record<string, string> = {
     string: '""',
@@ -350,7 +335,7 @@ const AnyOfPicker: Component = (props) => {
         })),
       },
       ...(opt.type === "object"
-        ? AnyOfObjOptionalFieldPicker(opt, node, parsedContent, fullCode)
+        ? AnyOfObjOptionalFieldPicker(opt, node, fullCode)
         : []),
       ...(opt.type === "array" ? AnyOfArray(opt, node) : []),
       simpleType.has(opt.type) &&
@@ -390,12 +375,12 @@ const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
 const GenericComponent = makeSimpleComponent("hi generic");
 
 const PropertyNameComponent: Component = (props) => {
-  const { parsedContent, node } = props;
+  const { node, fullCode } = props;
   return [
     {
       label: "PROPERTY",
       elements: [
-        { type: "display", content: `${parsedContent}` },
+        { type: "display", content: fullCode.slice(node.from, node.to) },
         {
           type: "button",
           content: "remove key",
@@ -576,7 +561,6 @@ export function generateMenuContent(
   }
 
   //   assemble the content for display
-  const parsedContent = simpleParse(currentCodeSlice);
   const content: MenuRow[] = [];
   if (schemaChunk?.description) {
     content.push({
@@ -585,7 +569,6 @@ export function generateMenuContent(
     });
   }
   const componentProps: ComponentProps = {
-    parsedContent,
     content: schemaChunk,
     node: syntaxNode,
     fullCode,

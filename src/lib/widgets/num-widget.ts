@@ -34,6 +34,7 @@ export class NumWidget extends WidgetType {
 
 function changeNum(view: EditorView, isInc: boolean, from: number) {
   const s = codeString(view, from)
+    // eslint-disable-next-line no-useless-escape
     .match(/([0-9\-\.]+)([^0-9]?)/)!
     .splice(1)[0];
   const num =
