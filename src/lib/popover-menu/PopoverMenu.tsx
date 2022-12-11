@@ -17,10 +17,8 @@ import PopoverMenuElement from "./PopoverMenuElement";
 import {
   UpdateDispatch,
   SelectionRoute,
-  //   setPopoverUsage,
   setRouting,
   popoverEffectDispatch,
-  // setPopoverVisibility,
   PopoverMenuState,
   visibleStates,
 } from "./PopoverState";
