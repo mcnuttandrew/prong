@@ -27,23 +27,31 @@ const simpleSet = (
 export const cmStatePlugin = StateField.define({
   create: () => initialCmState,
   update(state, tr) {
+    let didUpdate = false;
+    let newState = state;
     for (const effect of tr.effects) {
       if (effect.is(setSchema)) {
-        return simpleSet("schema", effect.value, state);
+        didUpdate = true;
+        newState = simpleSet("schema", effect.value, newState);
       }
       if (effect.is(setProjections)) {
-        return simpleSet("projections", effect.value, state);
+        didUpdate = true;
+        newState = simpleSet("projections", effect.value, newState);
       }
       if (effect.is(setSchemaTypings)) {
-        return simpleSet("schemaTypings", effect.value, state);
+        didUpdate = true;
+        newState = simpleSet("schemaTypings", effect.value, newState);
       }
       if (effect.is(setDiagnostics)) {
-        return simpleSet("diagnostics", effect.value, state);
+        didUpdate = true;
+        newState = simpleSet("diagnostics", effect.value, newState);
       }
+    }
+    if (didUpdate) {
+      return newState;
     }
     return state;
   },
-  provide: (field) => [],
 });
 
 export const cmStateView = ViewPlugin.fromClass(
