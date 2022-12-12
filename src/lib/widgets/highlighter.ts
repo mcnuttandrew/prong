@@ -45,6 +45,7 @@ const Highlighter: SimpleWidget = {
     const level = `${levelNumber >= 0 ? levelNumber + 1 : 4}`;
     const inBound =
       !!targetNode && targetNode.from === from && targetNode.to === to;
+
     // if (level === "4") {
     //   return [];
     // }
@@ -58,7 +59,8 @@ const Highlighter: SimpleWidget = {
         }),
       },
     });
-    return [highlight.range(from, to)];
+
+    return from !== to ? [highlight.range(from, to)] : [];
   },
   eventSubscriptions: {},
 };

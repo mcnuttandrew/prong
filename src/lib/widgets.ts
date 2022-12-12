@@ -36,9 +36,7 @@ export interface SimpleWidget {
 }
 const simpleWidgets: SimpleWidget[] = [
   SimpleBoolWidget,
-  // SimpleNumWidget,
   SimpleColorWidget,
-  // SimpleColorWidget,
   Highlighter,
   ClickTargetWidget,
   // SimpleSliderWidget,
