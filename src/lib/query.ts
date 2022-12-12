@@ -1,5 +1,8 @@
+type functionQueryType = (value: string) => boolean;
 export type ProjectionQuery =
+  | { type: "function"; query: functionQueryType }
   | { type: "index"; query: (number | string)[] }
+  | { type: "regex"; query: RegExp }
   | { type: "value"; query: string[] };
 
 function keyPathMatchesQueryCore(
@@ -36,11 +39,19 @@ function keyPathMatchesQueryMemoizer() {
     return result;
   };
 }
-const keyPathMatchesQuery = keyPathMatchesQueryMemoizer();
+export const keyPathMatchesQuery = keyPathMatchesQueryMemoizer();
 
 function valueQuery(query: string[], nodeValue: string): boolean {
   const strippedVal = nodeValue.slice(1, nodeValue.length - 1);
   return !!query.find((x) => x === strippedVal);
+}
+
+function functionQuery(query: functionQueryType, nodeValue: string) {
+  return query(nodeValue);
+}
+
+function regexQuery(query: RegExp, nodeValue: string) {
+  return !!nodeValue.match(query);
 }
 
 export function runProjectionQuery(
@@ -53,6 +64,10 @@ export function runProjectionQuery(
       return keyPathMatchesQuery(query.query, keyPath);
     case "value":
       return valueQuery(query.query, nodeValue);
+    case "function":
+      return functionQuery(query.query, nodeValue);
+    case "regex":
+      return regexQuery(query.query, nodeValue);
     default:
       return false;
   }

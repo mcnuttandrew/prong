@@ -1,6 +1,33 @@
 import { Decoration, WidgetType, EditorView } from "@codemirror/view";
-import { codeString, isArgToSpecialFunc, unwrap } from "../utils";
+import { codeString, unwrap } from "../utils";
 import { SimpleWidget } from "../widgets";
+import { SyntaxNode } from "@lezer/common";
+
+function isSliderFunc(s: string): boolean {
+  return s === "_slider";
+}
+
+function isArgToSpecialFunc(view: EditorView, node: SyntaxNode): boolean {
+  if (
+    node.parent?.type?.name === "ArgList" &&
+    node.parent?.parent?.type?.name === "CallExpression"
+  ) {
+    const theFuncNode = node.parent!.parent!.getChild("VariableName")!;
+    const theFunc = codeString(view, theFuncNode.from, theFuncNode.to);
+    return isSliderFunc(theFunc);
+  } else if (
+    node.parent?.type?.name === "ArrayExpression" &&
+    node.parent?.parent?.type?.name === "ArgList" &&
+    node.parent?.parent?.parent?.type?.name === "CallExpression"
+  ) {
+    const theFuncNode = node.parent!.parent!.parent!.getChild("VariableName")!;
+    const theFunc = codeString(view, theFuncNode.from, theFuncNode.to);
+    return isSliderFunc(theFunc);
+  } else {
+    return false;
+  }
+}
+
 export class NumWidget extends WidgetType {
   // If the number literal is negative, `from` does _not_ include "-"
   constructor(readonly isInc: boolean, readonly from: number) {

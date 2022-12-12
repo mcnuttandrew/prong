@@ -200,16 +200,14 @@ class Tooltip {
         currentCodeSlice,
         (code) => {
           console.log("instruction", code);
-          this.view.dispatch(
-            this.view.state.update({
-              changes: {
-                from: 0,
-                to: this.view.state.doc.length,
-                insert: code,
-              },
-            })
-          );
-          // simpleUpdate(this.view, 0, code.length, code);
+          this.view.dispatch({
+            changes: {
+              from: 0,
+              to: this.view.state.doc.length,
+              insert: code,
+            },
+            selection: this.view.state.selection,
+          });
         },
         this.view.state.doc.toString()
       )

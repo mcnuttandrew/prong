@@ -75,7 +75,7 @@ const schema: JSONSchema7 = {
 };
 
 const exampleData = `{
-  "fruits": [ "apple", "orange", "pear" ],
+  "fruits": [ "apple", "orange", "#c71585" ],
   "vegetables": [
     {
       "veggieName": "potato",
