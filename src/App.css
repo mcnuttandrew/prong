@@ -79,11 +79,13 @@
 
 .cm-color-widget {
   display: inline-block;
+
   /*  CodeMirror has white-space: pre by default
    Resetting here fixes a visual glitch where some whitespace in the color picker code
    makes the widget align weirdly */
   white-space: normal;
 }
+
 
 .cm-color-name-widget {
   display: inline-block;
@@ -97,21 +99,10 @@
   border-radius: 100%;
 }
 
-.color-name-picker {
-  position: absolute;
-  background: white;
-  z-index: 100;
-  overflow: auto;
-  /*  This prevents the picker for becoming narrower
-   near the right side of the screen. It preserves its width,
-   which allows the JS code to move it left the right amount */
-  width: max-content;
-
-  /*  The React code sets the `left` and `top` properties according to the button location
-   This property moves the picker over an additional bit */
-  margin-left: 20px;
-
-
+.color-name-picker ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 .color-name-picker .color-group {

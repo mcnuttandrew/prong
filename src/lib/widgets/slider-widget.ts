@@ -1,6 +1,14 @@
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SimpleWidget } from "../widgets";
-import { unwrap, argListToIntList, codeString } from "../utils";
+import { unwrap, codeString } from "../utils";
+import { SyntaxNode } from "@lezer/common";
+
+function argListToIntList(view: EditorView, argList: SyntaxNode[]): number[] {
+  return argList.map((child) =>
+    parseInt(codeString(view, child.from, child.to))
+  );
+}
+
 export class SliderWidget extends WidgetType {
   constructor(
     readonly min: number,

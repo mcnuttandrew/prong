@@ -6,7 +6,13 @@ import { StateField } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 
 import { cmStatePlugin } from "../cmState";
-import { simpleUpdate, codeString, classNames } from "../utils";
+import {
+  simpleUpdate,
+  codeString,
+  classNames,
+  codeStringState,
+  syntaxNodeToKeyPath,
+} from "../utils";
 
 import { modifyCodeByCommand, MenuEvent } from "../modify-json";
 
@@ -20,6 +26,7 @@ import {
   setRouting,
   popoverEffectDispatch,
   PopoverMenuState,
+  getProjectionContents,
   visibleStates,
 } from "./PopoverState";
 
@@ -114,6 +121,30 @@ function PopOverMenuContents(props: {
   );
 }
 
+const prepProjections =
+  (
+    node: SyntaxNode,
+    keyPath: (string | number)[],
+    currentValue: string,
+    setCode: (code: string) => void,
+    fullCode: string
+  ) =>
+  (proj: Projection): MenuRow => ({
+    label: proj.name,
+    elements: [
+      {
+        type: "projection",
+        element: proj.projection({
+          node,
+          keyPath,
+          currentValue,
+          setCode,
+          fullCode,
+        }),
+      },
+    ],
+  });
+
 class Tooltip {
   dom: HTMLElement;
   constructor(
@@ -152,10 +183,51 @@ class Tooltip {
       this.view.dispatch({ effects: [setRouting.of(route)] });
     };
 
+    const currentCodeSlice = codeStringState(
+      this.view.state,
+      targetNode.from,
+      targetNode.to
+    );
+    const keyPath = syntaxNodeToKeyPath(
+      targetNode,
+      codeStringState(this.view.state, 0)
+    );
+    console.log("check", currentCodeSlice, keyPath);
+    const fullCode = this.view.state.doc.toString();
+    const projectionContents = getProjectionContents(
+      this.view.state,
+      targetNode,
+      currentCodeSlice
+    ).map(
+      prepProjections(
+        targetNode,
+        keyPath,
+        currentCodeSlice,
+        (code) => {
+          console.log("XXX", keyPath);
+          console.log(
+            "instruction",
+            fullCode.slice(targetNode.from, targetNode.to),
+            targetNode.from,
+            targetNode.to
+          );
+          this.view.dispatch({
+            changes: {
+              from: 0,
+              to: fullCode.length,
+              insert: code,
+            },
+            selection: this.view.state.selection,
+          });
+        },
+        fullCode
+      )
+    );
+
     const element = React.createElement(PopOverMenuContents, {
       closeMenu,
       codeUpdate,
-      menuContents,
+      menuContents: [...menuContents, ...projectionContents],
       projections,
       selectedRouting: menuState === "inUse" ? selectedRouting : false,
       setSelectedRouting,

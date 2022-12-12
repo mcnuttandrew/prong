@@ -10,25 +10,8 @@ import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 import { ProjectionProps } from "../../src/lib/projections";
 import { setIn } from "../lib/utils";
+import { vegaLiteCode } from "./example-data";
 
-const vegaLiteCode = `
-{
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "A simple bar chart with embedded data.",
-  "data": {
-    "values": [
-      {"a": "A", "b": 28}, {"a": "B", "b": 55}, {"a": "C", "b": 43},
-      {"a": "D", "b": 91}, {"a": "E", "b": 81}, {"a": "F", "b": 53},
-      {"a": "G", "b": 19}, {"a": "H", "b": 87}, {"a": "I", "b": 52}
-    ]
-  },
-  "mark": "bar",
-  "encoding": {
-    "x": {"field": "a", "type": "nominal", "axis": {"labelAngle": 0}},
-    "y": {"field": "b", "type": "quantitative"}
-  }
-}
-`;
 const Pill: FC<{ name: string }> = function Pill(props) {
   const { name } = props;
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -206,7 +189,7 @@ function VegaLiteExampleApp() {
           onChange={(x) => setCurrentCode(x)}
           projections={[
             {
-              query: ["data", "values", "*"],
+              query: { type: "index", query: ["data", "values", "*"] },
               type: "tooltip",
               projection: ({ keyPath }) => {
                 return <div>hi annotation projection {keyPath.join(",")}</div>;
@@ -215,7 +198,10 @@ function VegaLiteExampleApp() {
               name: "popover example",
             },
             {
-              query: ["encoding", "*", "field", "field___val"],
+              query: {
+                type: "index",
+                query: ["encoding", "*", "field", "field___val"],
+              },
               type: "tooltip",
               projection: (props) => {
                 return (
@@ -244,7 +230,10 @@ function VegaLiteExampleApp() {
             // },
             {
               // query: ["data", "values", "*"],
-              query: ["description", "description___key"],
+              query: {
+                type: "index",
+                query: ["description", "description___key"],
+              },
               type: "inline",
               projection: CounterProjection,
               hasInternalState: true,
@@ -252,7 +241,7 @@ function VegaLiteExampleApp() {
             },
             {
               // query: ["data", "values", "*"],
-              query: ["mark", "mark___key"],
+              query: { type: "index", query: ["mark", "mark___key"] },
               type: "inline",
               projection: DynamicProjection,
               hasInternalState: true,
@@ -260,7 +249,10 @@ function VegaLiteExampleApp() {
             },
             {
               // query: ["data", "values", "*"],
-              query: ["encoding", "*", "field", "field___val"],
+              query: {
+                type: "index",
+                query: ["encoding", "*", "field", "field___val"],
+              },
               type: "inline",
               projection: shelf(setCurrentCode, currentCode),
               hasInternalState: false,

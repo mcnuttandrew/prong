@@ -2,7 +2,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
-import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
+import { syntaxNodeToKeyPath, codeStringState } from "../utils";
+import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 import { SimpleWidget } from "../widgets";
 
@@ -33,11 +34,28 @@ class InlineProjectionWidget extends WidgetType {
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
 
+    const view = this.view;
+
     const element = React.createElement(this.projection.projection, {
-      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view.state),
+      keyPath: syntaxNodeToKeyPath(
+        this.syntaxNode,
+        codeStringState(this.view.state, 0)
+      ),
       node: this.syntaxNode,
-      view: this.view,
       currentValue: this.currentCodeSlice,
+      setCode: (code) => {
+        // todo untested, may mess stuff up
+        const fullCode = view.state.doc.toString();
+        view.dispatch({
+          changes: {
+            from: 0,
+            to: fullCode.length,
+            insert: code,
+          },
+          selection: view.state.selection,
+        });
+      },
+      fullCode: this.view.state.doc.toString(),
     });
 
     ReactDOM.render(element, wrap);
@@ -62,8 +80,16 @@ const ProjectionWidgetFactory = (
   syntaxNode: SyntaxNode
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
-    const keyPath = syntaxNodeToKeyPath(syntaxNode, view.state);
-    return keyPathMatchesQuery(projection.query, keyPath);
+    const keyPath = syntaxNodeToKeyPath(
+      syntaxNode,
+      codeStringState(view.state, 0)
+    );
+    const currentCodeSlice = codeStringState(
+      view.state,
+      currentNode.from,
+      currentNode.to
+    );
+    return runProjectionQuery(projection.query, keyPath, currentCodeSlice);
   },
   addNode: (view, from, to) => {
     const decoDec = Decoration.replace({

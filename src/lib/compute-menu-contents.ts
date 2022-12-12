@@ -1,10 +1,10 @@
 import isequal from "lodash.isequal";
 import { SyntaxNode } from "@lezer/common";
-import * as Json from "jsonc-parser";
 
 import { MenuEvent, boundCheck } from "./modify-json";
 import { SchemaMap } from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
+import { simpleParse } from "./utils";
 
 // type JSONSchema = any;
 
@@ -498,14 +498,6 @@ const parentResponses: componentContainer = {
   // what other options are there?
 };
 
-function simpleParse(content: any, defaultVal = {}) {
-  try {
-    return Json.parse(content);
-  } catch (e) {
-    console.log("simple parse fail", e);
-    return defaultVal;
-  }
-}
 export function retargetToAppropriateNode(
   node: SyntaxNode | SyntaxNode
 ): SyntaxNode | SyntaxNode {
@@ -537,6 +529,7 @@ function getSchemaForRetargetedNode(
   return schemaChunk as any as JSONSchema7;
 }
 
+// todo remove first argument
 export function generateMenuContent(
   currentCodeSlice: string,
   syntaxNode: SyntaxNode,
