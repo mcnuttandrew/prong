@@ -1,5 +1,6 @@
-import { setIn } from "./utils";
-
+import { setIn, syntaxNodeToKeyPath, syntaxNodeToAbsPath } from "./utils";
+import { vegaCode } from "../examples/example-data";
+import { findNodeByText } from "./test-utils";
 const exampleData = `{
     "a": {
       "b": [1, 2, 
@@ -66,4 +67,35 @@ test("setIn", () => {
     "I": "big darn squid holy shit",
   }`;
   expect(setIn(["I"], "big darn squid holy shit", exampleData)).toBe(result5);
+});
+
+test("setIn - vegaCode", () => {
+  const a = setIn(
+    ["marks", 0, "encode", "hover", "stroke", "value", "value___value"],
+    "green",
+    vegaCode
+  );
+  expect(a).toMatchSnapshot();
+  const b = setIn(
+    ["marks", 0, "encode", "update", "stroke___val"],
+    "purple",
+    a
+  );
+  expect(b).toMatchSnapshot();
+});
+
+test("syntaxNodeToKeyPath", () => {
+  ["firebrick", "steelblue", "marks", "extent[1]"].forEach((key) => {
+    const node = findNodeByText(vegaCode, `"${key}"`)!;
+    expect(syntaxNodeToKeyPath(node, vegaCode)).toMatchSnapshot();
+  });
+});
+
+test("syntaxNodeToAbsPath", () => {
+  ["firebrick", "extent[1]"].forEach((key) => {
+    const node = findNodeByText(vegaCode, `"${key}"`)!;
+    expect(
+      syntaxNodeToAbsPath(node).map((x) => [x.index, x.nodeType])
+    ).toMatchSnapshot();
+  });
 });

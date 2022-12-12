@@ -185,12 +185,37 @@ export const colorNames: { [key: string]: string } = {
   yellowgreen: "#9acd32",
 };
 
-type AbsPathItem = { nodeType: string; index: number; node: SyntaxNode };
-function syntaxNodeToAbsPath(node: SyntaxNode): AbsPathItem[] {
-  const nodeType = node.name;
+type NodeType =
+  | "Object"
+  | "Array"
+  | "Property"
+  | "PropertyName"
+  | "String"
+  | "Number"
+  | "Boolean";
+type AbsPathItem = {
+  nodeType: NodeType;
+  index: number;
+  node: SyntaxNode;
+};
+
+function getChildren(syntaxNode: SyntaxNode): SyntaxNode[] {
+  const children: SyntaxNode[] = [];
+  let pointer = syntaxNode.firstChild;
+  const bannedTypes = new Set(["[", "]", "{", "}"]);
+  while (pointer) {
+    if (!bannedTypes.has(pointer.type.name)) {
+      children.push(pointer);
+    }
+    pointer = pointer.nextSibling;
+  }
+  return children;
+}
+export function syntaxNodeToAbsPath(node: SyntaxNode): AbsPathItem[] {
+  const nodeType = node.name as NodeType;
 
   const parent = node.parent;
-  const siblings = (parent && parent.getChildren(nodeType)) || [];
+  const siblings = parent ? getChildren(parent) : [];
   const selfIndex: number = siblings.findIndex(
     (sib) => sib.from === node.from && sib.to === node.to
   );
@@ -210,51 +235,58 @@ function absPathToKeyPath(
 ): (string | number)[] {
   const keyPath: (string | number)[] = [];
   const pointerLog = [];
-  let pointer = root;
   let idx = 1;
   while (idx < absPath.length) {
     const item = absPath[idx];
+    const pointer = getNestedVal(keyPath, root);
     pointerLog.push(pointer);
-    if (item.nodeType === "Object" && absPath[idx + 1]) {
-      const nextItem = absPath[idx + 1]; // a property node
-      const targetIndex = nextItem.index;
-      const key = Object.keys(pointer)[targetIndex];
-
-      if (typeof pointer[key] === "object") {
-        pointer = pointer[key];
-      }
-      keyPath.push(key);
-      idx++;
-    } else if (item.nodeType === "Array" && absPath[idx + 1]) {
-      const key = absPath[idx + 1].index;
-      keyPath.push(key);
-      if (typeof pointer[key] === "object") {
-        pointer = pointer[key];
-      }
-      idx++;
+    switch (item.nodeType) {
+      case "Array":
+        if (absPath.at(idx + 1)) {
+          const arrayKey = absPath[idx + 1].index;
+          keyPath.push(arrayKey);
+        }
+        break;
+      case "Object":
+        if (absPath.at(idx + 1)) {
+          const nextItem = absPath[idx + 1]; // a property node
+          const targetIndex = nextItem.index;
+          const objKey = Object.keys(pointer)[targetIndex];
+          keyPath.push(objKey);
+        }
+        break;
+      case "Property":
+        break;
+      case "PropertyName":
+        const PropertyNameTerminal = keyPath.pop();
+        keyPath.push(`${PropertyNameTerminal}___key`);
+        break;
+      case "Number":
+      case "String":
+      case "Boolean":
+        const prevItem = absPath[idx - 1];
+        if (prevItem.nodeType === "Property") {
+          const terminal = keyPath.at(-1);
+          keyPath.push(`${terminal}___value`);
+        }
+        break;
+      default:
+        break;
     }
+
     idx++;
-  }
-  const isChildOfProperty =
-    absPath.length > 2 && absPath[absPath.length - 2].nodeType === "Property";
-  const isPropertyKey = absPath[absPath.length - 1].nodeType === "PropertyName";
-  // if we are looking at property name object
-  if (isChildOfProperty && pointerLog[pointerLog.length - 1]) {
-    const parent = absPath[absPath.length - 2];
-    const val = Object.keys(pointerLog[pointerLog.length - 1])[parent.index];
-    keyPath.push(isPropertyKey ? `${val}___key` : `${val}___val`);
   }
   return keyPath;
 }
 
-export function syntaxNodeToKeyPath(node: SyntaxNode, state: EditorState) {
+const getNestedVal = (props: (string | number)[], obj: any) =>
+  props.reduce((a, prop) => a[prop], obj);
+
+export function syntaxNodeToKeyPath(node: SyntaxNode, fullCode: string) {
   const absPath = syntaxNodeToAbsPath(node);
-  const root = absPath[0];
   let parsedRoot = {};
   try {
-    parsedRoot = JSON.parse(
-      codeStringState(state, root.node.from, root.node.to)
-    );
+    parsedRoot = JSON.parse(fullCode);
   } catch (e) {
     return [];
   }
@@ -371,3 +403,12 @@ export const simpleUpdate = (
 ) => {
   view.dispatch(view.state.update({ changes: { from, to, insert } }));
 };
+
+export function simpleParse(content: any, defaultVal = {}) {
+  try {
+    return Json.parse(content);
+  } catch (e) {
+    console.log("simple parse fail", e);
+    return defaultVal;
+  }
+}

@@ -35,7 +35,10 @@ class InlineProjectionWidget extends WidgetType {
     this.widgetContainer = wrap;
 
     const element = React.createElement(this.projection.projection, {
-      keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view.state),
+      keyPath: syntaxNodeToKeyPath(
+        this.syntaxNode,
+        codeStringState(this.view.state, 0)
+      ),
       node: this.syntaxNode,
       // view: this.view,
       currentValue: this.currentCodeSlice,
@@ -67,7 +70,10 @@ const ProjectionWidgetFactory = (
   syntaxNode: SyntaxNode
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
-    const keyPath = syntaxNodeToKeyPath(syntaxNode, view.state);
+    const keyPath = syntaxNodeToKeyPath(
+      syntaxNode,
+      codeStringState(view.state, 0)
+    );
     const currentCodeSlice = codeStringState(
       view.state,
       currentNode.from,

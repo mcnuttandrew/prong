@@ -126,7 +126,7 @@ function shouldAddProjection(
   state: EditorState,
   projection: Projection
 ) {
-  const keyPath = syntaxNodeToKeyPath(syntaxNode, state);
+  const keyPath = syntaxNodeToKeyPath(syntaxNode, codeStringState(state, 0));
   const currentCodeSlice = codeStringState(
     state,
     syntaxNode.from,

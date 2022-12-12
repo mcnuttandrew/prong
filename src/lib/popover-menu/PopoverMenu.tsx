@@ -188,7 +188,12 @@ class Tooltip {
       targetNode.from,
       targetNode.to
     );
-    const keyPath = syntaxNodeToKeyPath(targetNode, this.view.state);
+    const keyPath = syntaxNodeToKeyPath(
+      targetNode,
+      codeStringState(this.view.state, 0)
+    );
+    console.log("check", currentCodeSlice, keyPath);
+    const fullCode = this.view.state.doc.toString();
     const projectionContents = getProjectionContents(
       this.view.state,
       targetNode,
@@ -199,17 +204,23 @@ class Tooltip {
         keyPath,
         currentCodeSlice,
         (code) => {
-          console.log("instruction", code);
+          console.log("XXX", keyPath);
+          console.log(
+            "instruction",
+            fullCode.slice(targetNode.from, targetNode.to),
+            targetNode.from,
+            targetNode.to
+          );
           this.view.dispatch({
             changes: {
               from: 0,
-              to: this.view.state.doc.length,
+              to: fullCode.length,
               insert: code,
             },
             selection: this.view.state.selection,
           });
         },
-        this.view.state.doc.toString()
+        fullCode
       )
     );
 
