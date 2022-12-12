@@ -319,6 +319,10 @@ const AnyOfPicker: Component = (props) => {
     boolean: "true",
     null: "null",
   };
+  const currentNodeType = typeof simpleParse(
+    props.fullCode.slice(node.from, node.to),
+    {}
+  );
   const anyOptions = bundleConstsToEnum(
     removeDupsInAnyOf(flattenAnyOf(content))
   );
@@ -345,15 +349,15 @@ const AnyOfPicker: Component = (props) => {
       ...(opt.type === "array" ? AnyOfArray(opt, node) : []),
       simpleType.has(opt.type) &&
         !isOfDescribedType && {
-          label: "STUFF",
+          label: "Switch to",
           elements: [
             opt.$$labeledType && {
               type: "display",
               content: opt.$$labeledType,
             },
-            {
+            currentNodeType !== opt.type && {
               type: "button",
-              content: `switch to ${opt.type}`,
+              content: `${opt.type}`,
               onSelect: {
                 type: "simpleSwap",
                 // payload: "null"
@@ -584,7 +588,7 @@ export function generateMenuContent(
   if (parentResponses[parentType]) {
     parentResponses[parentType](componentProps).forEach((x) => content.push(x));
   }
-  return simpleMerge(content.filter((x) => x));
+  return cleanSections(simpleMerge(content.filter((x) => x)));
 }
 
 function deduplicate(rows: any[]): any[] {
@@ -609,4 +613,8 @@ function simpleMerge(content: MenuRow[]): MenuRow[] {
     ([label, elements]) =>
       ({ label, elements: deduplicate(elements).filter((x) => x) } as MenuRow)
   );
+}
+
+function cleanSections(content: MenuRow[]): MenuRow[] {
+  return content.filter((x) => x.elements.length);
 }
