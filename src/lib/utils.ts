@@ -55,6 +55,7 @@ export function isSliderFunc(s: string): boolean {
   return s === "_slider";
 }
 
+// todo unused
 export function isArgToSpecialFunc(
   view: EditorView,
   node: SyntaxNode
