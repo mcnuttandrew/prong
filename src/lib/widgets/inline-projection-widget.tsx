@@ -2,7 +2,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
-import { syntaxNodeToKeyPath, keyPathMatchesQuery } from "../utils";
+import { syntaxNodeToKeyPath, codeStringState } from "../utils";
+import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 import { SimpleWidget } from "../widgets";
 
@@ -36,8 +37,12 @@ class InlineProjectionWidget extends WidgetType {
     const element = React.createElement(this.projection.projection, {
       keyPath: syntaxNodeToKeyPath(this.syntaxNode, this.view.state),
       node: this.syntaxNode,
-      view: this.view,
+      // view: this.view,
       currentValue: this.currentCodeSlice,
+      setCode: () => {
+        console.log("todo");
+      },
+      fullCode: this.view.state.doc.toString(),
     });
 
     ReactDOM.render(element, wrap);
@@ -63,7 +68,12 @@ const ProjectionWidgetFactory = (
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
     const keyPath = syntaxNodeToKeyPath(syntaxNode, view.state);
-    return keyPathMatchesQuery(projection.query, keyPath);
+    const currentCodeSlice = codeStringState(
+      view.state,
+      currentNode.from,
+      currentNode.to
+    );
+    return runProjectionQuery(projection.query, keyPath, currentCodeSlice);
   },
   addNode: (view, from, to) => {
     const decoDec = Decoration.replace({

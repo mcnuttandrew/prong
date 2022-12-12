@@ -12,7 +12,8 @@ import { SyntaxNode } from "@lezer/common";
 import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
-import { codeString, syntaxNodeToKeyPath, keyPathMatchesQuery } from "./utils";
+import { codeString, syntaxNodeToKeyPath, codeStringState } from "./utils";
+import { runProjectionQuery, ProjectionQuery } from "./query";
 import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
@@ -21,11 +22,13 @@ export interface ProjectionProps {
   node: SyntaxNode;
   keyPath: (string | number)[];
   currentValue: any;
+  setCode: (code: string) => void;
+  fullCode: string;
 }
 
 export interface Projection {
   name: string;
-  query: string[];
+  query: ProjectionQuery;
   type: "tooltip" | "inline";
   projection: (props: ProjectionProps) => JSX.Element;
   hasInternalState: boolean;
@@ -124,7 +127,12 @@ function shouldAddProjection(
   projection: Projection
 ) {
   const keyPath = syntaxNodeToKeyPath(syntaxNode, state);
-  return keyPathMatchesQuery(projection.query, keyPath);
+  const currentCodeSlice = codeStringState(
+    state,
+    syntaxNode.from,
+    syntaxNode.to
+  );
+  return runProjectionQuery(projection.query, keyPath, currentCodeSlice);
 }
 
 function identifyProjectionLocations(state: EditorState) {

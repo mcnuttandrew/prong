@@ -11,7 +11,7 @@ import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
 import SimpleBoolWidget from "./widgets/bool-widget";
-import SimpleColorNameWidget from "./widgets/color-name-widget";
+// import SimpleColorNameWidget from "./widgets/color-name-widget";
 import SimpleColorWidget from "./widgets/color-picker";
 import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
@@ -38,7 +38,7 @@ export interface SimpleWidget {
 const simpleWidgets: SimpleWidget[] = [
   SimpleBoolWidget,
   // SimpleNumWidget,
-  SimpleColorNameWidget,
+  // SimpleColorNameWidget,
   SimpleColorWidget,
   Highlighter,
   ClickTargetWidget,

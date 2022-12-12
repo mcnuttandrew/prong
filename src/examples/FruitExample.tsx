@@ -2,6 +2,7 @@ import React from "react";
 
 import Editor from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
+import standardBundle from "../projections/standard-bundle";
 
 const schema: JSONSchema7 = {
   $id: "https://example.com/arrays.schema.json",
@@ -102,7 +103,7 @@ function VegaLiteExampleApp() {
         onChange={(x) => {
           // console.log(x);
         }}
-        projections={[]}
+        projections={standardBundle}
       />
       <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
     </div>

@@ -206,7 +206,7 @@ function VegaLiteExampleApp() {
           onChange={(x) => setCurrentCode(x)}
           projections={[
             {
-              query: ["data", "values", "*"],
+              query: { type: "index", query: ["data", "values", "*"] },
               type: "tooltip",
               projection: ({ keyPath }) => {
                 return <div>hi annotation projection {keyPath.join(",")}</div>;
@@ -215,7 +215,10 @@ function VegaLiteExampleApp() {
               name: "popover example",
             },
             {
-              query: ["encoding", "*", "field", "field___val"],
+              query: {
+                type: "index",
+                query: ["encoding", "*", "field", "field___val"],
+              },
               type: "tooltip",
               projection: (props) => {
                 return (
@@ -244,7 +247,10 @@ function VegaLiteExampleApp() {
             // },
             {
               // query: ["data", "values", "*"],
-              query: ["description", "description___key"],
+              query: {
+                type: "index",
+                query: ["description", "description___key"],
+              },
               type: "inline",
               projection: CounterProjection,
               hasInternalState: true,
@@ -252,7 +258,7 @@ function VegaLiteExampleApp() {
             },
             {
               // query: ["data", "values", "*"],
-              query: ["mark", "mark___key"],
+              query: { type: "index", query: ["mark", "mark___key"] },
               type: "inline",
               projection: DynamicProjection,
               hasInternalState: true,
@@ -260,7 +266,10 @@ function VegaLiteExampleApp() {
             },
             {
               // query: ["data", "values", "*"],
-              query: ["encoding", "*", "field", "field___val"],
+              query: {
+                type: "index",
+                query: ["encoding", "*", "field", "field___val"],
+              },
               type: "inline",
               projection: shelf(setCurrentCode, currentCode),
               hasInternalState: false,

@@ -1,7 +1,6 @@
-import { StateField, StateEffect } from "@codemirror/state";
+import { StateField, StateEffect, EditorState } from "@codemirror/state";
 import createTooltip from "./PopoverMenu";
 import { SyntaxNode } from "@lezer/common";
-
 import { Transaction } from "@codemirror/state";
 import { showTooltip } from "@codemirror/view";
 import { cmStatePlugin } from "../cmState";
@@ -9,9 +8,9 @@ import { projectionState } from "../projections";
 import {
   codeStringState,
   getMenuTargetNode,
-  keyPathMatchesQuery,
   syntaxNodeToKeyPath,
 } from "../utils";
+import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 
 import { generateMenuContent, MenuRow } from "../compute-menu-contents";
@@ -26,6 +25,7 @@ export interface PopoverMenuState {
   tooltip: any;
   selectedRouting: [number, number];
   menuContents: MenuRow[];
+  hasProjectionContent: boolean;
 }
 export const popoverMenuState: PopoverMenuState = {
   menuState: "hidden",
@@ -34,6 +34,7 @@ export const popoverMenuState: PopoverMenuState = {
   tooltip: null,
   selectedRouting: [0, 0],
   menuContents: [],
+  hasProjectionContent: false,
 };
 
 const simpleSet = (
@@ -56,18 +57,6 @@ function selectionInsideProjection(tr: Transaction, pos: number) {
   );
   return posInsideOfInUseRange;
 }
-
-const prepProjections =
-  (node: SyntaxNode, keyPath: (string | number)[], currentValue: string) =>
-  (proj: Projection) => ({
-    label: proj.name,
-    elements: [
-      {
-        type: "projection",
-        element: proj.projection({ node, keyPath, currentValue }),
-      },
-    ],
-  });
 
 function handleSimpleUpdate(
   state: PopoverMenuState,
@@ -136,20 +125,15 @@ function PopoverStateMachine(
 }
 
 function computeContents(tr: Transaction, targetNode: SyntaxNode) {
-  const { schemaTypings, diagnostics, projections } =
-    tr.state.field(cmStatePlugin);
+  const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
-  const keyPath = syntaxNodeToKeyPath(targetNode, tr.state);
+
   const currentCodeSlice = codeStringState(
     tr.state,
     targetNode.from,
     targetNode.to
   );
   return [
-    ...projections
-      .filter((proj) => keyPathMatchesQuery(proj.query, keyPath))
-      .filter((proj) => proj.type === "tooltip")
-      .map(prepProjections(targetNode, keyPath, currentCodeSlice)),
     ...generateMenuContent(
       currentCodeSlice,
       targetNode,
@@ -169,6 +153,18 @@ function materializeTypings(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings } = tr.state.field(cmStatePlugin);
 
   return schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
+}
+
+export function getProjectionContents(
+  state: EditorState,
+  targetNode: SyntaxNode,
+  targetNodeValue: string
+): Projection[] {
+  const { projections } = state.field(cmStatePlugin);
+  const keyPath = syntaxNodeToKeyPath(targetNode, state);
+  return projections
+    .filter((proj) => runProjectionQuery(proj.query, keyPath, targetNodeValue))
+    .filter((proj) => proj.type === "tooltip");
 }
 
 export const popOverState: StateField<PopoverMenuState> = StateField.define({
@@ -206,8 +202,16 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       return { ...state, tooltip: null };
     }
     const tooltip = createTooltip(popOverState);
+    const currentCodeSlice = codeStringState(
+      tr.state,
+      targetNode.from,
+      targetNode.to
+    );
     return {
       ...state,
+      hasProjectionContent:
+        getProjectionContents(tr.state, targetNode, currentCodeSlice).length >
+        0,
       menuContents: computeContents(tr, targetNode),
       menuState,
       selectedRouting,

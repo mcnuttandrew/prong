@@ -1,6 +1,8 @@
 import * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { colorNames, colorGroups } from "../lib/utils";
+import { colorNames } from "../lib/utils";
+const colorGroups: Record<string, string[]> = {};
+// const colorNames = {};
 
 //stackoverflow.com/questions/1573053/javascript-function-to-convert-color-names-to-hex-codes
 
