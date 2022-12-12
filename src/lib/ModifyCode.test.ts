@@ -13,7 +13,7 @@ const exampleData = `{
     "I": "example",
   }`;
 
-test.only("modifyCodeByCommand - decreaseItemIdx", () => {
+test("modifyCodeByCommand - decreaseItemIdx", () => {
   ["1", "2", "3", '"a"', '"d"', '"e"', '"I"'].forEach((key) => {
     const keyNode = findNodeByText(exampleData, key)!;
     const cmd = modifyCodeByCommand(
@@ -165,7 +165,6 @@ test("modifyCodeByCommand - removeElementFromArray", () => {
     const key1 = findNodeByText(exampleData, `${firstKey}`)!;
     const cmd0 = modifyCodeByCommand(makeCmd(), key1, exampleData);
     const update1 = insertSwap(exampleData, cmd0!);
-    // console.log(key1);
     const key2 = findNodeByText(update1, `${secondKey}`)!;
     const cmd = modifyCodeByCommand(makeCmd(), key2, update1)!;
     const update2 = insertSwap(update1, cmd);

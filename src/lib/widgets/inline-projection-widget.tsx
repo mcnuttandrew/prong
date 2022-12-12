@@ -34,16 +34,26 @@ class InlineProjectionWidget extends WidgetType {
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
 
+    const view = this.view;
+
     const element = React.createElement(this.projection.projection, {
       keyPath: syntaxNodeToKeyPath(
         this.syntaxNode,
         codeStringState(this.view.state, 0)
       ),
       node: this.syntaxNode,
-      // view: this.view,
       currentValue: this.currentCodeSlice,
-      setCode: () => {
-        console.log("todo");
+      setCode: (code) => {
+        // todo untested, may mess stuff up
+        const fullCode = view.state.doc.toString();
+        view.dispatch({
+          changes: {
+            from: 0,
+            to: fullCode.length,
+            insert: code,
+          },
+          selection: view.state.selection,
+        });
       },
       fullCode: this.view.state.doc.toString(),
     });
