@@ -169,7 +169,8 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
 // only does the simplified case of add into the end of an object
 const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   { payload: { key, value } },
-  syntaxNode
+  syntaxNode,
+  currentText
 ) => {
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
@@ -189,9 +190,20 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
       to: prevSib.to,
     };
   }
+  // does the previous items have a line break separating them?
+  let lineBreakSep: false | string = false;
+  if (prevSib && prevSib.prevSibling) {
+    const diffSlice = currentText.slice(prevSib.prevSibling.to, prevSib.from);
+    if (diffSlice.includes("\n")) {
+      lineBreakSep = diffSlice.split("\n")[1];
+    }
+  }
+
   // regular object with stuff in it
   return {
-    value: `, ${key}: ${value}`,
+    value: lineBreakSep
+      ? `,\n${lineBreakSep}${key}: ${value}\n${lineBreakSep}`
+      : `, ${key}: ${value}`,
     from: prevSib.to,
     to: rightBrace.from,
   };
