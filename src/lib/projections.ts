@@ -155,7 +155,9 @@ function identifyProjectionLocations(state: EditorState) {
     enter: ({ from, to, node }) => {
       const baseRange = state.selection.ranges[0];
       inlineProjections.forEach((projection) => {
+        const isReplace = projection.mode === "replace";
         if (
+          isReplace &&
           !projection.hasInternalState &&
           baseRange &&
           baseRange.from >= from &&
