@@ -341,8 +341,8 @@ export function setIn(
   if (targetWindow === "error") {
     return "error";
   }
-  const value = typeof newValue === "string" ? `"${newValue}"` : newValue;
-  return insertSwap(content, { ...targetWindow, value });
+  // const value = typeof newValue === "string" ? `"${newValue}"` : newValue;
+  return insertSwap(content, { ...targetWindow, value: newValue });
 }
 
 export function insertSwap(content: string, update: UpdateDispatch) {

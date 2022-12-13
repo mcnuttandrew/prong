@@ -286,7 +286,7 @@ const ColorNameProjection: Projection = {
     return (
       <ColorNamePicker
         cb={(newColor) => {
-          setCode(setIn(keyPath, newColor, fullCode));
+          setCode(setIn(keyPath, `"${newColor}"`, fullCode));
         }}
         initColor={currentValue}
       />

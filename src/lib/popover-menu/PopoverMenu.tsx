@@ -231,5 +231,7 @@ class Tooltip {
 export default function createTooltip(
   stateField: StateField<PopoverMenuState>
 ) {
-  return (view: EditorView): TooltipView => new Tooltip(view, stateField);
+  return (view: EditorView): TooltipView => {
+    return new Tooltip(view, stateField);
+  };
 }

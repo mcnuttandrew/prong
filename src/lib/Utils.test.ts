@@ -55,7 +55,7 @@ test("setIn", () => {
     "e": [{ "f": 4, "g": 5 }],
     "I": "example",
   }`;
-  expect(setIn(["a", "b", "b___key"], "x", exampleData)).toBe(result4);
+  expect(setIn(["a", "b", "b___key"], '"x"', exampleData)).toBe(result4);
   const result5 = `{
     "a": {
       "b": [1, 2, 
@@ -66,19 +66,19 @@ test("setIn", () => {
     "e": [{ "f": 4, "g": 5 }],
     "I": "big darn squid holy shit",
   }`;
-  expect(setIn(["I"], "big darn squid holy shit", exampleData)).toBe(result5);
+  expect(setIn(["I"], '"big darn squid holy shit"', exampleData)).toBe(result5);
 });
 
 test("setIn - vegaCode", () => {
   const a = setIn(
     ["marks", 0, "encode", "hover", "stroke", "value", "value___value"],
-    "green",
+    '"green"',
     vegaCode
   );
   expect(a).toMatchSnapshot();
   const b = setIn(
     ["marks", 0, "encode", "update", "stroke___val"],
-    "purple",
+    '"purple"',
     a
   );
   expect(b).toMatchSnapshot();

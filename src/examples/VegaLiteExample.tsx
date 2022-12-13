@@ -4,12 +4,11 @@ import "../stylesheets/vega-lite-example.css";
 
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import * as Json from "jsonc-parser";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
-import { ProjectionProps } from "../../src/lib/projections";
-import { setIn } from "../lib/utils";
+import { ProjectionProps, Projection } from "../../src/lib/projections";
+import { simpleParse, setIn } from "../lib/utils";
 import { vegaLiteCode } from "./example-data";
 
 const Pill: FC<{ name: string }> = function Pill(props) {
@@ -30,14 +29,6 @@ const Pill: FC<{ name: string }> = function Pill(props) {
     </div>
   );
 };
-
-function lazyParse(content: string): any {
-  try {
-    return Json.parse(content);
-  } catch (e) {
-    return content;
-  }
-}
 
 // const DataTable = (props: ProjectionProps): JSX.Element => {
 //   const parsed = lazyParse(props.currentValue);
@@ -88,8 +79,7 @@ const Shelf: FC<{
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
-      // const currentCode = getCurrentCode();
-      const update = setIn(keyPath, x.name, currentCode);
+      const update = setIn(keyPath, `"${x.name}"`, currentCode);
       setCurrentCode(update);
       return { name: "Dustbin" };
     },
@@ -102,7 +92,7 @@ const Shelf: FC<{
     : canDrop
     ? "darkkhaki"
     : "#222";
-  const parsedCurrentValue = lazyParse(currentValue);
+  const parsedCurrentValue = simpleParse(currentValue, currentValue);
   return (
     <div
       ref={drop}
@@ -137,6 +127,48 @@ function CounterProjection(props: ProjectionProps) {
       Clicked {count} Times
     </div>
   );
+}
+
+const UploadAndInline: React.FC<ProjectionProps> = (props) => {
+  const { keyPath, fullCode, setCode } = props;
+  return (
+    <label>
+      Upload File
+      <input
+        type="file"
+        accept="json"
+        name="file"
+        onChange={(event) => {
+          const file = event.target.files![0];
+          var reader = new FileReader();
+          reader.onload = function (event) {
+            const result = event.target!.result;
+            const inlinedData = simpleParse(result, []);
+            const insertCode = inlinedData
+              .map((x: any) => JSON.stringify(x))
+              .join(",\n\t\t");
+            const prepped = `{\n\t"values": [\n\t\t${insertCode}\n\t]}`;
+            const newCode = setIn(keyPath, prepped, fullCode);
+            setCode(newCode);
+          };
+          reader.readAsText(file);
+        }}
+      />
+    </label>
+  );
+};
+
+function BuildUploadAndInline(path: (string | number)[]): Projection {
+  return {
+    name: "upload-and-inline",
+    query: {
+      query: path,
+      // ["data"],
+      type: "index",
+    },
+    projection: (props: ProjectionProps) => <UploadAndInline {...props} />,
+    type: "tooltip",
+  };
 }
 
 const shelf =
@@ -205,7 +237,9 @@ function VegaLiteExampleApp() {
                     {fields.map((x) => (
                       <button
                         onClick={() =>
-                          setCurrentCode(setIn(props.keyPath, x, currentCode))
+                          setCurrentCode(
+                            setIn(props.keyPath, `"${x}"`, currentCode)
+                          )
                         }
                         key={x}
                       >
@@ -258,6 +292,7 @@ function VegaLiteExampleApp() {
               name: "dnd",
               mode: "replace",
             },
+            BuildUploadAndInline(["data"]),
           ]}
         />
       </div>

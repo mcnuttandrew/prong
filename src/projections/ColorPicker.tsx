@@ -48,7 +48,9 @@ const ColorProjection: Projection = {
   projection: ({ keyPath, currentValue, setCode, fullCode }) => {
     return (
       <ColorPicker
-        onChange={(newColor) => setCode(setIn(keyPath, newColor, fullCode))}
+        onChange={(newColor) =>
+          setCode(setIn(keyPath, `"${newColor}"`, fullCode))
+        }
         initialColor={currentValue.slice(1, currentValue.length - 1)}
       />
     );
