@@ -187,7 +187,7 @@ function VegaLiteExampleApp() {
                 return (
                   <div className="flex-down">
                     <div>hi annotation projection {keyPath.join(",")}</div>
-                    <div>{`Timer value: ${counter}`}</div>
+                    <div>{`Timer value: ${timer}`}</div>
                   </div>
                 );
               },

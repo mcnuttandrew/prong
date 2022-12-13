@@ -169,9 +169,13 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
 // only does the simplified case of add into the end of an object
 const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   { payload: { key, value } },
-  syntaxNode,
+  inputNode,
   currentText
 ) => {
+  let syntaxNode: SyntaxNode = inputNode;
+  if (inputNode.type.name !== "object") {
+    syntaxNode = inputNode.parent!;
+  }
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
   // new object
