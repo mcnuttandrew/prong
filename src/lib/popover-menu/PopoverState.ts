@@ -28,7 +28,7 @@ export interface PopoverMenuState {
   hasProjectionContent: boolean;
 }
 export const popoverMenuState: PopoverMenuState = {
-  menuState: "hidden",
+  menuState: "preFirstUse",
   targetNode: null,
   targetedTypings: [],
   tooltip: null,
@@ -84,8 +84,14 @@ export type popoverSMEvent =
   | "open"
   | "close"
   | "use"
-  | "stopUsing";
-export type popOverSMState = "hardClosed" | "hidden" | "open" | "inUse";
+  | "stopUsing"
+  | "firstUse";
+export type popOverSMState =
+  | "hardClosed"
+  | "hidden"
+  | "open"
+  | "inUse"
+  | "preFirstUse";
 export const visibleStates = new Set<popOverSMState>(["open", "inUse"]);
 type PartialRecord<K extends keyof any, T> = {
   [P in K]?: T;
@@ -109,6 +115,9 @@ const stateMap: Record<
     forceClose: "hardClosed",
     stopUsing: "open",
     close: "hidden",
+  },
+  preFirstUse: {
+    firstUse: "hidden",
   },
 };
 
@@ -178,6 +187,16 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     // main path
     const targetNode = getMenuTargetNode(tr.state);
     let pos = tr.state.selection.ranges[0].from;
+
+    // dont show up before user initiates things
+    if (state.menuState === "preFirstUse") {
+      return !tr.selection
+        ? state
+        : {
+            ...state,
+            menuState: PopoverStateMachine(state.menuState, "firstUse"),
+          };
+    }
 
     // if there isn't (a real) target then bail and don't compute the menu
     if (!targetNode || targetNode.type.name === "JsonText") {
