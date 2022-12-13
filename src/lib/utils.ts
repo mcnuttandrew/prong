@@ -6,11 +6,6 @@ import * as Json from "jsonc-parser";
 import { UpdateDispatch } from "./popover-menu/PopoverState";
 import { getMatchingSchemas } from "./from-vscode/validator";
 
-// https://gist.github.com/olmokramer/82ccce673f86db7cda5e#gistcomment-2029233
-export const colorRegex =
-  // eslint-disable-next-line no-useless-escape
-  /(#(?:[0-9a-f]{2}){2,4}|#[0-9a-f]{3}|(?:rgba?|hsla?)\((?:\d+%?(?:deg|rad|grad|turn)?(?:,|\s)+){2,3}[\s\/]*[\d\.]+%?\))/i;
-
 export function codeString(
   view: EditorView,
   from: number,

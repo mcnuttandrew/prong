@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
-import { setIn, colorRegex } from "../lib/utils";
+import { setIn } from "../lib/utils";
 import { Projection } from "../lib/projections";
 
+const colorRegex = /"#([a-fA-F0-9]){3}"$|[a-fA-F0-9]{6}"$/i;
 function ColorPicker(props: {
   onChange: (color: string) => void;
   initialColor: string;
@@ -52,7 +53,6 @@ const ColorProjection: Projection = {
       />
     );
   },
-  hasInternalState: true,
   name: "ColorProjection",
 };
 export default ColorProjection;

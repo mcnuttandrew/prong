@@ -150,6 +150,7 @@
   font-weight: bold;
 }
 
+
 .color-name-picker .color-swatch {
   display: inline-block;
   width: 15px;
@@ -293,18 +294,19 @@ div[tabindex="-1"]:focus {
 
 .cm-annotation-highlighter-3,
 .cm-annotation-highlighter-4 {
-  /* text-underline-offset: 6px;
-  text-decoration-color: pink */
   text-decoration: none;
 
 }
 
-.cm-annotation-highlighter-selected {
-  /* text-underline-offset: 6px; */
-  background-color: lightcyan;
+.cm-line {
+  border-left: 3px solid white;
+  transition: border-color 0.2s;
+}
+
+.cm-line:has(.cm-annotation-highlighter-selected) {
+  border-left: 3px solid rebeccapurple;
 }
 
 .cm-linter-highlight {
-  /* background-color: sandybrown; */
   background-color: lightcoral;
 }

@@ -4,7 +4,7 @@ import { WidgetType, EditorView, Decoration } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
 import { syntaxNodeToKeyPath, codeStringState } from "../utils";
 import { runProjectionQuery } from "../query";
-import { Projection } from "../projections";
+import { ProjectionInline } from "../projections";
 import { SimpleWidget } from "../widgets";
 import isEqual from "lodash.isequal";
 
@@ -13,7 +13,7 @@ class InlineProjectionWidget extends WidgetType {
   constructor(
     readonly from: number,
     readonly to: number,
-    readonly projection: Projection,
+    readonly projection: ProjectionInline,
     readonly syntaxNode: SyntaxNode,
     readonly view: EditorView,
     readonly currentCodeSlice: string
@@ -79,7 +79,7 @@ class InlineProjectionWidget extends WidgetType {
 }
 
 const ProjectionWidgetFactory = (
-  projection: Projection,
+  projection: ProjectionInline,
   currentCodeSlice: string,
   syntaxNode: SyntaxNode
 ): SimpleWidget => ({
@@ -96,17 +96,20 @@ const ProjectionWidgetFactory = (
     return runProjectionQuery(projection.query, keyPath, currentCodeSlice);
   },
   addNode: (view, from, to) => {
-    const decoDec = Decoration.replace({
-      widget: new InlineProjectionWidget(
-        from,
-        to,
-        projection,
-        syntaxNode,
-        view,
-        currentCodeSlice
-      ),
-    }).range(from, to);
-    return [decoDec];
+    const widget = new InlineProjectionWidget(
+      from,
+      to,
+      projection,
+      syntaxNode,
+      view,
+      currentCodeSlice
+    );
+    if (projection.mode === "replace") {
+      return [Decoration.replace({ widget }).range(from, to)];
+    } else {
+      const target = projection.mode === "prefix" ? from : to;
+      return [Decoration.widget({ widget }).range(target)];
+    }
   },
   eventSubscriptions: {
     mousedown: (e) => {

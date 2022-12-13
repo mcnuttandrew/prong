@@ -187,11 +187,10 @@ function VegaLiteExampleApp() {
                 return (
                   <div className="flex-down">
                     <div>hi annotation projection {keyPath.join(",")}</div>
-                    <div>{`Timer value: ${counter}`}</div>
+                    <div>{`Timer value: ${timer}`}</div>
                   </div>
                 );
               },
-              hasInternalState: false,
               name: "popover example",
             },
             {
@@ -216,7 +215,6 @@ function VegaLiteExampleApp() {
                   </div>
                 );
               },
-              hasInternalState: false,
               name: "Field Picker",
             },
             // {
@@ -237,6 +235,7 @@ function VegaLiteExampleApp() {
               projection: CounterProjection,
               hasInternalState: true,
               name: "counter",
+              mode: "replace",
             },
             {
               // query: ["data", "values", "*"],
@@ -245,6 +244,7 @@ function VegaLiteExampleApp() {
               projection: DynamicProjection,
               hasInternalState: true,
               name: "dynamic projection",
+              mode: "replace",
             },
             {
               // query: ["data", "values", "*"],
@@ -256,6 +256,7 @@ function VegaLiteExampleApp() {
               projection: shelf(setCurrentCode, currentCode),
               hasInternalState: false,
               name: "dnd",
+              mode: "replace",
             },
           ]}
         />

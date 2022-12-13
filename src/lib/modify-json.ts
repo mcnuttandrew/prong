@@ -172,6 +172,10 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   syntaxNode,
   currentText
 ) => {
+  // let syntaxNode: SyntaxNode = inputNode;
+  // if (inputNode.type.name !== "object") {
+  //   syntaxNode = inputNode.parent!;
+  // }
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
   // new object

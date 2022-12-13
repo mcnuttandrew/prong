@@ -181,7 +181,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
 
     // if there isn't (a real) target then bail and don't compute the menu
     if (!targetNode || targetNode.type.name === "JsonText") {
-      return { ...state };
+      return state;
     }
     // handle multi-cursor stuff appropriately and dont show popover through a projection
     if (!cursorBehaviorIsValid(tr) || selectionInsideProjection(tr, pos)) {
