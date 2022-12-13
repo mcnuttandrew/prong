@@ -44,14 +44,6 @@ export interface ProjectionInline extends ProjectionBase {
 
 export type Projection = ProjectionInline | ProjectionTooltip;
 
-// export interface Projection {
-//   name: string;
-//   query: ProjectionQuery;
-//   type: "tooltip" | "inline";
-//   projection: (props: ProjectionProps) => JSX.Element;
-//   hasInternalState: boolean;
-// }
-
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
   const { projectionsInUse } = view.state.field(projectionState);
