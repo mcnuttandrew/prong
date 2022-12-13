@@ -1,4 +1,4 @@
-import React, { useState, FC } from "react";
+import React, { useState, FC, useEffect } from "react";
 
 import "../stylesheets/vega-lite-example.css";
 
@@ -39,37 +39,37 @@ function lazyParse(content: string): any {
   }
 }
 
-const DataTable = (props: ProjectionProps): JSX.Element => {
-  const parsed = lazyParse(props.currentValue);
-  console.log(props, parsed);
-  if (!Array.isArray(parsed) || !parsed.length) {
-    return <div>hi</div>;
-  }
-  const keys: string[] = Array.from(
-    parsed.reduce((acc, row: Record<string, any>) => {
-      Object.keys(row).forEach((key) => acc.add(key));
-      return acc;
-    }, new Set())
-  );
-  return (
-    <div>
-      <table>
-        <tr>
-          {keys.map((key) => (
-            <th>{key}</th>
-          ))}
-        </tr>
-        {parsed.map((row) => (
-          <tr>
-            {keys.map((key) => (
-              <td>{row[key]}</td>
-            ))}
-          </tr>
-        ))}
-      </table>
-    </div>
-  );
-};
+// const DataTable = (props: ProjectionProps): JSX.Element => {
+//   const parsed = lazyParse(props.currentValue);
+//   console.log(props, parsed);
+//   if (!Array.isArray(parsed) || !parsed.length) {
+//     return <div>hi</div>;
+//   }
+//   const keys: string[] = Array.from(
+//     parsed.reduce((acc, row: Record<string, any>) => {
+//       Object.keys(row).forEach((key) => acc.add(key));
+//       return acc;
+//     }, new Set())
+//   );
+//   return (
+//     <div>
+//       <table>
+//         <tr>
+//           {keys.map((key) => (
+//             <th>{key}</th>
+//           ))}
+//         </tr>
+//         {parsed.map((row) => (
+//           <tr>
+//             {keys.map((key) => (
+//               <td>{row[key]}</td>
+//             ))}
+//           </tr>
+//         ))}
+//       </table>
+//     </div>
+//   );
+// };
 
 const Shelf: FC<{
   currentValue: any;
@@ -134,7 +134,7 @@ function CounterProjection(props: ProjectionProps) {
   const [count, setCount] = useState(0);
   return (
     <div className="counter" onClick={() => setCount(count + 1)}>
-      counter-{count}
+      Clicked {count} Times
     </div>
   );
 }
@@ -155,14 +155,14 @@ const shelf =
 
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState(vegaLiteCode);
-  const [formVal, setFormVal] = useState("type some stuff");
+  const [timer, setTimer] = useState(0);
+
+  useEffect(() => {
+    setTimeout(() => setTimer(timer + 1), 5000);
+  }, [timer]);
 
   function DynamicProjection(props: ProjectionProps) {
-    return (
-      <div className="dynamic-projection-example">
-        my content is "{formVal}"
-      </div>
-    );
+    return <div className="dynamic-projection-example">Timer: ({timer})</div>;
   }
   const fields = ["penguins", "flowers", "wheat", "squids"];
 
@@ -174,14 +174,6 @@ function VegaLiteExampleApp() {
             <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>
-          <div className="flex-down">
-            <label htmlFor="example-form-val">{formVal}</label>
-            <input
-              id="example-form-val"
-              value={formVal}
-              onChange={(e) => setFormVal(e.target.value)}
-            />
-          </div>
         </div>
         <Editor
           schema={VegaLiteV5Schema}
@@ -192,7 +184,12 @@ function VegaLiteExampleApp() {
               query: { type: "index", query: ["data", "values", "*"] },
               type: "tooltip",
               projection: ({ keyPath }) => {
-                return <div>hi annotation projection {keyPath.join(",")}</div>;
+                return (
+                  <div className="flex-down">
+                    <div>hi annotation projection {keyPath.join(",")}</div>
+                    <div>{`Timer value: ${counter}`}</div>
+                  </div>
+                );
               },
               hasInternalState: false,
               name: "popover example",
@@ -226,8 +223,8 @@ function VegaLiteExampleApp() {
             //   query: { query: ["data", "values"], type: "index" },
             //   type: "inline",
             //   name: "data table",
-            //   // projection: (props: ProjectionProps) => <div>hi</div>,
-            //   projection: CounterProjection,
+            //   projection: (props: ProjectionProps) => <div>hi</div>,
+            //   // projection: CounterProjection,
             //   hasInternalState: false,
             // },
             {

@@ -106,19 +106,19 @@ const ObjPicker: Component = (props) => {
     });
   return [
     addFieldEntries.length && {
-      label: "Add Fields",
+      label: "Add",
       elements: addFieldEntries,
     },
     {
-      label: "Add Custom Fields",
+      label: "Add Field",
       elements: [
         {
           type: "free-input",
           label: "Add field",
           onSelect: {
             type: "addObjectKey",
-            payload: { key: "$$INPUT_BIND", value: "null" },
             nodeId: nodeToId(node),
+            payload: { key: "$$INPUT_BIND", value: "null" },
           },
         },
       ],
@@ -208,8 +208,8 @@ function AnyOfObjOptionalFieldPicker(
           type: "button",
           onSelect: {
             type: "simpleSwap",
-            payload: requiredPropObject,
             nodeId: nodeToId(node),
+            payload: requiredPropObject,
           },
           label: requiredPropObject,
           content: `object`,
@@ -218,8 +218,8 @@ function AnyOfObjOptionalFieldPicker(
           type: "button",
           onSelect: {
             type: "simpleSwap",
-            payload: "{}",
             nodeId: nodeToId(node),
+            payload: "{}",
           },
           content: "blank object",
         },
@@ -245,7 +245,8 @@ function AnyOfObjOptionalFieldPicker(
           content: x,
           onSelect: {
             type: "addObjectKey",
-            payload: { key: `"${x}"`, value: "null", nodeId: nodeToId(node) },
+            nodeId: nodeToId(node),
+            payload: { key: `"${x}"`, value: "null" },
           },
         })),
     },
@@ -284,8 +285,8 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
 
           onSelect: {
             type: "simpleSwap",
-            payload: "[]",
             nodeId: nodeToId(node),
+            payload: "[]",
           },
         },
       ],
@@ -302,7 +303,7 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
           content: `Switch to array of ${numElements} ${JSON.stringify(
             arrayTypeDefaults[arrayType]
           )}s`,
-          onSelect: { type: "simpleSwap", payload, nodeId: nodeToId(node) },
+          onSelect: { type: "simpleSwap", nodeId: nodeToId(node), payload },
         },
       ],
     });
@@ -408,9 +409,9 @@ const ObjectComponent: Component = ({ node }) => [
       {
         type: "free-input",
         label: "Add field",
-        nodeId: nodeToId(node),
         onSelect: {
           type: "addObjectKey",
+          nodeId: nodeToId(node),
           payload: { key: "$$INPUT_BIND", value: "null" },
         },
       },
@@ -473,7 +474,7 @@ const BooleanComponent: Component = ({ node }) => [
     elements: ["true", "false"].map((payload) => ({
       type: "button",
       content: payload,
-      onSelect: { type: "simpleSwap", payload, nodeId: nodeToId(node) },
+      onSelect: { type: "simpleSwap", nodeId: nodeToId(node), payload },
     })),
   },
 ];
@@ -588,7 +589,10 @@ export function generateMenuContent(
   if (parentResponses[parentType]) {
     parentResponses[parentType](componentProps).forEach((x) => content.push(x));
   }
-  return cleanSections(simpleMerge(content.filter((x) => x)));
+  const computedMenuContents = cleanSections(
+    simpleMerge(content.filter((x) => x))
+  );
+  return computedMenuContents;
 }
 
 function deduplicate(rows: any[]): any[] {

@@ -6,6 +6,7 @@ import { syntaxNodeToKeyPath, codeStringState } from "../utils";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 import { SimpleWidget } from "../widgets";
+import isEqual from "lodash.isequal";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
@@ -22,10 +23,13 @@ class InlineProjectionWidget extends WidgetType {
   }
 
   eq(other: InlineProjectionWidget): boolean {
+    // const nameTheSame = other.projection.name === this.projection.name;
+    const codeTheSame = this.currentCodeSlice === other.currentCodeSlice;
+    if (!isEqual(other.projection, this.projection)) {
+      return false;
+    }
     // is this wrong?
-    return this.projection.hasInternalState
-      ? this.currentCodeSlice === other.currentCodeSlice
-      : false;
+    return this.projection.hasInternalState ? codeTheSame : false;
   }
 
   toDOM(): HTMLDivElement {
