@@ -3,6 +3,9 @@ import Editor from "../components/Editor";
 import StandardProjections from "../projections/standard-bundle";
 import VegaSchema from "../constants/vega-schema.json";
 import { bin } from "d3-array";
+import { scaleBand, scaleLinear } from "d3-scale";
+import { SyntaxNode } from "@lezer/common";
+import { ProjectionProps } from "../lib/projections";
 
 import * as vega from "vega";
 import { parse, View } from "vega";
@@ -116,12 +119,115 @@ function createHistograms(
     });
   return histograms;
 }
+function getDataSetName(node: SyntaxNode, fullCode: string): string | false {
+  const x =
+    node?.parent?.parent?.parent?.parent?.parent?.parent?.parent?.parent;
+  if (!x) {
+    return false;
+  }
+  const parsedCode = simpleParse(fullCode.slice(x.from, x.to), false);
+  if (!parsedCode) {
+    return false;
+  }
+  const target = parsedCode?.from?.data;
+  return target || false;
+}
+
+function buildHistogramProjection(
+  preComputedHistograms: PreComputedHistograms
+) {
+  return function HistogramProjection(props: ProjectionProps) {
+    const [selectedBin, setSelectedBin] = useState<d3.Bin<
+      number,
+      number
+    > | null>(null);
+    const { currentValue, node, fullCode } = props;
+    const key = currentValue.slice(1, currentValue.length - 1);
+    const datasetName = getDataSetName(node, fullCode);
+    if (!datasetName) {
+      return <div></div>;
+    }
+    const histogram: d3.Bin<number, number>[] =
+      preComputedHistograms?.[datasetName]?.[key];
+    if (!histogram) {
+      return <div></div>;
+    }
+    const height = 15;
+    const width = 150;
+    const xScale = scaleBand()
+      .domain(histogram.map((d) => d.x0) as any)
+      .range([0, width]);
+    const yScale = scaleLinear()
+      .domain([0, Math.max(...histogram.map((el) => el.length))])
+      .range([0, height]);
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <svg height={height + 5} width={width} style={{ overflow: "visible" }}>
+          {histogram.map((bin, idx) => {
+            const isSelected =
+              selectedBin &&
+              selectedBin.x0 === bin.x0 &&
+              selectedBin?.x1 === bin.x1;
+            const textProps = {
+              fontSize: 8,
+              textAnchor: "middle",
+              x: xScale.bandwidth() / 2,
+            };
+            return (
+              <g key={idx} transform={`translate(${xScale(bin.x0 as any)})`}>
+                <rect
+                  x={0}
+                  stroke="white"
+                  width={xScale.bandwidth()}
+                  y={height - yScale(bin.length)}
+                  fill="#9BCF63"
+                  height={yScale(bin.length)}
+                  opacity={isSelected ? 1 : 0.8}
+                ></rect>
+                {isSelected && (
+                  <text y={-2} {...textProps}>
+                    {bin.length}
+                  </text>
+                )}
+                {isSelected && (
+                  <text y={height + 2} {...textProps}>
+                    {`[${bin.x0} - ${bin.x1}]`}
+                  </text>
+                )}
+                <rect
+                  onMouseEnter={() => setSelectedBin(bin)}
+                  onMouseLeave={() => setSelectedBin(null)}
+                  x={0}
+                  width={xScale.bandwidth()}
+                  y={0}
+                  fill="white"
+                  height={height}
+                  opacity={0}
+                ></rect>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    );
+  };
+}
+
+type PreComputedHistograms = Record<
+  string,
+  Record<string, d3.Bin<number, number>[]>
+>;
 function InSituFigure1() {
   const [currentCode, setCurrentCode] = useState(connectedScatterPlotSpec);
   const [vegaState, setVegaState] = useState({});
-  const [preComputedHistgrams, setPrecomputedHistograms] = useState<
-    Record<string, any>
-  >({});
+  const [preComputedHistograms, setPrecomputedHistograms] =
+    useState<PreComputedHistograms>({});
 
   useEffect(() => {
     try {
@@ -146,7 +252,6 @@ function InSituFigure1() {
       console.log(err);
     }
   }, [currentCode]);
-  console.log(preComputedHistgrams);
 
   return (
     <Editor
@@ -157,16 +262,7 @@ function InSituFigure1() {
         ...StandardProjections,
         {
           name: "inline-widget",
-          projection: ({ currentValue }) => {
-            const key = currentValue.slice(1, currentValue.length);
-            console.log(preComputedHistgrams[key]);
-            // const
-            return (
-              <div>
-                {currentValue} <div></div>
-              </div>
-            );
-          },
+          projection: buildHistogramProjection(preComputedHistograms),
           hasInternalState: false,
           type: "inline",
           query: {
