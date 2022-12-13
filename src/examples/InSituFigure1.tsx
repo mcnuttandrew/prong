@@ -239,7 +239,6 @@ type PreComputedHistograms = Record<
 >;
 function InSituFigure1() {
   const [currentCode, setCurrentCode] = useState(connectedScatterPlotSpec);
-  const [vegaState, setVegaState] = useState({});
   const [preComputedHistograms, setPrecomputedHistograms] =
     useState<PreComputedHistograms>({});
 
@@ -249,7 +248,6 @@ function InSituFigure1() {
         parse(simpleParse(currentCode, {}), {})
       ).initialize();
       view.runAsync().then(() => {
-        // resolve(
         const x = view.getState({
           signals: vega.falsy,
           data: vega.truthy,
@@ -259,8 +257,6 @@ function InSituFigure1() {
           .filter(([key, dataSet]) => isDataTable(dataSet))
           .map(([key, data]) => [key, createHistograms(data as DataTable)]);
         setPrecomputedHistograms(Object.fromEntries(namedPairs));
-        setVegaState(x);
-        // );
       });
     } catch (err) {
       console.log(err);
