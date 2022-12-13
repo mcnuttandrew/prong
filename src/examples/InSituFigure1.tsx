@@ -160,6 +160,14 @@ function buildHistogramProjection(
     const yScale = scaleLinear()
       .domain([0, Math.max(...histogram.map((el) => el.length))])
       .range([0, height]);
+    const textProps = {
+      fontSize: 8,
+      textAnchor: "middle",
+      pointerEvents: "none",
+      x:
+        xScale.bandwidth() / 2 +
+        (!!selectedBin ? xScale(selectedBin.x0 as any) || 0 : 0),
+    };
     return (
       <div
         style={{
@@ -168,51 +176,57 @@ function buildHistogramProjection(
           justifyContent: "center",
         }}
       >
-        <svg height={height + 5} width={width} style={{ overflow: "visible" }}>
-          {histogram.map((bin, idx) => {
-            const isSelected =
-              selectedBin &&
-              selectedBin.x0 === bin.x0 &&
-              selectedBin?.x1 === bin.x1;
-            const textProps = {
-              fontSize: 8,
-              textAnchor: "middle",
-              x: xScale.bandwidth() / 2,
-            };
-            return (
-              <g key={idx} transform={`translate(${xScale(bin.x0 as any)})`}>
-                <rect
-                  x={0}
-                  stroke="white"
-                  width={xScale.bandwidth()}
-                  y={height - yScale(bin.length)}
-                  fill="#9BCF63"
-                  height={yScale(bin.length)}
-                  opacity={isSelected ? 1 : 0.8}
-                ></rect>
-                {isSelected && (
-                  <text y={-2} {...textProps}>
-                    {bin.length}
-                  </text>
-                )}
-                {isSelected && (
-                  <text y={height + 2} {...textProps}>
-                    {`[${bin.x0} - ${bin.x1}]`}
-                  </text>
-                )}
-                <rect
-                  onMouseEnter={() => setSelectedBin(bin)}
-                  onMouseLeave={() => setSelectedBin(null)}
-                  x={0}
-                  width={xScale.bandwidth()}
-                  y={0}
-                  fill="white"
-                  height={height}
-                  opacity={0}
-                ></rect>
-              </g>
-            );
-          })}
+        <svg height={height} width={width} style={{ overflow: "visible" }}>
+          <g transform="translate(0, 2.5)">
+            <rect
+              width={width}
+              height={height}
+              stroke="gray"
+              strokeDasharray="4 1"
+              fill="ghostwhite"
+            ></rect>
+            {histogram.map((bin, idx) => {
+              const isSelected =
+                selectedBin &&
+                selectedBin.x0 === bin.x0 &&
+                selectedBin?.x1 === bin.x1;
+
+              return (
+                <g key={idx} transform={`translate(${xScale(bin.x0 as any)})`}>
+                  <rect
+                    x={0}
+                    stroke="white"
+                    width={xScale.bandwidth()}
+                    y={height - yScale(bin.length)}
+                    fill="#9BCF63"
+                    height={yScale(bin.length)}
+                    opacity={isSelected ? 1 : 0.8}
+                  ></rect>
+
+                  <rect
+                    onMouseEnter={() => setSelectedBin(bin)}
+                    onMouseLeave={() => setSelectedBin(null)}
+                    x={0}
+                    width={xScale.bandwidth()}
+                    y={0}
+                    fill="white"
+                    height={height}
+                    opacity={0}
+                  ></rect>
+                </g>
+              );
+            })}
+            {selectedBin && (
+              <text y={-2} {...textProps} pointerEvents="none">
+                {selectedBin.length}
+              </text>
+            )}
+            {selectedBin && (
+              <text y={height + 2} {...textProps} pointerEvents="none">
+                {`[${selectedBin.x0} - ${selectedBin.x1}]`}
+              </text>
+            )}
+          </g>
         </svg>
       </div>
     );
@@ -265,6 +279,7 @@ function InSituFigure1() {
           projection: buildHistogramProjection(preComputedHistograms),
           hasInternalState: false,
           type: "inline",
+          mode: "suffix",
           query: {
             type: "index",
             query: [

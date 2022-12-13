@@ -26,13 +26,31 @@ export interface ProjectionProps {
   fullCode: string;
 }
 
-export interface Projection {
+interface ProjectionBase {
   name: string;
   query: ProjectionQuery;
-  type: "tooltip" | "inline";
   projection: (props: ProjectionProps) => JSX.Element;
-  hasInternalState: boolean;
 }
+
+export interface ProjectionTooltip extends ProjectionBase {
+  type: "tooltip";
+}
+
+export interface ProjectionInline extends ProjectionBase {
+  type: "inline";
+  hasInternalState: boolean;
+  mode: "replace" | "prefix" | "suffix";
+}
+
+export type Projection = ProjectionInline | ProjectionTooltip;
+
+// export interface Projection {
+//   name: string;
+//   query: ProjectionQuery;
+//   type: "tooltip" | "inline";
+//   projection: (props: ProjectionProps) => JSX.Element;
+//   hasInternalState: boolean;
+// }
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
@@ -48,7 +66,7 @@ function createWidgets(view: EditorView) {
           .filter((x) => x.from === from && x.to === to)
           .forEach((projection) => {
             const projWidget = InlineProjectWidgetFactory(
-              projection.projection,
+              projection.projection as ProjectionInline,
               currentCodeSlice,
               node
             );
@@ -140,7 +158,7 @@ function identifyProjectionLocations(state: EditorState) {
   const { projections } = state.field(cmStatePlugin);
   const inlineProjections = projections.filter(
     (proj) => proj.type === "inline"
-  );
+  ) as ProjectionInline[];
   syntaxTree(state).iterate({
     enter: ({ from, to, node }) => {
       const baseRange = state.selection.ranges[0];

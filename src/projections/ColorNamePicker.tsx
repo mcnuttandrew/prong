@@ -292,7 +292,6 @@ const ColorNameProjection: Projection = {
       />
     );
   },
-  hasInternalState: true,
   name: "ColorNameProjection",
 };
 export default ColorNameProjection;

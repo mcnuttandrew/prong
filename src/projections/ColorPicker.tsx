@@ -53,7 +53,6 @@ const ColorProjection: Projection = {
       />
     );
   },
-  hasInternalState: true,
   name: "ColorProjection",
 };
 export default ColorProjection;
