@@ -59,16 +59,22 @@ export function runProjectionQuery(
   keyPath: (string | number)[],
   nodeValue: string
 ): boolean {
+  let pass = false;
   switch (query.type) {
     case "index":
-      return keyPathMatchesQuery(query.query, keyPath);
+      pass = keyPathMatchesQuery(query.query, keyPath);
+      break;
     case "value":
-      return valueQuery(query.query, nodeValue);
+      pass = valueQuery(query.query, nodeValue);
+      break;
     case "function":
-      return functionQuery(query.query, nodeValue);
+      pass = functionQuery(query.query, nodeValue);
+      break;
     case "regex":
-      return regexQuery(query.query, nodeValue);
+      pass = regexQuery(query.query, nodeValue);
+      break;
     default:
       return false;
   }
+  return pass;
 }

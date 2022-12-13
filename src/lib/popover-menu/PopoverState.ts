@@ -161,7 +161,7 @@ export function getProjectionContents(
   targetNodeValue: string
 ): Projection[] {
   const { projections } = state.field(cmStatePlugin);
-  const keyPath = syntaxNodeToKeyPath(targetNode, codeStringState(state));
+  const keyPath = syntaxNodeToKeyPath(targetNode, codeStringState(state, 0));
   return projections
     .filter((proj) => runProjectionQuery(proj.query, keyPath, targetNodeValue))
     .filter((proj) => proj.type === "tooltip");

@@ -39,37 +39,37 @@ function lazyParse(content: string): any {
   }
 }
 
-// const DataTable = (props: ProjectionProps): JSX.Element => {
-//   const parsed = lazyParse(props.currentValue);
-//   console.log(props, parsed);
-//   if (!Array.isArray(parsed) || !parsed.length) {
-//     return <div>hi</div>;
-//   }
-//   const keys: string[] = Array.from(
-//     parsed.reduce((acc, row: Record<string, any>) => {
-//       Object.keys(row).forEach((key) => acc.add(key));
-//       return acc;
-//     }, new Set())
-//   );
-//   return (
-//     <div>
-//       <table>
-//         <tr>
-//           {keys.map((key) => (
-//             <th>{key}</th>
-//           ))}
-//         </tr>
-//         {parsed.map((row) => (
-//           <tr>
-//             {keys.map((key) => (
-//               <td>{row[key]}</td>
-//             ))}
-//           </tr>
-//         ))}
-//       </table>
-//     </div>
-//   );
-// };
+const DataTable = (props: ProjectionProps): JSX.Element => {
+  const parsed = lazyParse(props.currentValue);
+  console.log(props, parsed);
+  if (!Array.isArray(parsed) || !parsed.length) {
+    return <div>hi</div>;
+  }
+  const keys: string[] = Array.from(
+    parsed.reduce((acc, row: Record<string, any>) => {
+      Object.keys(row).forEach((key) => acc.add(key));
+      return acc;
+    }, new Set())
+  );
+  return (
+    <div>
+      <table>
+        <tr>
+          {keys.map((key) => (
+            <th>{key}</th>
+          ))}
+        </tr>
+        {parsed.map((row) => (
+          <tr>
+            {keys.map((key) => (
+              <td>{row[key]}</td>
+            ))}
+          </tr>
+        ))}
+      </table>
+    </div>
+  );
+};
 
 const Shelf: FC<{
   currentValue: any;
@@ -200,7 +200,7 @@ function VegaLiteExampleApp() {
             {
               query: {
                 type: "index",
-                query: ["encoding", "*", "field", "field___val"],
+                query: ["encoding", "*", "field", "field___value"],
               },
               type: "tooltip",
               projection: (props) => {
@@ -223,16 +223,18 @@ function VegaLiteExampleApp() {
               name: "Field Picker",
             },
             // {
-            //   query: ["data", "values", "*"],
+            //   query: { query: ["data", "values"], type: "index" },
             //   type: "inline",
-            //   projection: DataTable,
+            //   name: "data table",
+            //   // projection: (props: ProjectionProps) => <div>hi</div>,
+            //   projection: CounterProjection,
             //   hasInternalState: false,
             // },
             {
               // query: ["data", "values", "*"],
               query: {
                 type: "index",
-                query: ["description", "description___key"],
+                query: ["description"],
               },
               type: "inline",
               projection: CounterProjection,
@@ -241,7 +243,7 @@ function VegaLiteExampleApp() {
             },
             {
               // query: ["data", "values", "*"],
-              query: { type: "index", query: ["mark", "mark___key"] },
+              query: { type: "index", query: ["mark"] },
               type: "inline",
               projection: DynamicProjection,
               hasInternalState: true,
@@ -251,7 +253,7 @@ function VegaLiteExampleApp() {
               // query: ["data", "values", "*"],
               query: {
                 type: "index",
-                query: ["encoding", "*", "field", "field___val"],
+                query: ["encoding", "*", "field", "field___value"],
               },
               type: "inline",
               projection: shelf(setCurrentCode, currentCode),
