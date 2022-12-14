@@ -277,7 +277,16 @@ function absPathToKeyPath(
 const getNestedVal = (props: (string | number)[], obj: any) =>
   props.reduce((a, prop) => a[prop], obj);
 
+let codeKey = "";
+let pathCache: Record<string, (string | number)[]> = {};
 export function syntaxNodeToKeyPath(node: SyntaxNode, fullCode: string) {
+  const cacheKey = `${node.from}-${node.to}`;
+  if (codeKey !== fullCode) {
+    pathCache = {};
+  }
+  if (pathCache[cacheKey]) {
+    return pathCache[cacheKey];
+  }
   const absPath = syntaxNodeToAbsPath(node);
   let parsedRoot = {};
   try {
@@ -286,7 +295,10 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, fullCode: string) {
     return [];
   }
 
-  return absPathToKeyPath(absPath, parsedRoot);
+  const resultPath = absPathToKeyPath(absPath, parsedRoot);
+  pathCache[cacheKey] = resultPath;
+  codeKey = fullCode;
+  return pathCache[cacheKey];
 }
 
 function findParseTargetWidth(
