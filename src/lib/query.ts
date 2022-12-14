@@ -5,7 +5,7 @@ export type ProjectionQuery =
   | { type: "regex"; query: RegExp }
   | { type: "value"; query: string[] };
 
-function keyPathMatchesQueryCore(
+export function keyPathMatchesQuery(
   query: (string | number)[],
   keyPath: (string | number)[]
 ): boolean {
@@ -24,23 +24,6 @@ function keyPathMatchesQueryCore(
   return true;
 }
 
-function keyPathMatchesQueryMemoizer() {
-  const pathMatchCache: Record<string, boolean> = {};
-  return function (
-    query: (string | number)[],
-    keyPath: (string | number)[]
-  ): boolean {
-    const accessKey = `${query.join("XXXXX")}_________${keyPath.join("XXXXX")}`;
-    if (pathMatchCache[accessKey]) {
-      return pathMatchCache[accessKey];
-    }
-    const result = keyPathMatchesQueryCore(query, keyPath);
-    pathMatchCache[accessKey] = result;
-    return result;
-  };
-}
-export const keyPathMatchesQuery = keyPathMatchesQueryMemoizer();
-
 function valueQuery(query: string[], nodeValue: string): boolean {
   const strippedVal = nodeValue.slice(1, nodeValue.length - 1);
   return !!query.find((x) => x === strippedVal);
@@ -54,11 +37,19 @@ function regexQuery(query: RegExp, nodeValue: string) {
   return !!nodeValue.match(query);
 }
 
+let cache: Record<string, boolean> = {};
 export function runProjectionQuery(
   query: ProjectionQuery,
   keyPath: (string | number)[],
   nodeValue: string
 ): boolean {
+  const cacheKey = `${JSON.stringify(query)}-${JSON.stringify(
+    keyPath
+  )}-${nodeValue}}`;
+  if (cache[cacheKey]) {
+    return cache[cacheKey];
+  }
+
   let pass = false;
   switch (query.type) {
     case "index":
@@ -76,5 +67,6 @@ export function runProjectionQuery(
     default:
       return false;
   }
+  cache[cacheKey] = pass;
   return pass;
 }
