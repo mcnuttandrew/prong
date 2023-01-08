@@ -137,18 +137,8 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
 
-  const currentCodeSlice = codeStringState(
-    tr.state,
-    targetNode.from,
-    targetNode.to
-  );
   return [
-    ...generateMenuContent(
-      currentCodeSlice,
-      targetNode,
-      schemaTypings,
-      fullCode
-    ),
+    ...generateMenuContent(targetNode, schemaTypings, fullCode),
     ...diagnostics
       .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
       .map((lint) => ({

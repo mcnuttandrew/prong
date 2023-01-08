@@ -6,8 +6,6 @@ import { SchemaMap } from "../components/Editor";
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import { simpleParse } from "./utils";
 
-// type JSONSchema = any;
-
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
   | {
@@ -16,11 +14,11 @@ export type MenuElement =
       content: string;
       onSelect: MenuEvent;
     }
-  | {
-      type: "dropdown";
-      content: string[];
-      onSelect: MenuEvent;
-    }
+  // | {
+  //     type: "dropdown";
+  //     label?: string;
+  //     values: { content: string; onSelect: MenuEvent }[];
+  //   }
   | { type: "display"; label?: string; content: string }
   | { type: "free-input"; label: string }
   | { type: "projection"; label?: string; element: JSX.Element };
@@ -266,53 +264,53 @@ const deduplicateAndSortArray = (arr: string[]): string[] => {
 };
 
 function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
-  const numElements = 5;
-  const arrayTypeDefaults: any = {
-    boolean: true,
-    string: "",
-    number: 0,
-    object: {},
-    array: [],
-  };
+  // const numElements = 5;
+  // const arrayTypeDefaults: any = {
+  //   boolean: true,
+  //   string: "",
+  //   number: 0,
+  //   object: {},
+  //   array: [],
+  // };
   const arrayType = (content?.items as any)?.type;
-
-  if (arrayType) {
-    return [
-      {
-        label: "Switch to",
-        elements: [
-          {
-            type: "button",
-            content: "Empty array",
-
-            onSelect: {
-              type: "simpleSwap",
-              nodeId: nodeToId(node),
-              payload: "[]",
-            },
-          },
-        ],
-      },
-    ];
+  if (!arrayType) {
+    return [];
   }
-  // i think this can be dropped in favor of just no return?
-  const payload = JSON.stringify(
-    [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
-  );
   return [
     {
-      label: "arrrX",
+      label: "Switch to",
       elements: [
         {
           type: "button",
-          content: `Switch to array of ${numElements} ${JSON.stringify(
-            arrayTypeDefaults[arrayType]
-          )}s`,
-          onSelect: { type: "simpleSwap", nodeId: nodeToId(node), payload },
+          content: "Empty array",
+
+          onSelect: {
+            type: "simpleSwap",
+            nodeId: nodeToId(node),
+            payload: "[]",
+          },
         },
       ],
     },
   ];
+  // // i think this can be dropped in favor of just no return?
+  // const payload = JSON.stringify(
+  //   [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
+  // );
+  // return [
+  //   {
+  //     label: "arrrX",
+  //     elements: [
+  //       {
+  //         type: "button",
+  //         content: `Switch to array of ${numElements} ${JSON.stringify(
+  //           arrayTypeDefaults[arrayType]
+  //         )}s`,
+  //         onSelect: { type: "simpleSwap", nodeId: nodeToId(node), payload },
+  //       },
+  //     ],
+  //   },
+  // ];
 }
 
 const AnyOfPicker: Component = (props) => {
@@ -365,7 +363,6 @@ const AnyOfPicker: Component = (props) => {
               content: `${opt.type}`,
               onSelect: {
                 type: "simpleSwap",
-                // payload: "null"
                 payload: simpleTypeMap[opt.type],
               },
             },
@@ -609,9 +606,50 @@ function getSchemaForRetargetedNode(
   return schemaChunk as any as JSONSchema7;
 }
 
-// todo remove first argument
+function deduplicate(rows: any[]): any[] {
+  const hasSeen: Set<string> = new Set([]);
+  return rows.filter((x) => {
+    const key = JSON.stringify(x);
+    if (hasSeen.has(key)) {
+      return false;
+    }
+    hasSeen.add(key);
+    return true;
+  });
+}
+
+function simpleMerge(content: MenuRow[]): MenuRow[] {
+  const groups = content.reduce((acc: Record<string, any[]>, row) => {
+    acc[row.label] = (acc[row.label] || []).concat(row.elements);
+    return acc;
+  }, {});
+
+  return Object.entries(groups).map(
+    ([label, elements]) =>
+      ({ label, elements: deduplicate(elements).filter((x) => x) } as MenuRow)
+  );
+}
+
+function cleanSections(content: MenuRow[]): MenuRow[] {
+  return content.filter((x) => x.elements.length);
+}
+
+// function possiblyMergeButtonsIntoDropdown(content: MenuRow[]) {
+//   return content.map((row) => {
+//     const allElementsAreButtons = row.elements.every(
+//       (el) => el.type === "button"
+//     );
+//     if (!allElementsAreButtons) {
+//       return row;
+//     }
+//     return {
+//       label: row.label,
+//       elements: [{ type: "dropdown", values: row.elements }],
+//     };
+//   });
+// }
+
 export function generateMenuContent(
-  currentCodeSlice: string,
   syntaxNode: SyntaxNode,
   schemaMap: SchemaMap,
   fullCode: string
@@ -671,32 +709,4 @@ export function generateMenuContent(
     simpleMerge(content.filter((x) => x))
   );
   return computedMenuContents;
-}
-
-function deduplicate(rows: any[]): any[] {
-  const hasSeen: Set<string> = new Set([]);
-  return rows.filter((x) => {
-    const key = JSON.stringify(x);
-    if (hasSeen.has(key)) {
-      return false;
-    }
-    hasSeen.add(key);
-    return true;
-  });
-}
-
-function simpleMerge(content: MenuRow[]): MenuRow[] {
-  const groups = content.reduce((acc: Record<string, any[]>, row) => {
-    acc[row.label] = (acc[row.label] || []).concat(row.elements);
-    return acc;
-  }, {});
-
-  return Object.entries(groups).map(
-    ([label, elements]) =>
-      ({ label, elements: deduplicate(elements).filter((x) => x) } as MenuRow)
-  );
-}
-
-function cleanSections(content: MenuRow[]): MenuRow[] {
-  return content.filter((x) => x.elements.length);
 }

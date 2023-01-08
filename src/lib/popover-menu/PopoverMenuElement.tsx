@@ -8,6 +8,7 @@ type MenuElementRenderer<T> = (props: {
   // TODO fix this type;
   menuElement: T;
   isSelected: boolean;
+  allElementsInGroupAreOfThisType: boolean;
 }) => JSX.Element;
 
 const DisplayElement: MenuElementRenderer<any> = (props) => (
@@ -67,10 +68,12 @@ const ButtonElement: MenuElementRenderer<any> = ({
   isSelected,
   menuElement: { onSelect, content, label },
   eventDispatch,
+  allElementsInGroupAreOfThisType,
 }) => (
   <div
     className={classNames({
-      flex: true,
+      flex: !allElementsInGroupAreOfThisType,
+      "flex-down": allElementsInGroupAreOfThisType,
       "cm-annotation-widget-element": !isSelected,
       "cm-annotation-widget-element-selected": isSelected,
     })}
@@ -80,17 +83,29 @@ const ButtonElement: MenuElementRenderer<any> = ({
   </div>
 );
 
-const DropdownElement: MenuElementRenderer<any> = (props) => {
-  return (
-    <div>
-      <select title={props.menuElement.type}>
-        {props.menuElement.content.map((x: string) => {
-          return <option value={x}>{x}</option>;
-        })}
-      </select>
-    </div>
-  );
-};
+// const DropdownElement: MenuElementRenderer<any> = ({isSelected, menuElement}) => {
+//   // return (
+//   //   <div >
+//   //     {/* <select title={props.menuElement.type}>
+//   //       {props.menuElement.values.map((x: any) => {
+//   //         return <option value={x}>{x}</option>;
+//   //       })}
+//   //     </select> */}
+//   //   </div>
+//   // );
+//   return (
+//     <div
+//       className={classNames({
+//         flex: true,
+//         "cm-annotation-widget-element": !isSelected,
+//         "cm-annotation-widget-element-selected": isSelected,
+//       })}
+//     >
+//       <button onClick={() => eventDispatch(onSelect, true)}>{content}</button>
+//       {label && <div>{label}</div>}
+//     </div>
+//   );
+// };
 
 const ProjectionElement: MenuElementRenderer<any> = ({
   isSelected,
@@ -111,7 +126,7 @@ const dispatch: Record<string, MenuElementRenderer<any>> = {
   button: ButtonElement,
   projection: ProjectionElement,
   "free-input": InputElement,
-  dropdown: DropdownElement,
+  // dropdown: DropdownElement,
 };
 const RenderMenuElement: MenuElementRenderer<any> = (props) => {
   return dispatch[props.menuElement.type](props);
