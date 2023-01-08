@@ -43,7 +43,7 @@ const InputElement: MenuElementRenderer<any> = (props) => {
   return (
     <div
       className={classNames({
-        "flex-down": true,
+        flex: true,
         "cm-annotation-widget-element": !props.isSelected,
         "cm-annotation-widget-element-selected": props.isSelected,
       })}
@@ -92,10 +92,24 @@ const DropdownElement: MenuElementRenderer<any> = (props) => {
   );
 };
 
+const ProjectionElement: MenuElementRenderer<any> = ({
+  isSelected,
+  menuElement: { element },
+}) => (
+  <div
+    className={classNames({
+      "cm-annotation-widget-element": !isSelected,
+      "cm-annotation-widget-element-selected": isSelected,
+    })}
+  >
+    {element}
+  </div>
+);
+
 const dispatch: Record<string, MenuElementRenderer<any>> = {
   display: DisplayElement,
   button: ButtonElement,
-  projection: (props) => props.menuElement.element,
+  projection: ProjectionElement,
   "free-input": InputElement,
   dropdown: DropdownElement,
 };

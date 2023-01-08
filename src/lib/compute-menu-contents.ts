@@ -3,7 +3,7 @@ import { SyntaxNode } from "@lezer/common";
 
 import { MenuEvent, boundCheck } from "./modify-json";
 import { SchemaMap } from "../components/Editor";
-import { JSONSchema7 } from "json-schema";
+import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import { simpleParse } from "./utils";
 
 // type JSONSchema = any;
@@ -36,6 +36,7 @@ export const nodeToId = (node: SyntaxNode): `${number}-${number}` =>
   `${node.from}-${node.to}`;
 const EnumPicker: Component = (props) => {
   const { content, node } = props;
+  // TODO dont switch if this is the current value?
   return [
     {
       label: "content",
@@ -166,17 +167,15 @@ const getUsedPropertiesForContainer = (node: SyntaxNode): SyntaxNode[] => {
   return props;
 };
 
-function AnyOfObjOptionalFieldPicker(
-  content: any,
-  node: SyntaxNode,
-  fullCode: string
-): MenuRow[] {
+function materializeRequiredProps(content: any): string[] {
   const requiredProps = new Set<string>(
     Array.isArray(content.required) ? content.required : []
   );
-  const requiredPropsArr = Array.from(requiredProps);
-
-  const requiredPropObject = JSON.stringify(
+  return Array.from(requiredProps);
+}
+function materializeAnyOfOption(content: any): string {
+  const requiredPropsArr = materializeRequiredProps(content);
+  return JSON.stringify(
     Object.fromEntries(
       requiredPropsArr.map((x) => [
         x,
@@ -186,6 +185,15 @@ function AnyOfObjOptionalFieldPicker(
       ])
     )
   );
+}
+
+function AnyOfObjOptionalFieldPicker(
+  content: any,
+  node: SyntaxNode,
+  fullCode: string
+): MenuRow[] {
+  const requiredPropsArr = materializeRequiredProps(content);
+  const requiredPropObject = materializeAnyOfOption(content);
 
   const isObject: boolean = new Set(["{", "}", "Object"]).has(node.type.name);
   const addProps = deduplicateAndSortArray(
@@ -221,7 +229,7 @@ function AnyOfObjOptionalFieldPicker(
             nodeId: nodeToId(node),
             payload: "{}",
           },
-          content: "blank object",
+          content: "empty object",
         },
       ],
     },
@@ -267,35 +275,32 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
     array: [],
   };
   const arrayType = (content?.items as any)?.type;
-  //   const sliderName = `numElements${idx}`;
 
-  const output: MenuRow[] = [
-    {
-      label: "JSON Schema Type",
-      elements: [{ type: "display", content: "TODO SLIDER" }],
-    },
-  ];
   if (arrayType) {
-    output.push({
-      label: "arrr",
-      elements: [
-        {
-          type: "button",
-          content: "Switch to array",
+    return [
+      {
+        label: "Switch to",
+        elements: [
+          {
+            type: "button",
+            content: "Empty array",
 
-          onSelect: {
-            type: "simpleSwap",
-            nodeId: nodeToId(node),
-            payload: "[]",
+            onSelect: {
+              type: "simpleSwap",
+              nodeId: nodeToId(node),
+              payload: "[]",
+            },
           },
-        },
-      ],
-    });
-  } else {
-    const payload = JSON.stringify(
-      [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
-    );
-    output.push({
+        ],
+      },
+    ];
+  }
+  // i think this can be dropped in favor of just no return?
+  const payload = JSON.stringify(
+    [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
+  );
+  return [
+    {
       label: "arrrX",
       elements: [
         {
@@ -306,9 +311,8 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
           onSelect: { type: "simpleSwap", nodeId: nodeToId(node), payload },
         },
       ],
-    });
-  }
-  return output;
+    },
+  ];
 }
 
 const AnyOfPicker: Component = (props) => {
@@ -373,6 +377,45 @@ const AnyOfPicker: Component = (props) => {
   return rows;
 };
 
+const generateSubItem = (subItem: JSONSchema7Definition) => {
+  if (typeof subItem !== "object" || subItem.type !== "object") {
+    return false;
+  }
+  const payload = materializeAnyOfOption(subItem);
+  return { content: payload, payload };
+};
+
+const ArrayItemBuilder: Component = ({ content, node }) => {
+  const items = content.items;
+  if (!items || typeof items === "boolean") {
+    return [];
+  }
+  const elements = (Array.isArray(items) ? items : [items]).flatMap((item) => {
+    if (typeof item === "boolean") {
+      return [];
+    }
+    return (item.oneOf || []).flatMap((subItem) => {
+      const result = generateSubItem(subItem);
+      if (!result) {
+        return [];
+      }
+      const { content, payload } = result;
+      const element: MenuElement = {
+        type: "button",
+        content,
+        onSelect: {
+          type: "addElementAsSiblingInArray",
+          payload,
+          nodeId: nodeToId(node.parent?.lastChild?.prevSibling!),
+        },
+      };
+      return element;
+    });
+  });
+
+  return [{ label: "Insert", elements }];
+};
+
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
   return [
     {
@@ -418,6 +461,35 @@ const ObjectComponent: Component = ({ node }) => [
     ],
   },
 ];
+
+const ArrayComponent: Component = ({ node }) => {
+  return [
+    {
+      label: "Add element",
+      elements: [
+        { label: "boolean", value: "false" },
+        { label: "number", value: "0" },
+        { label: "string", value: '""' },
+        { label: "object", value: "{}" },
+        { label: "array", value: "[]" },
+      ].map(({ label, value }) => ({
+        type: "button",
+        content: label,
+        onSelect: {
+          type: "addElementAsSiblingInArray",
+          payload: value,
+          nodeId: nodeToId(node.lastChild?.prevSibling!),
+        },
+      })),
+    },
+  ];
+};
+
+const bracketComponent: Component = (props) =>
+  ArrayComponent({ ...props, node: props.node.parent! });
+
+const curlyBracketComponent: Component = (props) =>
+  ObjectComponent({ ...props, node: props.node.parent! });
 
 const ParentIsPropertyComponent = makeSimpleComponent("hi property");
 
@@ -484,30 +556,33 @@ const menuSwitch: componentContainer = {
   ObjPicker,
   AnyOfPicker,
   GenericComponent,
+  ArrayItemBuilder,
 };
 const typeBasedComponents: componentContainer = {
   Object: ObjectComponent,
   PropertyName: PropertyNameComponent,
-  Array: makeSimpleComponent("array"),
+  Array: ArrayComponent,
   String: makeSimpleComponent("string"),
   Number: makeSimpleComponent("number"),
   False: BooleanComponent,
   True: BooleanComponent,
   Null: makeSimpleComponent("null"),
+
+  ...Object.fromEntries(["[", "]"].map((el) => [el, bracketComponent])),
+  ...Object.fromEntries(["{", "}"].map((el) => [el, curlyBracketComponent])),
   "⚠": makeSimpleComponent("⚠"),
 };
 const parentResponses: componentContainer = {
   Property: ParentIsPropertyComponent,
   Array: ParentIsArrayComponent,
-  // TODO: do i need to fill in all the other options for this?
-  // what other options are there?
 };
 
+export const liminalNodeTypes = new Set(["⚠", "{", "}", "[", "]"]);
 export function retargetToAppropriateNode(
   node: SyntaxNode | SyntaxNode
 ): SyntaxNode | SyntaxNode {
   let targetNode = node;
-  if (new Set(["⚠", "{", "}", "[", "]"]).has(node.type.name)) {
+  if (liminalNodeTypes.has(node.type.name)) {
     targetNode = node.parent!;
   } else if (node.type.name === "PropertyName") {
     targetNode = node.nextSibling!;
@@ -556,12 +631,15 @@ export function generateMenuContent(
 
   let contentBasedItem: Component | null = null;
   // TODO work through options listed in the validate wip
+  // not sure what this refers, but there are some missing options for sure, maybe explore the .type = X?
   if (schemaChunk && schemaChunk.enum) {
     contentBasedItem = menuSwitch.EnumPicker;
   } else if (schemaChunk && schemaChunk.type === "object") {
     contentBasedItem = menuSwitch.ObjPicker;
   } else if (schemaChunk && schemaChunk.anyOf) {
     contentBasedItem = menuSwitch.AnyOfPicker;
+  } else if (schemaChunk && schemaChunk.type === "array") {
+    contentBasedItem = menuSwitch.ArrayItemBuilder;
   }
 
   //   assemble the content for display

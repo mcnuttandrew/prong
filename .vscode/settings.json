@@ -1,11 +1,15 @@
 {
     "cSpell.words": [
         "codemirror",
+        "Consts",
+        "Dups",
         "isequal",
         "keymap",
         "lezer",
         "linebreak",
         "pickr",
+        "retarget",
+        "Retargeted",
         "simonwep",
         "tabindex"
     ]
