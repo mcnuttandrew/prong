@@ -14,11 +14,6 @@ export type MenuElement =
       content: string;
       onSelect: MenuEvent;
     }
-  // | {
-  //     type: "dropdown";
-  //     label?: string;
-  //     values: { content: string; onSelect: MenuEvent }[];
-  //   }
   | { type: "display"; label?: string; content: string }
   | { type: "free-input"; label: string }
   | { type: "projection"; label?: string; element: JSX.Element };
@@ -264,14 +259,6 @@ const deduplicateAndSortArray = (arr: string[]): string[] => {
 };
 
 function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
-  // const numElements = 5;
-  // const arrayTypeDefaults: any = {
-  //   boolean: true,
-  //   string: "",
-  //   number: 0,
-  //   object: {},
-  //   array: [],
-  // };
   const arrayType = (content?.items as any)?.type;
   if (!arrayType) {
     return [];
@@ -293,24 +280,6 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
       ],
     },
   ];
-  // // i think this can be dropped in favor of just no return?
-  // const payload = JSON.stringify(
-  //   [...new Array(numElements)].map(() => arrayTypeDefaults[arrayType])
-  // );
-  // return [
-  //   {
-  //     label: "arrrX",
-  //     elements: [
-  //       {
-  //         type: "button",
-  //         content: `Switch to array of ${numElements} ${JSON.stringify(
-  //           arrayTypeDefaults[arrayType]
-  //         )}s`,
-  //         onSelect: { type: "simpleSwap", nodeId: nodeToId(node), payload },
-  //       },
-  //     ],
-  //   },
-  // ];
 }
 
 const AnyOfPicker: Component = (props) => {
@@ -633,21 +602,6 @@ function simpleMerge(content: MenuRow[]): MenuRow[] {
 function cleanSections(content: MenuRow[]): MenuRow[] {
   return content.filter((x) => x.elements.length);
 }
-
-// function possiblyMergeButtonsIntoDropdown(content: MenuRow[]) {
-//   return content.map((row) => {
-//     const allElementsAreButtons = row.elements.every(
-//       (el) => el.type === "button"
-//     );
-//     if (!allElementsAreButtons) {
-//       return row;
-//     }
-//     return {
-//       label: row.label,
-//       elements: [{ type: "dropdown", values: row.elements }],
-//     };
-//   });
-// }
 
 export function generateMenuContent(
   syntaxNode: SyntaxNode,

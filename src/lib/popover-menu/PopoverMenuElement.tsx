@@ -83,30 +83,6 @@ const ButtonElement: MenuElementRenderer<any> = ({
   </div>
 );
 
-// const DropdownElement: MenuElementRenderer<any> = ({isSelected, menuElement}) => {
-//   // return (
-//   //   <div >
-//   //     {/* <select title={props.menuElement.type}>
-//   //       {props.menuElement.values.map((x: any) => {
-//   //         return <option value={x}>{x}</option>;
-//   //       })}
-//   //     </select> */}
-//   //   </div>
-//   // );
-//   return (
-//     <div
-//       className={classNames({
-//         flex: true,
-//         "cm-annotation-widget-element": !isSelected,
-//         "cm-annotation-widget-element-selected": isSelected,
-//       })}
-//     >
-//       <button onClick={() => eventDispatch(onSelect, true)}>{content}</button>
-//       {label && <div>{label}</div>}
-//     </div>
-//   );
-// };
-
 const ProjectionElement: MenuElementRenderer<any> = ({
   isSelected,
   menuElement: { element },
@@ -126,7 +102,6 @@ const dispatch: Record<string, MenuElementRenderer<any>> = {
   button: ButtonElement,
   projection: ProjectionElement,
   "free-input": InputElement,
-  // dropdown: DropdownElement,
 };
 const RenderMenuElement: MenuElementRenderer<any> = (props) => {
   return dispatch[props.menuElement.type](props);
