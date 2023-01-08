@@ -8,6 +8,7 @@ type MenuElementRenderer<T> = (props: {
   // TODO fix this type;
   menuElement: T;
   isSelected: boolean;
+  allElementsInGroupAreOfThisType: boolean;
 }) => JSX.Element;
 
 const DisplayElement: MenuElementRenderer<any> = (props) => (
@@ -43,7 +44,7 @@ const InputElement: MenuElementRenderer<any> = (props) => {
   return (
     <div
       className={classNames({
-        "flex-down": true,
+        flex: true,
         "cm-annotation-widget-element": !props.isSelected,
         "cm-annotation-widget-element-selected": props.isSelected,
       })}
@@ -67,10 +68,12 @@ const ButtonElement: MenuElementRenderer<any> = ({
   isSelected,
   menuElement: { onSelect, content, label },
   eventDispatch,
+  allElementsInGroupAreOfThisType,
 }) => (
   <div
     className={classNames({
-      flex: true,
+      flex: !allElementsInGroupAreOfThisType,
+      "flex-down": allElementsInGroupAreOfThisType,
       "cm-annotation-widget-element": !isSelected,
       "cm-annotation-widget-element-selected": isSelected,
     })}
@@ -80,24 +83,25 @@ const ButtonElement: MenuElementRenderer<any> = ({
   </div>
 );
 
-const DropdownElement: MenuElementRenderer<any> = (props) => {
-  return (
-    <div>
-      <select title={props.menuElement.type}>
-        {props.menuElement.content.map((x: string) => {
-          return <option value={x}>{x}</option>;
-        })}
-      </select>
-    </div>
-  );
-};
+const ProjectionElement: MenuElementRenderer<any> = ({
+  isSelected,
+  menuElement: { element },
+}) => (
+  <div
+    className={classNames({
+      "cm-annotation-widget-element": !isSelected,
+      "cm-annotation-widget-element-selected": isSelected,
+    })}
+  >
+    {element}
+  </div>
+);
 
 const dispatch: Record<string, MenuElementRenderer<any>> = {
   display: DisplayElement,
   button: ButtonElement,
-  projection: (props) => props.menuElement.element,
+  projection: ProjectionElement,
   "free-input": InputElement,
-  dropdown: DropdownElement,
 };
 const RenderMenuElement: MenuElementRenderer<any> = (props) => {
   return dispatch[props.menuElement.type](props);

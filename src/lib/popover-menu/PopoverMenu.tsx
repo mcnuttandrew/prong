@@ -82,6 +82,10 @@ function PopOverMenuContents(props: {
       <div className="cm-annotation-widget-popover-container">
         {menuContents.map((row, idx) => {
           const { label, elements } = row;
+          const initialType = (row.elements as any)?.type;
+          const allElementsSameType =
+            !!initialType &&
+            row.elements.every((x: any) => x?.type === initialType);
           return (
             <div
               className={classNames({
@@ -100,10 +104,11 @@ function PopOverMenuContents(props: {
                 {label}
               </div>
               <div className="cm-annotation-widget-popover-container-row-content">
-                {(elements || []).map((element, jdx) => (
+                {(elements || []).map((element, jdx, arr) => (
                   <PopoverMenuElement
                     menuElement={element}
                     eventDispatch={eventDispatch}
+                    allElementsInGroupAreOfThisType={allElementsSameType}
                     isSelected={
                       selectedRouting &&
                       selectedRouting[0] === idx &&

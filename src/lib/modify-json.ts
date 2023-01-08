@@ -1,6 +1,6 @@
 import { SyntaxNode } from "@lezer/common";
 import { UpdateDispatch } from "./popover-menu/PopoverState";
-import { nodeToId } from "./compute-menu-contents";
+import { nodeToId, liminalNodeTypes } from "./compute-menu-contents";
 
 export type MenuEvent =
   | addElementAsSiblingInArrayEvent
@@ -62,8 +62,8 @@ const checkAndLift =
     }
     const bound = boundCheck(node);
     const sib = isPrev ? node.prevSibling : node.nextSibling;
-    const atBoundart = isPrev ? bound.isFirst : bound.isLast;
-    if (!sib || atBoundart) {
+    const atBoundary = isPrev ? bound.isFirst : bound.isLast;
+    if (!sib || atBoundary) {
       return undefined;
     }
     return boundFunction(value, node, currentText);
@@ -172,10 +172,6 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   syntaxNode,
   currentText
 ) => {
-  // let syntaxNode: SyntaxNode = inputNode;
-  // if (inputNode.type.name !== "object") {
-  //   syntaxNode = inputNode.parent!;
-  // }
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
   // new object
@@ -223,44 +219,45 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   let from: number;
   let to: number;
   let value = payload;
-  const currentTypeIsBacket = syntaxNode.type.name === "[";
+
+  const currentTypeIsBracket = syntaxNode.type.name === "[";
   // const prevType = syntaxNode.prevSibling?.type.name || "⚠";
   const nextType = syntaxNode.nextSibling?.type.name || "⚠";
   // const prevTypeIsBracket = new Set(["⚠", "["]).has(prevType);
   const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
 
   // case: []
-  if (currentTypeIsBacket && nextType === "]") {
+  if (currentTypeIsBracket && nextType === "]") {
     from = syntaxNode.from;
     to = syntaxNode.to;
     value = `[${payload}`;
   }
 
   // case [X1]
-  if (currentTypeIsBacket && !nextTypeIsBracket) {
+  if (currentTypeIsBracket && !nextTypeIsBracket) {
     from = syntaxNode.from;
     to = syntaxNode.from;
     value = `[${payload}, `;
   }
 
-  if (!currentTypeIsBacket && !nextTypeIsBracket) {
+  if (!currentTypeIsBracket && !nextTypeIsBracket) {
     from = syntaxNode.to + 1;
     to = syntaxNode.to + 1;
     value = ` ${payload},`;
   }
 
-  if (!currentTypeIsBacket && nextType === "]") {
+  if (!currentTypeIsBracket && nextType === "]") {
     from = syntaxNode.to;
     to = syntaxNode.to;
     value = `, ${payload}`;
   }
-  if (!currentTypeIsBacket && nextType === "⚠") {
+  if (!currentTypeIsBracket && nextType === "⚠") {
     from = syntaxNode.to;
     to = syntaxNode.to;
     value = `, ${payload}`;
   }
 
-  if (currentTypeIsBacket && !nextTypeIsBracket) {
+  if (currentTypeIsBracket && !nextTypeIsBracket) {
     from = syntaxNode.from;
     to = syntaxNode.nextSibling!.from;
   }
@@ -322,5 +319,7 @@ const possiblyModifyChosenNode = (
     ? findSyntaxNodeById(syntaxNode, menuEvent.nodeId) || syntaxNode
     : syntaxNode;
 
-  return targetNode;
+  const isLiminalNode = liminalNodeTypes.has(targetNode.type.name);
+  // don't modify if its one of the liminal nodes (eg bracket)
+  return isLiminalNode ? syntaxNode : targetNode;
 };
