@@ -47,11 +47,11 @@ const EnumPicker: Component = (props) => {
 };
 
 function simpleFillOut(content: JSONSchema7) {
-  const simpleTypes: Record<string, string> = {
+  const simpleTypes: Record<string, any> = {
     string: "",
     object: `{}`,
-    number: "0",
-    boolean: "true",
+    number: 0,
+    boolean: true,
   };
   if ((content as any).type in simpleTypes) {
     return simpleTypes[(content as any).type];
@@ -199,7 +199,7 @@ function AnyOfObjOptionalFieldPicker(
   const inUseKeys = new Set(Object.keys(simpleParse(slice, {})));
   return [
     content.$$labeledType && {
-      label: "JSON Schema Type",
+      label: "Description",
       elements: [{ type: "display", content: content.$$labeledType }],
     },
     !isObject && {
@@ -304,7 +304,7 @@ const AnyOfPicker: Component = (props) => {
 
     const optionRow = [
       opt.description && {
-        label: "JSON Schema Type",
+        label: "Description",
         elements: [{ type: "display", content: opt.description }],
       },
       opt?.enum?.length && {
@@ -356,23 +356,53 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
   if (!items || typeof items === "boolean") {
     return [];
   }
+  const targetNode =
+    node.type.name === "Array"
+      ? node.lastChild?.prevSibling!
+      : node.parent?.lastChild?.prevSibling!;
+  if (!Array.isArray(items) && items.enum) {
+    return [
+      {
+        label: "content",
+        elements: (items.enum as any[]).map((content: string) => ({
+          type: "button",
+          content,
+          onSelect: {
+            type: "addElementAsSiblingInArray",
+            payload: `"${content}"`,
+            nodeId: nodeToId(targetNode),
+          },
+        })),
+      },
+    ];
+  }
   const elements = (Array.isArray(items) ? items : [items]).flatMap((item) => {
     if (typeof item === "boolean") {
       return [];
     }
-    return (item.oneOf || []).flatMap((subItem) => {
+    let targets: JSONSchema7Definition[] = [];
+    if (item.oneOf) {
+      targets = item.oneOf;
+    } else if (item.anyOf) {
+      targets = item.anyOf;
+    } else if (item.type === "object") {
+      targets = [item];
+    }
+    return targets.flatMap((subItem) => {
       const result = generateSubItem(subItem);
       if (!result) {
         return [];
       }
       const { content, payload } = result;
+      // if its array do one thing, otherwise its a bracket, then do another thing
+
       const element: MenuElement = {
         type: "button",
         content,
         onSelect: {
           type: "addElementAsSiblingInArray",
           payload,
-          nodeId: nodeToId(node.parent?.lastChild?.prevSibling!),
+          nodeId: nodeToId(targetNode),
         },
       };
       return element;
@@ -384,10 +414,10 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
 
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
   return [
-    {
-      label: "Inferred JSON Type",
-      elements: [{ type: "display", content }],
-    },
+    // {
+    //   label: "Inferred JSON Type",
+    //   elements: [{ type: "display", content }],
+    // },
   ];
 };
 
@@ -428,23 +458,44 @@ const ObjectComponent: Component = ({ node }) => [
   },
 ];
 
-const ArrayComponent: Component = ({ node }) => {
+function createObjectMatchingInput(
+  code: string,
+  node: SyntaxNode
+): string | false {
+  const x = simpleParse(code.slice(node.from, node.to), undefined);
+  if (!Array.isArray(x)) {
+    return false;
+  }
+  const childTypes = new Set(x.map((el) => typeof el));
+  if (childTypes.size > 1 || !childTypes.has("object")) {
+    return false;
+  }
+  const keys = Array.from(new Set(x.flatMap((el) => Object.keys(el))));
+  return JSON.stringify(Object.fromEntries(keys.map((el) => [el, ""])));
+}
+
+const ArrayComponent: Component = (props) => {
+  const elements = [
+    { label: "boolean", value: "false" },
+    { label: "number", value: "0" },
+    { label: "string", value: '""' },
+    { label: "object", value: "{}" },
+    { label: "array", value: "[]" },
+  ];
+  const simpleObject = createObjectMatchingInput(props.fullCode, props.node);
+  if (simpleObject) {
+    elements.push({ label: "inferred object", value: simpleObject });
+  }
   return [
     {
       label: "Add element",
-      elements: [
-        { label: "boolean", value: "false" },
-        { label: "number", value: "0" },
-        { label: "string", value: '""' },
-        { label: "object", value: "{}" },
-        { label: "array", value: "[]" },
-      ].map(({ label, value }) => ({
+      elements: elements.map(({ label, value }) => ({
         type: "button",
         content: label,
         onSelect: {
           type: "addElementAsSiblingInArray",
           payload: value,
-          nodeId: nodeToId(node.lastChild?.prevSibling!),
+          nodeId: nodeToId(props.node.lastChild?.prevSibling!),
         },
       })),
     },
@@ -459,13 +510,18 @@ const curlyBracketComponent: Component = (props) =>
 
 const ParentIsPropertyComponent = makeSimpleComponent("hi property");
 
-const directionalMoves = (node: SyntaxNode): MenuElement[] => {
+const directionalMoves = (syntaxNode: SyntaxNode): MenuElement[] => {
   const outputDirections: MenuElement[] = [];
+  let node = syntaxNode;
+  if (syntaxNode.type.name === "PropertyName") {
+    node = syntaxNode.parent!;
+  }
+
   const bounds = boundCheck(node);
   if (!bounds.isFirst) {
     outputDirections.push({
       type: "button",
-      content: "Move item left",
+      content: "Swap with prev",
       onSelect: { type: "decreaseItemIdx", nodeId: nodeToId(node) },
     });
     // {
@@ -477,7 +533,7 @@ const directionalMoves = (node: SyntaxNode): MenuElement[] => {
   if (!bounds.isLast) {
     outputDirections.push({
       type: "button",
-      content: "Move item right",
+      content: "Swap with next",
       onSelect: { type: "increaseItemIdx", nodeId: nodeToId(node) },
     });
     // {
@@ -638,7 +694,7 @@ export function generateMenuContent(
   const content: MenuRow[] = [];
   if (schemaChunk?.description) {
     content.push({
-      label: "JSON Schema Type",
+      label: "Description",
       elements: [{ type: "display", content: schemaChunk.description }],
     });
   }

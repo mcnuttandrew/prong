@@ -70,6 +70,7 @@ const schema: JSONSchema7 = {
         "Guava",
       ],
       type: "string",
+      description: "Options for fruit that are allowed",
     },
   },
 };
