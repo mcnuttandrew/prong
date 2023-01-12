@@ -113,13 +113,6 @@
   margin-top: 0.2rem;
 }
 
-.color-name-picker {
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  padding: 1rem;
-  font-family: sans-serif;
-}
-
-
 
 .color-name-picker .color-item,
 .color-name-picker .color-group {

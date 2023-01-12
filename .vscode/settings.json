@@ -1,16 +1,19 @@
 {
-    "cSpell.words": [
-        "codemirror",
-        "Consts",
-        "Dups",
-        "isequal",
-        "keymap",
-        "lezer",
-        "linebreak",
-        "pickr",
-        "retarget",
-        "Retargeted",
-        "simonwep",
-        "tabindex"
-    ]
+  "cSpell.words": [
+    "codemirror",
+    "Consts",
+    "dont",
+    "Dragonfruit",
+    "Dups",
+    "fruitie",
+    "isequal",
+    "keymap",
+    "lezer",
+    "linebreak",
+    "pickr",
+    "retarget",
+    "Retargeted",
+    "simonwep",
+    "tabindex"
+  ]
 }

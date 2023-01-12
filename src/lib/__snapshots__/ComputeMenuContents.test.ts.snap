@@ -190,6 +190,20 @@ Array [
   Object {
     "elements": Array [
       Object {
+        "content": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
+        "onSelect": Object {
+          "nodeId": "47-59",
+          "payload": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
+          "type": "addElementAsSiblingInArray",
+        },
+        "type": "button",
+      },
+    ],
+    "label": "Insert",
+  },
+  Object {
+    "elements": Array [
+      Object {
         "content": "\\"vegetables\\"",
         "type": "display",
       },
@@ -202,24 +216,15 @@ Array [
         "type": "button",
       },
       Object {
-        "content": "Move item right",
+        "content": "Swap with prev",
         "onSelect": Object {
-          "nodeId": "47-59",
-          "type": "increaseItemIdx",
+          "nodeId": "47-204",
+          "type": "decreaseItemIdx",
         },
         "type": "button",
       },
     ],
     "label": "PROPERTY",
-  },
-  Object {
-    "elements": Array [
-      Object {
-        "content": "hi property",
-        "type": "display",
-      },
-    ],
-    "label": "Inferred JSON Type",
   },
 ]
 `;

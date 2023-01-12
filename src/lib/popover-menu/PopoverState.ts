@@ -133,11 +133,15 @@ function PopoverStateMachine(
   }
 }
 
+const specialPriority: Record<string, number> = {
+  Description: 100,
+  "LINT ERROR": 99,
+};
+
 function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
-
-  return [
+  const contents = [
     ...generateMenuContent(targetNode, schemaTypings, fullCode),
     ...diagnostics
       .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
@@ -146,6 +150,9 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
         elements: [{ type: "display", content: lint.message }],
       })),
   ] as MenuRow[];
+  return contents.sort(
+    (b, a) => (specialPriority[a.label] || 0) - (specialPriority[b.label] || 0)
+  );
 }
 
 function materializeTypings(tr: Transaction, targetNode: SyntaxNode) {
