@@ -12,10 +12,12 @@ const schema: JSONSchema7 = {
   properties: {
     fruits: {
       type: "array",
+      description: "wowza what a list of fruit! awoooga",
       items: { $ref: "#/$defs/fruitie" },
     },
     vegetables: {
       type: "array",
+      description: "just a boring ol list of vegetables",
       items: { $ref: "#/$defs/veggie" },
     },
   },

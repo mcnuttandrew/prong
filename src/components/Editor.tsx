@@ -21,6 +21,7 @@ import {
 import PopoverPlugin from "../lib/popover-menu";
 import ProjectionPlugin from "../lib/projections";
 import { simpleUpdate } from "../lib/utils";
+import Panel from "../lib/panel";
 
 type Props = {
   onChange: (code: string) => void;
@@ -53,6 +54,7 @@ export default function Editor(props: Props) {
         basicSetup,
         languageConf.of(json()),
         keymap.of([indentWithTab]),
+        Panel(),
         cmStatePlugin,
         cmStateView,
         widgetsPlugin,
