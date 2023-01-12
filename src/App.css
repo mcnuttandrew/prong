@@ -75,7 +75,7 @@
   vertical-align: middle;
 }
 
-/* COLOR NAME WIDGET */
+/* INLINE COLOR NAME WIDGET */
 
 .cm-color-widget {
   display: inline-block;
@@ -99,70 +99,6 @@
   border-radius: 100%;
 }
 
-.color-name-picker ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.color-name-picker .color-group {
-  display: inline-block;
-  width: 75px;
-  font-weight: bold;
-  margin-bottom: 0.1rem;
-  margin-top: 0.2rem;
-}
-
-
-.color-name-picker .color-item,
-.color-name-picker .color-group {
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.color-name-picker .color-item {
-  font-family: monospace;
-  margin-bottom: 0px;
-  /*  To make the color strips stretch all the way across */
-  margin-left: -1rem;
-  margin-right: -1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.color-name-picker .color-item:first-of-type {
-  margin-top: 2px;
-}
-
-.color-name-picker .color-item:last-of-type {
-  margin-bottom: 10px;
-}
-
-.color-name-picker .selected {
-  font-weight: bold;
-}
-
-
-.color-name-picker .color-swatch {
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  margin-right: 1px;
-  border-style: solid;
-  border-width: 2px;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.color-name-picker .buttons {
-  display: flex;
-  margin-top: 1rem;
-}
-
-.color-name-picker .buttons button:first-child {
-  margin-right: 0.5rem;
-}
 
 /* GENERIC WIDGET STUFF */
 
@@ -182,8 +118,8 @@
 }
 
 .cm-annotation-menu {
-  background: floralwhite;
-  border-left: 15px solid salmon;
+  background: #EEEEEE;
+  border-left: 15px solid #D8D8D8;
   border-radius: 5px;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
   font-family: sans-serif;
@@ -212,6 +148,13 @@
   justify-content: center;
 }
 
+
+/* POPOVER STUFF */
+
+.cm-tooltip-autocomplete.cm-tooltip {
+  max-width: 400px
+}
+
 .cm-annotation-widget-popover-container-row {
   display: flex;
   width: 100%;
@@ -220,6 +163,10 @@
   border-bottom: thin dotted black;
   font-size: 13px;
   flex-direction: column;
+}
+
+.cm-annotation-widget-popover-container-row:last-child {
+  border-color: #EEEEEE;
 }
 
 .cm-annotation-widget-popover-container-row-label {
@@ -232,7 +179,7 @@
   text-align: center; */
   /* width: 40px; */
   width: 100%;
-  border-left: solid 15px floralwhite;
+  border-left: solid 5px #EEEEEE;
 }
 
 .cm-annotation-widget-popover-container-row-content {
@@ -244,13 +191,18 @@
   overflow-y: auto;
 }
 
-.cm-annotation-widget-element {
-  border-left: solid 15px floralwhite;
+.cm-annotation-widget-element, .cm-annotation-widget-popover-container-row {
+  border-left: solid 5px #EEEEEE;
 }
 
-.cm-annotation-widget-element-selected {
-  border-left: solid 15px aqua;
+.cm-annotation-widget-popover-container-row.cm-annotation-widget-element-selected {
+  border-left: solid 5px lightcoral;
 }
+
+.cm-annotation-widget-element.cm-annotation-widget-element-selected {
+  border: 2px solid lightcoral;
+}
+
 
 .cm-annotation-render-widget-display p {
   margin: 0;
@@ -270,24 +222,46 @@ div[tabindex="-1"]:focus {
 
 .cm-annotation-highlighter {
   cursor: pointer;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
+  border: thin dotted gray;
+  /* text-decoration: underline;
+  text-decoration-thickness: 1px; */
 }
 
+.cm-annotation-highlighter-selected {
+  border: thin solid gray;
+}
 
 .cm-annotation-highlighter-1 {
-  text-underline-offset: 2px;
-  text-decoration-color: rebeccapurple;
+  /* text-underline-offset: 2px;
+  text-decoration-color: rebeccapurple; */
 }
 
 .cm-annotation-highlighter-2 {
-  text-underline-offset: 4px;
-  text-decoration-color: goldenrod
+  /* text-underline-offset: 4px;
+  text-decoration-color: goldenrod */
 }
+
+.cm-annotation-widget-element button {
+  /* background: floralwhite; */
+  border: none;
+  /* border: thin solid gray; */
+  border-radius: 12px;
+  cursor: pointer;
+  /* padding: 4px; */
+  /* font-family: monospace; */
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+/* 
+.cm-annotation-widget-element button:before {
+  content: '▱';
+} */
 
 .cm-annotation-highlighter-3,
 .cm-annotation-highlighter-4 {
   text-decoration: none;
+  border: none;
 
 }
 
@@ -302,4 +276,10 @@ div[tabindex="-1"]:focus {
 
 .cm-linter-highlight {
   background-color: lightcoral;
+}
+
+
+.cm-tooltip-autocomplete {
+
+  right: 0 !important;
 }

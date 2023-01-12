@@ -187,11 +187,16 @@ const shelf =
 
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState(vegaLiteCode);
+  const [clockRunning, setClockRunning] = useState(true);
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {
-    setTimeout(() => setTimer(timer + 1), 5000);
-  }, [timer]);
+    setTimeout(() => {
+      if (clockRunning) {
+        setTimer(timer + 1);
+      }
+    }, 5000);
+  }, [timer, clockRunning]);
 
   function DynamicProjection(props: ProjectionProps) {
     return <div className="dynamic-projection-example">Timer: ({timer})</div>;
@@ -206,6 +211,9 @@ function VegaLiteExampleApp() {
             <Pill name={x} key={x} />
           ))}
           <button onClick={() => setCurrentCode("{}")}>new text</button>
+          <button onClick={() => setClockRunning(!clockRunning)}>
+            toggle timer
+          </button>
         </div>
         <Editor
           schema={VegaLiteV5Schema}

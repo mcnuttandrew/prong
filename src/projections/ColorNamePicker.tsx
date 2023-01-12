@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Projection } from "../lib/projections";
 import { colorNames, setIn } from "../lib/utils";
+import "../stylesheets/color-name-picker.css";
 
 // https://www.w3schools.com/colors/colors_groups.asp
+
+const titleCase = (x: string) =>
+  `${x[0].toUpperCase()}${x.slice(1).toLowerCase()}`;
 
 export const colorGroups: Record<string, string[]> = {
   pink: [
@@ -214,12 +218,11 @@ function ColorNamePicker(props: {
     [initColorGroup[0]]: false,
   });
 
-  const showGroupIndicators = false;
   return (
     <div className="color-name-picker">
       <ul>
         {Object.entries(colorGroups).map(([groupName, colors]) => (
-          <li key={groupName}>
+          <li key={groupName} className="flex-down">
             <span
               className="color-group"
               onClick={() =>
@@ -227,14 +230,12 @@ function ColorNamePicker(props: {
               }
             >
               {/* https://en.wikipedia.org/wiki/Geometric_Shapes */}
-              {(showGroupIndicators ? (state[groupName] ? "▾ " : "▿ ") : "") +
-                groupName.slice(0, 1).toUpperCase() +
-                groupName.slice(1)}
+              {(state[groupName] ? "▾ " : "▿ ") + titleCase(groupName)}
             </span>
             <span>
               {colors.map((color) => (
                 <span
-                  key={color + "-swatch"}
+                  key={`${color}-swatch`}
                   className="color-swatch"
                   onClick={() => cb(color)}
                   style={{

@@ -1,0 +1,68 @@
+.color-name-picker {
+    width: 300px;
+}
+
+.color-name-picker ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.color-name-picker .color-group {
+    display: inline-block;
+    width: 75px;
+    font-weight: bold;
+    margin-bottom: 0.1rem;
+    margin-top: 0.2rem;
+}
+
+
+.color-name-picker .color-item,
+.color-name-picker .color-group {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.color-name-picker .color-item {
+    font-family: monospace;
+    margin-bottom: 0px;
+    /*  To make the color strips stretch all the way across */
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.color-name-picker .color-item:first-of-type {
+    margin-top: 2px;
+}
+
+.color-name-picker .color-item:last-of-type {
+    margin-bottom: 10px;
+}
+
+.color-name-picker .selected {
+    font-weight: bold;
+}
+
+
+.color-name-picker .color-swatch {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 1px;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.color-name-picker .buttons {
+    display: flex;
+    margin-top: 1rem;
+}
+
+.color-name-picker .buttons button:first-child {
+    margin-right: 0.5rem;
+}

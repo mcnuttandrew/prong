@@ -32,7 +32,7 @@ const EnumPicker: Component = (props) => {
   // TODO dont switch if this is the current value?
   return [
     {
-      label: "content",
+      label: "Replace with",
       elements: (content.enum as any[]).map((val: string) => ({
         type: "button",
         content: val,
@@ -217,10 +217,10 @@ function AnyOfObjOptionalFieldPicker(
   const inUseKeys = new Set(Object.keys(simpleParse(slice, {})));
   const switchNode = focusSwitchNodeForAnyOfObjField(node);
   return [
-    content.$$labeledType && {
-      label: "Description",
-      elements: [{ type: "display", content: content.$$labeledType }],
-    },
+    // content.$$labeledType && {
+    //   label: "Description",
+    //   elements: [{ type: "display", content: content.$$labeledType }],
+    // },
     !isObject && {
       label: "Switch to",
       elements: [
@@ -382,7 +382,7 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
   if (!Array.isArray(items) && items.enum) {
     return [
       {
-        label: "content",
+        label: "Add element",
         elements: (items.enum as any[]).map((content: string) => ({
           type: "button",
           content,
@@ -446,7 +446,7 @@ const PropertyNameComponent: Component = (props) => {
   const { node, fullCode } = props;
   return [
     {
-      label: "PROPERTY",
+      label: "Adjust Position",
       elements: [
         { type: "display", content: fullCode.slice(node.from, node.to) },
         {
@@ -567,7 +567,7 @@ const directionalMoves = (syntaxNode: SyntaxNode): MenuElement[] => {
 const ParentIsArrayComponent: Component = ({ node }) => {
   return [
     {
-      label: "PROPERTY",
+      label: "Adjust Position",
       elements: [
         {
           type: "button",

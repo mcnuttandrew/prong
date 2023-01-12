@@ -11,17 +11,19 @@ type MenuElementRenderer<T> = (props: {
   allElementsInGroupAreOfThisType: boolean;
 }) => JSX.Element;
 
-const DisplayElement: MenuElementRenderer<any> = (props) => (
-  <div
-    className={classNames({
-      "cm-annotation-render-widget-display": true,
-      "cm-annotation-widget-element": !props.isSelected,
-      "cm-annotation-widget-element-selected": props.isSelected,
-    })}
-  >
-    <ReactMarkdown>{props.menuElement.content.trim()}</ReactMarkdown>
-  </div>
-);
+const DisplayElement: MenuElementRenderer<any> = (props) => {
+  return (
+    <div
+      className={classNames({
+        "cm-annotation-render-widget-display": true,
+        "cm-annotation-widget-element": true,
+        "cm-annotation-widget-element-selected": props.isSelected,
+      })}
+    >
+      <ReactMarkdown>{props.menuElement.content.trim()}</ReactMarkdown>
+    </div>
+  );
+};
 
 const InputElement: MenuElementRenderer<any> = (props) => {
   const { isSelected, menuElement, eventDispatch } = props;
@@ -45,7 +47,7 @@ const InputElement: MenuElementRenderer<any> = (props) => {
     <div
       className={classNames({
         flex: true,
-        "cm-annotation-widget-element": !props.isSelected,
+        "cm-annotation-widget-element": true,
         "cm-annotation-widget-element-selected": props.isSelected,
       })}
     >
@@ -74,7 +76,7 @@ const ButtonElement: MenuElementRenderer<any> = ({
     className={classNames({
       flex: !allElementsInGroupAreOfThisType,
       "flex-down": allElementsInGroupAreOfThisType,
-      "cm-annotation-widget-element": !isSelected,
+      "cm-annotation-widget-element": true,
       "cm-annotation-widget-element-selected": isSelected,
     })}
   >
@@ -89,7 +91,7 @@ const ProjectionElement: MenuElementRenderer<any> = ({
 }) => (
   <div
     className={classNames({
-      "cm-annotation-widget-element": !isSelected,
+      "cm-annotation-widget-element": true,
       "cm-annotation-widget-element-selected": isSelected,
     })}
   >
