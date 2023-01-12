@@ -57,10 +57,8 @@ function simpleFillOut(content: JSONSchema7) {
     return simpleTypes[(content as any).type];
   } else if (content.anyOf && content.anyOf.length) {
     const childTypes = content.anyOf.map((x: any) => x.type);
-    return childTypes.every((x: string) => childTypes[0] === x) &&
-      childTypes[0] in simpleTypes
-      ? simpleTypes[childTypes[0]]
-      : null;
+    const firstSimpleType = childTypes.find((x) => x in simpleTypes);
+    return firstSimpleType ? simpleTypes[firstSimpleType] : null;
   } else if (content.enum) {
     // doesn't do anything rn
     return content.enum.filter((x) => typeof x === "string")[0];
@@ -74,12 +72,23 @@ const parseContent = (node: SyntaxNode, fullCode: string, defaultVal?: any) => {
   return simpleParse(slice, defaultVal);
 };
 
+const focusTargetForObjPicker = (node: SyntaxNode): SyntaxNode => {
+  if (node.type.name === "PropertyName") {
+    return node.parent?.lastChild!;
+  } else if (node.type.name === "Property") {
+    return node.lastChild!;
+  }
+  return node;
+};
+
 const ObjPicker: Component = (props) => {
-  const { content, node, fullCode } = props;
+  const { content, fullCode } = props;
+  const node = focusTargetForObjPicker(props.node);
   const containerNode = getContainingObject(node);
   const parsedContent = parseContent(containerNode, fullCode, {});
   const currentKeys = new Set(Object.keys(parsedContent));
   // TODO this gets this wrong if coming from { / }
+  // i think this is fixed now?
   const addFieldEntries: MenuElement[] = Object.entries(
     content.properties || {}
   )
@@ -92,7 +101,7 @@ const ObjPicker: Component = (props) => {
           type: "addObjectKey",
           payload: {
             key: `"${content}"`,
-            value: `${simpleFillOut(prop)}` as any,
+            value: `${simpleFillOut(prop)}`,
           },
           nodeId: nodeToId(node),
         },
@@ -160,7 +169,7 @@ const getUsedPropertiesForContainer = (node: SyntaxNode): SyntaxNode[] => {
   return props;
 };
 
-function materializeRequiredProps(content: any): string[] {
+function materializeRequiredProps(content: JSONSchema7): string[] {
   const requiredProps = new Set<string>(
     Array.isArray(content.required) ? content.required : []
   );
@@ -168,17 +177,26 @@ function materializeRequiredProps(content: any): string[] {
 }
 function materializeAnyOfOption(content: any): string {
   const requiredPropsArr = materializeRequiredProps(content);
-  return JSON.stringify(
-    Object.fromEntries(
-      requiredPropsArr.map((x) => [
-        x,
-        x in (content?.properties || {})
-          ? simpleFillOut(content.properties[x])
-          : "null",
-      ])
-    )
-  );
+  const props = requiredPropsArr.map((x) => {
+    const val =
+      x in (content?.properties || {})
+        ? simpleFillOut(content.properties[x])
+        : "null";
+    return [x, val];
+  });
+  const payload = JSON.stringify(Object.fromEntries(props));
+  return payload;
 }
+
+// todo this is the logic as that other function like this, merge?
+const focusSwitchNodeForAnyOfObjField = (node: SyntaxNode): SyntaxNode => {
+  if (node.type.name === "Property") {
+    return node.lastChild!;
+  } else if (node.type.name === "PropertyName") {
+    return node.parent?.lastChild!;
+  }
+  return node;
+};
 
 function AnyOfObjOptionalFieldPicker(
   content: any,
@@ -197,6 +215,7 @@ function AnyOfObjOptionalFieldPicker(
   const containerProps = getUsedPropertiesForContainer(containerNode);
   const slice = fullCode.slice(containerNode.from, containerNode.to);
   const inUseKeys = new Set(Object.keys(simpleParse(slice, {})));
+  const switchNode = focusSwitchNodeForAnyOfObjField(node);
   return [
     content.$$labeledType && {
       label: "Description",
@@ -209,7 +228,7 @@ function AnyOfObjOptionalFieldPicker(
           type: "button",
           onSelect: {
             type: "simpleSwap",
-            nodeId: nodeToId(node),
+            nodeId: nodeToId(switchNode),
             payload: requiredPropObject,
           },
           label: requiredPropObject,
@@ -219,7 +238,7 @@ function AnyOfObjOptionalFieldPicker(
           type: "button",
           onSelect: {
             type: "simpleSwap",
-            nodeId: nodeToId(node),
+            nodeId: nodeToId(switchNode),
             payload: "{}",
           },
           content: "empty object",
