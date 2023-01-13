@@ -199,12 +199,6 @@ const focusSwitchNodeForAnyOfObjField = (node: SyntaxNode): SyntaxNode => {
   return node;
 };
 
-// function materializeAddField(content: JSONSchema7Definition): string {
-//   const simpleTypes = { array: [], object: {} };
-//   console.log(content);
-//   return "null";
-// }
-
 function AnyOfObjOptionalFieldPicker(
   content: any,
   node: SyntaxNode,
@@ -289,11 +283,22 @@ const deduplicateAndSortArray = (arr: string[]): string[] => {
   return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b));
 };
 
+const targetingForAnyOfArray = (node: SyntaxNode): SyntaxNode => {
+  if (node.type.name === "PropertyName") {
+    return node.parent?.lastChild!;
+  }
+  if (node.type.name === "Property") {
+    return node.lastChild!;
+  }
+  return node;
+};
+
 function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
   const arrayType = (content?.items as any)?.type;
   if (!arrayType) {
     return [];
   }
+
   return [
     {
       label: "Switch to",
@@ -304,7 +309,7 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
 
           onSelect: {
             type: "simpleSwap",
-            nodeId: nodeToId(node),
+            nodeId: nodeToId(targetingForAnyOfArray(node)),
             payload: "[]",
           },
         },
@@ -402,26 +407,8 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
   if (!items || typeof items === "boolean") {
     return [];
   }
-  console.log("builder", content);
   const targetNode = retargetForArrayBuilder(node);
-  if (targetNode.parent?.type.name !== "array") {
-    return [
-      {
-        label: "Replace with",
-        elements: [
-          {
-            type: "button",
-            content: "Empty Array",
-            onSelect: {
-              type: "simpleSwap",
-              payload: "[]",
-              nodeId: nodeToId(targetNode),
-            },
-          },
-        ],
-      },
-    ];
-  }
+
   if (!Array.isArray(items) && items.enum) {
     return [
       {
@@ -470,8 +457,20 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
       return element;
     });
   });
-
-  return [{ label: "Insert", elements }];
+  const output: MenuRow[] = [{ label: "Insert", elements }];
+  if (targetNode.parent?.type.name !== "array") {
+    const inner: MenuElement = {
+      type: "button",
+      content: "Empty Array",
+      onSelect: {
+        type: "simpleSwap",
+        payload: "[]",
+        nodeId: nodeToId(node),
+      },
+    };
+    output.push({ label: "Replace with", elements: [inner] });
+  }
+  return output;
 };
 
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
@@ -537,14 +536,12 @@ function createObjectMatchingInput(
 }
 
 const retargetForArray = (node: SyntaxNode): SyntaxNode => {
-  console.log(node.type.name);
   if (node.type.name === "[" || node.type.name === "]") {
     return node.parent?.lastChild?.prevSibling!;
   }
   if (node.type.name === "Array") {
     return node.lastChild?.prevSibling!;
   }
-  console.log("confuseion", node);
   return node;
 };
 

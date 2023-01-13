@@ -32,7 +32,7 @@ function RenderPopoverDocked(props: {
     });
   }, [buildTriggerRerender]);
 
-  // todo make this messaging more precise, also support other actions from the dock
+  // todo also support other actions from the dock
   return (
     <div className="cm-dock">
       {!docked && <div>Press Escape to dock the menu</div>}

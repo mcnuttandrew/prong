@@ -227,9 +227,7 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
 
   // case: []
-  console.log("??????", syntaxNode.type.name, nextType);
   if (currentTypeIsBracket && nextType === "]") {
-    console.log("target?");
     from = syntaxNode.from;
     to = syntaxNode.to;
     value = `[${payload}`;
