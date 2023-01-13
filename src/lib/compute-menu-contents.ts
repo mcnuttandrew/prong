@@ -48,16 +48,17 @@ const EnumPicker: Component = (props) => {
 
 function simpleFillOut(content: JSONSchema7) {
   const simpleTypes: Record<string, any> = {
-    string: "",
+    string: '""',
     object: `{}`,
     number: 0,
     boolean: true,
     array: "[]",
+    null: '"null"',
   };
   if ((content as any).type in simpleTypes) {
     return simpleTypes[(content as any).type];
   } else if (content.anyOf && content.anyOf.length) {
-    const childTypes = content.anyOf.map((x: any) => x.type);
+    const childTypes = content.anyOf.map((x: any) => x.type).filter((x) => x);
     const firstSimpleType = childTypes.find((x) => x in simpleTypes);
     return firstSimpleType ? simpleTypes[firstSimpleType] : null;
   } else if (content.enum) {
@@ -270,7 +271,7 @@ function AnyOfObjOptionalFieldPicker(
               nodeId: nodeToId(node),
               payload: {
                 key: `"${x}"`,
-                value: simpleFillOut(content?.properties[x]),
+                value: `${simpleFillOut(content?.properties[x])}`,
               },
             },
           };

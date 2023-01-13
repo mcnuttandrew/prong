@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom";
 import { Extension } from "@codemirror/state";
 import { EditorView, showPanel, Panel } from "@codemirror/view";
 import { popOverState } from "./popover-menu/PopoverState";
-import { MenuRow } from "./compute-menu-contents";
+import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
 import { codeString, simpleUpdate } from "./utils";
@@ -95,7 +95,7 @@ function panel(view: EditorView): Panel {
         eventDispatch: () => (menuEvent: MenuEvent) => {
           const codeUpdate = modifyCodeByCommand(
             menuEvent,
-            node!,
+            retargetToAppropriateNode(node!),
             codeString(view, 0)
           );
           if (codeUpdate) {

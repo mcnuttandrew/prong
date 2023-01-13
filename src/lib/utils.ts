@@ -290,7 +290,7 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, fullCode: string) {
   const absPath = syntaxNodeToAbsPath(node);
   let parsedRoot = {};
   try {
-    parsedRoot = JSON.parse(fullCode);
+    parsedRoot = Json.parse(fullCode);
   } catch (e) {
     return [];
   }
