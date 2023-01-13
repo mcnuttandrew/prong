@@ -52,11 +52,13 @@ function simpleFillOut(content: JSONSchema7) {
     object: `{}`,
     number: 0,
     boolean: true,
+    array: "[]",
+    null: '"null"',
   };
   if ((content as any).type in simpleTypes) {
     return simpleTypes[(content as any).type];
   } else if (content.anyOf && content.anyOf.length) {
-    const childTypes = content.anyOf.map((x: any) => x.type);
+    const childTypes = content.anyOf.map((x: any) => x.type).filter((x) => x);
     const firstSimpleType = childTypes.find((x) => x in simpleTypes);
     return firstSimpleType ? simpleTypes[firstSimpleType] : null;
   } else if (content.enum) {
@@ -109,7 +111,7 @@ const ObjPicker: Component = (props) => {
     });
   return [
     addFieldEntries.length && {
-      label: "Add",
+      label: "Add X",
       elements: addFieldEntries,
     },
     {
@@ -260,15 +262,21 @@ function AnyOfObjOptionalFieldPicker(
       label: "Add",
       elements: addProps
         .filter((x) => !inUseKeys.has(x))
-        .map((x) => ({
-          type: "button",
-          content: x,
-          onSelect: {
-            type: "addObjectKey",
-            nodeId: nodeToId(node),
-            payload: { key: `"${x}"`, value: "null" },
-          },
-        })),
+        .map((x) => {
+          const value = simpleFillOut(content?.properties[x]);
+          return {
+            type: "button",
+            content: x,
+            onSelect: {
+              type: "addObjectKey",
+              nodeId: nodeToId(node),
+              payload: {
+                key: `"${x}"`,
+                value: value === "" ? '""' : value,
+              },
+            },
+          };
+        }),
     },
   ].filter((x) => x) as MenuRow[];
 }
@@ -277,11 +285,22 @@ const deduplicateAndSortArray = (arr: string[]): string[] => {
   return Array.from(new Set(arr)).sort((a, b) => a.localeCompare(b));
 };
 
+const targetingForAnyOfArray = (node: SyntaxNode): SyntaxNode => {
+  if (node.type.name === "PropertyName") {
+    return node.parent?.lastChild!;
+  }
+  if (node.type.name === "Property") {
+    return node.lastChild!;
+  }
+  return node;
+};
+
 function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
   const arrayType = (content?.items as any)?.type;
   if (!arrayType) {
     return [];
   }
+
   return [
     {
       label: "Switch to",
@@ -292,7 +311,7 @@ function AnyOfArray(content: JSONSchema7, node: SyntaxNode): MenuRow[] {
 
           onSelect: {
             type: "simpleSwap",
-            nodeId: nodeToId(node),
+            nodeId: nodeToId(targetingForAnyOfArray(node)),
             payload: "[]",
           },
         },
@@ -370,15 +389,28 @@ const generateSubItem = (subItem: JSONSchema7Definition) => {
   return { content: payload, payload };
 };
 
+// pick element before the bracket
+function retargetForArrayBuilder(node: SyntaxNode): SyntaxNode {
+  if (node.type.name === "Array") {
+    return node.lastChild?.prevSibling!;
+  }
+  if (node.type.name === "PropertyName") {
+    return node.parent?.lastChild?.lastChild?.prevSibling!;
+  }
+  if (node.type.name === "[" || node.type.name === "]") {
+    return node.parent?.lastChild?.prevSibling!;
+  }
+  // console.log("im confuse", node);
+  return node;
+}
+
 const ArrayItemBuilder: Component = ({ content, node }) => {
   const items = content.items;
   if (!items || typeof items === "boolean") {
     return [];
   }
-  const targetNode =
-    node.type.name === "Array"
-      ? node.lastChild?.prevSibling!
-      : node.parent?.lastChild?.prevSibling!;
+  const targetNode = retargetForArrayBuilder(node);
+
   if (!Array.isArray(items) && items.enum) {
     return [
       {
@@ -427,8 +459,20 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
       return element;
     });
   });
-
-  return [{ label: "Insert", elements }];
+  const output: MenuRow[] = [{ label: "Insert", elements }];
+  if (targetNode.parent?.type.name !== "array") {
+    const inner: MenuElement = {
+      type: "button",
+      content: "Empty Array",
+      onSelect: {
+        type: "simpleSwap",
+        payload: "[]",
+        nodeId: nodeToId(node),
+      },
+    };
+    output.push({ label: "Replace with", elements: [inner] });
+  }
+  return output;
 };
 
 const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
@@ -493,6 +537,16 @@ function createObjectMatchingInput(
   return JSON.stringify(Object.fromEntries(keys.map((el) => [el, ""])));
 }
 
+const retargetForArray = (node: SyntaxNode): SyntaxNode => {
+  if (node.type.name === "[" || node.type.name === "]") {
+    return node.parent?.lastChild?.prevSibling!;
+  }
+  if (node.type.name === "Array") {
+    return node.lastChild?.prevSibling!;
+  }
+  return node;
+};
+
 const ArrayComponent: Component = (props) => {
   const elements = [
     { label: "boolean", value: "false" },
@@ -501,7 +555,8 @@ const ArrayComponent: Component = (props) => {
     { label: "object", value: "{}" },
     { label: "array", value: "[]" },
   ];
-  const simpleObject = createObjectMatchingInput(props.fullCode, props.node);
+  const targetNode = retargetForArray(props.node);
+  const simpleObject = createObjectMatchingInput(props.fullCode, targetNode);
   if (simpleObject) {
     elements.push({ label: "inferred object", value: simpleObject });
   }
@@ -514,7 +569,7 @@ const ArrayComponent: Component = (props) => {
         onSelect: {
           type: "addElementAsSiblingInArray",
           payload: value,
-          nodeId: nodeToId(props.node.lastChild?.prevSibling!),
+          nodeId: nodeToId(targetNode),
         },
       })),
     },

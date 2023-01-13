@@ -21,7 +21,7 @@ import {
 import PopoverPlugin from "../lib/popover-menu";
 import ProjectionPlugin from "../lib/projections";
 import { simpleUpdate } from "../lib/utils";
-import Panel from "../lib/panel";
+import Panel from "../lib/dock";
 
 type Props = {
   onChange: (code: string) => void;

@@ -214,9 +214,10 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     const menuState = PopoverStateMachine(state.menuState, "open");
 
     // if were not showing the popover bail
-    if (!visibleStates.has(menuState)) {
-      return { ...state, tooltip: null };
-    }
+    // cant do that because the docked menu might need stuff
+    // if (!visibleStates.has(menuState)) {
+    //   return { ...state, tooltip: null };
+    // }
     const tooltip = createTooltip(popOverState);
     const currentCodeSlice = codeStringState(
       tr.state,

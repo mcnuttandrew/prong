@@ -192,7 +192,7 @@ Array [
       Object {
         "content": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
         "onSelect": Object {
-          "nodeId": "47-59",
+          "nodeId": "135-200",
           "payload": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
           "type": "addElementAsSiblingInArray",
         },
@@ -200,6 +200,20 @@ Array [
       },
     ],
     "label": "Insert",
+  },
+  Object {
+    "elements": Array [
+      Object {
+        "content": "Empty Array",
+        "onSelect": Object {
+          "nodeId": "47-59",
+          "payload": "[]",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+    ],
+    "label": "Replace with",
   },
   Object {
     "elements": Array [
@@ -224,7 +238,7 @@ Array [
         "type": "button",
       },
     ],
-    "label": "PROPERTY",
+    "label": "Adjust Position",
   },
 ]
 `;
