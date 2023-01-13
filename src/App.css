@@ -283,3 +283,10 @@ div[tabindex="-1"]:focus {
 
   right: 0 !important;
 }
+
+
+/* DOCK */
+
+.cm-dock {
+  background: #EEEEEE;
+}
