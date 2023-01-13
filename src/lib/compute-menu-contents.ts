@@ -52,6 +52,7 @@ function simpleFillOut(content: JSONSchema7) {
     object: `{}`,
     number: 0,
     boolean: true,
+    array: "[]",
   };
   if ((content as any).type in simpleTypes) {
     return simpleTypes[(content as any).type];
@@ -198,6 +199,12 @@ const focusSwitchNodeForAnyOfObjField = (node: SyntaxNode): SyntaxNode => {
   return node;
 };
 
+// function materializeAddField(content: JSONSchema7Definition): string {
+//   const simpleTypes = { array: [], object: {} };
+//   console.log(content);
+//   return "null";
+// }
+
 function AnyOfObjOptionalFieldPicker(
   content: any,
   node: SyntaxNode,
@@ -260,15 +267,20 @@ function AnyOfObjOptionalFieldPicker(
       label: "Add",
       elements: addProps
         .filter((x) => !inUseKeys.has(x))
-        .map((x) => ({
-          type: "button",
-          content: x,
-          onSelect: {
-            type: "addObjectKey",
-            nodeId: nodeToId(node),
-            payload: { key: `"${x}"`, value: "null" },
-          },
-        })),
+        .map((x) => {
+          return {
+            type: "button",
+            content: x,
+            onSelect: {
+              type: "addObjectKey",
+              nodeId: nodeToId(node),
+              payload: {
+                key: `"${x}"`,
+                value: simpleFillOut(content?.properties[x]),
+              },
+            },
+          };
+        }),
     },
   ].filter((x) => x) as MenuRow[];
 }
@@ -370,15 +382,46 @@ const generateSubItem = (subItem: JSONSchema7Definition) => {
   return { content: payload, payload };
 };
 
+// pick element before the bracket
+function retargetForArrayBuilder(node: SyntaxNode): SyntaxNode {
+  if (node.type.name === "Array") {
+    return node.lastChild?.prevSibling!;
+  }
+  if (node.type.name === "PropertyName") {
+    return node.parent?.lastChild?.lastChild?.prevSibling!;
+  }
+  if (node.type.name === "[" || node.type.name === "]") {
+    return node.parent?.lastChild?.prevSibling!;
+  }
+  // console.log("im confuse", node);
+  return node;
+}
+
 const ArrayItemBuilder: Component = ({ content, node }) => {
   const items = content.items;
   if (!items || typeof items === "boolean") {
     return [];
   }
-  const targetNode =
-    node.type.name === "Array"
-      ? node.lastChild?.prevSibling!
-      : node.parent?.lastChild?.prevSibling!;
+  console.log("builder", content);
+  const targetNode = retargetForArrayBuilder(node);
+  if (targetNode.parent?.type.name !== "array") {
+    return [
+      {
+        label: "Replace with",
+        elements: [
+          {
+            type: "button",
+            content: "Empty Array",
+            onSelect: {
+              type: "simpleSwap",
+              payload: "[]",
+              nodeId: nodeToId(targetNode),
+            },
+          },
+        ],
+      },
+    ];
+  }
   if (!Array.isArray(items) && items.enum) {
     return [
       {
@@ -493,6 +536,18 @@ function createObjectMatchingInput(
   return JSON.stringify(Object.fromEntries(keys.map((el) => [el, ""])));
 }
 
+const retargetForArray = (node: SyntaxNode): SyntaxNode => {
+  console.log(node.type.name);
+  if (node.type.name === "[" || node.type.name === "]") {
+    return node.parent?.lastChild?.prevSibling!;
+  }
+  if (node.type.name === "Array") {
+    return node.lastChild?.prevSibling!;
+  }
+  console.log("confuseion", node);
+  return node;
+};
+
 const ArrayComponent: Component = (props) => {
   const elements = [
     { label: "boolean", value: "false" },
@@ -501,7 +556,8 @@ const ArrayComponent: Component = (props) => {
     { label: "object", value: "{}" },
     { label: "array", value: "[]" },
   ];
-  const simpleObject = createObjectMatchingInput(props.fullCode, props.node);
+  const targetNode = retargetForArray(props.node);
+  const simpleObject = createObjectMatchingInput(props.fullCode, targetNode);
   if (simpleObject) {
     elements.push({ label: "inferred object", value: simpleObject });
   }
@@ -514,7 +570,7 @@ const ArrayComponent: Component = (props) => {
         onSelect: {
           type: "addElementAsSiblingInArray",
           payload: value,
-          nodeId: nodeToId(props.node.lastChild?.prevSibling!),
+          nodeId: nodeToId(targetNode),
         },
       })),
     },
