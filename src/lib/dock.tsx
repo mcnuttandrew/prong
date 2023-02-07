@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 import * as ReactDOM from "react-dom";
 import { Extension } from "@codemirror/state";
 import { EditorView, showPanel, Panel } from "@codemirror/view";
-import { popOverState } from "./popover-menu/PopoverState";
+import {
+  popOverState,
+  popoverEffectDispatch,
+} from "./popover-menu/PopoverState";
 import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
@@ -15,6 +18,7 @@ function RenderPopoverDocked(props: {
       menuContents: MenuRow[];
       eventDispatch: any;
       docked: boolean;
+      setDock: (setToDocked: boolean) => void;
     }) => void
   ) => void;
 }) {
@@ -23,20 +27,40 @@ function RenderPopoverDocked(props: {
   const [eventDispatch, setEventDispatch] = useState<
     (e: MenuEvent, shouldClose?: boolean) => void
   >(() => {});
-  const [docked, setDocked] = useState(false);
+  const [docked, setDockedState] = useState(false);
+  const [setDock, bindSetDock] = useState<(setToDocked: boolean) => void>(
+    () => {}
+  );
   useEffect(() => {
     buildTriggerRerender((props) => {
-      setDocked(props.docked);
+      setDockedState(props.docked);
       setMenuContents(props.menuContents);
       setEventDispatch(props.eventDispatch);
+      bindSetDock(props.setDock);
     });
   }, [buildTriggerRerender]);
 
   // todo also support other actions from the dock
   return (
     <div className="cm-dock">
-      {!docked && <div>Press Escape to dock the menu</div>}
-      {docked && <div>Press CMD+. to undock the menu</div>}
+      <div className="cm-dock-label">
+        {!docked && (
+          <div>
+            Press Escape to dock the menu or{" "}
+            {setDock && (
+              <button onClick={() => setDock(true)}>click here↓</button>
+            )}
+          </div>
+        )}
+        {docked && (
+          <div>
+            Press CMD+. to undock the menu or{" "}
+            {setDock && (
+              <button onClick={() => setDock(false)}>click here↑</button>
+            )}
+          </div>
+        )}
+      </div>
       {menuContents.map((row, idx) => {
         const { label, elements } = row;
         const initialType = (row.elements as any)?.type;
@@ -89,6 +113,12 @@ function panel(view: EditorView): Panel {
       // todo make this rerender less frequently
       triggerRerender({
         docked,
+        setDock: () => (setToDocked: boolean) => {
+          const effect = popoverEffectDispatch.of(
+            setToDocked ? "forceClose" : "forceOpen"
+          );
+          update.view.dispatch({ effects: [effect] });
+        },
         menuContents: docked
           ? update.state.field(popOverState).menuContents
           : [],

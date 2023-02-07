@@ -130,6 +130,14 @@
   z-index: 1000;
 }
 
+.cm-annotation-menu-control {
+  position: absolute;
+  border: none;
+  left: 0;
+  background: none;
+  cursor: pointer;
+}
+
 /* EDITOR STUFF */
 
 .editor-container {
@@ -289,4 +297,8 @@ div[tabindex="-1"]:focus {
 
 .cm-dock {
   background: #EEEEEE;
+}
+
+.cm-dock-label {
+  font-size: 10px;
 }
