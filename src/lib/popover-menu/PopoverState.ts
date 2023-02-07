@@ -1,4 +1,5 @@
 import { StateField, StateEffect, EditorState } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 import createTooltip from "./PopoverMenu";
 import { SyntaxNode } from "@lezer/common";
 import { Transaction } from "@codemirror/state";
@@ -173,6 +174,57 @@ export function getProjectionContents(
     .filter((proj) => proj.type === "tooltip");
 }
 
+const prepProjections =
+  (
+    node: SyntaxNode,
+    keyPath: (string | number)[],
+    currentValue: string,
+    setCode: (code: string) => void,
+    fullCode: string
+  ) =>
+  (proj: Projection): MenuRow => ({
+    label: proj.name,
+    elements: [
+      {
+        type: "projection",
+        element: proj.projection({
+          node,
+          keyPath,
+          currentValue,
+          setCode,
+          fullCode,
+        }),
+      },
+    ],
+  });
+
+export function buildProjectionsForMenu(props: {
+  fullCode: string;
+  node: SyntaxNode | null;
+  state: EditorState;
+  view: EditorView;
+  currentCodeSlice: string;
+}) {
+  const { fullCode, state, node, currentCodeSlice, view } = props;
+  if (!node) {
+    return [];
+  }
+  return getProjectionContents(state, node!, currentCodeSlice).map(
+    prepProjections(
+      node!,
+      syntaxNodeToKeyPath(node, fullCode),
+      currentCodeSlice,
+      (code) => {
+        view.dispatch({
+          changes: { from: 0, to: fullCode.length, insert: code },
+          selection: state.selection,
+        });
+      },
+      fullCode
+    )
+  );
+}
+
 export const popOverState: StateField<PopoverMenuState> = StateField.define({
   create: () => popoverMenuState,
   update(state, tr) {
@@ -224,11 +276,11 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       targetNode.from,
       targetNode.to
     );
+    const hasProjectionContent =
+      getProjectionContents(tr.state, targetNode, currentCodeSlice).length > 0;
     return {
       ...state,
-      hasProjectionContent:
-        getProjectionContents(tr.state, targetNode, currentCodeSlice).length >
-        0,
+      hasProjectionContent,
       menuContents: computeContents(tr, targetNode),
       menuState,
       selectedRouting,

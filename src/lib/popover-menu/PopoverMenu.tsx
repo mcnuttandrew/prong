@@ -11,7 +11,6 @@ import {
   codeString,
   classNames,
   codeStringState,
-  syntaxNodeToKeyPath,
 } from "../utils";
 
 import { modifyCodeByCommand, MenuEvent } from "../modify-json";
@@ -26,7 +25,7 @@ import {
   setRouting,
   popoverEffectDispatch,
   PopoverMenuState,
-  getProjectionContents,
+  buildProjectionsForMenu,
   visibleStates,
 } from "./PopoverState";
 
@@ -132,30 +131,6 @@ function PopOverMenuContents(props: {
   );
 }
 
-const prepProjections =
-  (
-    node: SyntaxNode,
-    keyPath: (string | number)[],
-    currentValue: string,
-    setCode: (code: string) => void,
-    fullCode: string
-  ) =>
-  (proj: Projection): MenuRow => ({
-    label: proj.name,
-    elements: [
-      {
-        type: "projection",
-        element: proj.projection({
-          node,
-          keyPath,
-          currentValue,
-          setCode,
-          fullCode,
-        }),
-      },
-    ],
-  });
-
 class Tooltip {
   dom: HTMLElement;
   constructor(
@@ -169,15 +144,20 @@ class Tooltip {
 
   update() {
     const { projections } = this.view.state.field(cmStatePlugin);
-    const { targetNode, menuState, selectedRouting, menuContents } =
-      this.view.state.field(this.stateField);
+    const {
+      targetNode,
+      menuState,
+      selectedRouting,
+      menuContents,
+      hasProjectionContent,
+    } = this.view.state.field(this.stateField);
 
     const popoverNotVisible = !visibleStates.has(menuState);
     if (
       !targetNode ||
       targetNode.type.name === "JsonText" ||
       popoverNotVisible ||
-      !menuContents.length
+      (!menuContents.length && !hasProjectionContent)
     ) {
       ReactDOM.unmountComponentAtNode(this.dom);
       return;
@@ -201,29 +181,15 @@ class Tooltip {
       targetNode.from,
       targetNode.to
     );
-    const keyPath = syntaxNodeToKeyPath(
-      targetNode,
-      codeStringState(this.view.state, 0)
-    );
+
     const fullCode = this.view.state.doc.toString();
-    const projectionContents = getProjectionContents(
-      this.view.state,
-      targetNode,
-      currentCodeSlice
-    ).map(
-      prepProjections(
-        targetNode,
-        keyPath,
-        currentCodeSlice,
-        (code) => {
-          this.view.dispatch({
-            changes: { from: 0, to: fullCode.length, insert: code },
-            selection: this.view.state.selection,
-          });
-        },
-        fullCode
-      )
-    );
+    const projectionContents = buildProjectionsForMenu({
+      fullCode,
+      currentCodeSlice,
+      node: targetNode,
+      view: this.view,
+      state: this.view.state,
+    });
 
     const element = React.createElement(PopOverMenuContents, {
       closeMenu,

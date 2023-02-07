@@ -6,6 +6,7 @@ import { EditorView, showPanel, Panel } from "@codemirror/view";
 import {
   popOverState,
   popoverEffectDispatch,
+  buildProjectionsForMenu,
 } from "./popover-menu/PopoverState";
 import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
@@ -110,6 +111,10 @@ function panel(view: EditorView): Panel {
       const popState = update.state.field(popOverState);
       const docked = popState.menuState === "hardClosed";
       const node = popState.targetNode;
+
+      const fullCode = codeString(view, 0);
+      const currentCodeSlice = codeString(view, node?.from || 0, node?.to || 0);
+
       // todo make this rerender less frequently
       triggerRerender({
         docked,
@@ -120,13 +125,22 @@ function panel(view: EditorView): Panel {
           update.view.dispatch({ effects: [effect] });
         },
         menuContents: docked
-          ? update.state.field(popOverState).menuContents
+          ? [
+              ...update.state.field(popOverState).menuContents,
+              ...buildProjectionsForMenu({
+                fullCode,
+                currentCodeSlice,
+                node,
+                view: update.view,
+                state: update.state,
+              }),
+            ]
           : [],
         eventDispatch: () => (menuEvent: MenuEvent) => {
           const codeUpdate = modifyCodeByCommand(
             menuEvent,
             retargetToAppropriateNode(node!),
-            codeString(view, 0)
+            fullCode
           );
           if (codeUpdate) {
             simpleUpdate(
