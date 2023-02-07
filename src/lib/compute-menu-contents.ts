@@ -55,7 +55,9 @@ function simpleFillOut(content: JSONSchema7) {
     array: "[]",
     null: '"null"',
   };
-  if ((content as any).type in simpleTypes) {
+  if (!content) {
+    return null;
+  } else if ((content as any).type in simpleTypes) {
     return simpleTypes[(content as any).type];
   } else if (content.anyOf && content.anyOf.length) {
     const childTypes = content.anyOf.map((x: any) => x.type).filter((x) => x);
@@ -263,7 +265,8 @@ function AnyOfObjOptionalFieldPicker(
       elements: addProps
         .filter((x) => !inUseKeys.has(x))
         .map((x) => {
-          const value = simpleFillOut(content?.properties[x]);
+          const props = content?.properties || {};
+          const value = simpleFillOut(props[x]);
           return {
             type: "button",
             content: x,
