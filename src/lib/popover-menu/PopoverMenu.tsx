@@ -31,7 +31,7 @@ import {
 } from "./PopoverState";
 
 function PopOverMenuContents(props: {
-  closeMenu: () => void;
+  closeMenu: (hardClose?: boolean) => void;
   codeUpdate: (codeUpdate: UpdateDispatch) => void;
   menuContents: MenuRow[];
   projections: Projection[];
@@ -79,6 +79,12 @@ function PopOverMenuContents(props: {
 
   return (
     <div className={"cm-annotation-menu"}>
+      <button
+        className="cm-annotation-menu-control"
+        onClick={() => closeMenu(true)}
+      >
+        ↓
+      </button>
       <div className="cm-annotation-widget-popover-container">
         {menuContents.map((row, idx) => {
           const { label, elements } = row;
@@ -181,8 +187,10 @@ class Tooltip {
     const codeUpdate = (codeUpdate: UpdateDispatch) => {
       simpleUpdate(this.view, codeUpdate.from, codeUpdate.to, codeUpdate.value);
     };
-    const closeMenu = () =>
-      this.view.dispatch({ effects: [popoverEffectDispatch.of("close")] });
+    const closeMenu = (hardClose?: boolean) =>
+      this.view.dispatch({
+        effects: [popoverEffectDispatch.of(hardClose ? "forceClose" : "close")],
+      });
 
     const setSelectedRouting = (route: [number, number]) => {
       this.view.dispatch({ effects: [setRouting.of(route)] });
