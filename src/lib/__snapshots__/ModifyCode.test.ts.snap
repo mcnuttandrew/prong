@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modifyCodeByCommand - addElementAsSiblingInArray (empty array) 1`] = `"{\\"example\\": [-9]}"`;
+
 exports[`modifyCodeByCommand - addElementAsSiblingInArray 1`] = `
 "{
     \\"a\\": {

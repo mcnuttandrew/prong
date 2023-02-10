@@ -56,6 +56,18 @@ test("modifyCodeByCommand - simpleSwap", () => {
   // const threeKey =
 });
 
+test("modifyCodeByCommand - addElementAsSiblingInArray (empty array)", () => {
+  const txt = `{"example": []}`;
+  const makeCmd = (): MenuEvent =>
+    copy({ type: "addElementAsSiblingInArray", payload: "-9" });
+  const targ = findNodeByText(txt, "[]")!;
+  const cmd1 = modifyCodeByCommand(makeCmd(), targ, txt)!;
+  const result1 = insertSwap(txt, cmd1);
+  expect(result1).toMatchSnapshot();
+
+  expect(true).toBe(true);
+});
+
 test("modifyCodeByCommand - addElementAsSiblingInArray", () => {
   const makeCmd = (): MenuEvent =>
     copy({ type: "addElementAsSiblingInArray", payload: "-9" });
