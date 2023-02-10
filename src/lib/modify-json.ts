@@ -215,7 +215,6 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   { payload },
   node
 ) => {
-  console.log(payload, node.type);
   // WIP
   let from: number;
   let to: number;

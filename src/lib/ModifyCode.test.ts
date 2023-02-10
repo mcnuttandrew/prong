@@ -60,7 +60,6 @@ test("modifyCodeByCommand - addElementAsSiblingInArray (empty array)", () => {
   const txt = `{"example": []}`;
   const makeCmd = (): MenuEvent =>
     copy({ type: "addElementAsSiblingInArray", payload: "-9" });
-  // insert from left
   const targ = findNodeByText(txt, "[]")!;
   const cmd1 = modifyCodeByCommand(makeCmd(), targ, txt)!;
   const result1 = insertSwap(txt, cmd1);
