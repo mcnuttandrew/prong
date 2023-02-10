@@ -213,12 +213,17 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
 // not sure how to target an empty array?
 const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   { payload },
-  syntaxNode
+  node
 ) => {
+  console.log(payload, node.type);
   // WIP
   let from: number;
   let to: number;
   let value = payload;
+  let syntaxNode = node;
+  if (node.type.name === "Array") {
+    syntaxNode = syntaxNode.firstChild!;
+  }
 
   const currentTypeIsBracket = syntaxNode.type.name === "[";
   // const prevType = syntaxNode.prevSibling?.type.name || "⚠";
