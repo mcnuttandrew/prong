@@ -2,16 +2,11 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { javascript } from "@codemirror/lang-javascript";
-import { Compartment } from "@codemirror/state";
 import { basicSetup } from "codemirror";
 import { EditorView, ViewUpdate } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-import { tags } from "@lezer/highlight";
-import { HighlightStyle } from "@codemirror/language";
-import { syntaxHighlighting } from "@codemirror/language";
 
 import * as vegaExpression from "vega-expression";
-
 import { walk } from "estree-walker";
 
 import {
@@ -23,16 +18,10 @@ import {
 import { simpleUpdate } from "../lib/utils";
 
 let myTheme = EditorView.theme({
-  "&": { backgroundColor: "white" },
-
-  "&.cm-focused .cm-selectionBackground, ::selection": {
-    backgroundColor: "white",
-  },
-  ".cm-activeLine": { backgroundColor: "white" },
+  ".cm-activeLine": { backgroundColor: "none" },
   ".cm-gutters": { display: "none" },
 });
 
-const languageConf = new Compartment();
 export type SchemaMap = Record<string, any>;
 
 function tryExpression(code: string, signals: string[]): null | string {
@@ -66,22 +55,21 @@ export default function Editor(props: {
   const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
-
   // primary effect, initialize the editor etc
   useEffect(() => {
     const localExtension = EditorView.updateListener.of((v: ViewUpdate) => {
       if (v.docChanged) {
+        console.log(v);
         const newCode = v.state.doc.toString();
         onChange(newCode);
-
         onError(tryExpression(newCode, props.terms));
       }
     });
+
     const editorState = EditorState.create({
       extensions: [
         basicSetup,
-        // languageConf.of(javascript({ jsx: false, typescript: false })),
-        syntaxHighlighting(highlight, { fallback: true }),
+        javascript(),
         myTheme,
         localExtension,
         autocomplete(terms),
@@ -103,7 +91,7 @@ export default function Editor(props: {
     }
   }, [code, view]);
   return (
-    <div className="editor-container">
+    <div className="expression-editor">
       <div ref={cmParent} />
     </div>
   );
@@ -311,30 +299,3 @@ const terms = [
 ];
 
 const termSet = new Set(terms);
-
-const blue = "#0551A5";
-const green = "#17885C";
-const red = "#A21615";
-const black = "#000";
-const highlight = HighlightStyle.define([
-  // { tag: tags.string, color: blue },
-  // { tag: tags.number, color: green },
-  // { tag: tags.bool, color: blue },
-  // { tag: tags.propertyName, color: red },
-  // { tag: tags.null, color: blue },
-  // { tag: tags.separator, color: black },
-  // { tag: tags.squareBracket, color: black },
-  // { tag: tags.brace, color: black },
-  // { tag: tags.literal, color: "pink" },
-  { tag: tags.comment, color: "#fc6" },
-  { tag: tags.name, color: "#fc6" },
-  { tag: tags.typeName, color: "#fc6" },
-  { tag: tags.propertyName, color: "#fc6" },
-  { tag: tags.literal, color: "#fc6" },
-  { tag: tags.string, color: "#fc6" },
-  { tag: tags.number, color: "#fc6" },
-  { tag: tags.operator, color: "#fc6" },
-  { tag: tags.punctuation, color: "#fc6" },
-  { tag: tags.bracket, color: "#fc6" },
-  { tag: tags.keyword, color: "#f00" },
-]);
