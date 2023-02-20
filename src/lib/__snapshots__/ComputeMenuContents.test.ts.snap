@@ -39,6 +39,7 @@ Object {
         "vegetables": Object {
           "$$labeledType": "vegetables",
           "items": Object {
+            "$$refName": "#/$defs/veggie",
             "properties": Object {
               "veggieLike": Object {
                 "$$labeledType": "veggieLike",
@@ -72,6 +73,7 @@ Object {
   ],
   "135-200": Array [
     Object {
+      "$$refName": "#/$defs/veggie",
       "properties": Object {
         "veggieLike": Object {
           "$$labeledType": "veggieLike",
@@ -133,6 +135,7 @@ Object {
     Object {
       "$$labeledType": "vegetables",
       "items": Object {
+        "$$refName": "#/$defs/veggie",
         "properties": Object {
           "veggieLike": Object {
             "$$labeledType": "veggieLike",
@@ -156,6 +159,7 @@ Object {
   ],
   "67-129": Array [
     Object {
+      "$$refName": "#/$defs/veggie",
       "properties": Object {
         "veggieLike": Object {
           "$$labeledType": "veggieLike",

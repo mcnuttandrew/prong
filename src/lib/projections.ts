@@ -36,17 +36,25 @@ export interface ProjectionTooltip extends ProjectionBase {
   type: "tooltip";
 }
 
+export interface ProjectionFullTooltip extends ProjectionBase {
+  type: "full-tooltip";
+}
+
 export interface ProjectionInline extends ProjectionBase {
   type: "inline";
   hasInternalState: boolean;
   mode: "replace" | "prefix" | "suffix";
 }
 
-export type Projection = ProjectionInline | ProjectionTooltip;
+export type Projection =
+  | ProjectionInline
+  | ProjectionTooltip
+  | ProjectionFullTooltip;
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
   const { projectionsInUse } = view.state.field(projectionState);
+  const { schemaTypings } = view.state.field(cmStatePlugin);
 
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
@@ -60,7 +68,8 @@ function createWidgets(view: EditorView) {
             const projWidget = InlineProjectWidgetFactory(
               projection.projection as ProjectionInline,
               currentCodeSlice,
-              node
+              node,
+              schemaTypings[`${node.from}-${node.to}`]
             );
 
             projWidget
@@ -134,7 +143,8 @@ export const projectionState: StateField<ProjectionState> = StateField.define({
 function shouldAddProjection(
   syntaxNode: SyntaxNode,
   state: EditorState,
-  projection: Projection
+  projection: Projection,
+  typings: any[]
 ) {
   const keyPath = syntaxNodeToKeyPath(syntaxNode, codeStringState(state, 0));
   const currentCodeSlice = codeStringState(
@@ -142,12 +152,17 @@ function shouldAddProjection(
     syntaxNode.from,
     syntaxNode.to
   );
-  return runProjectionQuery(projection.query, keyPath, currentCodeSlice);
+  return runProjectionQuery(
+    projection.query,
+    keyPath,
+    currentCodeSlice,
+    typings
+  );
 }
 
 function identifyProjectionLocations(state: EditorState) {
   const locations: ProjectionMaterialization[] = [];
-  const { projections } = state.field(cmStatePlugin);
+  const { projections, schemaTypings } = state.field(cmStatePlugin);
   const inlineProjections = projections.filter(
     (proj) => proj.type === "inline"
   ) as ProjectionInline[];
@@ -165,8 +180,8 @@ function identifyProjectionLocations(state: EditorState) {
         ) {
           return;
         }
-
-        if (shouldAddProjection(node, state, projection)) {
+        const typings = schemaTypings[`${node.from}-${node.to}`];
+        if (shouldAddProjection(node, state, projection, typings)) {
           locations.push({ from, to, projection });
         }
       });

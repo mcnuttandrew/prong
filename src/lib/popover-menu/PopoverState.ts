@@ -14,7 +14,11 @@ import {
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 
-import { generateMenuContent, MenuRow } from "../compute-menu-contents";
+import {
+  generateMenuContent,
+  MenuRow,
+  MenuElement,
+} from "../compute-menu-contents";
 
 export type UpdateDispatch = { from: number; to: number; value: string };
 export type SelectionRoute = [number, number];
@@ -162,41 +166,21 @@ function materializeTypings(tr: Transaction, targetNode: SyntaxNode) {
   return schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
 }
 
-export function getProjectionContents(
+const tooltipTypes = new Set(["tooltip", "full-tooltip"]);
+function getProjectionContents(
   state: EditorState,
   targetNode: SyntaxNode,
   targetNodeValue: string
 ): Projection[] {
-  const { projections } = state.field(cmStatePlugin);
+  const { projections, schemaTypings } = state.field(cmStatePlugin);
   const keyPath = syntaxNodeToKeyPath(targetNode, codeStringState(state, 0));
+  const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections
-    .filter((proj) => runProjectionQuery(proj.query, keyPath, targetNodeValue))
-    .filter((proj) => proj.type === "tooltip");
+    .filter((proj) =>
+      runProjectionQuery(proj.query, keyPath, targetNodeValue, typings)
+    )
+    .filter((proj) => tooltipTypes.has(proj.type));
 }
-
-const prepProjections =
-  (
-    node: SyntaxNode,
-    keyPath: (string | number)[],
-    currentValue: string,
-    setCode: (code: string) => void,
-    fullCode: string
-  ) =>
-  (proj: Projection): MenuRow => ({
-    label: proj.name,
-    elements: [
-      {
-        type: "projection",
-        element: proj.projection({
-          node,
-          keyPath,
-          currentValue,
-          setCode,
-          fullCode,
-        }),
-      },
-    ],
-  });
 
 export function buildProjectionsForMenu(props: {
   fullCode: string;
@@ -204,25 +188,51 @@ export function buildProjectionsForMenu(props: {
   state: EditorState;
   view: EditorView;
   currentCodeSlice: string;
-}) {
+}): MenuRow[] {
   const { fullCode, state, node, currentCodeSlice, view } = props;
   if (!node) {
     return [];
   }
-  return getProjectionContents(state, node!, currentCodeSlice).map(
-    prepProjections(
-      node!,
-      syntaxNodeToKeyPath(node, fullCode),
-      currentCodeSlice,
-      (code) => {
-        view.dispatch({
-          changes: { from: 0, to: fullCode.length, insert: code },
-          selection: state.selection,
-        });
+  const keyPath = syntaxNodeToKeyPath(node, fullCode);
+  return getProjectionContents(state, node!, currentCodeSlice).map((proj) => ({
+    label: proj.name,
+    elements: [
+      {
+        type: "projection",
+        projectionType: proj.type,
+        element: proj.projection({
+          node,
+          keyPath,
+          currentValue: currentCodeSlice,
+          setCode: (code) => {
+            view.dispatch({
+              changes: { from: 0, to: fullCode.length, insert: code },
+              selection: state.selection,
+            });
+          },
+          fullCode,
+        }),
       },
-      fullCode
-    )
+    ],
+  }));
+}
+
+export function maybeFilterToFullProjection(menuRows: MenuRow[]): MenuRow[] {
+  let noFullProjection = true;
+  let projection: null | MenuElement = null;
+  let projLabel: null | string = null;
+  menuRows.forEach((row) =>
+    row.elements.forEach((el) => {
+      if (el.type === "projection" && el.projectionType === "full-tooltip") {
+        noFullProjection = false;
+        projection = el;
+        projLabel = row.label;
+      }
+    })
   );
+  return noFullProjection
+    ? menuRows
+    : ([{ elements: [projection!], label: projLabel! }] as MenuRow[]);
 }
 
 export const popOverState: StateField<PopoverMenuState> = StateField.define({

@@ -6,9 +6,8 @@ import { bin } from "d3-array";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { SyntaxNode } from "@lezer/common";
 import { ProjectionProps } from "../lib/projections";
-
-import * as vega from "vega";
-import { parse, View } from "vega";
+import { isDataTable } from "./example-utils";
+import { analyzeVegaCode } from "./example-utils";
 
 import { simpleParse } from "../lib/utils";
 
@@ -82,23 +81,6 @@ const connectedScatterPlotSpec = `{
     }
   ]
 }`;
-
-function isDataTable(input: any): boolean {
-  // array
-  if (!Array.isArray(input)) {
-    return false;
-  }
-  // array of objects
-  if (!input.every((x) => typeof x === "object")) {
-    return false;
-  }
-
-  const types = Array.from(
-    new Set(input.flatMap((row) => Object.values(row).map((el) => typeof el)))
-  );
-  const allowed = new Set(["string", "number", "boolean"]);
-  return types.every((typ) => allowed.has(typ));
-}
 
 type DataTable = Record<string, number | string | boolean | undefined>[];
 // this is an imperfect histogram
@@ -243,24 +225,12 @@ function InSituFigure1() {
     useState<PreComputedHistograms>({});
 
   useEffect(() => {
-    try {
-      const view = new View(
-        parse(simpleParse(currentCode, {}), {})
-      ).initialize();
-      view.runAsync().then(() => {
-        const x = view.getState({
-          signals: vega.falsy,
-          data: vega.truthy,
-          recurse: true,
-        });
-        const namedPairs = Object.entries(x.data)
-          .filter(([key, dataSet]) => isDataTable(dataSet))
-          .map(([key, data]) => [key, createHistograms(data as DataTable)]);
-        setPrecomputedHistograms(Object.fromEntries(namedPairs));
-      });
-    } catch (err) {
-      console.log(err);
-    }
+    analyzeVegaCode(currentCode, ({ data }) => {
+      const namedPairs = Object.entries(data)
+        .filter(([key, dataSet]) => isDataTable(dataSet))
+        .map(([key, data]) => [key, createHistograms(data as DataTable)]);
+      setPrecomputedHistograms(Object.fromEntries(namedPairs));
+    });
   }, [currentCode]);
 
   return (

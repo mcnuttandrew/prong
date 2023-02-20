@@ -199,12 +199,14 @@ const initialState = Object.fromEntries(
   Object.keys(colorGroups).map((k) => [k, false])
 );
 
+const stripColor = (color: string) => color.slice(1, color.length - 1);
+
 function ColorNamePicker(props: {
   cb: (color: string | null) => void;
   initColor: string;
 }): JSX.Element {
   const { cb, initColor } = props;
-  const strippedInitColor = initColor.slice(1, initColor.length - 1);
+  const strippedInitColor = stripColor(initColor);
   const initColorGroup = Object.entries(colorGroups).find(
     ([_, colors]) =>
       colors.includes(initColor) || colors.includes(strippedInitColor)
@@ -267,20 +269,11 @@ function ColorNamePicker(props: {
           </li>
         ))}
       </ul>
-      <div className="buttons">
-        <button
-          onClick={() =>
-            cb(colorNames[initColor] || colorNames[strippedInitColor])
-          }
-        >
-          Convert to hex
-        </button>
-      </div>
     </div>
   );
 }
 
-const ColorNameProjection: Projection = {
+export const ColorNameProjection: Projection = {
   query: { type: "value", query: Object.keys(colorNames) },
   type: "tooltip",
   projection: ({ keyPath, currentValue, setCode, fullCode }) => {
@@ -295,4 +288,24 @@ const ColorNameProjection: Projection = {
   },
   name: "ColorNameProjection",
 };
-export default ColorNameProjection;
+
+export const HexConversionProject: Projection = {
+  query: { type: "value", query: Object.keys(colorNames) },
+  type: "tooltip",
+  projection: ({ keyPath, currentValue, setCode, fullCode }) => {
+    return (
+      <div className="buttons">
+        <button
+          onClick={() => {
+            const newColor =
+              colorNames[currentValue] || colorNames[stripColor(currentValue)];
+            setCode(setIn(keyPath, `"${newColor}"`, fullCode));
+          }}
+        >
+          Convert to hex
+        </button>
+      </div>
+    );
+  },
+  name: "HexConversionProjection",
+};

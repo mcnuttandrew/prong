@@ -5,6 +5,7 @@ import { MenuEvent, boundCheck } from "./modify-json";
 import { SchemaMap } from "../components/Editor";
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import { simpleParse } from "./utils";
+import { Projection } from "./projections";
 
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
@@ -16,7 +17,12 @@ export type MenuElement =
     }
   | { type: "display"; label?: string; content: string }
   | { type: "free-input"; label: string }
-  | { type: "projection"; label?: string; element: JSX.Element };
+  | {
+      type: "projection";
+      projectionType: Projection["type"];
+      label?: string;
+      element: JSX.Element;
+    };
 interface ComponentProps {
   content: JSONSchema7;
   node: SyntaxNode;
@@ -135,15 +141,19 @@ const ObjPicker: Component = (props) => {
 
 // TODO flatten nested anyOfs and remove duplicates
 function flattenAnyOf(content: JSONSchema7): any {
-  if (!content || !content.anyOf) {
+  if (!content || !(content.anyOf || content.oneOf)) {
     return content;
   }
-  return content.anyOf.reduce((acc: any[], row: any) => {
-    if (row.description) {
-      acc.push({ description: row.description });
-    }
-    return acc.concat(row.anyOf ? flattenAnyOf(row) : row);
-  }, []);
+  return [...(content.anyOf || []), ...(content.oneOf || [])].reduce(
+    (acc: any[], row: any) => {
+      if (row.description) {
+        acc.push({ description: row.description });
+      }
+      const hasNext = row.anyOf || row.oneOf || null;
+      return acc.concat(hasNext ? flattenAnyOf(row) : row);
+    },
+    []
+  );
 }
 
 function removeDupsInAnyOf(content: JSONSchema7[]) {
@@ -507,6 +517,27 @@ const PropertyNameComponent: Component = (props) => {
   ];
 };
 
+const PropertyValueComponent: Component = (props) => {
+  const { node, fullCode } = props;
+  return [
+    {
+      label: "Adjust Position",
+      elements: [
+        { type: "display", content: fullCode.slice(node.from, node.to) },
+        {
+          type: "button",
+          content: "remove key",
+          onSelect: {
+            type: "removeObjectKey",
+            nodeId: nodeToId(node.parent?.firstChild!),
+          },
+        },
+        ...directionalMoves(node.parent?.firstChild!),
+      ],
+    },
+  ];
+};
+
 const ObjectComponent: Component = ({ node }) => [
   {
     label: "Add Field",
@@ -660,6 +691,7 @@ const menuSwitch: componentContainer = {
 const typeBasedComponents: componentContainer = {
   Object: ObjectComponent,
   PropertyName: PropertyNameComponent,
+  PropertyValue: PropertyValueComponent,
   Array: ArrayComponent,
   String: makeSimpleComponent("string"),
   Number: makeSimpleComponent("number"),
@@ -735,6 +767,10 @@ function simpleMerge(content: MenuRow[]): MenuRow[] {
 function cleanSections(content: MenuRow[]): MenuRow[] {
   return content.filter((x) => x.elements.length);
 }
+const mergeFunctions =
+  (a: any, b: any) =>
+  (...args: any) =>
+    [...a(...args), ...b(...args)];
 
 export function generateMenuContent(
   syntaxNode: SyntaxNode,
@@ -743,7 +779,7 @@ export function generateMenuContent(
 ): MenuRow[] {
   const schemaChunk = getSchemaForRetargetedNode(syntaxNode, schemaMap);
 
-  //   TODO these should be functions
+  // TODO these should be functions
   const type = syntaxNode.type.name;
   let typeBasedProperty: Component | null = null;
   if (typeBasedComponents[type]) {
@@ -752,6 +788,15 @@ export function generateMenuContent(
     console.log("missing imp for", type);
   } else if (typeBasedProperty && !typeBasedProperty[type]) {
     console.log("missing type imp for", type);
+  }
+
+  if (
+    syntaxNode.parent?.type.name === "Property" &&
+    syntaxNode.type.name !== "PropertyName"
+  ) {
+    typeBasedProperty = typeBasedProperty
+      ? mergeFunctions(typeBasedProperty, PropertyValueComponent)
+      : PropertyValueComponent;
   }
 
   let contentBasedItem: Component | null = null;
@@ -767,12 +812,20 @@ export function generateMenuContent(
     contentBasedItem = menuSwitch.ArrayItemBuilder;
   }
 
-  //   assemble the content for display
+  // assemble the content for display
   const content: MenuRow[] = [];
   if (schemaChunk?.description) {
     content.push({
       label: "Description",
       elements: [{ type: "display", content: schemaChunk.description }],
+    });
+  }
+  // @ts-ignore
+  if (schemaChunk?.$$refName) {
+    content.push({
+      label: "Description",
+      // @ts-ignore
+      elements: [{ type: "display", content: schemaChunk.$$refName }],
     });
   }
   const componentProps: ComponentProps = {
@@ -795,5 +848,6 @@ export function generateMenuContent(
   const computedMenuContents = cleanSections(
     simpleMerge(content.filter((x) => x))
   );
+  // console.log(schemaChunk);
   return computedMenuContents;
 }
