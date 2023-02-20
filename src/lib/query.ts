@@ -44,10 +44,10 @@ function schemaMatchQuery(query: string[], typings: any): boolean {
   let refNames = [];
   if (Array.isArray(typings)) {
     refNames = typings
-      .map((type: JSONSchema) => type?.$$refName)
+      .flatMap((type: JSONSchema) => [type?.$$refName, type?.$$labeledType])
       .filter((x) => x);
   } else if (typeof typings === "object") {
-    refNames = [typings?.$$refName].filter((x) => x);
+    refNames = [typings?.$$refName, typings?.$$labeledType].filter((x) => x);
   }
   const result = refNames.some((type) => {
     const last = type?.split("/").at(-1);

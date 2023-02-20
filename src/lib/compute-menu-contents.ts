@@ -848,6 +848,6 @@ export function generateMenuContent(
   const computedMenuContents = cleanSections(
     simpleMerge(content.filter((x) => x))
   );
-  console.log(computedMenuContents, schemaChunk);
+  // console.log(schemaChunk);
   return computedMenuContents;
 }

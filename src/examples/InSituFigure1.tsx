@@ -7,9 +7,7 @@ import { scaleBand, scaleLinear } from "d3-scale";
 import { SyntaxNode } from "@lezer/common";
 import { ProjectionProps } from "../lib/projections";
 import { isDataTable } from "./example-utils";
-
-import * as vega from "vega";
-import { parse, View } from "vega";
+import { analyzeVegaCode } from "./example-utils";
 
 import { simpleParse } from "../lib/utils";
 
@@ -227,24 +225,12 @@ function InSituFigure1() {
     useState<PreComputedHistograms>({});
 
   useEffect(() => {
-    try {
-      const view = new View(
-        parse(simpleParse(currentCode, {}), {})
-      ).initialize();
-      view.runAsync().then(() => {
-        const x = view.getState({
-          signals: vega.falsy,
-          data: vega.truthy,
-          recurse: true,
-        });
-        const namedPairs = Object.entries(x.data)
-          .filter(([key, dataSet]) => isDataTable(dataSet))
-          .map(([key, data]) => [key, createHistograms(data as DataTable)]);
-        setPrecomputedHistograms(Object.fromEntries(namedPairs));
-      });
-    } catch (err) {
-      console.log(err);
-    }
+    analyzeVegaCode(currentCode, ({ data }) => {
+      const namedPairs = Object.entries(data)
+        .filter(([key, dataSet]) => isDataTable(dataSet))
+        .map(([key, data]) => [key, createHistograms(data as DataTable)]);
+      setPrecomputedHistograms(Object.fromEntries(namedPairs));
+    });
   }, [currentCode]);
 
   return (
