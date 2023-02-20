@@ -200,6 +200,7 @@ export function resolveSchemaContent(
       while (next.$ref) {
         const ref = next.$ref;
         const segments = ref.split("#", 2);
+        next.$$refName = next.$ref;
         delete next.$ref;
         if (segments[0].length > 0) {
           openPromises.push(

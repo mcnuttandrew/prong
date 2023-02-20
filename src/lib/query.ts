@@ -1,9 +1,12 @@
+import { JSONSchema } from "./JSONSchemaTypes";
+
 type functionQueryType = (value: string) => boolean;
 export type ProjectionQuery =
   | { type: "function"; query: functionQueryType }
   | { type: "index"; query: (number | string)[] }
   | { type: "regex"; query: RegExp }
-  | { type: "value"; query: string[] };
+  | { type: "value"; query: string[] }
+  | { type: "schemaMatch"; query: string[] };
 
 export function keyPathMatchesQuery(
   query: (string | number)[],
@@ -37,11 +40,33 @@ function regexQuery(query: RegExp, nodeValue: string) {
   return !!nodeValue.match(query);
 }
 
+function schemaMatchQuery(query: string[], typings: any): boolean {
+  let refNames = [];
+  if (Array.isArray(typings)) {
+    refNames = typings
+      .map((type: JSONSchema) => type?.$$refName)
+      .filter((x) => x);
+  } else if (typeof typings === "object") {
+    refNames = [typings?.$$refName].filter((x) => x);
+  }
+  const result = refNames.some((type) => {
+    const last = type?.split("/").at(-1);
+    return query.some((queryKey) => queryKey === last);
+  });
+  return result;
+}
+
+const simpleMatchers = {
+  regex: regexQuery,
+  value: valueQuery,
+  function: functionQuery,
+};
 let cache: Record<string, boolean> = {};
 export function runProjectionQuery(
   query: ProjectionQuery,
   keyPath: (string | number)[],
-  nodeValue: string
+  nodeValue: string,
+  typings: any[]
 ): boolean {
   const cacheKey = `${JSON.stringify(query)}-${JSON.stringify(
     keyPath
@@ -56,13 +81,12 @@ export function runProjectionQuery(
       pass = keyPathMatchesQuery(query.query, keyPath);
       break;
     case "value":
-      pass = valueQuery(query.query, nodeValue);
-      break;
     case "function":
-      pass = functionQuery(query.query, nodeValue);
-      break;
     case "regex":
-      pass = regexQuery(query.query, nodeValue);
+      pass = simpleMatchers[query.type](query.query as any, nodeValue);
+      break;
+    case "schemaMatch":
+      pass = schemaMatchQuery(query.query, typings);
       break;
     default:
       return false;

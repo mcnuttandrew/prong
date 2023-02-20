@@ -6,6 +6,7 @@ import { bin } from "d3-array";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { SyntaxNode } from "@lezer/common";
 import { ProjectionProps } from "../lib/projections";
+import { isDataTable } from "./example-utils";
 
 import * as vega from "vega";
 import { parse, View } from "vega";
@@ -82,23 +83,6 @@ const connectedScatterPlotSpec = `{
     }
   ]
 }`;
-
-function isDataTable(input: any): boolean {
-  // array
-  if (!Array.isArray(input)) {
-    return false;
-  }
-  // array of objects
-  if (!input.every((x) => typeof x === "object")) {
-    return false;
-  }
-
-  const types = Array.from(
-    new Set(input.flatMap((row) => Object.values(row).map((el) => typeof el)))
-  );
-  const allowed = new Set(["string", "number", "boolean"]);
-  return types.every((typ) => allowed.has(typ));
-}
 
 type DataTable = Record<string, number | string | boolean | undefined>[];
 // this is an imperfect histogram

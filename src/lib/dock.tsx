@@ -7,6 +7,7 @@ import {
   popOverState,
   popoverEffectDispatch,
   buildProjectionsForMenu,
+  maybeFilterToFullProjection,
 } from "./popover-menu/PopoverState";
 import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
@@ -125,7 +126,7 @@ function panel(view: EditorView): Panel {
           update.view.dispatch({ effects: [effect] });
         },
         menuContents: docked
-          ? [
+          ? maybeFilterToFullProjection([
               ...update.state.field(popOverState).menuContents,
               ...buildProjectionsForMenu({
                 fullCode,
@@ -134,7 +135,7 @@ function panel(view: EditorView): Panel {
                 view: update.view,
                 state: update.state,
               }),
-            ]
+            ])
           : [],
         eventDispatch: () => (menuEvent: MenuEvent) => {
           const codeUpdate = modifyCodeByCommand(

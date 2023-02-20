@@ -27,6 +27,7 @@ import {
   PopoverMenuState,
   buildProjectionsForMenu,
   visibleStates,
+  maybeFilterToFullProjection,
 } from "./PopoverState";
 
 function PopOverMenuContents(props: {
@@ -191,10 +192,16 @@ class Tooltip {
       state: this.view.state,
     });
 
+    // todo use this cache
+    let fullMenuContents = maybeFilterToFullProjection([
+      ...menuContents,
+      ...projectionContents,
+    ]);
+
     const element = React.createElement(PopOverMenuContents, {
       closeMenu,
       codeUpdate,
-      menuContents: [...menuContents, ...projectionContents],
+      menuContents: fullMenuContents,
       projections,
       selectedRouting: menuState === "inUse" ? selectedRouting : false,
       setSelectedRouting,

@@ -81,7 +81,8 @@ class InlineProjectionWidget extends WidgetType {
 const ProjectionWidgetFactory = (
   projection: ProjectionInline,
   currentCodeSlice: string,
-  syntaxNode: SyntaxNode
+  syntaxNode: SyntaxNode,
+  typings: any
 ): SimpleWidget => ({
   checkForAdd: (type, view, currentNode) => {
     const keyPath = syntaxNodeToKeyPath(
@@ -93,7 +94,12 @@ const ProjectionWidgetFactory = (
       currentNode.from,
       currentNode.to
     );
-    return runProjectionQuery(projection.query, keyPath, currentCodeSlice);
+    return runProjectionQuery(
+      projection.query,
+      keyPath,
+      currentCodeSlice,
+      typings
+    );
   },
   addNode: (view, from, to) => {
     const widget = new InlineProjectionWidget(

@@ -75,4 +75,5 @@ export interface JSONSchema {
 
   // local extensions
   $$labeledType?: string;
+  $$refName?: string;
 }
