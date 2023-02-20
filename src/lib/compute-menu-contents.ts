@@ -500,12 +500,12 @@ const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
 const GenericComponent = makeSimpleComponent("hi generic");
 
 const PropertyNameComponent: Component = (props) => {
-  const { node } = props;
+  const { node, fullCode } = props;
   return [
     {
       label: "Adjust Position",
       elements: [
-        // { type: "display", content: fullCode.slice(node.from, node.to) },
+        { type: "display", content: fullCode.slice(node.from, node.to) },
         {
           type: "button",
           content: "remove key",
@@ -518,12 +518,12 @@ const PropertyNameComponent: Component = (props) => {
 };
 
 const PropertyValueComponent: Component = (props) => {
-  const { node } = props;
+  const { node, fullCode } = props;
   return [
     {
       label: "Adjust Position",
       elements: [
-        // { type: "display", content: fullCode.slice(node.from, node.to) },
+        { type: "display", content: fullCode.slice(node.from, node.to) },
         {
           type: "button",
           content: "remove key",

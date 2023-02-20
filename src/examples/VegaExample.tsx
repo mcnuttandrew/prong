@@ -65,9 +65,6 @@ function ExpressionEditorProjection(props: EditorProps) {
   useEffect(() => {
     setCode(props.currentValue.slice(1, props.currentValue.length - 1));
   }, [props.currentValue]);
-  if (!code) {
-    return <div></div>;
-  }
   return (
     <div style={{ width: "405px" }}>
       <div style={{ display: "flex", flexWrap: "wrap" }}>
