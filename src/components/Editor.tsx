@@ -35,9 +35,9 @@ export type SchemaMap = Record<string, any>;
 
 export default function Editor(props: Props) {
   const { schema, code, onChange, projections } = props;
-  const cmParent = useRef<HTMLDivElement>(null);
 
   const [view, setView] = useState<EditorView | null>(null);
+  const cmParent = useRef<HTMLDivElement>(null);
 
   // primary effect, initialize the editor etc
   useEffect(() => {
