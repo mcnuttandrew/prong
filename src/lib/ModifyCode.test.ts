@@ -2,6 +2,20 @@ import { insertSwap } from "./utils";
 import { modifyCodeByCommand, MenuEvent } from "./modify-json";
 import { findNodeByText } from "./test-utils";
 
+const fruitData = `{
+  "fruits": [ "apple", "orange", "#c71585" ],
+  "vegetables": [
+    {
+      "veggieName": "potato",
+      "veggieLike": true
+    },
+    {
+      "veggieName": "broccoli",
+      "veggieLike": false
+    }
+  ]
+}`;
+
 const exampleData = `{
     "a": {
       "b": [1, 2, 
@@ -148,6 +162,22 @@ test("modifyCodeByCommand - addObjectKey (boundary effects)", () => {
     1
   )!;
   expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
+});
+
+test("modifyCodeByCommand - addObjectKey (cursorPos fruit)", () => {
+  const rootKey = findNodeByText(fruitData, '"vegetables"')!.parent!.lastChild!
+    .firstChild!.nextSibling!;
+
+  const cmd = modifyCodeByCommand(
+    {
+      payload: { key: '"veggieStarRating"', value: "0" },
+      type: "addObjectKey",
+    },
+    rootKey,
+    fruitData,
+    71
+  )!;
+  expect(insertSwap(fruitData, cmd)).toMatchSnapshot();
 });
 
 test("modifyCodeByCommand - addObjectKey (cursorPos version)", () => {

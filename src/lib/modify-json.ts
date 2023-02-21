@@ -209,10 +209,11 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
   const prevSibIsError = prevSib.type.name === "⚠";
-  const prevSibIsBrace = prevSib.type.name === "{";
+  // switch the value to be a quoted string to prevent weird inserts
   const val = value === "" ? '""' : value;
 
-  if (prevSibIsBrace) {
+  // prev is brace
+  if (prevSib.type.name === "{") {
     return {
       value: `{${key}: ${val}}`,
       from: prevSib.from,
@@ -225,6 +226,7 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
     const maybeComma = sub.includes(",") ? "" : ",";
     const precededByBracket = prevSib.prevSibling?.type.name === "{";
     const sep = precededByBracket ? "" : `${maybeComma} `;
+
     return {
       value: `${sep}${key}: ${val}`,
       from: prevSib.from + (sub.includes(",") || precededByBracket ? 0 : -1),
@@ -255,14 +257,15 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
       to: finalTarget.from,
     };
   }
-
   const nextIsBrace = finalTarget.nextSibling?.type.name === "}";
-  const term = nextIsBrace ? "" : ",";
+  const isBrace = finalTarget.type.name === "{";
+  const suffix = nextIsBrace ? "" : ",";
+  const prefix = isBrace ? "" : ",";
   // regular object with stuff in it
   return {
     value: lineBreakSep
-      ? `,\n${lineBreakSep}${key}: ${val}${term}\n${lineBreakSep}`
-      : `, ${key}: ${val}${term}`,
+      ? `${prefix}\n${lineBreakSep}${key}: ${val}${suffix}\n${lineBreakSep}`
+      : `${prefix} ${key}: ${val}${suffix}`,
     // from: targIsBrace ? finalTarget.to - 1 : finalTarget.to,
     // to: targIsBrace ? finalTarget.to : finalTarget.nextSibling!.from,
     from: finalTarget.to,

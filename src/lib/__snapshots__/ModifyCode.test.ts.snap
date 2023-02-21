@@ -93,6 +93,21 @@ exports[`modifyCodeByCommand - addObjectKey (boundary effects) 1`] = `
   }"
 `;
 
+exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
+"{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    { \\"veggieStarRating\\": 0,\\"veggieName\\": \\"potato\\",
+      \\"veggieLike\\": true
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
 
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { }, \\"point\\": { } }"`;

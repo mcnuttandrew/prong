@@ -89,7 +89,7 @@ Array [
         "type": "button",
       },
     ],
-    "label": "Add X",
+    "label": "Add Field",
   },
 ]
 `;

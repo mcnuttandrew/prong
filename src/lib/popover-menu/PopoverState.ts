@@ -15,7 +15,6 @@ import {
 import { filterContents } from "../search";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
-import { simpleMerge } from "../compute-menu-contents";
 
 import {
   generateMenuContent,

@@ -119,7 +119,7 @@ const ObjPicker: Component = (props) => {
     });
   return [
     addFieldEntries.length && {
-      label: "Add X",
+      label: "Add Field",
       elements: addFieldEntries,
     },
     {
