@@ -15,6 +15,7 @@ import {
 import { filterContents } from "../search";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
+import { simpleMerge } from "../compute-menu-contents";
 
 import {
   generateMenuContent,
@@ -165,7 +166,6 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
     cleanUpButton,
   ] as MenuRow[];
 
-  console.log(targetNode, fullCode.slice(targetNode.from, targetNode.to));
   // this suggests that this MAY be an autocomplete gesture
   const targetNodeIsError = targetNode.type.name === "⚠";
   const targNodeContent = fullCode.slice(targetNode.from, targetNode.to);
@@ -193,7 +193,6 @@ function getProjectionContents(
   targetNodeValue: string
 ): Projection[] {
   const { projections, schemaTypings } = state.field(cmStatePlugin);
-  console.log("here", codeStringState(state, 0));
   const keyPath = syntaxNodeToKeyPath(targetNode, codeStringState(state, 0));
   const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections

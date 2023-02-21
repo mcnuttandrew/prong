@@ -71,12 +71,17 @@ function buildMoveCursor(
 const traverseContentTreeToNode: (
   tree: MenuRow[],
   path: SelectionRoute
-) => MenuElement | MenuRow | null = (tree, [row, col]) =>
-  tree[row].elements[col - 1];
+) => MenuElement | MenuRow | null = (tree, [row, col]) => {
+  if (!tree.length) {
+    return null;
+  }
+  return tree[row].elements[col - 1];
+};
 
 function runSelection(view: EditorView) {
   const { menuContents, selectedRouting, targetNode } =
     view.state.field(popOverState);
+  console.log("XX", menuContents, selectedRouting);
   let target = traverseContentTreeToNode(menuContents, selectedRouting);
   if (!target) {
     return false;

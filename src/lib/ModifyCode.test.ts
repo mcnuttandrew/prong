@@ -139,6 +139,17 @@ test("modifyCodeByCommand - addObjectKey", () => {
   expect(insertSwap(update1, cmd3)).toMatchSnapshot();
 });
 
+test("modifyCodeByCommand - addObjectKey (boundary effects)", () => {
+  const rootKey = findNodeByText(exampleData, exampleData)!.parent!;
+  const cmd = modifyCodeByCommand(
+    { payload: { key: `"test"`, value: "null" }, type: "addObjectKey" },
+    rootKey,
+    exampleData,
+    1
+  )!;
+  expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
+});
+
 test("modifyCodeByCommand - addObjectKey (cursorPos version)", () => {
   const buggyText = `{arc}`;
   const rootKey = findNodeByText(buggyText, "}")!.parent!;

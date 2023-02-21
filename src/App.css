@@ -138,6 +138,24 @@
   cursor: pointer;
 }
 
+.cm-annotation-menu-control--top {
+  top: 0;
+  left: -4px;
+  font-size: 10px;
+}
+
+.cm-annotation-menu-control--bottom {
+  bottom: 0;
+
+}
+
+.cm-annotation-widget-popover--search-bar {
+  /* background: #EEEEEE; */
+  /* bottom: 0; */
+  /* position: absolute; */
+  width: 100%;
+}
+
 /* EDITOR STUFF */
 
 .editor-container {

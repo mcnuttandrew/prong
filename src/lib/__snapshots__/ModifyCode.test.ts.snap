@@ -80,6 +80,19 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 6`] = `
   }"
 `;
 
+exports[`modifyCodeByCommand - addObjectKey (boundary effects) 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\", \\"test\\": null
+  }"
+`;
+
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
 
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { }, \\"point\\": { } }"`;

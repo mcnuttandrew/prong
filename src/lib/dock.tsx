@@ -9,7 +9,11 @@ import {
   buildProjectionsForMenu,
   maybeFilterToFullProjection,
 } from "./popover-menu/PopoverState";
-import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
+import {
+  MenuRow,
+  retargetToAppropriateNode,
+  simpleMerge,
+} from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
 import { codeString, simpleUpdate, getCursorPos } from "./utils";
@@ -118,16 +122,18 @@ function panel(view: EditorView): Panel {
       // todo make this rerender less frequently
       let contents: MenuRow[] = [];
       try {
-        contents = maybeFilterToFullProjection([
-          ...update.state.field(popOverState).menuContents,
-          ...buildProjectionsForMenu({
-            fullCode,
-            currentCodeSlice,
-            node,
-            view: update.view,
-            state: update.state,
-          }),
-        ]);
+        contents = simpleMerge(
+          maybeFilterToFullProjection([
+            ...update.state.field(popOverState).menuContents,
+            ...buildProjectionsForMenu({
+              fullCode,
+              currentCodeSlice,
+              node,
+              view: update.view,
+              state: update.state,
+            }),
+          ])
+        );
       } catch (e) {
         console.log("error building docked contents", e);
       }

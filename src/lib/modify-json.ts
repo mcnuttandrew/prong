@@ -176,35 +176,41 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
   return { value: value.payload, from, to };
 };
 
-// only does the simplified case of add into the end of an object
+/**
+ * Add object key function. Wow this is a mess
+ * @param event
+ * @param node
+ * @param currentText
+ * @param cursorPos
+ * @returns
+ */
 const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
-  { payload: { key, value } },
+  event,
   node,
   currentText,
   cursorPos
 ) => {
+  const {
+    payload: { key, value },
+  } = event;
+  // console.log("YYZ", event, node.type, currentText, cursorPos);
   // retarget to the object if we're somewhere inside
   let syntaxNode = node;
-  if (syntaxNode.type.name !== "Object") {
+
+  if (syntaxNode.type.name === "JsonText") {
+    syntaxNode = syntaxNode.firstChild!;
+  } else if (syntaxNode.type.name !== "Object") {
     syntaxNode = syntaxNode.parent!;
     if (syntaxNode.type.name !== "Object") {
       throw Error("Add Object Key error");
     }
   }
 
-  console.log("hi", key, value, syntaxNode.type, cursorPos, currentText);
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
   const prevSibIsError = prevSib.type.name === "⚠";
   const prevSibIsBrace = prevSib.type.name === "{";
-  console.log(
-    key,
-    value,
-    prevSib.type,
-    currentText.slice(prevSib.from, prevSib.to)
-  );
   const val = value === "" ? '""' : value;
-  // new object
 
   if (prevSibIsBrace) {
     return {
@@ -243,7 +249,6 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
     }
   }
   if (finalTarget.type.name === "}" && prevSibIsError) {
-    console.log("e");
     return {
       value: `{${key}: value}`,
       from: prevSib.prevSibling!.to,
@@ -254,8 +259,6 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   const nextIsBrace = finalTarget.nextSibling?.type.name === "}";
   const term = nextIsBrace ? "" : ",";
   // regular object with stuff in it
-  console.log(key, val);
-  console.log("f");
   return {
     value: lineBreakSep
       ? `,\n${lineBreakSep}${key}: ${val}${term}\n${lineBreakSep}`

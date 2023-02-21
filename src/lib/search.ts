@@ -3,7 +3,7 @@ import { MenuRow } from "./compute-menu-contents";
 // todo https://itnext.io/string-similarity-the-basic-know-your-algorithms-guide-3de3d7346227
 
 export function filterContents(searchTerm: string, rows: MenuRow[]): MenuRow[] {
-  return rows
+  const result = rows
     .map((row) => {
       return {
         ...row,
@@ -22,4 +22,5 @@ export function filterContents(searchTerm: string, rows: MenuRow[]): MenuRow[] {
       };
     })
     .filter((row) => row.elements.length > 0);
+  return result;
 }

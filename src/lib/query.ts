@@ -68,9 +68,12 @@ export function runProjectionQuery(
   nodeValue: string,
   typings: any[]
 ): boolean {
-  const cacheKey = `${JSON.stringify(query)}-${JSON.stringify(
-    keyPath
-  )}-${nodeValue}}`;
+  const queryStr =
+    query.type === "regex"
+      ? JSON.stringify({ ...query, query: query.query.toString() })
+      : JSON.stringify(query);
+  const keyPathStr = JSON.stringify(keyPath);
+  const cacheKey = `${queryStr}-${keyPathStr}-${nodeValue}}`;
   if (cache[cacheKey]) {
     return cache[cacheKey];
   }

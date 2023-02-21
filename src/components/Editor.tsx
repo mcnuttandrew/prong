@@ -73,7 +73,10 @@ export default function Editor(props: Props) {
   }, []);
 
   useEffect(() => {
-    view?.dispatch({ effects: [setSchema.of(schema)] });
+    // hack :(
+    setTimeout(() => {
+      view?.dispatch({ effects: [setSchema.of(schema)] });
+    }, 100);
   }, [schema, view]);
   useEffect(() => {
     // hack :(

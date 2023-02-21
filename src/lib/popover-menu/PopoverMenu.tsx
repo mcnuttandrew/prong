@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { EditorView, TooltipView } from "@codemirror/view";
 import { StateField } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
+import { filterContents } from "../search";
 
 import { cmStatePlugin } from "../cmState";
 import {
@@ -16,7 +17,11 @@ import {
 
 import { modifyCodeByCommand, MenuEvent } from "../modify-json";
 
-import { MenuRow, retargetToAppropriateNode } from "../compute-menu-contents";
+import {
+  MenuRow,
+  retargetToAppropriateNode,
+  simpleMerge,
+} from "../compute-menu-contents";
 
 import { Projection } from "../projections";
 import PopoverMenuElement from "./PopoverMenuElement";
@@ -41,6 +46,8 @@ function PopOverMenuContents(props: {
   syntaxNode: SyntaxNode;
   view: EditorView;
 }) {
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchTerm, setSearch] = useState<false | string>(false);
   const {
     closeMenu,
     codeUpdate,
@@ -83,16 +90,40 @@ function PopOverMenuContents(props: {
     }
   }, [selectedRouting]);
 
+  let filteredMenu = searchTerm
+    ? filterContents(searchTerm, menuContents)
+    : menuContents;
   return (
     <div className={"cm-annotation-menu"}>
       <button
-        className="cm-annotation-menu-control"
+        className="cm-annotation-menu-control cm-annotation-menu-control--bottom"
         onClick={() => closeMenu(true)}
       >
         ↓
       </button>
+      <button
+        className="cm-annotation-menu-control cm-annotation-menu-control--top"
+        onClick={() => setShowSearch(!showSearch)}
+      >
+        🔍
+      </button>
       <div className="cm-annotation-widget-popover-container">
-        {menuContents.map((row, idx) => {
+        {showSearch && (
+          <div className="cm-annotation-widget-popover--search-bar">
+            <span
+              className={"cm-annotation-widget-popover-container-row-label"}
+            >
+              Search bar
+            </span>
+            <input
+              title={"Search bar"}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+            />
+          </div>
+        )}
+        {filteredMenu.map((row, idx) => {
           const { label, elements } = row;
           const initialType = (row.elements as any)?.type;
           const allElementsSameType =
@@ -199,10 +230,9 @@ class Tooltip {
     });
 
     // todo use this cache
-    let fullMenuContents = maybeFilterToFullProjection([
-      ...menuContents,
-      ...projectionContents,
-    ]);
+    let fullMenuContents = simpleMerge(
+      maybeFilterToFullProjection([...menuContents, ...projectionContents])
+    );
 
     const element = React.createElement(PopOverMenuContents, {
       closeMenu,

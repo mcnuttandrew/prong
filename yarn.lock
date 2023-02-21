@@ -2140,6 +2140,11 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.50.tgz#1e0caa9364d3fccd2931c3ed96fdbeaa5d4cca83"
   integrity sha512-C6N5s2ZFtuZRj54k2/zyRhNDjJwwcViAM3Nbm8zjBpbqAdZ00mr0CFxvSKeO8Y/e03WVFLpQMdHYVfUd6SB+Hw==
 
+"@types/friendly-words@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/friendly-words/-/friendly-words-1.2.0.tgz#0b1107347d3d239c8995fdcc75bd5af0ce83d629"
+  integrity sha512-ASRy4Dz6NbCCrCfTyh6WSb6GRZlmZaKALVvQv63U5Py0G52ZeXTVM+pqYZHu2Idpx8nDY5mE4u6chHvHj+iE6Q==
+
 "@types/geojson@*":
   version "7946.0.10"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.10.tgz#6dfbf5ea17142f7f9a043809f1cd4c448cb68249"
@@ -5909,6 +5914,11 @@ fresh@0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
   integrity sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==
+
+friendly-words@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/friendly-words/-/friendly-words-1.2.0.tgz#db6d9842f510d94d0bd220b7609a3188a52f80a8"
+  integrity sha512-KO9vxmqnaaHJy5O83V9vJV3e3gmoeHVJoqndqbiGcFQgYVdj1gvCy8NlGkqATAxY7PyTenFdyJ6GoYxxFu52TQ==
 
 from2@^2.1.0:
   version "2.3.0"
