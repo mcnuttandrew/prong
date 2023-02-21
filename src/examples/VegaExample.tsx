@@ -36,7 +36,7 @@ function extractScaleNames(currentCode: string): string[] {
   );
 }
 
-const buttonListProjection =
+export const buttonListProjection =
   (list: string[], currentCode: string) => (props: ProjectionProps) => {
     return (
       <div>
