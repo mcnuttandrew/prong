@@ -12,7 +12,7 @@ import {
 import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
-import { codeString, simpleUpdate } from "./utils";
+import { codeString, simpleUpdate, getCursorPos } from "./utils";
 
 function RenderPopoverDocked(props: {
   buildTriggerRerender: (
@@ -115,7 +115,6 @@ function panel(view: EditorView): Panel {
 
       const fullCode = codeString(view, 0);
       const currentCodeSlice = codeString(view, node?.from || 0, node?.to || 0);
-
       // todo make this rerender less frequently
       triggerRerender({
         docked,
@@ -141,7 +140,8 @@ function panel(view: EditorView): Panel {
           const codeUpdate = modifyCodeByCommand(
             menuEvent,
             retargetToAppropriateNode(node!),
-            fullCode
+            fullCode,
+            getCursorPos(update.state)
           );
           if (codeUpdate) {
             simpleUpdate(

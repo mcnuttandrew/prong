@@ -1,5 +1,5 @@
 import { KeyBinding, EditorView } from "@codemirror/view";
-import { simpleUpdate, codeString } from "../utils";
+import { simpleUpdate, codeString, getCursorPos } from "../utils";
 
 import {
   popOverState,
@@ -89,7 +89,8 @@ function runSelection(view: EditorView) {
     const update = modifyCodeByCommand(
       target.onSelect,
       targetNode!,
-      codeString(view, 0)
+      codeString(view, 0),
+      getCursorPos(view.state)
     );
     if (update) {
       simpleUpdate(view, update.from, update.to, update.value);

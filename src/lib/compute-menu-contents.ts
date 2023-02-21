@@ -141,19 +141,20 @@ const ObjPicker: Component = (props) => {
 
 // TODO flatten nested anyOfs and remove duplicates
 function flattenAnyOf(content: JSONSchema7): any {
-  if (!content || !(content.anyOf || content.oneOf)) {
+  if (!content || !(content.anyOf || content.oneOf || content.allOf)) {
     return content;
   }
-  return [...(content.anyOf || []), ...(content.oneOf || [])].reduce(
-    (acc: any[], row: any) => {
-      if (row.description) {
-        acc.push({ description: row.description });
-      }
-      const hasNext = row.anyOf || row.oneOf || null;
-      return acc.concat(hasNext ? flattenAnyOf(row) : row);
-    },
-    []
-  );
+  return [
+    ...(content.anyOf || []),
+    ...(content.oneOf || []),
+    ...(content.allOf || []),
+  ].reduce((acc: any[], row: any) => {
+    if (row.description) {
+      acc.push({ description: row.description });
+    }
+    const hasNext = row.anyOf || row.oneOf || row.allOf || null;
+    return acc.concat(hasNext ? flattenAnyOf(row) : row);
+  }, []);
 }
 
 function removeDupsInAnyOf(content: JSONSchema7[]) {
@@ -449,6 +450,8 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
       targets = item.oneOf;
     } else if (item.anyOf) {
       targets = item.anyOf;
+    } else if (item.allOf) {
+      targets = item.allOf;
     } else if (item.type === "object") {
       targets = [item];
     }
@@ -848,6 +851,5 @@ export function generateMenuContent(
   const computedMenuContents = cleanSections(
     simpleMerge(content.filter((x) => x))
   );
-  // console.log(schemaChunk);
   return computedMenuContents;
 }

@@ -12,19 +12,19 @@ const exampleData = `{
     "I": "example",
   }`;
 
-function VegaLiteExampleApp() {
-  // const [currentCode, setCurrentCode] = useState(exampleData);
+function SimpleExample() {
+  const [currentCode, setCurrentCode] = useState(exampleData);
 
   return (
     <Editor
       schema={{}}
-      code={exampleData}
+      code={currentCode}
       onChange={(x) => {
-        console.log(x);
+        setCurrentCode(x);
       }}
       projections={[]}
     />
   );
 }
 
-export default VegaLiteExampleApp;
+export default SimpleExample;

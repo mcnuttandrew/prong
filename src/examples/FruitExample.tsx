@@ -91,8 +91,8 @@ const exampleData = `{
   ]
 }`;
 
-function VegaLiteExampleApp() {
-  // const [currentCode, setCurrentCode] = useState(exampleData);
+function FruitExample() {
+  const [currentCode, setCurrentCode] = React.useState(exampleData);
   const [numRows, setNumRows] = React.useState(0);
 
   return (
@@ -102,9 +102,9 @@ function VegaLiteExampleApp() {
       ))}
       <Editor
         schema={schema}
-        code={exampleData}
-        onChange={(x) => {
-          // console.log(x);
+        code={currentCode}
+        onChange={(x: string) => {
+          setCurrentCode(x);
         }}
         projections={standardBundle}
       />
@@ -113,4 +113,4 @@ function VegaLiteExampleApp() {
   );
 }
 
-export default VegaLiteExampleApp;
+export default FruitExample;
