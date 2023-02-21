@@ -116,6 +116,21 @@ function panel(view: EditorView): Panel {
       const fullCode = codeString(view, 0);
       const currentCodeSlice = codeString(view, node?.from || 0, node?.to || 0);
       // todo make this rerender less frequently
+      let contents: MenuRow[] = [];
+      try {
+        contents = maybeFilterToFullProjection([
+          ...update.state.field(popOverState).menuContents,
+          ...buildProjectionsForMenu({
+            fullCode,
+            currentCodeSlice,
+            node,
+            view: update.view,
+            state: update.state,
+          }),
+        ]);
+      } catch (e) {
+        console.log("error building docked contents", e);
+      }
       triggerRerender({
         docked,
         setDock: () => (setToDocked: boolean) => {
@@ -124,18 +139,7 @@ function panel(view: EditorView): Panel {
           );
           update.view.dispatch({ effects: [effect] });
         },
-        menuContents: docked
-          ? maybeFilterToFullProjection([
-              ...update.state.field(popOverState).menuContents,
-              ...buildProjectionsForMenu({
-                fullCode,
-                currentCodeSlice,
-                node,
-                view: update.view,
-                state: update.state,
-              }),
-            ])
-          : [],
+        menuContents: docked ? contents : [],
         eventDispatch: () => (menuEvent: MenuEvent) => {
           const codeUpdate = modifyCodeByCommand(
             menuEvent,

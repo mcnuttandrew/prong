@@ -9,8 +9,10 @@ import { projectionState } from "../projections";
 import {
   codeStringState,
   getMenuTargetNode,
+  generateCleanUpButton,
   syntaxNodeToKeyPath,
 } from "../utils";
+import { filterContents } from "../search";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 
@@ -146,7 +148,13 @@ const specialPriority: Record<string, number> = {
 function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
-  const contents = [
+  const cleanUpButton = generateCleanUpButton(
+    tr.selection,
+    targetNode,
+    fullCode
+  );
+
+  let contents = [
     ...generateMenuContent(targetNode, schemaTypings, fullCode),
     ...diagnostics
       .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
@@ -154,7 +162,19 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
         label: "LINT ERROR",
         elements: [{ type: "display", content: lint.message }],
       })),
+    cleanUpButton,
   ] as MenuRow[];
+
+  console.log(targetNode, fullCode.slice(targetNode.from, targetNode.to));
+  // this suggests that this MAY be an autocomplete gesture
+  const targetNodeIsError = targetNode.type.name === "⚠";
+  const targNodeContent = fullCode.slice(targetNode.from, targetNode.to);
+  const useContentAsFilter =
+    targetNodeIsError && !targNodeContent.includes(" ");
+
+  if (useContentAsFilter) {
+    contents = filterContents(targNodeContent, contents);
+  }
   return contents.sort(
     (b, a) => (specialPriority[a.label] || 0) - (specialPriority[b.label] || 0)
   );
@@ -173,6 +193,7 @@ function getProjectionContents(
   targetNodeValue: string
 ): Projection[] {
   const { projections, schemaTypings } = state.field(cmStatePlugin);
+  console.log("here", codeStringState(state, 0));
   const keyPath = syntaxNodeToKeyPath(targetNode, codeStringState(state, 0));
   const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections

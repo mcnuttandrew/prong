@@ -80,6 +80,12 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 6`] = `
   }"
 `;
 
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { }, \\"point\\": { } }"`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 3`] = `"{\\"bar\\": { }, \\"point\\": { }  }"`;
+
 exports[`modifyCodeByCommand - addObjectKey 1`] = `
 "{
     \\"a\\": {

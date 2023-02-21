@@ -53,3 +53,11 @@
     white-space: normal;
     text-align: center;
 }
+
+.styler-app {
+    width: 100%;
+}
+
+.styler-app .editor-container {
+    width: 100%
+}

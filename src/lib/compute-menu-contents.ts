@@ -55,10 +55,10 @@ const EnumPicker: Component = (props) => {
 function simpleFillOut(content: JSONSchema7) {
   const simpleTypes: Record<string, any> = {
     string: "",
-    object: `{}`,
+    object: `{ } `,
     number: 0,
     boolean: true,
-    array: "[]",
+    array: "[ ] ",
     null: '"null"',
   };
   if (!content) {
@@ -254,7 +254,7 @@ function AnyOfObjOptionalFieldPicker(
           onSelect: {
             type: "simpleSwap",
             nodeId: nodeToId(switchNode),
-            payload: "{}",
+            payload: "{ } ",
           },
           content: "empty object",
         },
@@ -589,8 +589,8 @@ const ArrayComponent: Component = (props) => {
     { label: "boolean", value: "false" },
     { label: "number", value: "0" },
     { label: "string", value: '""' },
-    { label: "object", value: "{}" },
-    { label: "array", value: "[]" },
+    { label: "object", value: "{ } " },
+    { label: "array", value: "[ ] " },
   ];
   const targetNode = retargetForArray(props.node);
   const simpleObject = createObjectMatchingInput(props.fullCode, targetNode);
@@ -770,6 +770,29 @@ function simpleMerge(content: MenuRow[]): MenuRow[] {
 function cleanSections(content: MenuRow[]): MenuRow[] {
   return content.filter((x) => x.elements.length);
 }
+function getCompareString(element: MenuElement): string {
+  switch (element.type) {
+    case "button":
+    case "display":
+      return element.content;
+    case "free-input":
+    case "projection":
+    default:
+      return "";
+  }
+}
+
+function sortMenuContents(content: MenuRow[]): MenuRow[] {
+  return content.map((row) => {
+    return {
+      ...row,
+      elements: row.elements.sort((a, b) =>
+        getCompareString(a).localeCompare(getCompareString(b))
+      ),
+    };
+  });
+}
+
 const mergeFunctions =
   (a: any, b: any) =>
   (...args: any) =>
@@ -848,8 +871,9 @@ export function generateMenuContent(
   if (parentResponses[parentType]) {
     parentResponses[parentType](componentProps).forEach((x) => content.push(x));
   }
-  const computedMenuContents = cleanSections(
+  let computedMenuContents = cleanSections(
     simpleMerge(content.filter((x) => x))
   );
+  computedMenuContents = sortMenuContents(computedMenuContents);
   return computedMenuContents;
 }
