@@ -222,10 +222,6 @@ Array [
   Object {
     "elements": Array [
       Object {
-        "content": "\\"vegetables\\"",
-        "type": "display",
-      },
-      Object {
         "content": "remove key",
         "onSelect": Object {
           "nodeId": "47-59",
@@ -242,7 +238,7 @@ Array [
         "type": "button",
       },
     ],
-    "label": "Adjust Position",
+    "label": "Utils",
   },
 ]
 `;

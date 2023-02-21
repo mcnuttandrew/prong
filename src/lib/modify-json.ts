@@ -176,35 +176,69 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
   return { value: value.payload, from, to };
 };
 
-// only does the simplified case of add into the end of an object
+/**
+ * Add object key function. Wow this is a mess
+ * @param event
+ * @param node
+ * @param currentText
+ * @param cursorPos
+ * @returns
+ */
 const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
-  { payload: { key, value } },
-  syntaxNode,
+  event,
+  node,
   currentText,
   cursorPos
 ) => {
+  const {
+    payload: { key, value },
+  } = event;
+  // console.log("YYZ", event, node.type, currentText, cursorPos);
+  // retarget to the object if we're somewhere inside
+  let syntaxNode = node;
+
+  if (syntaxNode.type.name === "JsonText") {
+    syntaxNode = syntaxNode.firstChild!;
+  } else if (syntaxNode.type.name !== "Object") {
+    syntaxNode = syntaxNode.parent!;
+    if (syntaxNode.type.name !== "Object") {
+      throw Error("Add Object Key error");
+    }
+  }
+
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
-  // new object
+  const prevSibIsError = prevSib.type.name === "⚠";
+  // switch the value to be a quoted string to prevent weird inserts
+  const val = value === "" ? '""' : value;
+
+  // prev is brace
   if (prevSib.type.name === "{") {
     return {
-      value: `{${key}: ${value}}`,
+      value: `{${key}: ${val}}`,
       from: prevSib.from,
       to: rightBrace.to,
     };
   }
-  // trailing comma
-  if (prevSib.type.name === "⚠") {
+  // trailing comma or other error
+  if (prevSibIsError) {
+    const sub = currentText.slice(prevSib.to - 1, prevSib.to);
+    const maybeComma = sub.includes(",") ? "" : ",";
+    const precededByBracket = prevSib.prevSibling?.type.name === "{";
+    const sep = precededByBracket ? "" : `${maybeComma} `;
+
     return {
-      value: `, ${key}: ${value}`,
-      from: prevSib.to - 1,
+      value: `${sep}${key}: ${val}`,
+      from: prevSib.from + (sub.includes(",") || precededByBracket ? 0 : -1),
       to: prevSib.to,
     };
   }
 
+  // targeted insertion is broken here :(
   const finalTarget = cursorPos
     ? rotateToAdaptivePosition(rightBrace.parent?.firstChild!, cursorPos)
     : prevSib;
+  // const finalTarget = prevSib;
   // does the previous items have a line break separating them?
   let lineBreakSep: false | string = false;
   if (finalTarget && finalTarget.prevSibling) {
@@ -216,14 +250,24 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
       lineBreakSep = diffSlice.split("\n")[1];
     }
   }
-
+  if (finalTarget.type.name === "}" && prevSibIsError) {
+    return {
+      value: `{${key}: value}`,
+      from: prevSib.prevSibling!.to,
+      to: finalTarget.from,
+    };
+  }
   const nextIsBrace = finalTarget.nextSibling?.type.name === "}";
-  const term = nextIsBrace ? "" : ",";
+  const isBrace = finalTarget.type.name === "{";
+  const suffix = nextIsBrace ? "" : ",";
+  const prefix = isBrace ? "" : ",";
   // regular object with stuff in it
   return {
     value: lineBreakSep
-      ? `,\n${lineBreakSep}${key}: ${value}${term}\n${lineBreakSep}`
-      : `, ${key}: ${value}${term}`,
+      ? `${prefix}\n${lineBreakSep}${key}: ${val}${suffix}\n${lineBreakSep}`
+      : `${prefix} ${key}: ${val}${suffix}`,
+    // from: targIsBrace ? finalTarget.to - 1 : finalTarget.to,
+    // to: targIsBrace ? finalTarget.to : finalTarget.nextSibling!.from,
     from: finalTarget.to,
     to: finalTarget.nextSibling!.from,
   };
@@ -246,7 +290,7 @@ function rotateToAdaptivePosition(
 // always add as sibling following the target
 // not sure how to target an empty array?
 const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
-  { payload, adaptive },
+  { payload },
   node,
   _,
   cursorPos

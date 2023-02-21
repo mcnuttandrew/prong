@@ -55,10 +55,10 @@ const EnumPicker: Component = (props) => {
 function simpleFillOut(content: JSONSchema7) {
   const simpleTypes: Record<string, any> = {
     string: "",
-    object: `{}`,
+    object: `{ } `,
     number: 0,
     boolean: true,
-    array: "[]",
+    array: "[ ] ",
     null: '"null"',
   };
   if (!content) {
@@ -119,7 +119,7 @@ const ObjPicker: Component = (props) => {
     });
   return [
     addFieldEntries.length && {
-      label: "Add X",
+      label: "Add Field",
       elements: addFieldEntries,
     },
     {
@@ -254,7 +254,7 @@ function AnyOfObjOptionalFieldPicker(
           onSelect: {
             type: "simpleSwap",
             nodeId: nodeToId(switchNode),
-            payload: "{}",
+            payload: "{ } ",
           },
           content: "empty object",
         },
@@ -503,12 +503,12 @@ const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
 const GenericComponent = makeSimpleComponent("hi generic");
 
 const PropertyNameComponent: Component = (props) => {
-  const { node, fullCode } = props;
+  const { node } = props;
   return [
     {
-      label: "Adjust Position",
+      label: "Utils",
       elements: [
-        { type: "display", content: fullCode.slice(node.from, node.to) },
+        // { type: "display", content: fullCode.slice(node.from, node.to) },
         {
           type: "button",
           content: "remove key",
@@ -521,12 +521,12 @@ const PropertyNameComponent: Component = (props) => {
 };
 
 const PropertyValueComponent: Component = (props) => {
-  const { node, fullCode } = props;
+  const { node } = props;
   return [
     {
-      label: "Adjust Position",
+      label: "Utils",
       elements: [
-        { type: "display", content: fullCode.slice(node.from, node.to) },
+        // { type: "display", content: fullCode.slice(node.from, node.to) },
         {
           type: "button",
           content: "remove key",
@@ -589,8 +589,8 @@ const ArrayComponent: Component = (props) => {
     { label: "boolean", value: "false" },
     { label: "number", value: "0" },
     { label: "string", value: '""' },
-    { label: "object", value: "{}" },
-    { label: "array", value: "[]" },
+    { label: "object", value: "{ } " },
+    { label: "array", value: "[ ] " },
   ];
   const targetNode = retargetForArray(props.node);
   const simpleObject = createObjectMatchingInput(props.fullCode, targetNode);
@@ -659,7 +659,7 @@ const directionalMoves = (syntaxNode: SyntaxNode): MenuElement[] => {
 const ParentIsArrayComponent: Component = ({ node }) => {
   return [
     {
-      label: "Adjust Position",
+      label: "Utils",
       elements: [
         {
           type: "button",
@@ -743,10 +743,26 @@ function getSchemaForRetargetedNode(
   return schemaChunk as any as JSONSchema7;
 }
 
+const safeStringify = (obj: any, indent = 2) => {
+  let cache: any = [];
+  const retVal = JSON.stringify(
+    obj,
+    (key, value) =>
+      typeof value === "object" && value !== null
+        ? cache.includes(value)
+          ? undefined // Duplicate reference found, discard key
+          : cache.push(value) && value // Store value in our collection
+        : value,
+    indent
+  );
+  cache = null;
+  return retVal;
+};
+
 function deduplicate(rows: any[]): any[] {
   const hasSeen: Set<string> = new Set([]);
   return rows.filter((x) => {
-    const key = JSON.stringify(x);
+    const key = safeStringify(x);
     if (hasSeen.has(key)) {
       return false;
     }
@@ -755,7 +771,7 @@ function deduplicate(rows: any[]): any[] {
   });
 }
 
-function simpleMerge(content: MenuRow[]): MenuRow[] {
+export function simpleMerge(content: MenuRow[]): MenuRow[] {
   const groups = content.reduce((acc: Record<string, any[]>, row) => {
     acc[row.label] = (acc[row.label] || []).concat(row.elements);
     return acc;
@@ -767,9 +783,29 @@ function simpleMerge(content: MenuRow[]): MenuRow[] {
   );
 }
 
-function cleanSections(content: MenuRow[]): MenuRow[] {
-  return content.filter((x) => x.elements.length);
+function getCompareString(element: MenuElement): string {
+  switch (element.type) {
+    case "button":
+    case "display":
+      return element.content;
+    case "free-input":
+    case "projection":
+    default:
+      return "";
+  }
 }
+
+function sortMenuContents(content: MenuRow[]): MenuRow[] {
+  return content.map((row) => {
+    return {
+      ...row,
+      elements: row.elements.sort((a, b) =>
+        getCompareString(a).localeCompare(getCompareString(b))
+      ),
+    };
+  });
+}
+
 const mergeFunctions =
   (a: any, b: any) =>
   (...args: any) =>
@@ -848,8 +884,9 @@ export function generateMenuContent(
   if (parentResponses[parentType]) {
     parentResponses[parentType](componentProps).forEach((x) => content.push(x));
   }
-  const computedMenuContents = cleanSections(
-    simpleMerge(content.filter((x) => x))
+  let computedMenuContents = simpleMerge(content.filter((x) => x)).filter(
+    (x) => x.elements.length
   );
+  computedMenuContents = sortMenuContents(computedMenuContents);
   return computedMenuContents;
 }

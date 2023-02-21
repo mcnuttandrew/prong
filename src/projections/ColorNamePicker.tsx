@@ -286,7 +286,7 @@ export const ColorNameProjection: Projection = {
       />
     );
   },
-  name: "ColorNameProjection",
+  name: "Color Name Picker",
 };
 
 export const HexConversionProject: Projection = {
@@ -307,5 +307,5 @@ export const HexConversionProject: Projection = {
       </div>
     );
   },
-  name: "HexConversionProjection",
+  name: "Utils",
 };

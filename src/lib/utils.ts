@@ -1,10 +1,14 @@
 import { EditorView } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
-import { EditorState } from "@codemirror/state";
+import { EditorState, EditorSelection } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
+import prettifier from "./vendored/prettifier";
+
 import { UpdateDispatch } from "./popover-menu/PopoverState";
-import { getMatchingSchemas } from "./from-vscode/validator";
+import { getMatchingSchemas } from "./vendored/validator";
+import { MenuRow, nodeToId } from "./compute-menu-contents";
+import { MenuEvent } from "./modify-json";
 
 export function codeString(
   view: EditorView,
@@ -246,6 +250,8 @@ function absPathToKeyPath(
         if (absPath.at(idx + 1)) {
           const nextItem = absPath[idx + 1]; // a property node
           const targetIndex = nextItem.index;
+          // TODO there's a bug here, not sure what
+          // console.log("bugger", targetIndex, pointer);
           const objKey = Object.keys(pointer)[targetIndex];
           keyPath.push(objKey);
         }
@@ -427,4 +433,36 @@ export function getCursorPos(state: EditorState) {
   }
   const range = ranges[0];
   return range.anchor;
+}
+
+const climbToRoot = (node: SyntaxNode): SyntaxNode =>
+  node.parent ? climbToRoot(node.parent) : node;
+
+export function generateCleanUpButton(
+  selection: EditorSelection | undefined,
+  node: SyntaxNode,
+  fullCode: string
+): MenuRow {
+  let onSelect = {} as MenuEvent;
+  const parsed = simpleParse(fullCode, false);
+  let payload = fullCode;
+  if (parsed) {
+    payload = prettifier(parsed, { maxLength: 60 });
+  }
+  onSelect = {
+    type: "simpleSwap",
+    payload,
+    nodeId: nodeToId(climbToRoot(node)),
+  };
+
+  return {
+    label: "Utils",
+    elements: [
+      {
+        type: "button",
+        content: "Clean up",
+        onSelect,
+      },
+    ],
+  };
 }

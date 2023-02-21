@@ -1,6 +1,10 @@
-import React, { useState, FC, useEffect } from "react";
+import React, { useState } from "react";
 import StandardProjections from "../projections/standard-bundle";
+import { vegaLiteCode, vegaLiteScatterPlot } from "./example-data";
 
+import { VegaLite } from "react-vega";
+
+import { simpleParse } from "../lib/utils";
 import "../stylesheets/vega-lite-example.css";
 import Editor from "../components/Editor";
 
@@ -11,16 +15,27 @@ const updatedSchema = {
 };
 
 function VegaLiteExampleApp() {
-  const [currentCode, setCurrentCode] = useState("{}");
+  const [currentCode, setCurrentCode] = useState("{ }");
 
   return (
-    <div className="App">
+    <div className="styler-app flex">
       <Editor
         schema={updatedSchema}
         code={currentCode}
         onChange={(x) => setCurrentCode(x)}
         projections={StandardProjections}
       />
+      <div className="flex-down">
+        {[vegaLiteScatterPlot, vegaLiteCode].map((spec, idx) => {
+          return (
+            <VegaLite
+              key={idx}
+              spec={JSON.parse(spec)}
+              config={simpleParse(currentCode, {})}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

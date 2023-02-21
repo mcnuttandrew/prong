@@ -1,5 +1,5 @@
 import { linter } from "@codemirror/lint";
-import { produceLintValidations } from "../lib/from-vscode/validator";
+import { produceLintValidations } from "./vendored/validator";
 import { codeString } from "../lib/utils";
 import { cmStatePlugin } from "./cmState";
 

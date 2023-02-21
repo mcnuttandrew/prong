@@ -9,10 +9,15 @@ import {
   buildProjectionsForMenu,
   maybeFilterToFullProjection,
 } from "./popover-menu/PopoverState";
-import { MenuRow, retargetToAppropriateNode } from "./compute-menu-contents";
+import {
+  MenuRow,
+  retargetToAppropriateNode,
+  simpleMerge,
+} from "./compute-menu-contents";
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
 import { codeString, simpleUpdate, getCursorPos } from "./utils";
+import { filterContents } from "./search";
 
 function RenderPopoverDocked(props: {
   buildTriggerRerender: (
@@ -30,6 +35,7 @@ function RenderPopoverDocked(props: {
     (e: MenuEvent, shouldClose?: boolean) => void
   >(() => {});
   const [docked, setDockedState] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<false | string>(false);
   const [setDock, bindSetDock] = useState<(setToDocked: boolean) => void>(
     () => {}
   );
@@ -39,8 +45,13 @@ function RenderPopoverDocked(props: {
       setMenuContents(props.menuContents);
       setEventDispatch(props.eventDispatch);
       bindSetDock(props.setDock);
+      setSearchTerm(false);
     });
   }, [buildTriggerRerender]);
+
+  const filteredContent = searchTerm
+    ? filterContents(searchTerm, menuContents)
+    : menuContents;
 
   // todo also support other actions from the dock
   return (
@@ -62,8 +73,21 @@ function RenderPopoverDocked(props: {
             )}
           </div>
         )}
+        {docked && (
+          <div>
+            <div>Search</div>
+            <input
+              value={searchTerm || ""}
+              title={"Docked Search Bar"}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+              }}
+            />
+          </div>
+        )}
       </div>
-      {menuContents.map((row, idx) => {
+
+      {filteredContent.map((row, idx) => {
         const { label, elements } = row;
         const initialType = (row.elements as any)?.type;
         const allElementsSameType =
@@ -116,6 +140,23 @@ function panel(view: EditorView): Panel {
       const fullCode = codeString(view, 0);
       const currentCodeSlice = codeString(view, node?.from || 0, node?.to || 0);
       // todo make this rerender less frequently
+      let contents: MenuRow[] = [];
+      try {
+        contents = simpleMerge(
+          maybeFilterToFullProjection([
+            ...update.state.field(popOverState).menuContents,
+            ...buildProjectionsForMenu({
+              fullCode,
+              currentCodeSlice,
+              node,
+              view: update.view,
+              state: update.state,
+            }),
+          ])
+        );
+      } catch (e) {
+        console.log("error building docked contents", e);
+      }
       triggerRerender({
         docked,
         setDock: () => (setToDocked: boolean) => {
@@ -124,18 +165,7 @@ function panel(view: EditorView): Panel {
           );
           update.view.dispatch({ effects: [effect] });
         },
-        menuContents: docked
-          ? maybeFilterToFullProjection([
-              ...update.state.field(popOverState).menuContents,
-              ...buildProjectionsForMenu({
-                fullCode,
-                currentCodeSlice,
-                node,
-                view: update.view,
-                state: update.state,
-              }),
-            ])
-          : [],
+        menuContents: docked ? contents : [],
         eventDispatch: () => (menuEvent: MenuEvent) => {
           const codeUpdate = modifyCodeByCommand(
             menuEvent,
