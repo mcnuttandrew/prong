@@ -318,5 +318,8 @@ div[tabindex="-1"]:focus {
 }
 
 .cm-dock-label {
+  align-items: center;
+  display: flex;
   font-size: 10px;
+  justify-content: space-between;
 }

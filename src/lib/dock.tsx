@@ -17,6 +17,7 @@ import {
 import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
 import { codeString, simpleUpdate, getCursorPos } from "./utils";
+import { filterContents } from "./search";
 
 function RenderPopoverDocked(props: {
   buildTriggerRerender: (
@@ -34,6 +35,7 @@ function RenderPopoverDocked(props: {
     (e: MenuEvent, shouldClose?: boolean) => void
   >(() => {});
   const [docked, setDockedState] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<false | string>(false);
   const [setDock, bindSetDock] = useState<(setToDocked: boolean) => void>(
     () => {}
   );
@@ -43,8 +45,13 @@ function RenderPopoverDocked(props: {
       setMenuContents(props.menuContents);
       setEventDispatch(props.eventDispatch);
       bindSetDock(props.setDock);
+      setSearchTerm(false);
     });
   }, [buildTriggerRerender]);
+
+  const filteredContent = searchTerm
+    ? filterContents(searchTerm, menuContents)
+    : menuContents;
 
   // todo also support other actions from the dock
   return (
@@ -66,8 +73,21 @@ function RenderPopoverDocked(props: {
             )}
           </div>
         )}
+        {docked && (
+          <div>
+            <div>Search</div>
+            <input
+              value={searchTerm || ""}
+              title={"Docked Search Bar"}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+              }}
+            />
+          </div>
+        )}
       </div>
-      {menuContents.map((row, idx) => {
+
+      {filteredContent.map((row, idx) => {
         const { label, elements } = row;
         const initialType = (row.elements as any)?.type;
         const allElementsSameType =
