@@ -15,25 +15,34 @@ export type MenuEvent =
 // | moveItemToStartEvent;
 
 // | duplicateElementInArrayEvent;
-type nullEvent = { type: "nullEvent"; nodeId: string };
-type simpleSwapEvent = { type: "simpleSwap"; payload: string; nodeId: string };
-type addObjectKeyEvent = {
+type baseEvent = { nodeId: string };
+interface nullEvent extends baseEvent {
+  type: "nullEvent";
+}
+interface simpleSwapEvent extends baseEvent {
+  type: "simpleSwap";
+  payload: string;
+}
+interface addObjectKeyEvent extends baseEvent {
   type: "addObjectKey";
   payload: { key: string; value: string };
-  nodeId: string;
-};
-type addElementAsSiblingInArrayEvent = {
+}
+interface addElementAsSiblingInArrayEvent extends baseEvent {
   type: "addElementAsSiblingInArray";
   payload: string;
-  nodeId: string;
-};
-type removeObjectKeyEvent = { type: "removeObjectKey"; nodeId: string };
-type removeElementFromArrayEvent = {
+}
+interface removeObjectKeyEvent extends baseEvent {
+  type: "removeObjectKey";
+}
+interface removeElementFromArrayEvent extends baseEvent {
   type: "removeElementFromArray";
-  nodeId: string;
-};
-type increaseItemIdxEvent = { type: "increaseItemIdx"; nodeId: string };
-type decreaseItemIdxEvent = { type: "decreaseItemIdx"; nodeId: string };
+}
+interface increaseItemIdxEvent extends baseEvent {
+  type: "increaseItemIdx";
+}
+interface decreaseItemIdxEvent extends baseEvent {
+  type: "decreaseItemIdx";
+}
 
 // type duplicateElementInArrayEvent = {
 //   type: "duplicateElementInArray";
@@ -42,7 +51,8 @@ type decreaseItemIdxEvent = { type: "decreaseItemIdx"; nodeId: string };
 type ModifyCmd<A extends MenuEvent> = (
   value: A,
   syntaxNode: SyntaxNode,
-  currentText: string
+  currentText: string,
+  cursorPos: number | undefined
 ) => UpdateDispatch | undefined;
 
 export const boundCheck = (node: SyntaxNode) => {
@@ -55,7 +65,7 @@ export const boundCheck = (node: SyntaxNode) => {
 
 const checkAndLift =
   (boundFunction: ModifyCmd<any>, isPrev: boolean): ModifyCmd<any> =>
-  (value, syntaxNode, currentText) => {
+  (value, syntaxNode, currentText, cursorPos) => {
     let node = syntaxNode;
     if (syntaxNode.type.name === "PropertyName") {
       node = syntaxNode.parent!;
@@ -66,7 +76,7 @@ const checkAndLift =
     if (!sib || atBoundary) {
       return undefined;
     }
-    return boundFunction(value, node, currentText);
+    return boundFunction(value, node, currentText, cursorPos);
   };
 const decreaseItemIdx: ModifyCmd<decreaseItemIdxEvent> = checkAndLift(
   (value, node, currentText) => {
@@ -170,7 +180,8 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
 const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   { payload: { key, value } },
   syntaxNode,
-  currentText
+  currentText,
+  cursorPos
 ) => {
   const rightBrace = syntaxNode.lastChild!;
   const prevSib = rightBrace.prevSibling!;
@@ -190,30 +201,55 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
       to: prevSib.to,
     };
   }
+
+  const finalTarget = cursorPos
+    ? rotateToAdaptivePosition(rightBrace.parent?.firstChild!, cursorPos)
+    : prevSib;
   // does the previous items have a line break separating them?
   let lineBreakSep: false | string = false;
-  if (prevSib && prevSib.prevSibling) {
-    const diffSlice = currentText.slice(prevSib.prevSibling.to, prevSib.from);
+  if (finalTarget && finalTarget.prevSibling) {
+    const diffSlice = currentText.slice(
+      finalTarget.prevSibling.to,
+      finalTarget.from
+    );
     if (diffSlice.includes("\n")) {
       lineBreakSep = diffSlice.split("\n")[1];
     }
   }
 
+  const nextIsBrace = finalTarget.nextSibling?.type.name === "}";
+  const term = nextIsBrace ? "" : ",";
   // regular object with stuff in it
   return {
     value: lineBreakSep
-      ? `,\n${lineBreakSep}${key}: ${value}\n${lineBreakSep}`
-      : `, ${key}: ${value}`,
-    from: prevSib.to,
-    to: rightBrace.from,
+      ? `,\n${lineBreakSep}${key}: ${value}${term}\n${lineBreakSep}`
+      : `, ${key}: ${value}${term}`,
+    from: finalTarget.to,
+    to: finalTarget.nextSibling!.from,
   };
 };
+
+function rotateToAdaptivePosition(
+  node: SyntaxNode,
+  cursorPos: number | undefined
+): SyntaxNode {
+  if (!cursorPos) {
+    return node;
+  }
+  let next = node!.parent!.firstChild!;
+  while (next.nextSibling && next.nextSibling.from < cursorPos) {
+    next = next.nextSibling;
+  }
+  return next;
+}
 
 // always add as sibling following the target
 // not sure how to target an empty array?
 const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
-  { payload },
-  node
+  { payload, adaptive },
+  node,
+  _,
+  cursorPos
 ) => {
   // WIP
   let from: number;
@@ -223,7 +259,9 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   if (node.type.name === "Array") {
     syntaxNode = syntaxNode.firstChild!;
   }
-
+  syntaxNode = rotateToAdaptivePosition(syntaxNode, cursorPos);
+  // adapt to the position by rotating to the position from here
+  // criterion: find the item just before that one after it
   const currentTypeIsBracket = syntaxNode.type.name === "[";
   // const prevType = syntaxNode.prevSibling?.type.name || "⚠";
   const nextType = syntaxNode.nextSibling?.type.name || "⚠";
@@ -284,13 +322,19 @@ const CmdTable: Record<string, ModifyCmd<any>> = {
 export const modifyCodeByCommand: ModifyCmd<any> = (
   value,
   syntaxNode,
-  currentText
+  currentText,
+  cursorPos
 ) => {
   if (!CmdTable[value.type]) {
     return { from: 0, to: 0, value: "" };
   }
   const targetNode = possiblyModifyChosenNode(value, syntaxNode);
-  const result = CmdTable[value.type](value, targetNode, currentText);
+  const result = CmdTable[value.type](
+    value,
+    targetNode,
+    currentText,
+    cursorPos
+  );
   return result || { from: 0, to: 0, value: "" };
 };
 
@@ -298,7 +342,6 @@ const climbToRoot = (node: SyntaxNode): SyntaxNode =>
   node.parent ? climbToRoot(node.parent) : node;
 
 function findSyntaxNodeById(node: SyntaxNode, id: string): SyntaxNode | null {
-  //   const root = (node as any).context as SyntaxNode;
   const root = climbToRoot(node);
   let foundNode: SyntaxNode | null = null;
   root.tree?.iterate({

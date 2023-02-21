@@ -59,7 +59,6 @@ export default function Editor(props: {
   useEffect(() => {
     const localExtension = EditorView.updateListener.of((v: ViewUpdate) => {
       if (v.docChanged) {
-        console.log(v);
         const newCode = v.state.doc.toString();
         onChange(newCode);
         onError(tryExpression(newCode, props.terms));

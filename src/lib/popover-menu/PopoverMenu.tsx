@@ -7,10 +7,11 @@ import { SyntaxNode } from "@lezer/common";
 
 import { cmStatePlugin } from "../cmState";
 import {
-  simpleUpdate,
-  codeString,
   classNames,
+  codeString,
   codeStringState,
+  getCursorPos,
+  simpleUpdate,
 } from "../utils";
 
 import { modifyCodeByCommand, MenuEvent } from "../modify-json";
@@ -52,7 +53,12 @@ function PopOverMenuContents(props: {
   const node = syntaxNode && retargetToAppropriateNode(syntaxNode);
 
   const eventDispatch = (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => {
-    const update = modifyCodeByCommand(menuEvent, node, codeString(view, 0));
+    const update = modifyCodeByCommand(
+      menuEvent,
+      node,
+      codeString(view, 0),
+      getCursorPos(view.state)
+    );
     if (update) {
       codeUpdate(update);
     }

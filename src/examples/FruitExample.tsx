@@ -91,7 +91,7 @@ const exampleData = `{
   ]
 }`;
 
-function VegaLiteExampleApp() {
+function FruitExample() {
   // const [currentCode, setCurrentCode] = useState(exampleData);
   const [numRows, setNumRows] = React.useState(0);
 
@@ -113,4 +113,4 @@ function VegaLiteExampleApp() {
   );
 }
 
-export default VegaLiteExampleApp;
+export default FruitExample;
