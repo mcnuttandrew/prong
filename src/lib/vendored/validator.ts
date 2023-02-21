@@ -25,7 +25,11 @@ import {
   ErrorCode,
 } from "./utils";
 
-export function localize(info: string, message: string, args: any[]): string {
+export function localize(
+  info: string,
+  message: string,
+  ...args: any[]
+): string {
   let result: string;
   if (args.length === 0) {
     result = message;
@@ -103,6 +107,7 @@ interface IProblem {
   severity?: Severity;
   code?: ErrorCode;
   message: string;
+  expected?: string[];
 }
 
 const formats = {
@@ -332,6 +337,7 @@ export function validate(
       if (!schema.type.some(matchesType)) {
         validationResult.problems.push({
           location: { offset: node.offset, length: node.length },
+          expected: schema.type,
           message:
             schema.errorMessage ||
             localize(
@@ -345,6 +351,7 @@ export function validate(
       if (!matchesType(schema.type)) {
         validationResult.problems.push({
           location: { offset: node.offset, length: node.length },
+          expected: [schema.type],
           message:
             schema.errorMessage ||
             localize(

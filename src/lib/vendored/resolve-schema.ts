@@ -1,5 +1,4 @@
 /* eslint-disable */
-import * as nls from "vscode-nls";
 import { JSONSchema, JSONSchemaRef, JSONSchemaMap } from "../JSONSchemaTypes";
 import { asSchema } from "./utils";
 import { localize } from "./validator";

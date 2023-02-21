@@ -15,6 +15,7 @@ import {
 import { filterContents } from "../search";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
+import { prepDiagnostics } from "../compute-menu-contents";
 
 import {
   generateMenuContent,
@@ -142,7 +143,7 @@ function PopoverStateMachine(
 
 const specialPriority: Record<string, number> = {
   Description: 100,
-  "LINT ERROR": 99,
+  "Lint error": 99,
 };
 
 function computeContents(tr: Transaction, targetNode: SyntaxNode) {
@@ -156,12 +157,7 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
 
   let contents = [
     ...generateMenuContent(targetNode, schemaTypings, fullCode),
-    ...diagnostics
-      .filter((x) => x.from === targetNode.from && x.to === targetNode.to)
-      .map((lint) => ({
-        label: "LINT ERROR",
-        elements: [{ type: "display", content: lint.message }],
-      })),
+    ...prepDiagnostics(diagnostics, targetNode),
     cleanUpButton,
   ] as MenuRow[];
 

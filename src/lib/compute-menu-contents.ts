@@ -7,6 +7,8 @@ import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import { simpleParse } from "./utils";
 import { Projection } from "./projections";
 
+import { LintError } from "./Linter";
+
 export type MenuRow = { label: string; elements: MenuElement[] };
 export type MenuElement =
   | {
@@ -52,15 +54,46 @@ const EnumPicker: Component = (props) => {
   ];
 };
 
+export function prepDiagnostics(
+  diagnostics: LintError[],
+  targetNode: SyntaxNode
+) {
+  return diagnostics
+    .filter(
+      (x) =>
+        (x.from === targetNode.from || x.from === targetNode.from - 1) &&
+        (x.to === targetNode.to || x.to === targetNode.to + 1)
+      // more generous than we need to be with the linter errors
+    )
+    .map((lint) => ({
+      label: "Lint error",
+      elements: [
+        { type: "display", content: lint.message },
+        ...(lint.expected || []).map((expectation: string) => {
+          return {
+            type: "button",
+            content: `Switch to ${expectation}`,
+            onSelect: {
+              type: "simpleSwap",
+              payload: simpleTypes[expectation] || `"${expectation}"`,
+              nodeId: nodeToId(targetNode),
+            },
+          };
+        }),
+      ],
+    }))
+    .filter((x) => x);
+}
+const simpleTypes: Record<string, any> = {
+  string: "",
+  object: `{ } `,
+  number: 0,
+  boolean: true,
+  array: "[ ] ",
+  null: '"null"',
+};
+
 function simpleFillOut(content: JSONSchema7) {
-  const simpleTypes: Record<string, any> = {
-    string: "",
-    object: `{ } `,
-    number: 0,
-    boolean: true,
-    array: "[ ] ",
-    null: '"null"',
-  };
   if (!content) {
     return null;
   } else if ((content as any).type in simpleTypes) {
@@ -170,8 +203,11 @@ function bundleConstsToEnum(content: JSONSchema7[]) {
 }
 
 // goes anything not an object up to it's container, only to be used below
+const targTypes = new Set(["Object", "JsonText"]);
 const getContainingObject = (node: SyntaxNode): SyntaxNode => {
-  return node.type.name === "Object" ? node : getContainingObject(node.parent!);
+  return targTypes.has(node.type.name)
+    ? node
+    : getContainingObject(node.parent!);
 };
 
 const getUsedPropertiesForContainer = (node: SyntaxNode): SyntaxNode[] => {
@@ -791,7 +827,7 @@ function getCompareString(element: MenuElement): string {
     case "free-input":
     case "projection":
     default:
-      return "";
+      return "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
   }
 }
 

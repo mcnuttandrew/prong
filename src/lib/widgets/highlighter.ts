@@ -68,7 +68,7 @@ const Highlighter: SimpleWidget = {
     // const inBound =
     //   !!targetNode && targetNode.from === from && targetNode.to === to;
     const inBound = checkIfShouldMarkAsInBound(targetNode, from, to);
-    if (level === "4") {
+    if (level === "4" && !hasDiagnosticError) {
       return [];
     }
     const highlight = Decoration.mark({
