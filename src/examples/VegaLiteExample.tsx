@@ -257,7 +257,7 @@ function VegaLiteExampleApp() {
                   </div>
                 );
               },
-              name: "Field Picker",
+              name: "Switch to",
             },
             // {
             //   query: { query: ["data", "values"], type: "index" },

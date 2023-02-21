@@ -1,7 +1,6 @@
 /* eslint-disable */
 // forked from
 // https:github.com/microsoft/vscode-json-languageService/blob/386122c7f0b6dfab488b3cadaf135188bf367e0f/src/parser/jsonParser.ts
-import * as nls from "vscode-nls";
 import { JSONSchema, JSONSchemaRef } from "../JSONSchemaTypes";
 // import $RefParser from "@apidevtools/json-schema-ref-parser";
 import {
@@ -26,7 +25,30 @@ import {
   ErrorCode,
 } from "./utils";
 
-let localize = nls.loadMessageBundle();
+export function localize(info: string, message: string, args: any[]): string {
+  let result: string;
+  if (args.length === 0) {
+    result = message;
+  } else {
+    result = message.replace(/\{(\d+)\}/g, (match, rest) => {
+      let index = rest[0];
+      let arg = args[index];
+      let replacement = match;
+      if (typeof arg === "string") {
+        replacement = arg;
+      } else if (
+        typeof arg === "number" ||
+        typeof arg === "boolean" ||
+        arg === void 0 ||
+        arg === null
+      ) {
+        replacement = String(arg);
+      }
+      return replacement;
+    });
+  }
+  return result;
+}
 
 export function getMatchingSchemas(
   schema: JSONSchema,

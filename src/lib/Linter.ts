@@ -19,6 +19,7 @@ export const jsonLinter = linter((source) => {
 
 export const lintCode = (schema: any, code: string): Promise<LintError[]> => {
   return produceLintValidations(schema, code).then((x) => {
+    console.log(x);
     return x.problems.map((problem) => {
       const { location, message, code } = problem;
       return {

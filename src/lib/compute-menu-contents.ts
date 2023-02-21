@@ -375,10 +375,10 @@ const AnyOfPicker: Component = (props) => {
         !isOfDescribedType && {
           label: "Switch to",
           elements: [
-            opt.$$labeledType && {
-              type: "display",
-              content: opt.$$labeledType,
-            },
+            // opt.$$labeledType && {
+            //   type: "display",
+            //   content: opt.$$labeledType,
+            // },
             currentNodeType !== opt.type && {
               type: "button",
               content: `${opt.type}`,
@@ -428,7 +428,7 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
   if (!Array.isArray(items) && items.enum) {
     return [
       {
-        label: "Add element",
+        label: "Insert",
         elements: (items.enum as any[]).map((content: string) => ({
           type: "button",
           content,
@@ -675,7 +675,7 @@ const ParentIsArrayComponent: Component = ({ node }) => {
 
 const BooleanComponent: Component = ({ node }) => [
   {
-    label: "Set to",
+    label: "Switch to",
     elements: ["true", "false"].map((payload) => ({
       type: "button",
       content: payload,
