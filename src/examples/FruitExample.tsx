@@ -92,7 +92,7 @@ const exampleData = `{
 }`;
 
 function FruitExample() {
-  // const [currentCode, setCurrentCode] = useState(exampleData);
+  const [currentCode, setCurrentCode] = React.useState(exampleData);
   const [numRows, setNumRows] = React.useState(0);
 
   return (
@@ -102,9 +102,9 @@ function FruitExample() {
       ))}
       <Editor
         schema={schema}
-        code={exampleData}
-        onChange={(x) => {
-          // console.log(x);
+        code={currentCode}
+        onChange={(x: string) => {
+          setCurrentCode(x);
         }}
         projections={standardBundle}
       />
