@@ -16,6 +16,7 @@ import { potentiallyFilterContentForGesture } from "../search";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 import { prepDiagnostics } from "../compute-menu-contents";
+import { pickNodetoHighlight } from "../widgets/highlighter";
 
 import {
   generateMenuContent,
@@ -29,6 +30,7 @@ export type SelectionRoute = [number, number];
 export interface PopoverMenuState {
   menuState: popOverSMState;
   targetNode: SyntaxNode | null;
+  highlightNode: SyntaxNode | null;
   targetedTypings: [];
   tooltip: any;
   selectedRouting: [number, number];
@@ -38,6 +40,7 @@ export interface PopoverMenuState {
 export const popoverMenuState: PopoverMenuState = {
   menuState: "preFirstUse",
   targetNode: null,
+  highlightNode: null,
   targetedTypings: [],
   tooltip: null,
   selectedRouting: [0, 0],
@@ -170,7 +173,7 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   );
 }
 
-function materializeTypings(tr: Transaction, targetNode: SyntaxNode) {
+function getTypings(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings } = tr.state.field(cmStatePlugin);
 
   return schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
@@ -307,7 +310,8 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       menuState,
       selectedRouting,
       targetNode,
-      targetedTypings: materializeTypings(tr, targetNode),
+      highlightNode: pickNodetoHighlight(targetNode),
+      targetedTypings: getTypings(tr, targetNode),
       tooltip: {
         pos,
         create: tooltip,

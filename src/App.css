@@ -249,8 +249,6 @@ div[tabindex="-1"]:focus {
 .cm-annotation-highlighter {
   cursor: pointer;
   border: thin dotted gray;
-  /* text-decoration: underline;
-  text-decoration-thickness: 1px; */
 }
 
 .cm-annotation-highlighter-selected {
@@ -258,32 +256,12 @@ div[tabindex="-1"]:focus {
 }
 
 .cm-annotation-highlighter-1 {
-  /* text-underline-offset: 2px;
-  text-decoration-color: rebeccapurple; */
+  text-underline-offset: 2px;
+  text-decoration-color: rebeccapurple;
 }
 
-.cm-annotation-highlighter-2 {
-  /* text-underline-offset: 4px;
-  text-decoration-color: goldenrod */
-}
 
-.cm-annotation-widget-element button {
-  /* background: floralwhite; */
-  border: none;
-  /* border: thin solid gray; */
-  border-radius: 12px;
-  cursor: pointer;
-  /* padding: 4px; */
-  /* font-family: monospace; */
-  font-size: 13px;
-  text-decoration: underline;
-}
-
-/* 
-.cm-annotation-widget-element button:before {
-  content: '▱';
-} */
-
+.cm-annotation-highlighter-2,
 .cm-annotation-highlighter-3,
 .cm-annotation-highlighter-4 {
   text-decoration: none;
@@ -291,9 +269,23 @@ div[tabindex="-1"]:focus {
 
 }
 
+.cm-annotation-widget-element button {
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+
+
 .cm-line {
   border-left: 3px solid white;
   transition: border-color 0.2s;
+}
+
+.cm-gutterElement.cm-activeLineGutter, .cm-activeLine.cm-line, .cm-line:has(.cm-annotation-highlighter-selected) {
+  background-color: rgba(102, 51, 153, 0.1);
 }
 
 .cm-line:has(.cm-annotation-highlighter-selected) {
