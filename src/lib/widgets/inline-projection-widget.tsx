@@ -1,11 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { WidgetType, EditorView, Decoration } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import { syntaxNodeToKeyPath, codeStringState } from "../utils";
 import { runProjectionQuery } from "../query";
 import { ProjectionInline } from "../projections";
-import { SimpleWidget } from "../widgets";
+import { SimpleWidget, SimpleWidgetStateVersion } from "../widgets";
 import isEqual from "lodash.isequal";
 
 class InlineProjectionWidget extends WidgetType {
@@ -15,7 +16,8 @@ class InlineProjectionWidget extends WidgetType {
     readonly to: number,
     readonly projection: ProjectionInline,
     readonly syntaxNode: SyntaxNode,
-    readonly view: EditorView,
+    // readonly view: EditorView,
+    readonly state: EditorState,
     readonly currentCodeSlice: string
   ) {
     super();
@@ -38,28 +40,29 @@ class InlineProjectionWidget extends WidgetType {
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
 
-    const view = this.view;
-
+    // const view = this.view;
+    const state = this.state;
     const element = React.createElement(this.projection.projection, {
       keyPath: syntaxNodeToKeyPath(
         this.syntaxNode,
-        codeStringState(this.view.state, 0)
+        codeStringState(this.state, 0)
       ),
       node: this.syntaxNode,
       currentValue: this.currentCodeSlice,
       setCode: (code) => {
         // todo untested, may mess stuff up
-        const fullCode = view.state.doc.toString();
-        view.dispatch({
-          changes: {
-            from: 0,
-            to: fullCode.length,
-            insert: code,
-          },
-          selection: view.state.selection,
-        });
+        const fullCode = state.doc.toString();
+        console.log("this is now broken", state);
+        // view.dispatch({
+        //   changes: {
+        //     from: 0,
+        //     to: fullCode.length,
+        //     insert: code,
+        //   },
+        //   selection: state.selection,
+        // });
       },
-      fullCode: this.view.state.doc.toString(),
+      fullCode: this.state.doc.toString(),
     });
 
     ReactDOM.render(element, wrap);
@@ -83,14 +86,11 @@ const ProjectionWidgetFactory = (
   currentCodeSlice: string,
   syntaxNode: SyntaxNode,
   typings: any
-): SimpleWidget => ({
-  checkForAdd: (type, view, currentNode) => {
-    const keyPath = syntaxNodeToKeyPath(
-      syntaxNode,
-      codeStringState(view.state, 0)
-    );
+): SimpleWidgetStateVersion => ({
+  checkForAdd: (type, state, currentNode) => {
+    const keyPath = syntaxNodeToKeyPath(syntaxNode, codeStringState(state, 0));
     const currentCodeSlice = codeStringState(
-      view.state,
+      state,
       currentNode.from,
       currentNode.to
     );
@@ -101,16 +101,19 @@ const ProjectionWidgetFactory = (
       typings
     );
   },
-  addNode: (view, from, to) => {
+  addNode: (state, from, to) => {
     const widget = new InlineProjectionWidget(
       from,
       to,
       projection,
       syntaxNode,
-      view,
+      state,
       currentCodeSlice
     );
-    if (projection.mode === "replace") {
+    if (
+      projection.mode === "replace" ||
+      projection.mode === "replace-multiline"
+    ) {
       return [Decoration.replace({ widget }).range(from, to)];
     } else {
       const target = projection.mode === "prefix" ? from : to;

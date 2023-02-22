@@ -7,7 +7,8 @@ import {
 } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { NodeType, SyntaxNode } from "@lezer/common";
-import { Range } from "@codemirror/state";
+
+import { Range, EditorState } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
 import SimpleBoolWidget from "./widgets/bool-widget";
@@ -28,6 +29,20 @@ export interface SimpleWidget {
   ) => boolean;
   addNode: (
     view: EditorView,
+    from: number,
+    to: number,
+    currentNode: SyntaxNode
+  ) => Range<Decoration>[];
+  eventSubscriptions: EventSubs;
+}
+export interface SimpleWidgetStateVersion {
+  checkForAdd: (
+    type: NodeType,
+    state: EditorState,
+    currentNode: SyntaxNode
+  ) => boolean;
+  addNode: (
+    state: EditorState,
     from: number,
     to: number,
     currentNode: SyntaxNode

@@ -49,10 +49,13 @@ function schemaMatchQuery(query: string[], typings: any): boolean {
   } else if (typeof typings === "object") {
     refNames = [typings?.$$refName, typings?.$$labeledType].filter((x) => x);
   }
-  const result = refNames.some((type) => {
-    const last = type?.split("/").at(-1);
-    return query.some((queryKey) => queryKey === last);
-  });
+  const downcasedQuery = query.map((x) => x.toLowerCase());
+  const result = refNames
+    .map((x) => x.toLowerCase())
+    .some((type) => {
+      const last = type?.split("/").at(-1);
+      return downcasedQuery.some((queryKey) => queryKey === last);
+    });
   return result;
 }
 

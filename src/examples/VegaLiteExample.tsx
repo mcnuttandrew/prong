@@ -5,6 +5,8 @@ import "../stylesheets/vega-lite-example.css";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import DataTable from "./DataTable";
+
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 import { ProjectionProps, Projection } from "../../src/lib/projections";
@@ -30,52 +32,13 @@ const Pill: FC<{ name: string }> = function Pill(props) {
   );
 };
 
-// const DataTable = (props: ProjectionProps): JSX.Element => {
-//   const parsed = lazyParse(props.currentValue);
-//   console.log(props, parsed);
-//   if (!Array.isArray(parsed) || !parsed.length) {
-//     return <div>hi</div>;
-//   }
-//   const keys: string[] = Array.from(
-//     parsed.reduce((acc, row: Record<string, any>) => {
-//       Object.keys(row).forEach((key) => acc.add(key));
-//       return acc;
-//     }, new Set())
-//   );
-//   return (
-//     <div>
-//       <table>
-//         <tr>
-//           {keys.map((key) => (
-//             <th>{key}</th>
-//           ))}
-//         </tr>
-//         {parsed.map((row) => (
-//           <tr>
-//             {keys.map((key) => (
-//               <td>{row[key]}</td>
-//             ))}
-//           </tr>
-//         ))}
-//       </table>
-//     </div>
-//   );
-// };
-
 const Shelf: FC<{
   currentValue: any;
   keyPath: string[];
   setCurrentCode: (x: any) => void;
   currentCode: string;
-  // getCurrentCode: () => string;
 }> = function Shelf(props) {
-  const {
-    keyPath,
-    currentCode,
-    // getCurrentCode,
-    setCurrentCode,
-    currentValue,
-  } = props;
+  const { keyPath, currentCode, setCurrentCode, currentValue } = props;
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
@@ -161,11 +124,7 @@ const UploadAndInline: React.FC<ProjectionProps> = (props) => {
 function BuildUploadAndInline(path: (string | number)[]): Projection {
   return {
     name: "upload-and-inline",
-    query: {
-      query: path,
-      // ["data"],
-      type: "index",
-    },
+    query: { query: path, type: "index" },
     projection: (props: ProjectionProps) => <UploadAndInline {...props} />,
     type: "tooltip",
   };
@@ -259,14 +218,14 @@ function VegaLiteExampleApp() {
               },
               name: "Switch to",
             },
-            // {
-            //   query: { query: ["data", "values"], type: "index" },
-            //   type: "inline",
-            //   name: "data table",
-            //   projection: (props: ProjectionProps) => <div>hi</div>,
-            //   // projection: CounterProjection,
-            //   hasInternalState: false,
-            // },
+            {
+              query: { query: ["InlineDataset"], type: "schemaMatch" },
+              type: "inline",
+              name: "data table",
+              projection: (props: ProjectionProps) => <DataTable {...props} />,
+              hasInternalState: false,
+              mode: "replace-multiline",
+            },
             {
               // query: ["data", "values", "*"],
               query: {
