@@ -12,7 +12,7 @@ import {
   generateCleanUpButton,
   syntaxNodeToKeyPath,
 } from "../utils";
-import { filterContents } from "../search";
+import { potentiallyFilterContentForGesture } from "../search";
 import { runProjectionQuery } from "../query";
 import { Projection } from "../projections";
 import { prepDiagnostics } from "../compute-menu-contents";
@@ -161,16 +161,11 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
     cleanUpButton,
   ] as MenuRow[];
 
-  // this suggests that this MAY be an autocomplete gesture
-  const targetNodeIsError = targetNode.type.name === "⚠";
-  const targNodeContent = fullCode.slice(targetNode.from, targetNode.to);
-  const useContentAsFilter =
-    targetNodeIsError && !targNodeContent.includes(" ");
-
-  if (useContentAsFilter) {
-    contents = filterContents(targNodeContent, contents);
-  }
-  return contents.sort(
+  return potentiallyFilterContentForGesture(
+    targetNode,
+    fullCode,
+    contents
+  ).sort(
     (b, a) => (specialPriority[a.label] || 0) - (specialPriority[b.label] || 0)
   );
 }
