@@ -3,20 +3,25 @@ import isequal from "lodash.isequal";
 import {
   MenuElement,
   nodeToId,
-  Component,
   MenuRow,
-  componentContainer,
   simpleTypes,
+  literalTypes,
 } from "../compute-menu-contents";
 import { simpleParse } from "../utils";
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 
-const EnumPicker: Component = (props) => {
+type SchemaBasedComponent = (props: {
+  content: JSONSchema7;
+  node: SyntaxNode;
+  fullCode: string;
+}) => MenuRow[];
+
+const EnumPicker: SchemaBasedComponent = (props) => {
   const { content, node } = props;
   // TODO dont switch if this is the current value?
   return [
     {
-      label: "Replace with",
+      label: "Switch to",
       elements: (content.enum as any[]).map((val: string) => ({
         type: "button",
         content: val,
@@ -29,23 +34,6 @@ const EnumPicker: Component = (props) => {
     },
   ];
 };
-
-function simpleFillOut(content: JSONSchema7) {
-  if (!content) {
-    return null;
-  } else if ((content as any).type in simpleTypes) {
-    return simpleTypes[(content as any).type];
-  } else if (content.anyOf && content.anyOf.length) {
-    const childTypes = content.anyOf.map((x: any) => x.type).filter((x) => x);
-    const firstSimpleType = childTypes.find((x) => x in simpleTypes);
-    return firstSimpleType ? simpleTypes[firstSimpleType] : null;
-  } else if (content.enum) {
-    // doesn't do anything rn
-    return content.enum.filter((x) => typeof x === "string")[0];
-  } else {
-    return null;
-  }
-}
 
 const parseContent = (node: SyntaxNode, fullCode: string, defaultVal?: any) => {
   const slice = fullCode.slice(node.from, node.to);
@@ -61,7 +49,7 @@ const focusTargetForObjPicker = (node: SyntaxNode): SyntaxNode => {
   return node;
 };
 
-const ObjPicker: Component = (props) => {
+const ObjPicker: SchemaBasedComponent = (props) => {
   const { content, fullCode } = props;
   const node = focusTargetForObjPicker(props.node);
   const containerNode = getContainingObject(node);
@@ -79,10 +67,7 @@ const ObjPicker: Component = (props) => {
         content,
         onSelect: {
           type: "addObjectKey",
-          payload: {
-            key: `"${content}"`,
-            value: `${simpleFillOut(prop)}`,
-          },
+          payload: { key: `"${content}"`, value: materializeAnyOfOption(prop) },
           nodeId: nodeToId(node),
         },
       };
@@ -109,28 +94,50 @@ const ObjPicker: Component = (props) => {
   ].filter((x) => x) as MenuRow[];
 };
 
-// TODO flatten nested anyOfs and remove duplicates
-function flattenAnyOf(content: JSONSchema7): any {
-  // if (!content || !(content.anyOf || content.oneOf || content.allOf)) {
-  if (!content || !(content.anyOf || content.allOf)) {
-    return content;
-  }
-  return [
-    ...(content.anyOf || []),
-    // ...(content.oneOf || []),
-    ...(content.allOf || []),
-  ].reduce((acc: any[], row: any) => {
-    if (row.description) {
-      acc.push({ description: row.description });
+// TODO TREAT ALLOF SPECIALLY TO??
+const HOFFlatten = (key: "anyOf" | "oneOf" | "allOf") => {
+  const flattener = (content: any): any => {
+    if (!content) {
+      return content;
     }
-    const hasNext =
-      row.anyOf ||
-      // row.oneOf ||
-      row.allOf ||
-      null;
-    return acc.concat(hasNext ? flattenAnyOf(row) : row);
-  }, []);
-}
+    return (Array.isArray(content) ? content : content[key] || []).reduce(
+      (acc: any[], row: any) => {
+        if (row.description) {
+          acc.push({ description: row.description });
+        }
+        return acc.concat(row[key] ? flattener(row[key]) : row);
+      },
+      []
+    );
+  };
+  return flattener;
+};
+const flattenAnyOf = HOFFlatten("anyOf");
+const flattenOneOf = HOFFlatten("oneOf");
+// const flattenAllOf = HOFFlatten("allOf");
+
+// // TODO flatten nested anyOfs and remove duplicates
+// function flattenAnyOf(content: JSONSchema7): any {
+//   // if (!content || !(content.anyOf || content.oneOf || content.allOf)) {
+//   if (!content || !(content.anyOf || content.allOf)) {
+//     return content;
+//   }
+//   return [
+//     ...(content.anyOf || []),
+//     // ...(content.oneOf || []),
+//     ...(content.allOf || []),
+//   ].reduce((acc: any[], row: any) => {
+//     if (row.description) {
+//       acc.push({ description: row.description });
+//     }
+//     const hasNext =
+//       row.anyOf ||
+//       // row.oneOf ||
+//       row.allOf ||
+//       null;
+//     return acc.concat(hasNext ? flattenAnyOf(row) : row);
+//   }, []);
+// }
 
 function removeDupsInAnyOf(content: JSONSchema7[]) {
   return content.filter((row, idx) =>
@@ -162,20 +169,52 @@ const getUsedPropertiesForContainer = (node: SyntaxNode): SyntaxNode[] => {
   return props;
 };
 
-function materializeRequiredProps(content: JSONSchema7): string[] {
+function simpleFillOut(content: JSONSchema7) {
+  if (!content) {
+    return null;
+  }
+  if ((content as any).type in simpleTypes) {
+    return simpleTypes[(content as any).type];
+  }
+  if (content.anyOf && content.anyOf.length) {
+    const childTypes = content.anyOf.map((x: any) => x.type).filter((x) => x);
+    const firstSimpleType = childTypes.find((x) => x in simpleTypes);
+    return firstSimpleType ? simpleTypes[firstSimpleType] : null;
+  }
+  if (content.oneOf && content.oneOf.length) {
+    const childTypes = content.oneOf.map((x: any) => x.type).filter((x) => x);
+    const firstSimpleType = childTypes.find((x) => x in simpleTypes);
+    return firstSimpleType ? simpleTypes[firstSimpleType] : null;
+  }
+  if (content.enum) {
+    // doesn't do anything rn
+    return content.enum.filter((x) => typeof x === "string")[0];
+  }
+  return "null";
+}
+
+function materializeRequiredProps(content: any): string[] {
   const requiredProps = new Set<string>(
     Array.isArray(content.required) ? content.required : []
   );
   return Array.from(requiredProps);
 }
 
-function materializeAnyOfOption(content: any): string {
-  const requiredPropsArr = materializeRequiredProps(content);
+export function materializeAnyOfOption(content: JSONSchema7): string {
+  const targ = ((content?.oneOf && flattenOneOf(content.oneOf)[0]) ||
+    (content?.anyOf && flattenAnyOf(content.anyOf)[0]) ||
+    content) as JSONSchema7;
+  if (!targ) {
+    return "null";
+  }
+  const requiredPropsArr = materializeRequiredProps(targ);
+  const type = targ.type as string;
+  if (type in literalTypes) {
+    return literalTypes[type];
+  }
   const props = requiredPropsArr.map((x) => {
-    const val =
-      x in (content?.properties || {})
-        ? simpleFillOut(content.properties[x])
-        : "null";
+    const properties: any = content?.properties || {};
+    const val = x in properties ? simpleFillOut(properties[x]) : "null";
     return [x, val];
   });
   const payload = JSON.stringify(Object.fromEntries(props));
@@ -255,12 +294,12 @@ function AnyOfObjOptionalFieldPicker(
       })),
     },
     isObject && {
-      label: "Add",
+      label: "Add Field",
       elements: addProps
         .filter((x) => !inUseKeys.has(x))
         .map((x) => {
           const props = content?.properties || {};
-          const value = simpleFillOut(props[x]);
+          const value = materializeAnyOfOption(props[x]);
           return {
             type: "button",
             content: x,
@@ -321,7 +360,7 @@ const simpleTypeMap: Record<string, string> = {
   null: "null",
 };
 const simpleType = new Set(Object.keys(simpleTypeMap));
-const AnyOfPicker: Component = (props) => {
+const AnyOfPicker: SchemaBasedComponent = (props) => {
   const { content, node, fullCode } = props;
 
   const currentNodeType = typeof simpleParse(
@@ -341,7 +380,7 @@ const AnyOfPicker: Component = (props) => {
         elements: [{ type: "display", content: opt.description }],
       },
       opt?.enum?.length && {
-        label: "Replace with",
+        label: "Switch to",
         elements: opt.enum.map((val: string) => ({
           type: "button",
           content: val,
@@ -376,10 +415,10 @@ const AnyOfPicker: Component = (props) => {
   return rows;
 };
 
-const OneOfPicker: Component = (props): MenuRow[] => {
+const OneOfPicker: SchemaBasedComponent = (props): MenuRow[] => {
   const { content, node } = props;
   // todo maybe wrong
-  const targetNode = node.parent!;
+  const targetNode = node;
   const elements: MenuElement[] = [];
   content.oneOf!.forEach((option) => {
     const result = generateSubItem(option);
@@ -391,7 +430,7 @@ const OneOfPicker: Component = (props): MenuRow[] => {
       type: "button",
       content,
       onSelect: {
-        type: "addElementAsSiblingInArray",
+        type: "simpleSwap",
         payload,
         nodeId: nodeToId(targetNode),
       },
@@ -420,21 +459,21 @@ function retargetForArrayBuilder(node: SyntaxNode): SyntaxNode {
   if (node.type.name === "[" || node.type.name === "]") {
     return node.parent?.lastChild?.prevSibling!;
   }
-  // console.log("im confuse", node);
   return node;
 }
 
-const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
-  return [
-    // {
-    //   label: "Inferred JSON Type",
-    //   elements: [{ type: "display", content }],
-    // },
-  ];
-};
+const makeSimpleComponent: (x: string) => SchemaBasedComponent =
+  (content) => (props) => {
+    return [
+      // {
+      //   label: "Inferred JSON Type",
+      //   elements: [{ type: "display", content }],
+      // },
+    ];
+  };
 const GenericComponent = makeSimpleComponent("hi generic");
 
-const ArrayItemBuilder: Component = ({ content, node }) => {
+const ArrayItemBuilder: SchemaBasedComponent = ({ content, node }) => {
   const items = content.items;
   if (!items || typeof items === "boolean") {
     return [];
@@ -502,12 +541,12 @@ const ArrayItemBuilder: Component = ({ content, node }) => {
         nodeId: nodeToId(node),
       },
     };
-    output.push({ label: "Replace with", elements: [inner] });
+    output.push({ label: "Switch to", elements: [inner] });
   }
   return output;
 };
 
-const menuSwitch: componentContainer = {
+const menuSwitch: Record<string, SchemaBasedComponent> = {
   EnumPicker,
   ObjPicker,
   AnyOfPicker,
@@ -555,16 +594,15 @@ export function evalSchemaChunks(
         elements: [{ type: "display", content: chunk.description }],
       });
     }
-    // @ts-ignore
-    if (chunk.$$refName) {
-      items.push({
-        label: "Description",
-        // @ts-ignore
-        elements: [{ type: "display", content: chunk.$$refName }],
-      });
-    }
+    // // @ts-ignore
+    // if (chunk.$$refName) {
+    //   items.push({
+    //     label: "Description",
+    //     // @ts-ignore
+    //     elements: [{ type: "display", content: chunk.$$refName }],
+    //   });
+    // }
     return items as MenuRow[];
   });
-  console.log(results);
   return results;
 }

@@ -187,7 +187,7 @@ const shelf =
 
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState(vegaLiteCode);
-  const [clockRunning, setClockRunning] = useState(true);
+  const [clockRunning, setClockRunning] = useState(false);
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {

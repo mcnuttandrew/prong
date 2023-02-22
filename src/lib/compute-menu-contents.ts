@@ -28,13 +28,6 @@ export type MenuElement =
       label?: string;
       element: JSX.Element;
     };
-export interface ComponentProps {
-  content: JSONSchema7;
-  node: SyntaxNode;
-  fullCode: string;
-}
-export type Component = (props: ComponentProps) => MenuRow[];
-export type componentContainer = Record<string, Component>;
 
 export const nodeToId = (node: SyntaxNode): `${number}-${number}` =>
   `${node.from}-${node.to}`;
@@ -76,6 +69,13 @@ export const simpleTypes: Record<string, any> = {
   boolean: true,
   array: "[ ] ",
   null: '"null"',
+};
+export const literalTypes: Record<string, string> = {
+  string: '""',
+  integer: "0",
+  number: "0",
+  boolean: "true",
+  null: "null",
 };
 
 export const liminalNodeTypes = new Set(["⚠", "{", "}", "[", "]"]);
@@ -127,10 +127,22 @@ const safeStringify = (obj: any, indent = 2) => {
   return retVal;
 };
 
-function deduplicate(rows: any[]): any[] {
+function getCacheKeyForElement(el: MenuElement): string {
+  switch (el.type) {
+    case "free-input":
+      return "free-input";
+    case "button":
+    case "display":
+    case "projection":
+    default:
+      return safeStringify(el);
+  }
+}
+
+function deduplicate(rows: MenuElement[]): any[] {
   const hasSeen: Set<string> = new Set([]);
   return rows.filter((x) => {
-    const key = safeStringify(x);
+    const key = getCacheKeyForElement(x);
     if (hasSeen.has(key)) {
       return false;
     }
@@ -178,7 +190,6 @@ export function generateMenuContent(
   fullCode: string
 ): MenuRow[] {
   const schemaChunk = getSchemaForRetargetedNode(syntaxNode, schemaMap);
-  console.log(schemaChunk);
 
   const content: MenuRow[] = [
     evalSchemaChunks,
@@ -191,7 +202,6 @@ export function generateMenuContent(
   let computedMenuContents = simpleMerge(content).filter(
     (x) => x.elements.length
   );
-  console.log(computedMenuContents);
   computedMenuContents = sortMenuContents(computedMenuContents);
   return computedMenuContents;
 }

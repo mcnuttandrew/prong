@@ -2,19 +2,20 @@ import { SyntaxNode } from "@lezer/common";
 import {
   MenuElement,
   nodeToId,
-  Component,
   MenuRow,
-  componentContainer,
   retargetToAppropriateNode,
+  literalTypes,
 } from "../compute-menu-contents";
+
 import { boundCheck } from "../modify-json";
 import { simpleParse } from "../utils";
 import { JSONSchema7 } from "json-schema";
 
-const mergeFunctions =
-  (a: any, b: any) =>
-  (...args: any) =>
-    [...a(...args), ...b(...args)];
+interface TypeComponentProps {
+  node: SyntaxNode;
+  fullCode: string;
+}
+type TypeComponent = (props: TypeComponentProps) => MenuRow[];
 
 const directionalMoves = (syntaxNode: SyntaxNode): MenuElement[] => {
   const outputDirections: MenuElement[] = [];
@@ -51,13 +52,12 @@ const directionalMoves = (syntaxNode: SyntaxNode): MenuElement[] => {
   return outputDirections;
 };
 
-const PropertyNameComponent: Component = (props) => {
+const PropertyNameComponent: TypeComponent = (props) => {
   const { node } = props;
   return [
     {
       label: "Utils",
       elements: [
-        // { type: "display", content: fullCode.slice(node.from, node.to) },
         {
           type: "button",
           content: "remove key",
@@ -69,7 +69,7 @@ const PropertyNameComponent: Component = (props) => {
   ];
 };
 
-const PropertyValueComponent: Component = (props) => {
+const PropertyValueComponent: TypeComponent = (props) => {
   const { node } = props;
   return [
     {
@@ -90,7 +90,7 @@ const PropertyValueComponent: Component = (props) => {
   ];
 };
 
-const ObjectComponent: Component = ({ node }) => [
+const ObjectComponent: TypeComponent = ({ node }) => [
   {
     label: "Add Field",
     elements: [
@@ -133,7 +133,7 @@ const retargetForArray = (node: SyntaxNode): SyntaxNode => {
   return node;
 };
 
-const ArrayComponent: Component = (props) => {
+const ArrayComponent: TypeComponent = (props) => {
   const elements = [
     { label: "boolean", value: "false" },
     { label: "number", value: "0" },
@@ -148,7 +148,7 @@ const ArrayComponent: Component = (props) => {
   }
   return [
     {
-      label: "Add element",
+      label: "Insert",
       elements: elements.map(({ label, value }) => ({
         type: "button",
         content: label,
@@ -162,23 +162,24 @@ const ArrayComponent: Component = (props) => {
   ];
 };
 
-const bracketComponent: Component = (props) =>
+const bracketComponent: TypeComponent = (props) =>
   ArrayComponent({ ...props, node: props.node.parent! });
 
-const curlyBracketComponent: Component = (props) =>
+const curlyBracketComponent: TypeComponent = (props) =>
   ObjectComponent({ ...props, node: props.node.parent! });
 
-const makeSimpleComponent: (x: string) => Component = (content) => (props) => {
-  return [
-    // {
-    //   label: "Inferred JSON Type",
-    //   elements: [{ type: "display", content }],
-    // },
-  ];
-};
+const makeSimpleComponent: (x: string) => TypeComponent =
+  (content) => (props) => {
+    return [
+      // {
+      //   label: "Inferred JSON Type",
+      //   elements: [{ type: "display", content }],
+      // },
+    ];
+  };
 const ParentIsPropertyComponent = makeSimpleComponent("hi property");
 
-const ParentIsArrayComponent: Component = ({ node }) => {
+const ParentIsArrayComponent: TypeComponent = ({ node }) => {
   return [
     {
       label: "Utils",
@@ -195,7 +196,7 @@ const ParentIsArrayComponent: Component = ({ node }) => {
   ];
 };
 
-const BooleanComponent: Component = ({ node }) => [
+const BooleanComponent: TypeComponent = ({ node }) => [
   {
     label: "Switch to",
     elements: ["true", "false"].map((payload) => ({
@@ -206,16 +207,37 @@ const BooleanComponent: Component = ({ node }) => [
   },
 ];
 
-const typeBasedComponents: componentContainer = {
+const simpleLiteral: TypeComponent = ({ node }) => {
+  const elements: MenuElement[] = Object.entries(literalTypes)
+    .filter(([key]) => key.toLowerCase() !== node.type.name.toLowerCase())
+    .map(([key, value]) => {
+      return {
+        type: "button",
+        content: key,
+        onSelect: {
+          type: "simpleSwap",
+          nodeId: nodeToId(node),
+          payload: value,
+        },
+      };
+    });
+  return [{ label: "Switch to", elements }];
+};
+
+const composeComponents =
+  (a: TypeComponent, b: TypeComponent) => (props: TypeComponentProps) =>
+    [...a(props), ...b(props)];
+
+const typeBasedComponents: Record<string, TypeComponent> = {
   Object: ObjectComponent,
   PropertyName: PropertyNameComponent,
   PropertyValue: PropertyValueComponent,
   Array: ArrayComponent,
-  String: makeSimpleComponent("string"),
-  Number: makeSimpleComponent("number"),
-  False: BooleanComponent,
-  True: BooleanComponent,
-  Null: makeSimpleComponent("null"),
+  String: simpleLiteral,
+  Number: simpleLiteral,
+  Null: simpleLiteral,
+  False: composeComponents(simpleLiteral, BooleanComponent),
+  True: composeComponents(simpleLiteral, BooleanComponent),
 
   ...Object.fromEntries(["[", "]"].map((el) => [el, bracketComponent])),
   ...Object.fromEntries(["{", "}"].map((el) => [el, curlyBracketComponent])),
@@ -227,36 +249,31 @@ export function evalTypeBasedContent(
   schemaChunk: JSONSchema7[],
   code: string
 ): MenuRow[] {
+  const componentProps = { node: syntaxNode, fullCode: code };
   const type = syntaxNode.type.name;
-  let typeBasedProperty: Component | null = null;
-  if (typeBasedComponents[type]) {
-    typeBasedProperty = typeBasedComponents[type];
+  const output: MenuRow[] = [];
+
+  let typeBasedProperty: TypeComponent | null = typeBasedComponents[type];
+
+  if (typeBasedProperty) {
+    typeBasedProperty(componentProps).forEach((x) => output.push(x));
   } else if (!schemaChunk) {
     console.log("missing imp for", type);
-  } else if (typeBasedProperty && !typeBasedProperty[type]) {
+  } else if (!typeBasedProperty) {
     console.log("missing type imp for", type);
   }
-
+  // handle the weird case of property vaues
   if (
     syntaxNode.parent?.type.name === "Property" &&
     syntaxNode.type.name !== "PropertyName"
   ) {
-    typeBasedProperty = typeBasedProperty
-      ? mergeFunctions(typeBasedProperty, PropertyValueComponent)
-      : PropertyValueComponent;
+    PropertyValueComponent(componentProps).forEach((x) => output.push(x));
   }
-  const output = (schemaChunk || []).flatMap((chunk) => {
-    const componentProps = {
-      content: chunk,
-      node: syntaxNode,
-      fullCode: code,
-    };
-    return typeBasedProperty ? typeBasedProperty(componentProps) : [];
-  });
+
   return output || [];
 }
 
-const parentResponses: componentContainer = {
+const parentResponses: Record<string, TypeComponent> = {
   Property: ParentIsPropertyComponent,
   Array: ParentIsArrayComponent,
 };

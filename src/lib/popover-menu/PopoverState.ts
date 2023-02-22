@@ -285,6 +285,8 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       : state.selectedRouting;
     const menuState = PopoverStateMachine(state.menuState, "open");
 
+    // TODO ADD CACHEING FOR THE MENU HERE, cachekey: targetNode (from, to), code, ?
+
     // if were not showing the popover bail
     // cant do that because the docked menu might need stuff
     // if (!visibleStates.has(menuState)) {

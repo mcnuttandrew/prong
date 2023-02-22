@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateMenuContent 1`] = `
+exports[`generateMenuContent - fruit 1`] = `
 Object {
   "0-206": Array [
     Object {
@@ -189,7 +189,7 @@ Object {
 }
 `;
 
-exports[`generateMenuContent 2`] = `
+exports[`generateMenuContent - fruit 2`] = `
 Array [
   Object {
     "elements": Array [
@@ -217,7 +217,7 @@ Array [
         "type": "button",
       },
     ],
-    "label": "Replace with",
+    "label": "Switch to",
   },
   Object {
     "elements": Array [
@@ -234,6 +234,621 @@ Array [
         "onSelect": Object {
           "nodeId": "47-204",
           "type": "decreaseItemIdx",
+        },
+        "type": "button",
+      },
+    ],
+    "label": "Utils",
+  },
+]
+`;
+
+exports[`generateMenuContent - vega 1`] = `
+Array [
+  Object {
+    "elements": Array [
+      Object {
+        "content": "as",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"as\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "base",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"base\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "divide",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"divide\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "interval",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"interval\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "maxbins",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"maxbins\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "minstep",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"minstep\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "name",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"name\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "span",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"span\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "steps",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "\\"steps\\"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      Object {
+        "label": "Add field",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": Object {
+            "key": "$$INPUT_BIND",
+            "value": "null",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "free-input",
+      },
+    ],
+    "label": "Add Field",
+  },
+  Object {
+    "elements": Array [
+      Object {
+        "content": "{\\"type\\":\\"aggregate\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"aggregate\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"bin\\",\\"field\\":\\"{ } \\",\\"extent\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"bin\\",\\"field\\":\\"{ } \\",\\"extent\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"collect\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"collect\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"contour\\",\\"size\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"contour\\",\\"size\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"countpattern\\",\\"field\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"countpattern\\",\\"field\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"cross\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"cross\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"crossfilter\\",\\"fields\\":\\"[ ] \\",\\"query\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"crossfilter\\",\\"fields\\":\\"[ ] \\",\\"query\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"density\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"density\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"dotbin\\",\\"field\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"dotbin\\",\\"field\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"extent\\",\\"field\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"extent\\",\\"field\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"filter\\",\\"expr\\":\\"\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"filter\\",\\"expr\\":\\"\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"flatten\\",\\"fields\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"flatten\\",\\"fields\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"fold\\",\\"fields\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"fold\\",\\"fields\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"force\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"force\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"formula\\",\\"expr\\":\\"\\",\\"as\\":\\"\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"formula\\",\\"expr\\":\\"\\",\\"as\\":\\"\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"geojson\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"geojson\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"geopath\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"geopath\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"geopoint\\",\\"projection\\":\\"\\",\\"fields\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"geopoint\\",\\"projection\\":\\"\\",\\"fields\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"geoshape\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"geoshape\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"graticule\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"graticule\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"heatmap\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"heatmap\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"identifier\\",\\"as\\":\\"\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"identifier\\",\\"as\\":\\"\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"impute\\",\\"field\\":\\"{ } \\",\\"key\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"impute\\",\\"field\\":\\"{ } \\",\\"key\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"isocontour\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"isocontour\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"joinaggregate\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"joinaggregate\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"kde\\",\\"field\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"kde\\",\\"field\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"kde2d\\",\\"size\\":\\"[ ] \\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"kde2d\\",\\"size\\":\\"[ ] \\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"label\\",\\"size\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"label\\",\\"size\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"linkpath\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"linkpath\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"loess\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"loess\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"lookup\\",\\"from\\":\\"\\",\\"key\\":\\"{ } \\",\\"fields\\":\\"[ ] \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"lookup\\",\\"from\\":\\"\\",\\"key\\":\\"{ } \\",\\"fields\\":\\"[ ] \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"nest\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"nest\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"pack\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"pack\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"partition\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"partition\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"pie\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"pie\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"pivot\\",\\"field\\":\\"{ } \\",\\"value\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"pivot\\",\\"field\\":\\"{ } \\",\\"value\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"project\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"project\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"quantile\\",\\"field\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"quantile\\",\\"field\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"regression\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"regression\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":0,\\"filter\\":\\"null\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":0,\\"filter\\":\\"null\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"sample\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"sample\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"sequence\\",\\"start\\":0,\\"stop\\":0}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"sequence\\",\\"start\\":0,\\"stop\\":0}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"stack\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"stack\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"stratify\\",\\"key\\":\\"{ } \\",\\"parentKey\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"stratify\\",\\"key\\":\\"{ } \\",\\"parentKey\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"timeunit\\",\\"field\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"timeunit\\",\\"field\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"tree\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"tree\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"treelinks\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"treelinks\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"treemap\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"treemap\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"voronoi\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"voronoi\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"window\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"window\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "{\\"type\\":\\"wordcloud\\"}",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "payload": "{\\"type\\":\\"wordcloud\\"}",
+          "type": "simpleSwap",
+        },
+        "type": "button",
+      },
+    ],
+    "label": "Switch to",
+  },
+  Object {
+    "elements": Array [
+      Object {
+        "content": "Remove Item",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "type": "removeElementFromArray",
+        },
+        "type": "button",
+      },
+      Object {
+        "content": "Swap with next",
+        "onSelect": Object {
+          "nodeId": "721-938",
+          "type": "increaseItemIdx",
         },
         "type": "button",
       },
