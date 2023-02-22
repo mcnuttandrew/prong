@@ -81,7 +81,7 @@ const traverseContentTreeToNode: (
 function runSelection(view: EditorView) {
   const { menuContents, selectedRouting, targetNode } =
     view.state.field(popOverState);
-  console.log("XX", menuContents, selectedRouting);
+
   let target = traverseContentTreeToNode(menuContents, selectedRouting);
   if (!target) {
     return false;

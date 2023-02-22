@@ -1,9 +1,7 @@
 /* eslint-disable */
-import * as nls from "vscode-nls";
 import { JSONSchema, JSONSchemaRef, JSONSchemaMap } from "../JSONSchemaTypes";
 import { asSchema } from "./utils";
-
-let localize = nls.loadMessageBundle();
+import { localize } from "./validator";
 
 // const URI = './';
 function normalizeId(id: string): string {

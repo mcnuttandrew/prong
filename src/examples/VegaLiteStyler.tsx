@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import StandardProjections from "../projections/standard-bundle";
-import { vegaLiteCode, vegaLiteScatterPlot } from "./example-data";
+import {
+  vegaLiteCode,
+  vegaLiteScatterPlot,
+  vegaLiteHeatmap,
+  vegaLiteStreamgraph,
+  vegaLiteLinechart,
+} from "./example-data";
+
+import { buttonListProjection } from "./VegaExample";
 
 import { VegaLite } from "react-vega";
 
@@ -14,6 +22,18 @@ const updatedSchema = {
   $ref: "#/definitions/Config",
 };
 
+const fonts = [
+  "Arial",
+  "Verdana",
+  "Tahoma",
+  "Trebuchet MS",
+  "Times New Roman",
+  "Georgia",
+  "Garamond",
+  "Courier New",
+  "Brush Script MT",
+];
+
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState("{ }");
 
@@ -23,10 +43,24 @@ function VegaLiteExampleApp() {
         schema={updatedSchema}
         code={currentCode}
         onChange={(x) => setCurrentCode(x)}
-        projections={StandardProjections}
+        projections={[
+          ...StandardProjections,
+          {
+            type: "tooltip",
+            name: "Switch to",
+            query: { type: "schemaMatch", query: ["font"] },
+            projection: buttonListProjection(fonts, currentCode),
+          },
+        ]}
       />
-      <div className="flex-down">
-        {[vegaLiteScatterPlot, vegaLiteCode].map((spec, idx) => {
+      <div className="chart-container">
+        {[
+          vegaLiteScatterPlot,
+          vegaLiteCode,
+          vegaLiteHeatmap,
+          vegaLiteStreamgraph,
+          vegaLiteLinechart,
+        ].map((spec, idx) => {
           return (
             <VegaLite
               key={idx}

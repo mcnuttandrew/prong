@@ -131,3 +131,79 @@ export const vegaLiteScatterPlot = `
   }
 }
 `;
+export const vegaLiteHeatmap = `
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {"url": "data/movies.json"},
+  "transform": [{
+    "filter": {"and": [
+      {"field": "IMDB Rating", "valid": true},
+      {"field": "Rotten Tomatoes Rating", "valid": true}
+    ]}
+  }],
+  "mark": "rect",
+  "width": 300,
+  "height": 200,
+  "encoding": {
+    "x": {
+      "bin": {"maxbins":60},
+      "field": "IMDB Rating",
+      "type": "quantitative"
+    },
+    "y": {
+      "bin": {"maxbins": 40},
+      "field": "Rotten Tomatoes Rating",
+      "type": "quantitative"
+    },
+    "color": {
+      "aggregate": "count",
+      "type": "quantitative"
+    }
+  },
+  "config": {
+    "view": {
+      "stroke": "transparent"
+    }
+  }
+}
+`;
+
+export const vegaLiteStreamgraph = `
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 300, "height": 200,
+  "data": {"url": "data/unemployment-across-industries.json"},
+  "mark": "area",
+  "encoding": {
+    "x": {
+      "timeUnit": "yearmonth", "field": "date",
+      "axis": {"domain": false, "format": "%Y", "tickSize": 0}
+    },
+    "y": {
+      "aggregate": "sum", "field": "count",
+      "axis": null,
+      "stack": "center"
+    },
+    "color": {"field":"series", "scale":{"scheme": "category20b"}}
+  }
+}`;
+
+export const vegaLiteLinechart = `
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Stock prices of 5 Tech Companies over Time.",
+  "data": {"url": "data/stocks.csv"},
+  "mark": {
+    "type": "line",
+    "point": {
+      "filled": false,
+      "fill": "white"
+    }
+  },
+  "encoding": {
+    "x": {"timeUnit": "year", "field": "date"},
+    "y": {"aggregate":"mean", "field": "price", "type": "quantitative"},
+    "color": {"field": "symbol", "type": "nominal"}
+  }
+}
+`;

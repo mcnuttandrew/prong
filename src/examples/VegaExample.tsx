@@ -36,7 +36,7 @@ function extractScaleNames(currentCode: string): string[] {
   );
 }
 
-const buttonListProjection =
+export const buttonListProjection =
   (list: string[], currentCode: string) => (props: ProjectionProps) => {
     return (
       <div>
@@ -117,7 +117,7 @@ function VegaExampleApp() {
         {
           type: "full-tooltip",
           query: { type: "schemaMatch", query: ["exprString", "signal"] },
-          name: "signal-editor",
+          name: "Signal Editor",
           projection: (props) => {
             return <ExpressionEditorProjection {...props} signals={signals} />;
           },
@@ -128,7 +128,7 @@ function VegaExampleApp() {
             type: "schemaMatch",
             query: ["field", "stringOrSignal"],
           },
-          name: "Field Picker",
+          name: "Switch to",
           projection: buttonListProjection(fieldNames, currentCode),
         },
         {
@@ -137,7 +137,7 @@ function VegaExampleApp() {
             type: "schemaMatch",
             query: ["scale"],
           },
-          name: "Scale Picker",
+          name: "Switch to",
           projection: buttonListProjection(scaleNames, currentCode),
         },
       ]}

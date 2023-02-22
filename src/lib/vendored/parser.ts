@@ -5,11 +5,9 @@ import * as Json from "jsonc-parser";
 // import { SyntaxKind } from "jsonc-parser";
 // import { ScanError } from "jsonc-parser";
 import { ErrorCode, isNumber } from "./utils";
-import { Severity } from "./validator";
+import { Severity, localize } from "./validator";
 
-import * as nls from "vscode-nls";
 // const Json = require("jsonc-parser");
-let localize = nls.loadMessageBundle();
 
 enum ScanError {
   None = 0,
