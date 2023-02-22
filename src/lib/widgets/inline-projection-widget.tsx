@@ -1,12 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { WidgetType, EditorView, Decoration } from "@codemirror/view";
+import { WidgetType, Decoration } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import { syntaxNodeToKeyPath, codeStringState } from "../utils";
 import { runProjectionQuery } from "../query";
 import { ProjectionInline } from "../projections";
-import { SimpleWidget, SimpleWidgetStateVersion } from "../widgets";
+import { SimpleWidgetStateVersion } from "../widgets";
 import isEqual from "lodash.isequal";
 
 class InlineProjectionWidget extends WidgetType {
@@ -16,7 +16,6 @@ class InlineProjectionWidget extends WidgetType {
     readonly to: number,
     readonly projection: ProjectionInline,
     readonly syntaxNode: SyntaxNode,
-    // readonly view: EditorView,
     readonly state: EditorState,
     readonly currentCodeSlice: string
   ) {

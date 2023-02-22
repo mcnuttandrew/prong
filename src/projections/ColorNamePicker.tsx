@@ -293,6 +293,7 @@ export const HexConversionProject: Projection = {
   query: { type: "value", query: Object.keys(colorNames) },
   type: "tooltip",
   projection: ({ keyPath, currentValue, setCode, fullCode }) => {
+    console.log("here");
     return (
       <div className="buttons">
         <button
