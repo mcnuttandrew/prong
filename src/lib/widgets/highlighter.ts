@@ -19,41 +19,58 @@ const simpleTypes = new Set([
   "False",
 ]);
 
-function checkIfShouldMarkAsInBound(
-  node: SyntaxNode | null,
-  from: number,
-  to: number
-): boolean {
-  if (!node) {
-    return false;
+const toParents = new Set([
+  "[",
+  "]",
+  "{",
+  "}",
+  "⚠",
+  // "PropertyName",
+  "PropertyValue",
+]);
+export const targTypes = new Set([
+  "Object",
+  "Property",
+  "Array",
+  "String",
+  "Number",
+  "Null",
+  "False",
+  "True",
+]);
+export function pickNodetoHighlight(node: SyntaxNode): SyntaxNode {
+  const type = node.type.name;
+  if (toParents.has(type)) {
+    return node.parent!;
   }
-  return node.from === from && node.to === to;
+
+  return node;
 }
 
 const Highlighter: SimpleWidget = {
   checkForAdd: (type, view, node) => {
     const { schemaTypings, diagnostics } = view.state.field(cmStatePlugin);
-    const { targetNode } = view.state.field(popOverState);
-    const isSimpleType = simpleTypes.has(node.type.name);
+    const { highlightNode } = view.state.field(popOverState);
+    const isTargetableType = simpleTypes.has(node.type.name);
     const hasTyping = schemaTypings[`${node.from}-${node.to}`];
     const hasDiagnosticError = !!diagnostics.find(
       (x) => x.from === node.from && x.to === node.to
     );
     const isTarget =
-      !!targetNode &&
-      targetNode.from === node.from &&
-      targetNode.to === node.to;
+      !!highlightNode &&
+      highlightNode.from === node.from &&
+      highlightNode.to === node.to;
 
     return (
       (hasTyping && hasTyping.length) ||
-      isSimpleType ||
+      isTargetableType ||
       hasDiagnosticError ||
       isTarget
     );
   },
   addNode: (view, from, to, node) => {
     const { diagnostics } = view.state.field(cmStatePlugin);
-    const { targetNode } = view.state.field(popOverState);
+    const { highlightNode } = view.state.field(popOverState);
     const hasDiagnosticError = !!diagnostics.find(
       (x) => x.from === node.from && x.to === node.to
     );
@@ -65,17 +82,18 @@ const Highlighter: SimpleWidget = {
       x.has(node.type.name)
     );
     const level = `${levelNumber >= 0 ? levelNumber + 1 : 4}`;
-    // const inBound =
-    //   !!targetNode && targetNode.from === from && targetNode.to === to;
-    const inBound = checkIfShouldMarkAsInBound(targetNode, from, to);
-    if (level === "4" && !hasDiagnosticError) {
+    const isHighlightNode =
+      !!highlightNode &&
+      highlightNode.from === node.from &&
+      highlightNode.to === node.to;
+    if (level === "4" && !hasDiagnosticError && !isHighlightNode) {
       return [];
     }
     const highlight = Decoration.mark({
       attributes: {
         class: classNames({
           "cm-annotation-highlighter": true,
-          "cm-annotation-highlighter-selected": inBound,
+          "cm-annotation-highlighter-selected": isHighlightNode,
           [`cm-annotation-highlighter-${level}`]: true,
           "cm-linter-highlight": hasDiagnosticError,
         }),
