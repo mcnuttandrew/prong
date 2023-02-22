@@ -423,7 +423,7 @@ const AnyOfPicker: Component = (props) => {
                 payload: simpleTypeMap[opt.type],
               },
             },
-          ].filter((x) => x) as MenuRow[],
+          ].filter((x) => x) as unknown as MenuRow[],
         },
     ].filter((x) => x);
     return optionRow;
