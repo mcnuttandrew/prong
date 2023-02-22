@@ -372,14 +372,19 @@ export const modifyCodeByCommand: ModifyCmd<any> = (
   if (!CmdTable[value.type]) {
     return { from: 0, to: 0, value: "" };
   }
-  const targetNode = possiblyModifyChosenNode(value, syntaxNode);
-  const result = CmdTable[value.type](
-    value,
-    targetNode,
-    currentText,
-    cursorPos
-  );
-  return result || { from: 0, to: 0, value: "" };
+  try {
+    const targetNode = possiblyModifyChosenNode(value, syntaxNode);
+    const result = CmdTable[value.type](
+      value,
+      targetNode,
+      currentText,
+      cursorPos
+    );
+    return result || { from: 0, to: 0, value: "" };
+  } catch (e) {
+    console.error("Modify code by command error", value, e);
+    return { from: 0, to: 0, value: "" };
+  }
 };
 
 const climbToRoot = (node: SyntaxNode): SyntaxNode =>

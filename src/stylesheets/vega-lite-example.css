@@ -59,5 +59,12 @@
 }
 
 .styler-app .editor-container {
-    width: 100%
+    min-width: 650px;
+    width: 650px;
+
+}
+
+.styler-app .chart-container {
+    display: flex;
+    flex-wrap: wrap;
 }

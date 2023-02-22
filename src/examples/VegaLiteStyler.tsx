@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import StandardProjections from "../projections/standard-bundle";
-import { vegaLiteCode, vegaLiteScatterPlot } from "./example-data";
+import {
+  vegaLiteCode,
+  vegaLiteScatterPlot,
+  vegaLiteHeatmap,
+  vegaLiteStreamgraph,
+  vegaLiteLinechart,
+} from "./example-data";
 
 import { buttonListProjection } from "./VegaExample";
 
@@ -47,8 +53,14 @@ function VegaLiteExampleApp() {
           },
         ]}
       />
-      <div className="flex-down">
-        {[vegaLiteScatterPlot, vegaLiteCode].map((spec, idx) => {
+      <div className="chart-container">
+        {[
+          vegaLiteScatterPlot,
+          vegaLiteCode,
+          vegaLiteHeatmap,
+          vegaLiteStreamgraph,
+          vegaLiteLinechart,
+        ].map((spec, idx) => {
           return (
             <VegaLite
               key={idx}
