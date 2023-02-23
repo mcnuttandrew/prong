@@ -179,6 +179,9 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
 const longest = (arr: string[]) =>
   arr.reduce((acc, row) => (acc.length > row.length ? acc : row), "");
 
+const shortest = (arr: string[]) =>
+  arr.reduce((acc, row) => (acc.length > row.length ? acc : row), "");
+
 const hasType = (
   node: SyntaxNode | undefined,
   type: SyntaxNode["type"]["name"]
@@ -210,7 +213,7 @@ function computeSeperations(
     indentation = (line?.split(searchKey) || [""])[0];
   }
 
-  return { prevSep: longest(seps), nextSep: longest(seps), indentation };
+  return { prevSep: shortest(seps), nextSep: shortest(seps), indentation };
 }
 
 /**
@@ -221,7 +224,7 @@ function computeSeperations(
  * @param cursorPos
  * @returns
  */
-const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
+const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   event,
   node,
   text,
@@ -230,7 +233,6 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
   const {
     payload: { key, value },
   } = event;
-  // console.log("YYZ", event, node.type, currentText, cursorPos);
   // retarget to the object if we're somewhere inside
   let syntaxNode = node;
   if (hasType(syntaxNode, "JsonText")) {
@@ -254,39 +256,52 @@ const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
     nextSib,
     text
   );
-  const prefix =
-    (hasType(prevSib, "{") || hasType(approxTarget, "{") ? "" : ",") + prevSep;
+  const prefixA = (hasType(prevSib, "{") ? "" : ",") + prevSep;
   const suffix =
     (hasType(nextSib, "}") || hasType(approxTarget, "}") ? "" : ",") + nextSep;
   if (hasType(approxTarget, "⚠")) {
+    console.log("branch a");
     return {
-      value: `${prefix}${indentation}${key}: ${value}${suffix}`,
+      value: `${prefixA}${indentation}${key}: ${value}${suffix}`,
       from: prevSib.to,
       to: nextSib.from,
     };
   }
   if (hasType(approxTarget, "}")) {
+    console.log("branch b");
     return {
-      value: `${prefix}${indentation}${key}: ${value}${suffix}`,
+      value: `${prefixA}${indentation}${key}: ${value}${suffix}`,
       from: prevSib.to,
       to: approxTarget.to - 1,
     };
   }
+
+  const prefixB = (hasType(approxTarget, "{") ? "" : ",") + prevSep;
+
   if (hasType(approxTarget, "{")) {
+    console.log("branch c");
     return {
-      value: `${prefix}${indentation}${key}: ${value}${suffix}`,
+      value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
       from: approxTarget.from + 1,
       to: nextSib.from,
     };
   }
-
+  console.log("branch d");
   return {
-    value: `${prefix}${indentation}${key}: ${value}${suffix}`,
-    from: prevSib!.from,
-    to: nextSib!.to,
+    value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
+    // from: prevSib!.from,
+    from: approxTarget.to,
+    to: nextSib!.from,
   };
 };
 
+const addObjectKey: ModifyCmd<addObjectKeyEvent> = (...args) => {
+  const output = addObjectKeyPre(...args);
+  const content = output!.value.trim();
+  const sides = output?.value.split(content);
+  console.log({ output }, sides, content);
+  return output;
+};
 function rotateToAdaptivePosition(
   node: SyntaxNode,
   cursorPos: number | undefined

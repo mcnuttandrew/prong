@@ -115,6 +115,64 @@ exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
 
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
 
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { }, \\"point\\": { }}"`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 3`] = `"{\\"bar\\": { }, \\"point\\": { }}"`;
+
+exports[`modifyCodeByCommand - addObjectKey (fruit insert 0) 1`] = `
+"
+{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieStar\\": [1, 2, 3],
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieLike\\": true 
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (fruit insert 1) 1`] = `
+"
+{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieStar\\": [1, 2, 3],
+      \\"veggieLike\\": true 
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (fruit insert 2) 1`] = `
+"
+{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieLike\\": true,
+      \\"veggieStar\\": [1, 2, 3]
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
 exports[`modifyCodeByCommand - addObjectKey 1`] = `
 "{
     \\"J\\": [6, 7, 8],

@@ -144,7 +144,6 @@ test("modifyCodeByCommand - addObjectKey", () => {
   )!;
   expect(insertSwap(exampleData, cmd)).toMatchSnapshot();
 
-  console.log("start one in question");
   const rootKeyb = findNodeByText(exampleData, `{ "f": 4, "g": 5 }`)!;
   const cmdb = modifyCodeByCommand(
     { payload: { key: `"J"`, value: "[6, 7, 8]" }, type: "addObjectKey" },
@@ -209,25 +208,25 @@ test("modifyCodeByCommand - addObjectKey (cursorPos version)", () => {
   )!;
   expect(insertSwap(buggyText, cmd)).toMatchSnapshot();
 
-  // const buggyText2 = `{ "bar": { }  }`;
-  // const rootKey2 = findNodeByText(buggyText2, "}")!;
-  // const cmd2 = modifyCodeByCommand(
-  //   { payload: { key: `"point"`, value: "{ } " }, type: "addObjectKey" },
-  //   rootKey2,
-  //   buggyText2,
-  //   13
-  // )!;
-  // expect(insertSwap(buggyText2, cmd2)).toMatchSnapshot();
+  const buggyText2 = `{ "bar": { }  }`;
+  const rootKey2 = findNodeByText(buggyText2, "}")!;
+  const cmd2 = modifyCodeByCommand(
+    { payload: { key: `"point"`, value: "{ } " }, type: "addObjectKey" },
+    rootKey2,
+    buggyText2,
+    13
+  )!;
+  expect(insertSwap(buggyText2, cmd2)).toMatchSnapshot();
 
-  // const buggyText3 = `{"bar": { } po }`;
-  // const rootKey3 = findNodeByText(buggyText3, "}")!;
-  // const cmd3 = modifyCodeByCommand(
-  //   { payload: { key: `"point"`, value: "{ } " }, type: "addObjectKey" },
-  //   rootKey3,
-  //   buggyText3,
-  //   13
-  // )!;
-  // expect(insertSwap(buggyText3, cmd3)).toMatchSnapshot();
+  const buggyText3 = `{"bar": { } po }`;
+  const rootKey3 = findNodeByText(buggyText3, "}")!;
+  const cmd3 = modifyCodeByCommand(
+    { payload: { key: `"point"`, value: "{ } " }, type: "addObjectKey" },
+    rootKey3,
+    buggyText3,
+    13
+  )!;
+  expect(insertSwap(buggyText3, cmd3)).toMatchSnapshot();
 });
 
 test("modifyCodeByCommand - addObjectKey (buggy mark)", () => {
@@ -259,6 +258,65 @@ test("modifyCodeByCommand - addObjectKeyEvent (legend insert)", () => {
     // todo vary the char position a little bit
   )!;
   expect(insertSwap(buggyText, cmd)).toMatchSnapshot();
+});
+
+const fruitTest = `
+{
+  "fruits": [ "apple", "orange", "#c71585" ],
+  "vegetables": [
+    {
+      "veggieName": "potato",
+      "veggieLike": true 
+    },
+    {
+      "veggieName": "broccoli",
+      "veggieLike": false
+    }
+  ]
+}`;
+test("modifyCodeByCommand - addObjectKey (fruit insert 0)", () => {
+  const targetKey = findNodeByText(fruitTest, '"veggieName": "potato"')!;
+  const rootKey = targetKey?.parent!;
+  const cmd = modifyCodeByCommand(
+    {
+      payload: { key: `"veggieStar"`, value: "[1, 2, 3]" },
+      type: "addObjectKey",
+    },
+    rootKey,
+    fruitTest,
+    rootKey.from + 1
+  )!;
+  expect(insertSwap(fruitTest, cmd)).toMatchSnapshot();
+});
+
+test.only("modifyCodeByCommand - addObjectKey (fruit insert 1)", () => {
+  const targetKey = findNodeByText(fruitTest, '"veggieName": "potato"')!;
+  const rootKey = targetKey?.parent!;
+  const cmd = modifyCodeByCommand(
+    {
+      payload: { key: `"veggieStar"`, value: "[1, 2, 3]" },
+      type: "addObjectKey",
+    },
+    rootKey,
+    fruitTest,
+    targetKey.to + 2
+  )!;
+  expect(insertSwap(fruitTest, cmd)).toMatchSnapshot();
+});
+
+test("modifyCodeByCommand - addObjectKey (fruit insert 2)", () => {
+  const targetKey = findNodeByText(fruitTest, '"veggieLike": true')!;
+  const rootKey = targetKey?.parent!;
+  const cmd = modifyCodeByCommand(
+    {
+      payload: { key: `"veggieStar"`, value: "[1, 2, 3]" },
+      type: "addObjectKey",
+    },
+    rootKey,
+    fruitTest,
+    targetKey.to + 2
+  )!;
+  expect(insertSwap(fruitTest, cmd)).toMatchSnapshot();
 });
 
 const copy = (x: any) => JSON.parse(JSON.stringify(x));
