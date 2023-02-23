@@ -255,9 +255,9 @@ function VegaLiteExampleApp() {
                 name: "counter",
                 mode: "replace",
               },
-              {
+              clockRunning && {
                 // query: ["data", "values", "*"],
-                query: { type: "index", query: ["mark"] },
+                query: { type: "index", query: ["$schema"] },
                 type: "inline",
                 projection: DynamicProjection,
                 hasInternalState: true,

@@ -132,6 +132,7 @@ function getCacheKeyForElement(el: MenuElement): string {
     case "free-input":
       return "free-input";
     case "button":
+      return el.content;
     case "display":
     case "projection":
     default:
