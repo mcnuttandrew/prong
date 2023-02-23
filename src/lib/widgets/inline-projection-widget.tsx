@@ -39,8 +39,6 @@ class InlineProjectionWidget extends WidgetType {
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
 
-    // const view = this.view;
-    const state = this.state;
     const element = React.createElement(this.projection.projection, {
       keyPath: syntaxNodeToKeyPath(
         this.syntaxNode,
@@ -49,17 +47,7 @@ class InlineProjectionWidget extends WidgetType {
       node: this.syntaxNode,
       currentValue: this.currentCodeSlice,
       setCode: (code) => {
-        // todo untested, may mess stuff up
-        const fullCode = state.doc.toString();
-        console.log("this is now broken", state);
-        // view.dispatch({
-        //   changes: {
-        //     from: 0,
-        //     to: fullCode.length,
-        //     insert: code,
-        //   },
-        //   selection: state.selection,
-        // });
+        console.log("State can not be set using this type of projection");
       },
       fullCode: this.state.doc.toString(),
     });
