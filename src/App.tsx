@@ -5,14 +5,14 @@ import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteExample";
 import VegaExampleApp from "./examples/VegaExample";
 import SimpleExample from "./examples/SimpleExample";
-import FruitExample from "./examples/FruitExample";
+import ProduceExample from "./examples/ProduceExample";
 import InSituFigure1 from "./examples/InSituFigure1";
 import VegaLiteStyler from "./examples/VegaLiteStyler";
 
 const routes: { name: string; Component: () => JSX.Element }[] = [
   { name: "vega-lite", Component: VegaLiteExampleApp },
   { name: "vega", Component: VegaExampleApp },
-  { name: "fruit", Component: FruitExample },
+  { name: "produce", Component: ProduceExample },
   { name: "simple", Component: SimpleExample },
   { name: "in-situ-figure-1", Component: InSituFigure1 },
   { name: "vega-lite-styler", Component: VegaLiteStyler },

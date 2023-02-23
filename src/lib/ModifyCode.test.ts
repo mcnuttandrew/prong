@@ -289,7 +289,7 @@ test("modifyCodeByCommand - addObjectKey (fruit insert 0)", () => {
   expect(insertSwap(fruitTest, cmd)).toMatchSnapshot();
 });
 
-test.only("modifyCodeByCommand - addObjectKey (fruit insert 1)", () => {
+test("modifyCodeByCommand - addObjectKey (fruit insert 1)", () => {
   const targetKey = findNodeByText(fruitTest, '"veggieName": "potato"')!;
   const rootKey = targetKey?.parent!;
   const cmd = modifyCodeByCommand(

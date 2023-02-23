@@ -176,9 +176,6 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
   return { value: value.payload, from, to };
 };
 
-const longest = (arr: string[]) =>
-  arr.reduce((acc, row) => (acc.length > row.length ? acc : row), "");
-
 const shortest = (arr: string[]) =>
   arr.reduce((acc, row) => (acc.length > row.length ? acc : row), "");
 
@@ -260,7 +257,6 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   const suffix =
     (hasType(nextSib, "}") || hasType(approxTarget, "}") ? "" : ",") + nextSep;
   if (hasType(approxTarget, "⚠")) {
-    console.log("branch a");
     return {
       value: `${prefixA}${indentation}${key}: ${value}${suffix}`,
       from: prevSib.to,
@@ -268,7 +264,6 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
     };
   }
   if (hasType(approxTarget, "}")) {
-    console.log("branch b");
     return {
       value: `${prefixA}${indentation}${key}: ${value}${suffix}`,
       from: prevSib.to,
@@ -279,14 +274,12 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   const prefixB = (hasType(approxTarget, "{") ? "" : ",") + prevSep;
 
   if (hasType(approxTarget, "{")) {
-    console.log("branch c");
     return {
       value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
       from: approxTarget.from + 1,
       to: nextSib.from,
     };
   }
-  console.log("branch d");
   return {
     value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
     // from: prevSib!.from,
@@ -297,10 +290,22 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
 
 const addObjectKey: ModifyCmd<addObjectKeyEvent> = (...args) => {
   const output = addObjectKeyPre(...args);
-  const content = output!.value.trim();
-  const sides = output?.value.split(content);
-  console.log({ output }, sides, content);
-  return output;
+
+  const skips = (output?.value || "")
+    .split("\n")
+    .map((x) => x.replace(/\s/g, ""))
+    .map((x, idx, arr) => {
+      if (idx === 0 || idx === arr.length - 1) {
+        return false;
+      }
+      return x.length === 0 ? idx : false;
+    });
+  const value = output!.value
+    .split("\n")
+    .filter((_, idx) => !skips[idx])
+    .join("\n");
+
+  return output ? { ...output, value } : undefined;
 };
 function rotateToAdaptivePosition(
   node: SyntaxNode,

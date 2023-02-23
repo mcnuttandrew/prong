@@ -115,9 +115,9 @@ exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
 
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
 
-exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { }, \\"point\\": { }}"`;
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { },     \\"point\\": { }      }"`;
 
-exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 3`] = `"{\\"bar\\": { }, \\"point\\": { }}"`;
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 3`] = `"{\\"bar\\": { },  \\"point\\": { }   }"`;
 
 exports[`modifyCodeByCommand - addObjectKey (fruit insert 0) 1`] = `
 "
@@ -163,7 +163,7 @@ exports[`modifyCodeByCommand - addObjectKey (fruit insert 2) 1`] = `
     {
       \\"veggieName\\": \\"potato\\",
       \\"veggieLike\\": true,
-      \\"veggieStar\\": [1, 2, 3]
+          \\"veggieStar\\": [1, 2, 3]
     },
     {
       \\"veggieName\\": \\"broccoli\\",
@@ -218,9 +218,7 @@ exports[`modifyCodeByCommand - addObjectKeyEvent (legend insert) 1`] = `
 "
 {
   \\"padding\\": 5,
-  
     \\"legends\\": [],
-  
   \\"signals\\": []
 }
 "
