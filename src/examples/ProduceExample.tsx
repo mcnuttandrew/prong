@@ -91,7 +91,7 @@ const exampleData = `{
   ]
 }`;
 
-function FruitExample() {
+function ProduceExample() {
   const [currentCode, setCurrentCode] = React.useState(exampleData);
   const [numRows, setNumRows] = React.useState(0);
 
@@ -113,4 +113,4 @@ function FruitExample() {
   );
 }
 
-export default FruitExample;
+export default ProduceExample;

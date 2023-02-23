@@ -52,7 +52,7 @@ type ModifyCmd<A extends MenuEvent> = (
   value: A,
   syntaxNode: SyntaxNode,
   currentText: string,
-  cursorPos: number | undefined
+  cursorPos: number
 ) => UpdateDispatch | undefined;
 
 export const boundCheck = (node: SyntaxNode) => {
@@ -176,6 +176,43 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
   return { value: value.payload, from, to };
 };
 
+const shortest = (arr: string[]) =>
+  arr.reduce((acc, row) => (acc.length > row.length ? acc : row), "");
+
+const hasType = (
+  node: SyntaxNode | undefined,
+  type: SyntaxNode["type"]["name"]
+) => node?.type.name === type;
+function computeSeperations(
+  prev: SyntaxNode | undefined,
+  target: SyntaxNode,
+  next: SyntaxNode | undefined,
+  preText: string
+) {
+  let text = preText;
+  if (hasType(target, "⚠")) {
+    text = text.slice(0, target.from) + text.slice(target.to);
+  }
+  const regionHasNl = (from: number, to: number) =>
+    text.slice(from, to).includes("\n");
+  const prevToTarg = (prev && text.slice(prev.to, target.from)) || "";
+  const prevToNext = (prev && next && text.slice(prev.to, next.from)) || "";
+  const nextToTarg = (next && text.slice(target.to, next.from)) || "";
+  const seps = [prevToTarg, prevToNext, nextToTarg].map((x) =>
+    x.replace(/\S|,/g, "")
+  );
+
+  let indentation = "";
+  if (prev && regionHasNl(prev?.from, target?.to)) {
+    const lines = text.split("\n");
+    const searchKey = text.slice(prev.from, prev.to);
+    const line = lines.find((x) => x.includes(searchKey));
+    indentation = (line?.split(searchKey) || [""])[0];
+  }
+
+  return { prevSep: shortest(seps), nextSep: shortest(seps), indentation };
+}
+
 /**
  * Add object key function. Wow this is a mess
  * @param event
@@ -184,95 +221,91 @@ const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
  * @param cursorPos
  * @returns
  */
-const addObjectKey: ModifyCmd<addObjectKeyEvent> = (
+const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   event,
   node,
-  currentText,
+  text,
   cursorPos
 ) => {
   const {
     payload: { key, value },
   } = event;
-  // console.log("YYZ", event, node.type, currentText, cursorPos);
   // retarget to the object if we're somewhere inside
   let syntaxNode = node;
-
-  if (syntaxNode.type.name === "JsonText") {
+  if (hasType(syntaxNode, "JsonText")) {
     syntaxNode = syntaxNode.firstChild!;
-  } else if (syntaxNode.type.name !== "Object") {
+  } else if (!hasType(syntaxNode, "Object")) {
     syntaxNode = syntaxNode.parent!;
-    if (syntaxNode.type.name !== "Object") {
+    if (!hasType(syntaxNode, "Object")) {
       throw Error("Add Object Key error");
     }
   }
+  const approxTarget = rotateToAdaptivePosition(
+    node.firstChild || node,
+    cursorPos
+  );
+  const nextSib = approxTarget.nextSibling!;
+  const prevSib = approxTarget.prevSibling!;
 
-  const rightBrace = syntaxNode.lastChild!;
-  const prevSib = rightBrace.prevSibling!;
-  const prevSibIsError = prevSib.type.name === "⚠";
-  // switch the value to be a quoted string to prevent weird inserts
-  const val = value === "" ? '""' : value;
-
-  // prev is brace
-  if (prevSib.type.name === "{") {
+  const { prevSep, nextSep, indentation } = computeSeperations(
+    prevSib,
+    approxTarget,
+    nextSib,
+    text
+  );
+  const prefixA = (hasType(prevSib, "{") ? "" : ",") + prevSep;
+  const suffix =
+    (hasType(nextSib, "}") || hasType(approxTarget, "}") ? "" : ",") + nextSep;
+  if (hasType(approxTarget, "⚠")) {
     return {
-      value: `{${key}: ${val}}`,
-      from: prevSib.from,
-      to: rightBrace.to,
+      value: `${prefixA}${indentation}${key}: ${value}${suffix}`,
+      from: prevSib.to,
+      to: nextSib.from,
     };
   }
-  // trailing comma or other error
-  if (prevSibIsError) {
-    const sub = currentText.slice(prevSib.to - 1, prevSib.to);
-    const maybeComma = sub.includes(",") ? "" : ",";
-    const precededByBracket = prevSib.prevSibling?.type.name === "{";
-    const sep = precededByBracket ? "" : `${maybeComma} `;
-
+  if (hasType(approxTarget, "}")) {
     return {
-      value: `${sep}${key}: ${val}`,
-      from: prevSib.from + (sub.includes(",") || precededByBracket ? 0 : -1),
-      to: prevSib.to,
+      value: `${prefixA}${indentation}${key}: ${value}${suffix}`,
+      from: prevSib.to,
+      to: approxTarget.to - 1,
     };
   }
 
-  // targeted insertion is broken here :(
-  const finalTarget = cursorPos
-    ? rotateToAdaptivePosition(rightBrace.parent?.firstChild!, cursorPos)
-    : prevSib;
-  // const finalTarget = prevSib;
-  // does the previous items have a line break separating them?
-  let lineBreakSep: false | string = false;
-  if (finalTarget && finalTarget.prevSibling) {
-    const diffSlice = currentText.slice(
-      finalTarget.prevSibling.to,
-      finalTarget.from
-    );
-    if (diffSlice.includes("\n")) {
-      lineBreakSep = diffSlice.split("\n")[1];
-    }
-  }
-  if (finalTarget.type.name === "}" && prevSibIsError) {
+  const prefixB = (hasType(approxTarget, "{") ? "" : ",") + prevSep;
+
+  if (hasType(approxTarget, "{")) {
     return {
-      value: `{${key}: value}`,
-      from: prevSib.prevSibling!.to,
-      to: finalTarget.from,
+      value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
+      from: approxTarget.from + 1,
+      to: nextSib.from,
     };
   }
-  const nextIsBrace = finalTarget.nextSibling?.type.name === "}";
-  const isBrace = finalTarget.type.name === "{";
-  const suffix = nextIsBrace ? "" : ",";
-  const prefix = isBrace ? "" : ",";
-  // regular object with stuff in it
   return {
-    value: lineBreakSep
-      ? `${prefix}\n${lineBreakSep}${key}: ${val}${suffix}\n${lineBreakSep}`
-      : `${prefix} ${key}: ${val}${suffix}`,
-    // from: targIsBrace ? finalTarget.to - 1 : finalTarget.to,
-    // to: targIsBrace ? finalTarget.to : finalTarget.nextSibling!.from,
-    from: finalTarget.to,
-    to: finalTarget.nextSibling!.from,
+    value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
+    from: approxTarget.to,
+    to: nextSib!.from,
   };
 };
 
+const addObjectKey: ModifyCmd<addObjectKeyEvent> = (...args) => {
+  const output = addObjectKeyPre(...args);
+
+  const skips = (output?.value || "")
+    .split("\n")
+    .map((x) => x.replace(/\s/g, ""))
+    .map((x, idx, arr) => {
+      if (idx === 0 || idx === arr.length - 1) {
+        return false;
+      }
+      return x.length === 0 ? idx : false;
+    });
+  const value = output!.value
+    .split("\n")
+    .filter((_, idx) => !skips[idx])
+    .join("\n");
+
+  return output ? { ...output, value } : undefined;
+};
 function rotateToAdaptivePosition(
   node: SyntaxNode,
   cursorPos: number | undefined
@@ -280,7 +313,12 @@ function rotateToAdaptivePosition(
   if (!cursorPos) {
     return node;
   }
-  let next = node!.parent!.firstChild!;
+  let next = node;
+  if (node.type.name === "Object" || node.type.name === "Array") {
+    next = node.firstChild!;
+  } else {
+    next = node!.parent!.firstChild!;
+  }
   while (next.nextSibling && next.nextSibling.from < cursorPos) {
     next = next.nextSibling;
   }
@@ -351,6 +389,39 @@ const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
   return { value, from: from!, to: to! };
 };
 
+const climbToRoot = (node: SyntaxNode): SyntaxNode =>
+  node.parent ? climbToRoot(node.parent) : node;
+
+function findSyntaxNodeById(node: SyntaxNode, id: string): SyntaxNode | null {
+  const root = climbToRoot(node);
+  let foundNode: SyntaxNode | null = null;
+  root.tree?.iterate({
+    enter: ({ node }) => {
+      if (foundNode) {
+        return;
+      }
+
+      if (nodeToId(node) === id) {
+        foundNode = node;
+      }
+    },
+  });
+  return foundNode;
+}
+
+const possiblyModifyChosenNode = (
+  menuEvent: MenuEvent,
+  syntaxNode: SyntaxNode
+) => {
+  const targetNode = menuEvent.nodeId
+    ? findSyntaxNodeById(syntaxNode, menuEvent.nodeId) || syntaxNode
+    : syntaxNode;
+
+  const isLiminalNode = liminalNodeTypes.has(targetNode.type.name);
+  // don't modify if its one of the liminal nodes (eg bracket)
+  return isLiminalNode ? syntaxNode : targetNode;
+};
+
 // todo fix this type string
 // todo maybe also add typings about what objects are expected???
 const CmdTable: Record<string, ModifyCmd<any>> = {
@@ -385,37 +456,4 @@ export const modifyCodeByCommand: ModifyCmd<any> = (
     console.error("Modify code by command error", value, e);
     return { from: 0, to: 0, value: "" };
   }
-};
-
-const climbToRoot = (node: SyntaxNode): SyntaxNode =>
-  node.parent ? climbToRoot(node.parent) : node;
-
-function findSyntaxNodeById(node: SyntaxNode, id: string): SyntaxNode | null {
-  const root = climbToRoot(node);
-  let foundNode: SyntaxNode | null = null;
-  root.tree?.iterate({
-    enter: ({ node }) => {
-      if (foundNode) {
-        return;
-      }
-
-      if (nodeToId(node) === id) {
-        foundNode = node;
-      }
-    },
-  });
-  return foundNode;
-}
-
-const possiblyModifyChosenNode = (
-  menuEvent: MenuEvent,
-  syntaxNode: SyntaxNode
-) => {
-  const targetNode = menuEvent.nodeId
-    ? findSyntaxNodeById(syntaxNode, menuEvent.nodeId) || syntaxNode
-    : syntaxNode;
-
-  const isLiminalNode = liminalNodeTypes.has(targetNode.type.name);
-  // don't modify if its one of the liminal nodes (eg bracket)
-  return isLiminalNode ? syntaxNode : targetNode;
 };

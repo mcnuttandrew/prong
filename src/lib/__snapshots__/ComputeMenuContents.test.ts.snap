@@ -265,7 +265,7 @@ Array [
           "nodeId": "721-938",
           "payload": Object {
             "key": "\\"base\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
@@ -289,7 +289,7 @@ Array [
           "nodeId": "721-938",
           "payload": Object {
             "key": "\\"interval\\"",
-            "value": "{}",
+            "value": "true",
           },
           "type": "addObjectKey",
         },
@@ -301,7 +301,7 @@ Array [
           "nodeId": "721-938",
           "payload": Object {
             "key": "\\"maxbins\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
@@ -313,7 +313,7 @@ Array [
           "nodeId": "721-938",
           "payload": Object {
             "key": "\\"minstep\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
@@ -325,7 +325,7 @@ Array [
           "nodeId": "721-938",
           "payload": Object {
             "key": "\\"name\\"",
-            "value": "{}",
+            "value": "\\"\\"",
           },
           "type": "addObjectKey",
         },
@@ -337,7 +337,7 @@ Array [
           "nodeId": "721-938",
           "payload": Object {
             "key": "\\"span\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
