@@ -122,13 +122,16 @@ const DestringProjection: Projection = {
     type: "function",
     query: (_, type) => targVals.has(type),
   },
-  projection: (props) => {
-    return (
-      <div style={{ color: coloring[props.node.type.name] || "black" }}>
-        {maybeTrim(props.currentValue)}
-      </div>
-    );
-  },
+  projection: (props) => (
+    <div
+      style={{
+        color: coloring[props.node.type.name] || "black",
+        background: props.diagnosticErrors.length ? "lightsalmon" : "none",
+      }}
+    >
+      {maybeTrim(props.currentValue)}
+    </div>
+  ),
   name: "Destring",
   hasInternalState: false,
 };
@@ -145,10 +148,8 @@ function ProduceExample() {
       <Editor
         schema={schema}
         code={currentCode}
-        onChange={(x: string) => {
-          setCurrentCode(x);
-        }}
-        projections={[...standardBundle, DestringProjection] as Projection[]}
+        onChange={(x) => setCurrentCode(x)}
+        projections={[...standardBundle, DestringProjection]}
       />
       <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
     </div>

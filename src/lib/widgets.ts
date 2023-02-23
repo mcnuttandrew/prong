@@ -83,7 +83,8 @@ function createWidgets(view: EditorView) {
     return Decoration.set(
       widgets.sort((a, b) => {
         const delta = a.from - b.from;
-        const relWidth = a.to - a.from - (b.to - b.from);
+        const relWidth = 0;
+        // const relWidth = a.to - a.from - (b.to - b.from);
         return delta || relWidth;
       })
     );

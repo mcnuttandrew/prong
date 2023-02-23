@@ -209,6 +209,7 @@ export function buildProjectionsForMenu(props: {
   currentCodeSlice: string;
 }): MenuRow[] {
   const { fullCode, state, node, currentCodeSlice, view } = props;
+  const { schemaTypings, diagnostics } = state.field(cmStatePlugin);
   if (!node) {
     return [];
   }
@@ -230,6 +231,10 @@ export function buildProjectionsForMenu(props: {
             });
           },
           fullCode,
+          diagnosticErrors: diagnostics.filter(
+            (x) => x.from === node.from && x.to === node.to
+          ),
+          typings: schemaTypings[`${node.from}-${node.to}`],
         }),
       },
     ],

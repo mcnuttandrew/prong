@@ -2,7 +2,7 @@ import { Decoration } from "@codemirror/view";
 import { SimpleWidget } from "../widgets";
 import { cmStatePlugin } from "../cmState";
 import { popOverState } from "../popover-menu/PopoverState";
-import { classNames } from "../utils";
+import { classNames, codeStringState } from "../utils";
 import { SyntaxNode } from "@lezer/common";
 
 const simpleTypes = new Set([

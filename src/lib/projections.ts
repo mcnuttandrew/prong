@@ -17,6 +17,7 @@ import { runProjectionQuery, ProjectionQuery } from "./query";
 import { cmStatePlugin } from "./cmState";
 
 import InlineProjectWidgetFactory from "./widgets/inline-projection-widget";
+import { Diagnostic } from "@codemirror/lint";
 
 export interface ProjectionProps {
   node: SyntaxNode;
@@ -24,6 +25,8 @@ export interface ProjectionProps {
   currentValue: any;
   setCode: (code: string) => void;
   fullCode: string;
+  typings: any[];
+  diagnosticErrors: Diagnostic[];
 }
 
 interface ProjectionBase {

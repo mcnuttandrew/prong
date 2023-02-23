@@ -8,6 +8,7 @@ import { runProjectionQuery } from "../query";
 import { ProjectionInline } from "../projections";
 import { SimpleWidgetStateVersion } from "../widgets";
 import isEqual from "lodash.isequal";
+import { cmStatePlugin } from "../cmState";
 
 class InlineProjectionWidget extends WidgetType {
   widgetContainer: HTMLDivElement | null;
@@ -38,7 +39,9 @@ class InlineProjectionWidget extends WidgetType {
     wrap.className = "cm-projection-widget position-relative";
     wrap.innerText = this.currentCodeSlice;
     this.widgetContainer = wrap;
-
+    const { schemaTypings, diagnostics } = this.state.field(cmStatePlugin);
+    const from = this.from;
+    const to = this.to;
     const element = React.createElement(this.projection.projection, {
       keyPath: syntaxNodeToKeyPath(
         this.syntaxNode,
@@ -50,6 +53,10 @@ class InlineProjectionWidget extends WidgetType {
         console.log("State can not be set using this type of projection");
       },
       fullCode: this.state.doc.toString(),
+      diagnosticErrors: diagnostics.filter(
+        (x) => x.from === from && x.to === to
+      ),
+      typings: schemaTypings[`${from}-${to}`],
     });
 
     ReactDOM.render(element, wrap);
