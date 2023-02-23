@@ -5,6 +5,8 @@ import "../stylesheets/vega-lite-example.css";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
+import DataTable from "./DataTable";
+
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 import { ProjectionProps, Projection } from "../../src/lib/projections";
@@ -30,52 +32,13 @@ const Pill: FC<{ name: string }> = function Pill(props) {
   );
 };
 
-// const DataTable = (props: ProjectionProps): JSX.Element => {
-//   const parsed = lazyParse(props.currentValue);
-//   console.log(props, parsed);
-//   if (!Array.isArray(parsed) || !parsed.length) {
-//     return <div>hi</div>;
-//   }
-//   const keys: string[] = Array.from(
-//     parsed.reduce((acc, row: Record<string, any>) => {
-//       Object.keys(row).forEach((key) => acc.add(key));
-//       return acc;
-//     }, new Set())
-//   );
-//   return (
-//     <div>
-//       <table>
-//         <tr>
-//           {keys.map((key) => (
-//             <th>{key}</th>
-//           ))}
-//         </tr>
-//         {parsed.map((row) => (
-//           <tr>
-//             {keys.map((key) => (
-//               <td>{row[key]}</td>
-//             ))}
-//           </tr>
-//         ))}
-//       </table>
-//     </div>
-//   );
-// };
-
 const Shelf: FC<{
   currentValue: any;
   keyPath: string[];
   setCurrentCode: (x: any) => void;
   currentCode: string;
-  // getCurrentCode: () => string;
 }> = function Shelf(props) {
-  const {
-    keyPath,
-    currentCode,
-    // getCurrentCode,
-    setCurrentCode,
-    currentValue,
-  } = props;
+  const { keyPath, currentCode, setCurrentCode, currentValue } = props;
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "PILL",
     drop: (x: any) => {
@@ -161,11 +124,7 @@ const UploadAndInline: React.FC<ProjectionProps> = (props) => {
 function BuildUploadAndInline(path: (string | number)[]): Projection {
   return {
     name: "upload-and-inline",
-    query: {
-      query: path,
-      // ["data"],
-      type: "index",
-    },
+    query: { query: path, type: "index" },
     projection: (props: ProjectionProps) => <UploadAndInline {...props} />,
     type: "tooltip",
   };
@@ -187,8 +146,9 @@ const shelf =
 
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState(vegaLiteCode);
-  const [clockRunning, setClockRunning] = useState(false);
+  const [clockRunning, setClockRunning] = useState<boolean>(false);
   const [timer, setTimer] = useState(0);
+  const [showDatatable, setShowDatatable] = useState<boolean>(true);
 
   useEffect(() => {
     setTimeout(() => {
@@ -215,93 +175,110 @@ function VegaLiteExampleApp() {
             toggle timer
           </button>
         </div>
+        {!showDatatable && (
+          <button onClick={() => setShowDatatable(true)}>
+            Show data table
+          </button>
+        )}
         <Editor
           schema={VegaLiteV5Schema}
           code={currentCode}
           onChange={(x) => setCurrentCode(x)}
-          projections={[
-            {
-              query: { type: "index", query: ["data", "values", "*"] },
-              type: "tooltip",
-              projection: ({ keyPath }) => {
-                return (
-                  <div className="flex-down">
-                    <div>hi annotation projection {keyPath.join(",")}</div>
-                    <div>{`Timer value: ${timer}`}</div>
-                  </div>
-                );
+          projections={
+            [
+              {
+                query: { type: "index", query: ["data", "values", "*"] },
+                type: "tooltip",
+                projection: ({ keyPath }) => {
+                  return (
+                    <div className="flex-down">
+                      <div>hi annotation projection {keyPath.join(",")}</div>
+                      <div>{`Timer value: ${timer}`}</div>
+                    </div>
+                  );
+                },
+                name: "popover example",
+              } as Projection,
+              {
+                query: {
+                  type: "index",
+                  query: ["encoding", "*", "field", "field___value"],
+                },
+                type: "tooltip",
+                projection: (props) => {
+                  return (
+                    <div>
+                      {fields.map((x) => (
+                        <button
+                          onClick={() =>
+                            setCurrentCode(
+                              setIn(props.keyPath, `"${x}"`, currentCode)
+                            )
+                          }
+                          key={x}
+                        >
+                          {x}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                },
+                name: "Switch to",
+              } as Projection,
+              showDatatable && {
+                query: { query: ["InlineDataset"], type: "schemaMatch" },
+                // query: {
+                //   type: "index",
+                //   query: ["data", "values", "values___value"],
+                // },
+                type: "inline",
+                name: "data table",
+                projection: (props: ProjectionProps) => (
+                  <DataTable
+                    {...props}
+                    externalUpdate={(code) => setCurrentCode(code)}
+                    hideTable={() => setShowDatatable(false)}
+                  />
+                ),
+                hasInternalState: true,
+                mode: "replace-multiline",
               },
-              name: "popover example",
-            },
-            {
-              query: {
-                type: "index",
-                query: ["encoding", "*", "field", "field___value"],
+              {
+                // query: ["data", "values", "*"],
+                query: {
+                  type: "index",
+                  query: ["description"],
+                },
+                type: "inline",
+                projection: CounterProjection,
+                hasInternalState: true,
+                name: "counter",
+                mode: "replace",
               },
-              type: "tooltip",
-              projection: (props) => {
-                return (
-                  <div>
-                    {fields.map((x) => (
-                      <button
-                        onClick={() =>
-                          setCurrentCode(
-                            setIn(props.keyPath, `"${x}"`, currentCode)
-                          )
-                        }
-                        key={x}
-                      >
-                        {x}
-                      </button>
-                    ))}
-                  </div>
-                );
+              {
+                // query: ["data", "values", "*"],
+                query: { type: "index", query: ["mark"] },
+                type: "inline",
+                projection: DynamicProjection,
+                hasInternalState: true,
+                name: "dynamic projection",
+                mode: "replace",
               },
-              name: "Switch to",
-            },
-            // {
-            //   query: { query: ["data", "values"], type: "index" },
-            //   type: "inline",
-            //   name: "data table",
-            //   projection: (props: ProjectionProps) => <div>hi</div>,
-            //   // projection: CounterProjection,
-            //   hasInternalState: false,
-            // },
-            {
-              // query: ["data", "values", "*"],
-              query: {
-                type: "index",
-                query: ["description"],
+              {
+                // query: ["data", "values", "*"],
+                query: {
+                  type: "index",
+                  query: ["encoding", "*", "field", "field___value"],
+                },
+                type: "inline",
+                projection: shelf(setCurrentCode, currentCode),
+                hasInternalState: false,
+                name: "dnd",
+                mode: "replace",
               },
-              type: "inline",
-              projection: CounterProjection,
-              hasInternalState: true,
-              name: "counter",
-              mode: "replace",
-            },
-            {
-              // query: ["data", "values", "*"],
-              query: { type: "index", query: ["mark"] },
-              type: "inline",
-              projection: DynamicProjection,
-              hasInternalState: true,
-              name: "dynamic projection",
-              mode: "replace",
-            },
-            {
-              // query: ["data", "values", "*"],
-              query: {
-                type: "index",
-                query: ["encoding", "*", "field", "field___value"],
-              },
-              type: "inline",
-              projection: shelf(setCurrentCode, currentCode),
-              hasInternalState: false,
-              name: "dnd",
-              mode: "replace",
-            },
-            BuildUploadAndInline(["data"]),
-          ]}
+              BuildUploadAndInline(["data"]),
+            ].filter((x) => x) as Projection[]
+          }
         />
       </div>
     </DndProvider>

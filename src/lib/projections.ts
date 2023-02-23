@@ -12,7 +12,7 @@ import { SyntaxNode } from "@lezer/common";
 import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
-import { codeString, syntaxNodeToKeyPath, codeStringState } from "./utils";
+import { syntaxNodeToKeyPath, codeStringState } from "./utils";
 import { runProjectionQuery, ProjectionQuery } from "./query";
 import { cmStatePlugin } from "./cmState";
 
@@ -43,7 +43,7 @@ export interface ProjectionFullTooltip extends ProjectionBase {
 export interface ProjectionInline extends ProjectionBase {
   type: "inline";
   hasInternalState: boolean;
-  mode: "replace" | "prefix" | "suffix";
+  mode: "replace" | "prefix" | "suffix" | "replace-multiline";
 }
 
 export type Projection =
@@ -51,34 +51,35 @@ export type Projection =
   | ProjectionTooltip
   | ProjectionFullTooltip;
 
-function createWidgets(view: EditorView) {
+function widgetBuilder(
+  projectionsInUse: ProjectionMaterialization[],
+  state: EditorState
+) {
   const widgets: Range<Decoration>[] = [];
-  const { projectionsInUse } = view.state.field(projectionState);
-  const { schemaTypings } = view.state.field(cmStatePlugin);
+  const { schemaTypings } = state.field(cmStatePlugin);
+  // for (const { from, to } of view.visibleRanges) {
+  syntaxTree(state).iterate({
+    from: 0,
+    to: state.doc.length,
+    enter: ({ node, from, to, type }) => {
+      const currentCodeSlice = codeStringState(state, from, to);
+      projectionsInUse
+        .filter((x) => x.from === from && x.to === to)
+        .forEach((projection) => {
+          const projWidget = InlineProjectWidgetFactory(
+            projection.projection as ProjectionInline,
+            currentCodeSlice,
+            node,
+            schemaTypings[`${node.from}-${node.to}`]
+          );
 
-  for (const { from, to } of view.visibleRanges) {
-    syntaxTree(view.state).iterate({
-      from,
-      to,
-      enter: ({ node, from, to, type }) => {
-        const currentCodeSlice = codeString(view, from, to);
-        projectionsInUse
-          .filter((x) => x.from === from && x.to === to)
-          .forEach((projection) => {
-            const projWidget = InlineProjectWidgetFactory(
-              projection.projection as ProjectionInline,
-              currentCodeSlice,
-              node,
-              schemaTypings[`${node.from}-${node.to}`]
-            );
-
-            projWidget
-              .addNode(view, from, to, node)
-              .forEach((w) => widgets.push(w));
-          });
-      },
-    });
-  }
+          projWidget
+            .addNode(state, from, to, node)
+            .forEach((w) => widgets.push(w));
+        });
+    },
+  });
+  // }
   try {
     return Decoration.set(widgets.sort((a, b) => a.from - b.from));
   } catch (e) {
@@ -99,7 +100,8 @@ export const projectionView = ViewPlugin.fromClass(
     decorations: DecorationSet;
 
     constructor(view: EditorView) {
-      this.decorations = createWidgets(view);
+      const { projectionsInUse } = view.state.field(projectionState);
+      this.decorations = widgetBuilder(projectionsInUse, view.state);
     }
 
     update(update: ViewUpdate) {
@@ -108,7 +110,8 @@ export const projectionView = ViewPlugin.fromClass(
         update.state.field(projectionState)
       );
       if (update.viewportChanged || stateValuesChanged) {
-        this.decorations = createWidgets(update.view);
+        const { projectionsInUse } = update.view.state.field(projectionState);
+        this.decorations = widgetBuilder(projectionsInUse, update.view.state);
       }
     }
   },
@@ -135,9 +138,19 @@ export const projectionState: StateField<ProjectionState> = StateField.define({
     // todo, this may be too broad?
     return {
       ...state,
-      projectionsInUse: identifyProjectionLocations(tr.state),
+      projectionsInUse: identifyProjectionLocations(tr.state).inlineLocations,
     };
   },
+});
+
+const multilineProjectionState: StateField<DecorationSet> = StateField.define({
+  create: () => Decoration.none,
+  update: (state, tr) =>
+    widgetBuilder(
+      identifyProjectionLocations(tr.state).multilineLocations,
+      tr.state
+    ),
+  provide: (f) => EditorView.decorations.from(f),
 });
 
 function shouldAddProjection(
@@ -161,7 +174,8 @@ function shouldAddProjection(
 }
 
 function identifyProjectionLocations(state: EditorState) {
-  const locations: ProjectionMaterialization[] = [];
+  const inlineLocations: ProjectionMaterialization[] = [];
+  const multilineLocations: ProjectionMaterialization[] = [];
   const { projections, schemaTypings } = state.field(cmStatePlugin);
   const inlineProjections = projections.filter(
     (proj) => proj.type === "inline"
@@ -182,14 +196,18 @@ function identifyProjectionLocations(state: EditorState) {
         }
         const typings = schemaTypings[`${node.from}-${node.to}`];
         if (shouldAddProjection(node, state, projection, typings)) {
-          locations.push({ from, to, projection });
+          if (projection.mode === "replace-multiline") {
+            multilineLocations.push({ from, to, projection });
+          } else {
+            inlineLocations.push({ from, to, projection });
+          }
         }
       });
     },
   });
-  return locations;
+  return { multilineLocations, inlineLocations };
 }
 
 export default function projectionPlugin(): Extension {
-  return [projectionState, projectionView];
+  return [projectionState, projectionView, multilineProjectionState];
 }
