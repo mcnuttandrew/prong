@@ -285,7 +285,10 @@ const getNestedVal = (props: (string | number)[], obj: any) =>
 
 let codeKey = "";
 let pathCache: Record<string, (string | number)[]> = {};
-export function syntaxNodeToKeyPath(node: SyntaxNode, fullCode: string) {
+export function syntaxNodeToKeyPath(
+  node: SyntaxNode,
+  fullCode: string
+): (string | number)[] {
   const cacheKey = `${node.from}-${node.to}`;
   if (codeKey !== fullCode) {
     pathCache = {};
@@ -298,13 +301,21 @@ export function syntaxNodeToKeyPath(node: SyntaxNode, fullCode: string) {
   try {
     parsedRoot = Json.parse(fullCode);
   } catch (e) {
+    console.error(e);
+    console.error("ERROR CREATING PATH", fullCode);
     return [];
   }
 
-  const resultPath = absPathToKeyPath(absPath, parsedRoot);
-  pathCache[cacheKey] = resultPath;
-  codeKey = fullCode;
-  return pathCache[cacheKey];
+  try {
+    const resultPath = absPathToKeyPath(absPath, parsedRoot);
+    pathCache[cacheKey] = resultPath;
+    codeKey = fullCode;
+    return pathCache[cacheKey];
+  } catch (e) {
+    console.error(e);
+    console.error("ERROR CREATING PATH", absPath, parsedRoot);
+    return [];
+  }
 }
 
 function findParseTargetWidth(
@@ -428,9 +439,9 @@ export function simpleParse(content: any, defaultVal = {}) {
 
 export function getCursorPos(state: EditorState) {
   const ranges = state.selection.ranges;
-  if (ranges.length > 1) {
-    return undefined;
-  }
+  // if (ranges.length > 1) {
+  //   return undefined;
+  // }
   const range = ranges[0];
   return range.anchor;
 }

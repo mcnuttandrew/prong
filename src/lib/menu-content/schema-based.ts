@@ -201,14 +201,18 @@ function materializeRequiredProps(content: any): string[] {
 }
 
 export function materializeAnyOfOption(content: JSONSchema7): string {
-  const targ = ((content?.oneOf && flattenOneOf(content.oneOf)[0]) ||
-    (content?.anyOf && flattenAnyOf(content.anyOf)[0]) ||
-    content) as JSONSchema7;
+  const targOptions = (
+    ((content?.oneOf && flattenOneOf(content.oneOf)) ||
+      (content?.anyOf && flattenAnyOf(content.anyOf)) || [
+        content,
+      ]) as JSONSchema7[]
+  ).filter((x) => x.type);
+  const targ = targOptions[0];
   if (!targ) {
     return "null";
   }
   const requiredPropsArr = materializeRequiredProps(targ);
-  const type = targ.type as string;
+  const type = Array.isArray(targ.type) ? targ.type[0] : (targ.type as string);
   if (type in literalTypes) {
     return literalTypes[type];
   }

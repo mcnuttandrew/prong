@@ -153,7 +153,7 @@ const multilineProjectionState: StateField<DecorationSet> = StateField.define({
   provide: (f) => EditorView.decorations.from(f),
 });
 
-function shouldAddProjection(
+function shouldAddProjectionPreGuard(
   syntaxNode: SyntaxNode,
   state: EditorState,
   projection: Projection,
@@ -172,6 +172,16 @@ function shouldAddProjection(
     typings
   );
 }
+
+const shouldAddProjection: typeof shouldAddProjectionPreGuard = (...args) => {
+  try {
+    return shouldAddProjectionPreGuard(...args);
+  } catch (e) {
+    console.error(e);
+    console.log("ERROR ARGS", args);
+    return false;
+  }
+};
 
 function identifyProjectionLocations(state: EditorState) {
   const inlineLocations: ProjectionMaterialization[] = [];

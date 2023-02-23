@@ -82,6 +82,7 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 6`] = `
 
 exports[`modifyCodeByCommand - addObjectKey (boundary effects) 1`] = `
 "{
+    \\"test\\": null,
     \\"a\\": {
       \\"b\\": [1, 2, 
         3],
@@ -89,15 +90,19 @@ exports[`modifyCodeByCommand - addObjectKey (boundary effects) 1`] = `
     },
     \\"d\\": null,
     \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
-    \\"I\\": \\"example\\", \\"test\\": null
+    \\"I\\": \\"example\\",
   }"
 `;
+
+exports[`modifyCodeByCommand - addObjectKey (buggy mark) 1`] = `"{\\"mark\\": {\\"type\\":\\"bar\\",  \\"color\\": \\"\\"  }} "`;
 
 exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
 "{
   \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
   \\"vegetables\\": [
-    { \\"veggieStarRating\\": 0,\\"veggieName\\": \\"potato\\",
+    {
+      \\"veggieStarRating\\": 0,
+      \\"veggieName\\": \\"potato\\",
       \\"veggieLike\\": true
     },
     {
@@ -110,12 +115,9 @@ exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
 
 exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
 
-exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { }, \\"point\\": { } }"`;
-
-exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 3`] = `"{\\"bar\\": { }, \\"point\\": { }  }"`;
-
 exports[`modifyCodeByCommand - addObjectKey 1`] = `
 "{
+    \\"J\\": [6, 7, 8],
     \\"a\\": {
       \\"b\\": [1, 2, 
         3],
@@ -123,7 +125,7 @@ exports[`modifyCodeByCommand - addObjectKey 1`] = `
     },
     \\"d\\": null,
     \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
-    \\"I\\": \\"example\\", \\"J\\": [6, 7, 8]
+    \\"I\\": \\"example\\",
   }"
 `;
 
@@ -135,7 +137,7 @@ exports[`modifyCodeByCommand - addObjectKey 2`] = `
       \\"c\\": true,
     },
     \\"d\\": null,
-    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5, \\"J\\": [6, 7, 8]}],
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5, \\"J\\": [6, 7, 8] }],
     \\"I\\": \\"example\\",
   }"
 `;
@@ -149,8 +151,21 @@ exports[`modifyCodeByCommand - addObjectKey 3`] = `
     },
     \\"d\\": null,
     \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
-    \\"I\\": \\"example\\", \\"J\\": {\\"X\\": \\"Y\\"}
+    \\"I\\": \\"example\\",
+  \\"J\\": {\\"X\\": \\"Y\\"}
   }"
+`;
+
+exports[`modifyCodeByCommand - addObjectKeyEvent (legend insert) 1`] = `
+"
+{
+  \\"padding\\": 5,
+  
+    \\"legends\\": [],
+  
+  \\"signals\\": []
+}
+"
 `;
 
 exports[`modifyCodeByCommand - decreaseItemIdx 1`] = `

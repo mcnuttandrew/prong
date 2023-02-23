@@ -22,7 +22,7 @@ Array [
           "nodeId": "10-13",
           "payload": Object {
             "key": "\\"gridCap\\"",
-            "value": "{}",
+            "value": "\\"\\"",
           },
           "type": "addObjectKey",
         },
@@ -34,7 +34,7 @@ Array [
           "nodeId": "10-13",
           "payload": Object {
             "key": "\\"gridColor\\"",
-            "value": "{}",
+            "value": "null",
           },
           "type": "addObjectKey",
         },
@@ -58,7 +58,7 @@ Array [
           "nodeId": "10-13",
           "payload": Object {
             "key": "\\"gridDashOffset\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
@@ -70,7 +70,7 @@ Array [
           "nodeId": "10-13",
           "payload": Object {
             "key": "\\"gridOpacity\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
@@ -82,7 +82,7 @@ Array [
           "nodeId": "10-13",
           "payload": Object {
             "key": "\\"gridWidth\\"",
-            "value": "{}",
+            "value": "0",
           },
           "type": "addObjectKey",
         },
