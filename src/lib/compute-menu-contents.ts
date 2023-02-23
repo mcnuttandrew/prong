@@ -69,7 +69,7 @@ export const simpleTypes: Record<string, any> = {
   string: "",
   object: `{ } `,
   number: "0",
-  boolean: "true",
+  boolean: true,
   array: "[ ] ",
   null: "null",
 };

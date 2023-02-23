@@ -194,10 +194,10 @@ Array [
   Object {
     "elements": Array [
       Object {
-        "content": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":\\"true\\"}",
+        "content": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
         "onSelect": Object {
           "nodeId": "135-200",
-          "payload": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":\\"true\\"}",
+          "payload": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
           "type": "addElementAsSiblingInArray",
         },
         "type": "button",
