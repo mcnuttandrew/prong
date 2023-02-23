@@ -53,7 +53,10 @@ export function prepDiagnostics(
             content: `Switch to ${expectation}`,
             onSelect: {
               type: "simpleSwap",
-              payload: simpleTypes[expectation] || `"${expectation}"`,
+              payload:
+                expectation in simpleTypes
+                  ? simpleTypes[expectation]
+                  : `"${expectation}"`,
               nodeId: nodeToId(targetNode),
             },
           };
@@ -65,10 +68,10 @@ export function prepDiagnostics(
 export const simpleTypes: Record<string, any> = {
   string: "",
   object: `{ } `,
-  number: 0,
-  boolean: true,
+  number: "0",
+  boolean: "true",
   array: "[ ] ",
-  null: '"null"',
+  null: "null",
 };
 export const literalTypes: Record<string, string> = {
   string: '""',

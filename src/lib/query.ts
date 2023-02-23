@@ -1,6 +1,10 @@
 import { JSONSchema } from "./JSONSchemaTypes";
+import { SyntaxNode } from "@lezer/common";
 
-type functionQueryType = (value: string) => boolean;
+type functionQueryType = (
+  value: string,
+  nodeType: SyntaxNode["type"]["name"]
+) => boolean;
 export type ProjectionQuery =
   | { type: "function"; query: functionQueryType }
   | { type: "index"; query: (number | string)[] }
@@ -32,8 +36,12 @@ function valueQuery(query: string[], nodeValue: string): boolean {
   return !!query.find((x) => x === strippedVal);
 }
 
-function functionQuery(query: functionQueryType, nodeValue: string) {
-  return query(nodeValue);
+function functionQuery(
+  query: functionQueryType,
+  nodeValue: string,
+  nodeType: SyntaxNode["type"]["name"]
+) {
+  return query(nodeValue, nodeType);
 }
 
 function regexQuery(query: RegExp, nodeValue: string) {
@@ -69,7 +77,8 @@ export function runProjectionQuery(
   query: ProjectionQuery,
   keyPath: (string | number)[],
   nodeValue: string,
-  typings: any[]
+  typings: any[],
+  nodeType: SyntaxNode["type"]["name"]
 ): boolean {
   const queryStr =
     query.type === "regex"
@@ -86,8 +95,10 @@ export function runProjectionQuery(
     case "index":
       pass = keyPathMatchesQuery(query.query, keyPath);
       break;
-    case "value":
     case "function":
+      pass = functionQuery(query.query as any, nodeValue, nodeType);
+      break;
+    case "value":
     case "regex":
       pass = simpleMatchers[query.type](query.query as any, nodeValue);
       break;

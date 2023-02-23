@@ -85,7 +85,8 @@ const ProjectionWidgetFactory = (
       projection.query,
       keyPath,
       currentCodeSlice,
-      typings
+      typings,
+      currentNode.type.name
     );
   },
   addNode: (state, from, to) => {

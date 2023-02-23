@@ -3,6 +3,7 @@ import React from "react";
 import Editor from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
 import standardBundle from "../projections/standard-bundle";
+import { Projection } from "../lib/projections";
 
 const schema: JSONSchema7 = {
   $id: "https://example.com/arrays.schema.json",
@@ -91,6 +92,47 @@ const exampleData = `{
   ]
 }`;
 
+const targVals = new Set([
+  "PropertyName",
+  "Number",
+  "String",
+  "Null",
+  "False",
+  "True",
+]);
+const maybeTrim = (x: string) => {
+  return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
+};
+
+const blue = "#0551A5";
+const green = "#17885C";
+const red = "#A21615";
+const coloring: Record<string, string> = {
+  String: blue,
+  Number: green,
+  Boolean: blue,
+  PropertyName: red,
+  Null: blue,
+};
+
+const DestringProjection: Projection = {
+  type: "inline",
+  mode: "replace",
+  query: {
+    type: "function",
+    query: (_, type) => targVals.has(type),
+  },
+  projection: (props) => {
+    return (
+      <div style={{ color: coloring[props.node.type.name] || "black" }}>
+        {maybeTrim(props.currentValue)}
+      </div>
+    );
+  },
+  name: "Destring",
+  hasInternalState: false,
+};
+
 function ProduceExample() {
   const [currentCode, setCurrentCode] = React.useState(exampleData);
   const [numRows, setNumRows] = React.useState(0);
@@ -106,7 +148,7 @@ function ProduceExample() {
         onChange={(x: string) => {
           setCurrentCode(x);
         }}
-        projections={standardBundle}
+        projections={[...standardBundle, DestringProjection] as Projection[]}
       />
       <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
     </div>

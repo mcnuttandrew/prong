@@ -190,7 +190,13 @@ function getProjectionContents(
   const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections
     .filter((proj) =>
-      runProjectionQuery(proj.query, keyPath, targetNodeValue, typings)
+      runProjectionQuery(
+        proj.query,
+        keyPath,
+        targetNodeValue,
+        typings,
+        targetNode.type.name
+      )
     )
     .filter((proj) => tooltipTypes.has(proj.type));
 }

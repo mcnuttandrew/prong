@@ -169,7 +169,8 @@ function shouldAddProjectionPreGuard(
     projection.query,
     keyPath,
     currentCodeSlice,
-    typings
+    typings,
+    syntaxNode.type.name
   );
 }
 
