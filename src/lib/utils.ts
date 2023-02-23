@@ -439,9 +439,6 @@ export function simpleParse(content: any, defaultVal = {}) {
 
 export function getCursorPos(state: EditorState) {
   const ranges = state.selection.ranges;
-  // if (ranges.length > 1) {
-  //   return undefined;
-  // }
   const range = ranges[0];
   return range.anchor;
 }

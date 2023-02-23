@@ -71,7 +71,7 @@ test("generateMenuContent - vega", async () => {
   expect(menuContent).toMatchSnapshot();
 });
 
-test.only("materializeAnyOfOption", () => {
+test("materializeAnyOfOption", () => {
   const literalSchema = { type: "string", $$labeledType: "role" };
   expect(materializeAnyOfOption(literalSchema as any)).toBe('""');
 

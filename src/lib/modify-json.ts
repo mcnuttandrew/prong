@@ -282,7 +282,6 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   }
   return {
     value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
-    // from: prevSib!.from,
     from: approxTarget.to,
     to: nextSib!.from,
   };
