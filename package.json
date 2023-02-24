@@ -45,7 +45,8 @@
     "vega-datasets": "^2.5.4",
     "vega-embed": "^6.21.3",
     "vega-expression": "^5.0.0",
-    "vega-lite": "^5.6.1"
+    "vega-lite": "^5.6.1",
+    "vega-themes": "^2.12.1"
   },
   "scripts": {
     "start": "REACT_APP_DISABLE_LIVE_RELOAD=true react-scripts start",
