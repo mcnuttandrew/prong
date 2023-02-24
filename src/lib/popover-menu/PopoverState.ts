@@ -190,7 +190,13 @@ function getProjectionContents(
   const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections
     .filter((proj) =>
-      runProjectionQuery(proj.query, keyPath, targetNodeValue, typings)
+      runProjectionQuery(
+        proj.query,
+        keyPath,
+        targetNodeValue,
+        typings,
+        targetNode.type.name
+      )
     )
     .filter((proj) => tooltipTypes.has(proj.type));
 }
@@ -203,6 +209,7 @@ export function buildProjectionsForMenu(props: {
   currentCodeSlice: string;
 }): MenuRow[] {
   const { fullCode, state, node, currentCodeSlice, view } = props;
+  const { schemaTypings, diagnostics } = state.field(cmStatePlugin);
   if (!node) {
     return [];
   }
@@ -224,6 +231,10 @@ export function buildProjectionsForMenu(props: {
             });
           },
           fullCode,
+          diagnosticErrors: diagnostics.filter(
+            (x) => x.from === node.from && x.to === node.to
+          ),
+          typings: schemaTypings[`${node.from}-${node.to}`],
         }),
       },
     ],

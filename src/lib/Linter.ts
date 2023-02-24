@@ -4,7 +4,7 @@ import { codeString } from "../lib/utils";
 import { cmStatePlugin } from "./cmState";
 import { parser } from "@lezer/json";
 
-interface Diagonstic {
+export interface Diagonstic {
   location: {
     offset: number;
     length: number;

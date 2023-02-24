@@ -724,10 +724,10 @@ Array [
         "type": "button",
       },
       Object {
-        "content": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":0,\\"filter\\":\\"null\\"}",
+        "content": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":\\"0\\",\\"filter\\":\\"null\\"}",
         "onSelect": Object {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":0,\\"filter\\":\\"null\\"}",
+          "payload": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":\\"0\\",\\"filter\\":\\"null\\"}",
           "type": "simpleSwap",
         },
         "type": "button",
@@ -742,10 +742,10 @@ Array [
         "type": "button",
       },
       Object {
-        "content": "{\\"type\\":\\"sequence\\",\\"start\\":0,\\"stop\\":0}",
+        "content": "{\\"type\\":\\"sequence\\",\\"start\\":\\"0\\",\\"stop\\":\\"0\\"}",
         "onSelect": Object {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"sequence\\",\\"start\\":0,\\"stop\\":0}",
+          "payload": "{\\"type\\":\\"sequence\\",\\"start\\":\\"0\\",\\"stop\\":\\"0\\"}",
           "type": "simpleSwap",
         },
         "type": "button",

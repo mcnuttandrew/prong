@@ -59,16 +59,17 @@ const simpleWidgets: SimpleWidget[] = [
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
-  const { projectionsInUse } = view.state.field(projectionState);
-  const inUseRanges = getInUseRanges(projectionsInUse);
+  // todo maybe this won't break?
+  // const { projectionsInUse } = view.state.field(projectionState);
+  // const inUseRanges = getInUseRanges(projectionsInUse);
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,
       to,
       enter: ({ node, from, to, type }) => {
-        if (inUseRanges.has(`${from}-${to}`)) {
-          return;
-        }
+        // if (inUseRanges.has(`${from}-${to}`)) {
+        //   return;
+        // }
         simpleWidgets.forEach(({ checkForAdd, addNode }) => {
           if (!checkForAdd(type, view, node)) {
             return;
@@ -79,7 +80,14 @@ function createWidgets(view: EditorView) {
     });
   }
   try {
-    return Decoration.set(widgets.sort((a, b) => a.from - b.from));
+    return Decoration.set(
+      widgets.sort((a, b) => {
+        const delta = a.from - b.from;
+        const relWidth = 0;
+        // const relWidth = a.to - a.from - (b.to - b.from);
+        return delta || relWidth;
+      })
+    );
   } catch (e) {
     console.log(e);
     console.log("problem creating widgets");

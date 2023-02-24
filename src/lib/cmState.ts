@@ -3,7 +3,7 @@ import { ViewPlugin, EditorView, ViewUpdate } from "@codemirror/view";
 import { JSONSchema } from "./JSONSchemaTypes";
 import { Projection } from "./projections";
 import { createNodeMap } from "./utils";
-import { lintCode } from "./Linter";
+import { lintCode, LintError } from "./Linter";
 import isEqual from "lodash.isequal";
 
 export const setSchema = StateEffect.define<JSONSchema>();
@@ -15,7 +15,7 @@ export const initialCmState = {
   schema: {} as JSONSchema,
   projections: [] as Projection[],
   schemaTypings: {} as Record<string, any>,
-  diagnostics: [] as any[],
+  diagnostics: [] as LintError[],
 };
 
 const simpleSet = (
