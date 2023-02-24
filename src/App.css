@@ -162,6 +162,10 @@
   position: relative;
 }
 
+.editor-target {
+  height: 100%;
+}
+
 .cm-annotation-widget-popover-container {
   max-width: 400px;
   outline: none;
@@ -172,6 +176,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.cm-editor {
+  height: 100%
+}
+
+.cm-scroller {
+  overflow: auto
 }
 
 

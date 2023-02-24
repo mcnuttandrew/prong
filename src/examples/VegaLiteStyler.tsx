@@ -1,6 +1,17 @@
 import React, { useState } from "react";
 import StandardProjections from "../projections/standard-bundle";
 import {
+  dark,
+  excel,
+  fivethirtyeight,
+  ggplot2,
+  googlecharts,
+  latimes,
+  powerbi,
+  quartz,
+  urbaninstitute,
+} from "vega-themes";
+import {
   vegaLiteCode,
   vegaLiteScatterPlot,
   vegaLiteHeatmap,
@@ -15,11 +26,25 @@ import { VegaLite } from "react-vega";
 import { simpleParse } from "../lib/utils";
 import "../stylesheets/vega-lite-example.css";
 import Editor from "../components/Editor";
+import prettifier from "../lib/vendored/prettifier";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 const updatedSchema = {
   ...VegaLiteV5Schema,
   $ref: "#/definitions/Config",
+};
+
+const themes = {
+  dark,
+  excel,
+  fivethirtyeight,
+  ggplot2,
+  googlecharts,
+  latimes,
+  powerbi,
+  quartz,
+  urbaninstitute,
+  empty: {},
 };
 
 const fonts = [
@@ -39,20 +64,37 @@ function VegaLiteExampleApp() {
 
   return (
     <div className="styler-app flex">
-      <Editor
-        schema={updatedSchema}
-        code={currentCode}
-        onChange={(x) => setCurrentCode(x)}
-        projections={[
-          ...StandardProjections,
-          {
-            type: "tooltip",
-            name: "Switch to",
-            query: { type: "schemaMatch", query: ["font"] },
-            projection: buttonListProjection(fonts, currentCode),
-          },
-        ]}
-      />
+      <div className="flex-down">
+        <h5>Predefined Themes</h5>
+        <div className="flex">
+          {Object.entries(themes).map(([themeName, theme]) => {
+            return (
+              <button
+                key={themeName}
+                onClick={() => setCurrentCode(prettifier(theme))}
+              >
+                {themeName}
+              </button>
+            );
+          })}
+        </div>
+
+        <Editor
+          schema={updatedSchema}
+          code={currentCode}
+          onChange={(x) => setCurrentCode(x)}
+          height={"800px"}
+          projections={[
+            ...StandardProjections,
+            {
+              type: "tooltip",
+              name: "Switch to",
+              query: { type: "schemaMatch", query: ["font"] },
+              projection: buttonListProjection(fonts, currentCode),
+            },
+          ]}
+        />
+      </div>
       <div className="chart-container">
         {[
           vegaLiteScatterPlot,

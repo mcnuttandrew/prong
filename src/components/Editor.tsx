@@ -28,13 +28,14 @@ type Props = {
   code: string;
   schema: any; // TODO fix
   projections?: Projection[];
+  height?: string;
 };
 
 const languageConf = new Compartment();
 export type SchemaMap = Record<string, any>;
 
 export default function Editor(props: Props) {
-  const { schema, code, onChange, projections } = props;
+  const { schema, code, onChange, projections, height } = props;
 
   const [view, setView] = useState<EditorView | null>(null);
   const cmParent = useRef<HTMLDivElement>(null);
@@ -91,8 +92,8 @@ export default function Editor(props: Props) {
     }
   }, [code, view]);
   return (
-    <div className="editor-container">
-      <div ref={cmParent} />
+    <div className="editor-container" style={height ? { height } : {}}>
+      <div ref={cmParent} className="editor-target" />
     </div>
   );
 }
