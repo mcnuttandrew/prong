@@ -395,23 +395,43 @@ export function createNodeMap(schema: any, doc: string) {
 }
 
 export function getMenuTargetNode(state: EditorState) {
-  const possibleMenuTargets: any[] = [];
+  const possibleMenuTargets: SyntaxNode[] = [];
+  const ranges = state.selection.ranges;
+  const range = ranges[0];
+  const singleWidthRange = range.from === range.to;
+  if (ranges.length !== 1 && singleWidthRange) {
+    return null;
+  }
+
   syntaxTree(state).iterate({
     enter: (nodeRef) => {
       const node = nodeRef.node;
-      const ranges = state.selection.ranges;
-      if (ranges.length !== 1 && ranges[0].from !== ranges[0].to) {
-        return;
-      }
-      if (node.from <= ranges[0].from && node.to >= ranges[0].from) {
+      if (node.from <= range.from && node.to >= range.from) {
         possibleMenuTargets.push(node);
       }
     },
   });
 
   const target = possibleMenuTargets.reduce(
-    (acc, row) => {
+    (acc: { dist: Number; target: SyntaxNode | null }, row) => {
       const dist = row.to - row.from;
+      // these hueristics try to pick out an free typing (denoted via an error)
+      if (
+        row.type.name === "⚠" &&
+        singleWidthRange &&
+        (row.from === range.from || row.to === range.from)
+      ) {
+        return { dist, target: row };
+      }
+      if (
+        acc.target &&
+        acc.target.type.name === "⚠" &&
+        singleWidthRange &&
+        (acc.target.from === range.from || acc.target.to === range.from)
+      ) {
+        return acc;
+      }
+      // this hueristic always picks the smallest target
       return dist < acc.dist ? { dist, target: row } : acc;
     },
     { dist: Infinity, target: null }

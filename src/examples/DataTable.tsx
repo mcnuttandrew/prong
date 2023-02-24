@@ -12,7 +12,7 @@ function extractFieldNames(data: Table) {
   });
   return Array.from(fieldNames);
 }
-const letters = `abcdefghijklmnopqrstuvwxzy`;
+const letters = ["penguins", "flowers", "wheat", "squids", "dough", "bags"];
 
 function RenderCell(props: {
   contents: string;
