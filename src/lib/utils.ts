@@ -1,14 +1,11 @@
 import { EditorView } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
-import { EditorState, EditorSelection } from "@codemirror/state";
+import { EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import * as Json from "jsonc-parser";
-import prettifier from "./vendored/prettifier";
 
 import { UpdateDispatch } from "./popover-menu/PopoverState";
 import { getMatchingSchemas } from "./vendored/validator";
-import { MenuRow, nodeToId } from "./compute-menu-contents";
-import { MenuEvent } from "./modify-json";
 
 export function codeString(
   view: EditorView,
@@ -465,32 +462,3 @@ export function getCursorPos(state: EditorState) {
 
 const climbToRoot = (node: SyntaxNode): SyntaxNode =>
   node.parent ? climbToRoot(node.parent) : node;
-
-export function generateCleanUpButton(
-  selection: EditorSelection | undefined,
-  node: SyntaxNode,
-  fullCode: string
-): MenuRow {
-  let onSelect = {} as MenuEvent;
-  const parsed = simpleParse(fullCode, false);
-  let payload = fullCode;
-  if (parsed) {
-    payload = prettifier(parsed, { maxLength: 60 });
-  }
-  onSelect = {
-    type: "simpleSwap",
-    payload,
-    nodeId: nodeToId(climbToRoot(node)),
-  };
-
-  return {
-    label: "Utils",
-    elements: [
-      {
-        type: "button",
-        content: "Clean up",
-        onSelect,
-      },
-    ],
-  };
-}

@@ -9,7 +9,6 @@ import { projectionState } from "../projections";
 import {
   codeStringState,
   getMenuTargetNode,
-  generateCleanUpButton,
   syntaxNodeToKeyPath,
 } from "../utils";
 import { potentiallyFilterContentForGesture } from "../search";
@@ -152,16 +151,10 @@ const specialPriority: Record<string, number> = {
 function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
-  const cleanUpButton = generateCleanUpButton(
-    tr.selection,
-    targetNode,
-    fullCode
-  );
 
   let contents = [
     ...generateMenuContent(targetNode, schemaTypings, fullCode),
     ...prepDiagnostics(diagnostics, targetNode),
-    cleanUpButton,
   ] as MenuRow[];
 
   return potentiallyFilterContentForGesture(
@@ -290,7 +283,8 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       return state;
     }
     // handle multi-cursor stuff appropriately and dont show popover through a projection
-    if (!cursorBehaviorIsValid(tr) || selectionInsideProjection(tr, pos)) {
+    // if (!cursorBehaviorIsValid(tr) || selectionInsideProjection(tr, pos)) {
+    if (!cursorBehaviorIsValid(tr)) {
       return { ...state, tooltip: null };
     }
 
@@ -318,6 +312,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     );
     const hasProjectionContent =
       getProjectionContents(tr.state, targetNode, currentCodeSlice).length > 0;
+
     return {
       ...state,
       hasProjectionContent,

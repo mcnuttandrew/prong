@@ -82,7 +82,7 @@ function TraceryExample() {
   const keys = Object.keys(simpleParse(currentCode, {}));
   useEffect(() => {
     setRoots(generateRoots(currentCode));
-  }, [currentCode]);
+  }, []);
   const unpeeledRoot = unpeelRoot(roots);
 
   return (
@@ -109,9 +109,9 @@ function TraceryExample() {
         onChange={(x) => setCurrentCode(x)}
         height={"800px"}
         projections={[
-          ...StandardProjections,
+          ...StandardProjections.filter((x) => x.name !== "ColorChip"),
           {
-            type: "tooltip",
+            type: "full-tooltip",
             query: {
               type: "nodeType",
               query: ["Number", "String", "Null", "False", "True"],

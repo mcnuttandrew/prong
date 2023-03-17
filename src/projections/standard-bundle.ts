@@ -5,6 +5,7 @@ import RandomWordProjection from "./RandomWord";
 import ClickTarget from "./ClickTarget";
 import BooleanTarget from "./Boolean";
 import ColorChip from "./ColorChip";
+import CleanUp from "./CleanUp";
 
 export default [
   ColorNameProjection,
@@ -14,4 +15,5 @@ export default [
   ClickTarget,
   BooleanTarget,
   ColorChip,
+  CleanUp,
 ] as Projection[];
