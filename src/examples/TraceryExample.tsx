@@ -24,24 +24,44 @@ const initialCode = `
     "move":["spiral", "twirl", "curl", "dance", "twine", "weave", "meander", "wander", "flow"]
 }`;
 
-function TraceryCascadeVis(props: { node: TraceryNode; first: boolean }) {
-  const { node, first } = props;
+function TraceryCascadeVis(props: {
+  node: TraceryNode;
+  first: boolean;
+  onClick: (node: TraceryNode) => void;
+}) {
+  const { node, first, onClick } = props;
   if (first) {
     return (
       <div className="flex">
         {(node.children || []).map((child, idx) => (
-          <TraceryCascadeVis node={child} key={idx} first={false} />
+          <TraceryCascadeVis
+            node={child}
+            key={idx}
+            first={false}
+            onClick={onClick}
+          />
         ))}
       </div>
     );
   }
   return (
-    <div className="cascade-container flex-down">
+    <div
+      className="cascade-container flex-down"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(node);
+      }}
+    >
       {first ? "" : node.raw}
       {(node.children || []).length ? (
         <div className="flex">
           {(node.children || []).map((child, idx) => (
-            <TraceryCascadeVis node={child} key={idx} first={false} />
+            <TraceryCascadeVis
+              node={child}
+              key={idx}
+              first={false}
+              onClick={onClick}
+            />
           ))}
         </div>
       ) : (
@@ -71,9 +91,73 @@ function unpeelRoot(root: TraceryNode[]) {
     allNodes.push(current);
     (current.children || []).forEach((child) => queue.push(child));
   }
+  console.log(computeRanges(root[0]));
+  // console.log(allNodes.map((node) => [node.finishedText, node]));
   return Object.fromEntries(
     allNodes.filter((x) => x.symbol).map((x) => [x.symbol, x])
   );
+}
+
+// todo this is a bigger project, but here are the ideas
+// 1. i'd like to be able to click on a word and see which part of the specification cause it shaded by increasing specifity
+// 2. i think to do this we can use a really simple recursive provenance inference algorithm. algorithm works as follows
+// a. initially there is just 1 range it's bound to the origin, represent it like {range: [start, end], node: Node}
+// b. then recusively let the children chop up that rnage and claim parts of
+// c. surface all ranges
+// -> throw those into this visualizer you are trying to write here
+
+// function WordVisualization(props: { node: TraceryNode }) {
+//   const { node } = props;
+//   const children = node.children || [];
+//   console.log(node);
+//   const content = node.raw;
+//   return (
+//     <>
+//       {children.length || !content.length ? "" : <button>{node.raw}</button>}
+//       {children.map((child, idx) => (
+//         <WordVisualization node={child} key={idx} />
+//       ))}
+//     </>
+//   );
+// }
+
+// const firstIndexInString = (str: string, match: string): [number, number] | false => {
+//   const splits = str.split(match);
+//   if (splits.length === 1) {
+//     return false;
+//   }
+
+//   return false;
+// }
+// function computeRangesHelper(node: TraceryNode) {
+//   const range = [{ range: [0, node.finishedText], node }];
+//   const childRanges = (node.children || []).map(child => {
+
+//   })
+// }
+
+function computeRanges(node: TraceryNode): any {
+  // const range = [{range: [node.finishedText], node}]
+  // use the raw on the way down to figure who is who (order is also necessary for this)
+  // could also just modify tracery to do this in the first place, eh that seems delicate
+  if (!node.children) {
+    return [
+      { range: [0, node.finishedText?.length], node, text: node.finishedText },
+    ];
+  }
+  const children = node.children || [];
+  return children.flatMap((child: any) => {
+    let offset = 0;
+    return computeRanges(child).map((x) => {
+      const newRange = {
+        ...x,
+        range: [x.range[0] + offset, x.range[1] + offset],
+      };
+      offset += x.range[1] - x.range[0];
+      return newRange;
+    });
+    // return computeRanges(child).map(x => ({...x, range: [x.range[0] ]}));
+  });
 }
 
 function TraceryExample() {
@@ -87,6 +171,11 @@ function TraceryExample() {
 
   return (
     <div className="flex-down">
+      {/* {roots.length && (
+        <div>
+          <WordVisualization node={roots[0]} />
+        </div>
+      )} */}
       {roots.length && (
         <div>
           <h3>
@@ -100,7 +189,13 @@ function TraceryExample() {
       )}
       {roots.length && (
         <div>
-          <TraceryCascadeVis node={roots[0]} first={true} />
+          <TraceryCascadeVis
+            node={roots[0]}
+            first={true}
+            onClick={(node) => {
+              console.log("hi", node);
+            }}
+          />
         </div>
       )}
       <Editor

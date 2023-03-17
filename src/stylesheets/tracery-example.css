@@ -4,6 +4,7 @@
     padding: 5px 5px;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .cascade-container {
@@ -12,4 +13,5 @@
     padding: 5px 5px;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
