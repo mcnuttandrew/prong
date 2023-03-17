@@ -16,7 +16,6 @@ import SimpleColorWidget from "./widgets/color-widget";
 import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
 import { popOverState } from "./popover-menu/PopoverState";
-import { projectionState, getInUseRanges } from "./projections";
 
 import Highlighter from "./widgets/highlighter";
 
