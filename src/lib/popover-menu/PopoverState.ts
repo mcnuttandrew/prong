@@ -190,12 +190,15 @@ function getProjectionContents(
   const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections
     .filter((proj) =>
+      // todo covert these args to named args
       runProjectionQuery(
         proj.query,
         keyPath,
         targetNodeValue,
         typings,
-        targetNode.type.name
+        targetNode.type.name,
+        // @ts-ignore
+        proj.id
       )
     )
     .filter((proj) => tooltipTypes.has(proj.type));
@@ -235,6 +238,7 @@ export function buildProjectionsForMenu(props: {
             (x) => x.from === node.from && x.to === node.to
           ),
           typings: schemaTypings[`${node.from}-${node.to}`],
+          cursorPositions: [...view.state.selection.ranges],
         }),
       },
     ],

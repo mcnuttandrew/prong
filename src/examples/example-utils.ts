@@ -20,6 +20,10 @@ export function isDataTable(input: any): boolean {
   return types.every((typ) => allowed.has(typ));
 }
 
+export const maybeTrim = (x: string) => {
+  return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
+};
+
 export function analyzeVegaCode(
   currentCode: string,
   analysis: (viewState: { signals?: any; data?: any }) => void

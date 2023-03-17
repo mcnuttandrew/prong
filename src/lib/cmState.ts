@@ -36,7 +36,11 @@ export const cmStatePlugin = StateField.define({
       }
       if (effect.is(setProjections)) {
         didUpdate = true;
-        newState = simpleSet("projections", effect.value, newState);
+        newState = simpleSet(
+          "projections",
+          effect.value.map((x, id) => ({ ...x, id })),
+          newState
+        );
       }
       if (effect.is(setSchemaTypings)) {
         didUpdate = true;

@@ -4,6 +4,7 @@ import Editor from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
 import standardBundle from "../projections/standard-bundle";
 import { Projection } from "../lib/projections";
+import { maybeTrim } from "./example-utils";
 
 const schema: JSONSchema7 = {
   $id: "https://example.com/arrays.schema.json",
@@ -100,9 +101,6 @@ const targVals = new Set([
   "False",
   "True",
 ]);
-const maybeTrim = (x: string) => {
-  return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
-};
 
 const blue = "#0551A5";
 const green = "#17885C";

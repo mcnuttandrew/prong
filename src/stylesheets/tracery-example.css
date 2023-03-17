@@ -1,0 +1,15 @@
+.cascade-node {
+    border: thin solid black;
+    border-radius: 15px;
+    padding: 5px 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.cascade-container {
+    border: thin solid black;
+    border-radius: 15px;
+    padding: 5px 5px;
+    align-items: center;
+    justify-content: center;
+}

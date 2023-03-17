@@ -57,6 +57,7 @@ class InlineProjectionWidget extends WidgetType {
         (x) => x.from === from && x.to === to
       ),
       typings: schemaTypings[`${from}-${to}`],
+      cursorPositions: [...this.state.selection.ranges],
     });
 
     ReactDOM.render(element, wrap);
@@ -93,7 +94,9 @@ const ProjectionWidgetFactory = (
       keyPath,
       currentCodeSlice,
       typings,
-      currentNode.type.name
+      currentNode.type.name,
+      // @ts-ignore
+      projection.id
     );
   },
   addNode: (state, from, to) => {

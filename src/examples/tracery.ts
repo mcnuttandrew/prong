@@ -4,11 +4,12 @@ interface Rule {}
 //   raw: string;
 //   type: TraceryNodeType;
 // }
+type Section = {
+  raw: string;
+  type: TraceryNodeType;
+};
 type Sections = {
-  [idx: number]: {
-    raw: string;
-    type: TraceryNodeType;
-  };
+  [idx: number]: Section;
   length: number;
   errors?: any[];
 };
@@ -175,7 +176,7 @@ var baseEngModifiers: Record<string, Modifier> = {
 };
 
 type TraceryNodeType = -1 | 0 | 1 | 2;
-class TraceryNode {
+export class TraceryNode {
   childIndex: number;
   childRule?: Rule;
   children?: TraceryNode[];
@@ -195,7 +196,7 @@ class TraceryNode {
     parent: TraceryNode,
     childIndex: number,
     // settings: { raw: string; type: TraceryNodeType }
-    settings: Section
+    settings: any
   ) {
     if (settings.raw === undefined) {
       throw Error("No raw input for node");
@@ -234,6 +235,7 @@ class TraceryNode {
     // and expand it into section
     this.childRule = childRule;
     if (this.childRule !== undefined) {
+      // @ts-ignore
       var sections = tracery.parse(childRule);
       for (var i = 0; i < sections.length; i++) {
         this.children[i] = new TraceryNode(this, i, sections[i]);
@@ -248,7 +250,7 @@ class TraceryNode {
   }
 
   // Expand this rule (possibly creating children)
-  expand(preventRecursion: boolean) {
+  expand(preventRecursion?: boolean) {
     if (!this.isExpanded) {
       this.isExpanded = true;
 
@@ -263,7 +265,7 @@ class TraceryNode {
       switch (this.type) {
         // Raw rule
         case -1:
-          this.expandChildren(this.raw, preventRecursion);
+          this.expandChildren(this.raw, !!preventRecursion);
           break;
 
         // plaintext, do nothing but copy text into finsihed text
@@ -289,6 +291,7 @@ class TraceryNode {
             for (var i = 0; i < parsed.preactions.length; i++) {
               this.preactions[i] = new NodeAction(
                 this,
+                // @ts-ignore
                 parsed.preactions[i].raw
               );
             }
@@ -305,6 +308,7 @@ class TraceryNode {
           this.finishedText = this.raw;
 
           // Expand (passing the node, this allows tracking of recursion depth)
+          // @ts-ignore
           var selectedRule = this.grammar.selectRule(this.symbol, this);
 
           if (!selectedRule) {
@@ -312,10 +316,11 @@ class TraceryNode {
               log: "Child rule not created",
             });
           }
-          this.expandChildren(selectedRule, preventRecursion);
+          this.expandChildren(selectedRule, !!preventRecursion);
 
           // Apply modifiers
           for (var i = 0; i < this.modifiers.length; i++) {
+            // @ts-ignore
             var mod = this.grammar.modifiers[this.modifiers[i]];
             if (!mod) this.finishedText += "((." + this.modifiers[i] + "))";
             else this.finishedText = mod(this.finishedText);
@@ -346,10 +351,12 @@ class TraceryNode {
 // 2 function: [functionName(param0,param1)] (TODO!)
 class NodeAction {
   node: TraceryNode;
-  target: Section;
+  target: any;
   type: 0 | 1 | 2;
-  rule: Rule;
+  rule?: any;
   ruleNode?: TraceryNode;
+  raw?: string;
+
   constructor(node: TraceryNode, raw: string) {
     if (!node) console.warn("No node for NodeAction");
     if (!raw) console.warn("No raw commands for NodeAction");
@@ -379,14 +386,19 @@ class NodeAction {
     var grammar = this.node.grammar;
     switch (this.type) {
       case 0:
+        // @ts-ignore
         this.ruleNode = new TraceryNode(grammar, 0, {
           type: -1,
           raw: this.rule,
         });
+        // @ts-ignore
         this.ruleNode.expand();
+        // @ts-ignore
         this.ruleText = this.ruleNode.finishedText;
 
+        // @ts-ignore
         grammar.pushRules(this.target, this.ruleText, this);
+        // @ts-ignore
         console.log("Push rules:" + this.target + " " + this.ruleText);
         break;
       case 1:
@@ -399,14 +411,20 @@ class NodeAction {
 
 // Sets of rules
 // Can also contain conditional or fallback sets of rulesets)
+type Distribution = "random" | "shuffle" | "weighted" | "falloff";
 class RuleSet {
-  raw: string;
-  grammar: Grammar;
+  conditionalRule?: RuleSet;
+  conditionalValues?: Record<string, any>;
+  defaultRules?: any[];
+  distribution: Distribution;
   falloff: number;
-  distribution: "random";
-  conditionalRule?: Rule;
+  grammar: Grammar;
+  ranking: any;
+  raw: string;
+  shuffledDeck?: any;
+  defaultUses: any;
 
-  constructor(grammar: Grammar, raw: string) {
+  constructor(grammar: Grammar, raw: any) {
     this.raw = raw;
     this.grammar = grammar;
     this.falloff = 1;
@@ -429,7 +447,9 @@ class RuleSet {
     if (this.conditionalRule) {
       var value = this.grammar.expand(this.conditionalRule);
       // does this value match any of the conditionals?
-      if (this.conditionalValues[value]) {
+      // @ts-ignore
+      if (this.conditionalValues && this.conditionalValues[value]) {
+        // @ts-ignore
         var v = this.conditionalValues[value].getRule();
         if (v !== null && v !== undefined) return v;
       }
@@ -458,10 +478,11 @@ class RuleSet {
           if (!this.shuffledDeck || this.shuffledDeck.length === 0) {
             // make an array
             this.shuffledDeck = fyshuffle(
-              Array.apply(null, {
-                length: this.defaultRules.length,
-              }).map(Number.call, Number),
-              this.falloff
+              // @ts-ignore
+              Array.apply(null, { length: this.defaultRules.length }).map(
+                Number.call,
+                Number
+              )
             );
           }
 
@@ -516,7 +537,8 @@ class Symbol {
   key: string;
   grammar: Grammar;
   rawRules: Rule[];
-  stack?: Rule[];
+  stack?: RuleSet[];
+  uses?: any[];
 
   baseRules: RuleSet;
   constructor(grammar: Grammar, key: string, rawRules: Rule[]) {
@@ -537,21 +559,28 @@ class Symbol {
     this.baseRules.clearState();
   }
 
-  pushRules(rawRules) {
+  pushRules(rawRules: Rule) {
     var rules = new RuleSet(this.grammar, rawRules);
+    if (!this.stack) {
+      this.stack = [];
+    }
     this.stack.push(rules);
   }
 
   popRules() {
-    this.stack.pop();
+    this.stack?.pop();
   }
 
-  selectRule(node) {
+  selectRule(node?: TraceryNode) {
+    if (!this.uses) {
+      this.uses = [];
+    }
     this.uses.push({
       node: node,
     });
 
-    if (this.stack.length === 0) throw "No rules for " + this.key;
+    if (!this.stack || this.stack.length === 0)
+      throw Error("No rules for " + this.key);
     return this.stack[this.stack.length - 1].getRule();
   }
 }
@@ -561,6 +590,7 @@ class Grammar {
   modifiers: Record<string, any>;
   symbols?: Record<string, Symbol>;
   subgrammars?: Grammar[];
+  distribution?: Distribution;
   constructor(raw: any) {
     this.modifiers = {};
     this.loadFromRawObj(raw);
@@ -573,7 +603,7 @@ class Grammar {
     }
   }
 
-  addModifiers(mods) {
+  addModifiers(mods: Record<string, Modifier>) {
     // copy over the base modifiers
     for (var key in mods) {
       if (mods.hasOwnProperty(key)) {
@@ -597,8 +627,9 @@ class Grammar {
     }
   }
 
-  createRoot(rule) {
+  createRoot(rule: RuleSet | string) {
     // Create a node and subnodes
+    // @ts-ignore
     var root = new TraceryNode(this, 0, {
       type: -1,
       raw: rule,
@@ -607,22 +638,26 @@ class Grammar {
     return root;
   }
 
-  expand(rule) {
+  expand(rule: RuleSet) {
     var root = this.createRoot(rule);
     root.expand();
     return root;
   }
 
-  flatten(rule) {
+  flatten(rule: RuleSet) {
     return this.expand(rule).finishedText;
   }
 
   // Create or push rules
-  pushRules(key, rawRules, sourceAction) {
+  pushRules(key: string, rawRules: RuleSet[], sourceAction: NodeAction) {
+    // @ts-ignore
     if (this.symbols[key] === undefined) {
+      // @ts-ignore
       this.symbols[key] = new Symbol(this, key, rawRules);
+      // @ts-ignore
       if (sourceAction) this.symbols[key].isDynamic = true;
     } else {
+      // @ts-ignore
       this.symbols[key].pushRules(rawRules);
     }
   }
@@ -633,13 +668,15 @@ class Grammar {
     this.symbols[key].popRules();
   }
 
-  selectRule(key?: string, node?) {
+  selectRule(key?: string, node?: TraceryNode) {
+    // @ts-ignore
     if (this.symbols[key]) return this.symbols[key].selectRule(node);
 
     // Failover to alternative subgrammars
     for (var i = 0; i < (this.subgrammars || []).length; i++) {
-      if (this.subgrammars[i]!.symbols[key])
-        return this.subgrammars[i].symbols[key].selectRule();
+      const gram = this.subgrammars![i];
+      if (gram?.symbols && gram?.symbols[key as string])
+        return gram.symbols[key as string].selectRule();
     }
 
     return `((${key}))`;
@@ -672,6 +709,7 @@ const tracery = {
       postactions: [],
       modifiers: [],
     };
+    // @ts-ignore
     const sections = tracery.parse(tagContents);
     let symbolSection = undefined;
     for (let i = 0; i < sections.length; i++) {
@@ -682,6 +720,7 @@ const tracery = {
           throw Error("multiple main sections in " + tagContents);
         }
       } else {
+        // @ts-ignore
         parsed.preactions.push(sections[i]);
       }
     }
@@ -690,34 +729,40 @@ const tracery = {
       //   throw ("no main section in " + tagContents);
     } else {
       let components = symbolSection.split(".");
+      // @ts-ignore
       parsed.symbol = components[0];
+      // @ts-ignore
       parsed.modifiers = components.slice(1);
     }
     return parsed;
   },
 
-  parse: function (rule: Rule) {
-    var depth = 0;
-    var inTag = false;
-    var sections: Sections = [];
-    var escaped = false;
+  parse: function (rule: RuleSet) {
+    let depth = 0;
+    let inTag = false;
+    let sections: Sections = [];
+    let escaped = false;
 
     sections.errors = [];
-    var start = 0;
+    let start = 0;
 
-    var escapedSubstring = "";
-    var lastEscapedChar = undefined;
-    function createSection(start, end, type) {
+    let escapedSubstring = "";
+    let lastEscapedChar: string | undefined = undefined;
+    function createSection(start: number, end: number, type: string) {
       if (end - start < 1) {
+        // @ts-ignore
         sections.errors.push(start + ": 0-length section of type " + type);
       }
       var rawSubstring;
       if (lastEscapedChar !== undefined) {
         rawSubstring =
+          // @ts-ignore
           escapedSubstring + rule.substring(lastEscapedChar + 1, end);
       } else {
+        // @ts-ignore
         rawSubstring = rule.substring(start, end);
       }
+      // @ts-ignore
       sections.push({
         type: type,
         raw: rawSubstring,
@@ -726,14 +771,17 @@ const tracery = {
       escapedSubstring = "";
     }
 
+    // @ts-ignore
     for (var i = 0; i < rule.length; i++) {
       if (!escaped) {
+        // @ts-ignore
         var c = rule.charAt(i);
 
         switch (c) {
           // Enter a deeper bracketed section
           case "[":
             if (depth === 0 && !inTag) {
+              // @ts-ignore
               if (start < i) createSection(start, i, 0);
               start = i + 1;
             }
@@ -744,6 +792,7 @@ const tracery = {
 
             // End a bracketed section
             if (depth === 0 && !inTag) {
+              // @ts-ignore
               createSection(start, i, 2);
               start = i + 1;
             }
@@ -754,9 +803,11 @@ const tracery = {
           case "#":
             if (depth === 0) {
               if (inTag) {
+                // @ts-ignore
                 createSection(start, i, 1);
                 start = i + 1;
               } else {
+                // @ts-ignore
                 if (start < i) createSection(start, i, 0);
                 start = i + 1;
               }
@@ -766,8 +817,10 @@ const tracery = {
 
           case "\\":
             escaped = true;
+            // @ts-ignore
             escapedSubstring = escapedSubstring + rule.substring(start, i);
             start = i + 1;
+            // @ts-ignore
             lastEscapedChar = i;
             break;
         }
@@ -775,6 +828,7 @@ const tracery = {
         escaped = false;
       }
     }
+    // @ts-ignore
     if (start < rule.length) createSection(start, rule.length, 0);
 
     if (inTag) {
@@ -789,72 +843,11 @@ const tracery = {
 
     return sections;
   },
-
-  //   test: function () {
-  //     var content = $("#content-col");
-  //     var testlog = $("<div/>", {
-  //       class: "card debug-output",
-  //     }).appendTo(content);
-
-  //     var tests = {
-  //       basic: ["", "a", "tracery"],
-  //       hashtag: ["#a#", "a#b#", "aaa#b##cccc#dd#eee##f#"],
-  //       hashtagWrong: ["##", "#", "a#a", "#aa#aa###"],
-  //       escape: ["\\#test\\#", "\\[#test#\\]"],
-  //     };
-
-  //     var testGrammar = tracery.createGrammar({
-  //       animal: [
-  //         "capybara",
-  //         "unicorn",
-  //         "university",
-  //         "umbrella",
-  //         "u-boat",
-  //         "boa",
-  //         "ocelot",
-  //         "zebu",
-  //         "finch",
-  //         "fox",
-  //         "hare",
-  //         "fly",
-  //       ],
-  //       color: ["yellow", "maroon", "indigo", "ivory", "obsidian"],
-  //       mood: ["elated", "irritable", "morose", "enthusiastic"],
-  //       story: ["[mc:#animal#]Once there was #mc.a#, a very #mood# #mc#"],
-  //     });
-
-  //     var toParse = [];
-  //     for (var i = 0; i < 20; i++) {
-  //       var expansion = testGrammar.expand("[test:#foo#]foo");
-  //       console.log(expansion.finishedText);
-  //     }
-  //   },
-
-  //   parsedSectionsToHTML: function (sections) {
-  //     var output = "";
-  //     for (var i = 0; i < sections.length; i++) {
-  //       output +=
-  //         "<span class='section-" +
-  //         sections[i].type +
-  //         "'>" +
-  //         sections[i].raw +
-  //         "</span> ";
-  //     }
-  //     if (sections.errors) {
-  //       for (var i = 0; i < sections.errors.length; i++) {
-  //         output +=
-  //           "<span class='section-error'>" + sections.errors[i] + "</span> ";
-  //       }
-  //     }
-  //     return output;
-  //   },
   TraceryNode,
   Grammar,
   Symbol,
   RuleSet,
 };
-
-// Externalize
 
 export default tracery;
 
@@ -862,9 +855,8 @@ interface App {
   generateCount: 1;
   mode: undefined;
   grammar: Grammar;
-  generatedRoots: any[];
+  generatedRoots: TraceryNode[];
   origin?: string;
-  //   stepIterator: NodeIterator;
 }
 
 // var app = {
@@ -877,7 +869,7 @@ function generateRoot(app: App) {
   if (!origin) {
     origin = "origin";
   }
-  return app.grammar.createRoot("#" + origin + "#");
+  return app.grammar.createRoot(`#${origin}#`);
 }
 
 export function generate(preventRecursion: boolean, app: App) {

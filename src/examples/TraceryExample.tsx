@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import StandardProjections from "../projections/standard-bundle";
 import { buttonListProjection } from "./VegaExample";
 // import { Tracery } from "./tracery-errata/tracery";
-import tracery, { generate } from "./tracery-errata/tracery-v2";
+import tracery, { generate, TraceryNode } from "./tracery";
+import { simpleParse } from "../lib/utils";
+import "../stylesheets/tracery-example.css";
+import { maybeTrim } from "./example-utils";
 
 import Editor from "../components/Editor";
 
@@ -21,7 +24,32 @@ const initialCode = `
     "move":["spiral", "twirl", "curl", "dance", "twine", "weave", "meander", "wander", "flow"]
 }`;
 
-console.log();
+function TraceryCascadeVis(props: { node: TraceryNode; first: boolean }) {
+  const { node, first } = props;
+  if (first) {
+    return (
+      <div className="flex">
+        {(node.children || []).map((child, idx) => (
+          <TraceryCascadeVis node={child} key={idx} first={false} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="cascade-container flex-down">
+      {first ? "" : node.raw}
+      {(node.children || []).length ? (
+        <div className="flex">
+          {(node.children || []).map((child, idx) => (
+            <TraceryCascadeVis node={child} key={idx} first={false} />
+          ))}
+        </div>
+      ) : (
+        <></>
+      )}
+    </div>
+  );
+}
 
 const targVals = new Set([
   // "PropertyName",
@@ -35,20 +63,38 @@ function generateRoots(currentCode: string) {
   return generate(false, {
     generateCount: 1,
     mode: undefined,
-    grammar: tracery.createGrammar(JSON.parse(currentCode)),
+    grammar: tracery.createGrammar(simpleParse(currentCode, {})),
     generatedRoots: [],
   });
+}
+
+function unpeelRoot(root: TraceryNode[]) {
+  if (root.length === 0) {
+    return {};
+  }
+  const allNodes = [];
+  let queue = [root[0]];
+  while (queue.length) {
+    const current = queue.shift()!;
+    allNodes.push(current);
+    (current.children || []).forEach((child) => queue.push(child));
+  }
+  return Object.fromEntries(
+    allNodes.filter((x) => x.symbol).map((x) => [x.symbol, x])
+  );
 }
 
 function TraceryExample() {
   const [currentCode, setCurrentCode] = useState(initialCode);
   const [roots, setRoots] = useState<any[]>([]);
+  const keys = Object.keys(simpleParse(currentCode, {}));
   // const context = Tracery.createContext(JSON.parse(initialCode), {});
   // const parsed = Tracery.parseGrammar(context.grammar);
   // console.log("hi", context.expand("#origin#"));
   useEffect(() => {
     setRoots(generateRoots(currentCode));
   }, [currentCode]);
+  const unpeeledRoot = unpeelRoot(roots);
 
   return (
     <div className="flex-down">
@@ -63,6 +109,11 @@ function TraceryExample() {
           <h1>{roots[0].finishedText}</h1>
         </div>
       )}
+      {roots.length && (
+        <div>
+          <TraceryCascadeVis node={roots[0]} first={true} />
+        </div>
+      )}
       <Editor
         schema={TracerySchema}
         code={currentCode}
@@ -71,14 +122,66 @@ function TraceryExample() {
         projections={[
           ...StandardProjections,
           {
-            type: "full-tooltip",
+            type: "tooltip",
             query: {
               type: "function",
               query: (_, type) => targVals.has(type),
             },
             name: "TraceryEditor",
             projection: (props) => {
-              return <div>hi</div>;
+              // todo this part should turn into an autocomplete right?
+              return (
+                <div>
+                  <span>Insert reference to</span>
+                  {keys.map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        const cursorPos = props.cursorPositions[0].from;
+                        if (!cursorPos) {
+                          return;
+                        }
+                        props.setCode(
+                          `${currentCode.slice(
+                            0,
+                            cursorPos
+                          )} #${key}# ${currentCode.slice(cursorPos)}`
+                        );
+                      }}
+                    >
+                      {key}
+                    </button>
+                  ))}
+                </div>
+              );
+            },
+          },
+          {
+            type: "tooltip",
+            query: {
+              type: "function",
+              query: (val, type) => {
+                // console.log(
+                //   "wow",
+                //   unpeeledRoot[maybeTrim(val)],
+                //   maybeTrim(val),
+                //   unpeeledRoot
+                // );
+                return "PropertyName" === type && unpeeledRoot[maybeTrim(val)];
+              },
+            },
+            name: "TraceryEditor2",
+            projection: (props) => {
+              // console.log(props);
+              const key = `${props.keyPath[0]}`.split("___")[0];
+              if (unpeeledRoot[key]) {
+                return (
+                  <div>
+                    <TraceryCascadeVis node={unpeeledRoot[key]} first={false} />
+                  </div>
+                );
+              }
+              return <div></div>;
             },
           },
           // {

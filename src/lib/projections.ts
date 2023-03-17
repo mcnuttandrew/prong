@@ -27,6 +27,7 @@ export interface ProjectionProps {
   fullCode: string;
   typings: any[];
   diagnosticErrors: Diagnostic[];
+  cursorPositions: any[];
 }
 
 interface ProjectionBase {
@@ -173,7 +174,9 @@ function shouldAddProjectionPreGuard(
     keyPath,
     currentCodeSlice,
     typings,
-    syntaxNode.type.name
+    syntaxNode.type.name,
+    // @ts-ignore
+    projection.id
   );
 }
 
