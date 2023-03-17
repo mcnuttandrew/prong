@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import Editor from "../components/Editor";
+import standardBundle from "../projections/standard-bundle";
 
 const exampleData = `{
     "a": {
@@ -22,7 +23,7 @@ function SimpleExample() {
       onChange={(x) => {
         setCurrentCode(x);
       }}
-      projections={[]}
+      projections={standardBundle}
     />
   );
 }

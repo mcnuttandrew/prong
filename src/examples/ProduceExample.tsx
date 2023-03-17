@@ -93,15 +93,6 @@ const exampleData = `{
   ]
 }`;
 
-const targVals = new Set([
-  "PropertyName",
-  "Number",
-  "String",
-  "Null",
-  "False",
-  "True",
-]);
-
 const blue = "#0551A5";
 const green = "#17885C";
 const red = "#A21615";
@@ -117,8 +108,8 @@ const DestringProjection: Projection = {
   type: "inline",
   mode: "replace",
   query: {
-    type: "function",
-    query: (_, type) => targVals.has(type),
+    type: "nodeType",
+    query: ["PropertyName", "Number", "String", "Null", "False", "True"],
   },
   projection: (props) => (
     <div

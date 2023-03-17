@@ -51,14 +51,6 @@ function TraceryCascadeVis(props: { node: TraceryNode; first: boolean }) {
   );
 }
 
-const targVals = new Set([
-  // "PropertyName",
-  "Number",
-  "String",
-  "Null",
-  "False",
-  "True",
-]);
 function generateRoots(currentCode: string) {
   return generate(false, {
     generateCount: 1,
@@ -88,9 +80,6 @@ function TraceryExample() {
   const [currentCode, setCurrentCode] = useState(initialCode);
   const [roots, setRoots] = useState<any[]>([]);
   const keys = Object.keys(simpleParse(currentCode, {}));
-  // const context = Tracery.createContext(JSON.parse(initialCode), {});
-  // const parsed = Tracery.parseGrammar(context.grammar);
-  // console.log("hi", context.expand("#origin#"));
   useEffect(() => {
     setRoots(generateRoots(currentCode));
   }, [currentCode]);
@@ -124,8 +113,8 @@ function TraceryExample() {
           {
             type: "tooltip",
             query: {
-              type: "function",
-              query: (_, type) => targVals.has(type),
+              type: "nodeType",
+              query: ["Number", "String", "Null", "False", "True"],
             },
             name: "TraceryEditor",
             projection: (props) => {
@@ -161,12 +150,6 @@ function TraceryExample() {
             query: {
               type: "function",
               query: (val, type) => {
-                // console.log(
-                //   "wow",
-                //   unpeeledRoot[maybeTrim(val)],
-                //   maybeTrim(val),
-                //   unpeeledRoot
-                // );
                 return "PropertyName" === type && unpeeledRoot[maybeTrim(val)];
               },
             },

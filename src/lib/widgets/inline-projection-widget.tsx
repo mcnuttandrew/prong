@@ -18,7 +18,8 @@ class InlineProjectionWidget extends WidgetType {
     readonly projection: ProjectionInline,
     readonly syntaxNode: SyntaxNode,
     readonly state: EditorState,
-    readonly currentCodeSlice: string
+    readonly currentCodeSlice: string,
+    readonly setCode: (code: string) => void
   ) {
     super();
     this.widgetContainer = null;
@@ -49,9 +50,7 @@ class InlineProjectionWidget extends WidgetType {
       ),
       node: this.syntaxNode,
       currentValue: this.currentCodeSlice,
-      setCode: (code) => {
-        console.log("State can not be set using this type of projection");
-      },
+      setCode: (code) => this.setCode(code),
       fullCode: this.state.doc.toString(),
       diagnosticErrors: diagnostics.filter(
         (x) => x.from === from && x.to === to
@@ -80,7 +79,8 @@ const ProjectionWidgetFactory = (
   projection: ProjectionInline,
   currentCodeSlice: string,
   syntaxNode: SyntaxNode,
-  typings: any
+  typings: any,
+  setCode: (code: string) => void
 ): SimpleWidgetStateVersion => ({
   checkForAdd: (type, state, currentNode) => {
     const keyPath = syntaxNodeToKeyPath(syntaxNode, codeStringState(state, 0));
@@ -106,7 +106,8 @@ const ProjectionWidgetFactory = (
       projection,
       syntaxNode,
       state,
-      currentCodeSlice
+      currentCodeSlice,
+      setCode
     );
     if (
       projection.mode === "replace" ||

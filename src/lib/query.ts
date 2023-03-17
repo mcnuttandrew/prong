@@ -1,16 +1,15 @@
 import { JSONSchema } from "./JSONSchemaTypes";
 import { SyntaxNode } from "@lezer/common";
 
-type functionQueryType = (
-  value: string,
-  nodeType: SyntaxNode["type"]["name"]
-) => boolean;
+type NodeType = SyntaxNode["type"]["name"];
+type functionQueryType = (value: string, nodeType: NodeType) => boolean;
 export type ProjectionQuery =
   | { type: "function"; query: functionQueryType }
   | { type: "index"; query: (number | string)[] }
   | { type: "regex"; query: RegExp }
   | { type: "value"; query: string[] }
-  | { type: "schemaMatch"; query: string[] };
+  | { type: "schemaMatch"; query: string[] }
+  | { type: "nodeType"; query: NodeType[] };
 
 export function keyPathMatchesQuery(
   query: (string | number)[],
@@ -39,7 +38,7 @@ function valueQuery(query: string[], nodeValue: string): boolean {
 function functionQuery(
   query: functionQueryType,
   nodeValue: string,
-  nodeType: SyntaxNode["type"]["name"]
+  nodeType: NodeType
 ) {
   return query(nodeValue, nodeType);
 }
@@ -65,6 +64,10 @@ function schemaMatchQuery(query: string[], typings: any): boolean {
       return downcasedQuery.some((queryKey) => queryKey === last);
     });
   return result;
+}
+
+function nodeTypeMatch(query: NodeType[], nodeType: NodeType): boolean {
+  return query.some((x) => x === nodeType);
 }
 
 const simpleMatchers = {
@@ -98,6 +101,9 @@ export function runProjectionQuery(
       break;
     case "function":
       pass = functionQuery(query.query as any, nodeValue, nodeType);
+      break;
+    case "nodeType":
+      pass = nodeTypeMatch(query.query, nodeType);
       break;
     case "value":
     case "regex":

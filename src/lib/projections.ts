@@ -60,7 +60,7 @@ function widgetBuilder(
   state: EditorState
 ) {
   const widgets: Range<Decoration>[] = [];
-  const { schemaTypings } = state.field(cmStatePlugin);
+  const { schemaTypings, codeUpdateHook } = state.field(cmStatePlugin);
   // for (const { from, to } of view.visibleRanges) {
   syntaxTree(state).iterate({
     from: 0,
@@ -74,7 +74,8 @@ function widgetBuilder(
             projection.projection as ProjectionInline,
             currentCodeSlice,
             node,
-            schemaTypings[`${node.from}-${node.to}`]
+            schemaTypings[`${node.from}-${node.to}`],
+            codeUpdateHook
           );
 
           projWidget

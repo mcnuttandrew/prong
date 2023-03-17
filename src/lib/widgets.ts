@@ -11,9 +11,9 @@ import { NodeType, SyntaxNode } from "@lezer/common";
 import { Range, EditorState } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
-import SimpleBoolWidget from "./widgets/bool-widget";
-import SimpleColorWidget from "./widgets/color-widget";
-import ClickTargetWidget from "./widgets/click-target-widget";
+// import SimpleBoolWidget from "./widgets/bool-widget";
+// import SimpleColorWidget from "./widgets/color-widget";
+// import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
 import { popOverState } from "./popover-menu/PopoverState";
 
@@ -49,10 +49,10 @@ export interface SimpleWidgetStateVersion {
   eventSubscriptions: EventSubs;
 }
 const simpleWidgets: SimpleWidget[] = [
-  SimpleBoolWidget,
-  SimpleColorWidget,
+  // SimpleBoolWidget,
+  // SimpleColorWidget,
   Highlighter,
-  ClickTargetWidget,
+  // ClickTargetWidget,
   // SimpleSliderWidget,
 ];
 

@@ -10,12 +10,14 @@ export const setSchema = StateEffect.define<JSONSchema>();
 export const setProjections = StateEffect.define<Projection[]>();
 export const setSchemaTypings = StateEffect.define<Record<string, any>>();
 export const setDiagnostics = StateEffect.define<any[]>();
+export const setUpdateHook = StateEffect.define<any[]>();
 
 export const initialCmState = {
   schema: {} as JSONSchema,
   projections: [] as Projection[],
   schemaTypings: {} as Record<string, any>,
   diagnostics: [] as LintError[],
+  codeUpdateHook: (code: string) => {},
 };
 
 const simpleSet = (
@@ -49,6 +51,10 @@ export const cmStatePlugin = StateField.define({
       if (effect.is(setDiagnostics)) {
         didUpdate = true;
         newState = simpleSet("diagnostics", effect.value, newState);
+      }
+      if (effect.is(setUpdateHook)) {
+        didUpdate = true;
+        newState = simpleSet("codeUpdateHook", effect.value[0], newState);
       }
     }
     if (didUpdate) {

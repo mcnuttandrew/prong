@@ -16,6 +16,7 @@ import {
   cmStatePlugin,
   setSchema,
   setProjections,
+  setUpdateHook,
   cmStateView,
 } from "../lib/cmState";
 import PopoverPlugin from "../lib/popover-menu";
@@ -91,6 +92,13 @@ export default function Editor(props: Props) {
       simpleUpdate(view, 0, view.state.doc.length, code);
     }
   }, [code, view]);
+  useEffect(() => {
+    setTimeout(() => {
+      view?.dispatch({
+        effects: [setUpdateHook.of([(code: string) => onChange(code)])],
+      });
+    });
+  }, [view, onChange]);
   return (
     <div className="editor-container" style={height ? { height } : {}}>
       <div ref={cmParent} className="editor-target" />

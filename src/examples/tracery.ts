@@ -879,7 +879,6 @@ export function generate(preventRecursion: boolean, app: App) {
   app.generatedRoots = [];
   for (var i = 0; i < app.generateCount; i++) {
     var root = generateRoot(app);
-    console.log("hi", root);
     root.expand(preventRecursion);
     app.generatedRoots[i] = root;
     //  root.visualizeExpansion($("#output .content"));
