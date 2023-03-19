@@ -15,3 +15,7 @@
     justify-content: center;
     cursor: pointer;
 }
+
+.cascade-container--selected {
+    background-color: aqua;
+}

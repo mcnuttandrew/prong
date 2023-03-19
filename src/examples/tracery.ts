@@ -191,6 +191,7 @@ export class TraceryNode {
   preactions?: NodeAction[];
   symbol?: Symbol;
   modifiers?: Modifier[];
+  id: string;
 
   constructor(
     parent: TraceryNode,
@@ -220,6 +221,7 @@ export class TraceryNode {
     if (!this.grammar) {
       console.warn("No grammar specified for this node", this);
     }
+    this.id = `${Math.random()}`;
   }
   toString() {
     return "Node('" + this.raw + "' " + this.type + " d:" + this.depth + ")";
@@ -885,6 +887,7 @@ export function generate(preventRecursion: boolean, app: App) {
 
     // app.stepIterator = new NodeIterator(root);
   }
+  console.log(app);
   return app.generatedRoots;
   //   refreshVisualization();
 }
