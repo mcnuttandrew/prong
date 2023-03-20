@@ -460,5 +460,5 @@ export function getCursorPos(state: EditorState) {
   return range.anchor;
 }
 
-const climbToRoot = (node: SyntaxNode): SyntaxNode =>
-  node.parent ? climbToRoot(node.parent) : node;
+// const climbToRoot = (node: SyntaxNode): SyntaxNode =>
+//   node.parent ? climbToRoot(node.parent) : node;

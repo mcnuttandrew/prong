@@ -5,7 +5,6 @@ import { SyntaxNode } from "@lezer/common";
 import { Transaction } from "@codemirror/state";
 import { showTooltip } from "@codemirror/view";
 import { cmStatePlugin } from "../cmState";
-import { projectionState } from "../projections";
 import {
   codeStringState,
   getMenuTargetNode,
@@ -60,13 +59,13 @@ function cursorBehaviorIsValid(tr: Transaction) {
   return !(moreThanOneSelection || selectionWiderThanOne);
 }
 
-function selectionInsideProjection(tr: Transaction, pos: number) {
-  const { projectionsInUse } = tr.state.field(projectionState);
-  const posInsideOfInUseRange = projectionsInUse.some(
-    ({ from, to }) => pos >= from && pos <= to
-  );
-  return posInsideOfInUseRange;
-}
+// function selectionInsideProjection(tr: Transaction, pos: number) {
+//   const { projectionsInUse } = tr.state.field(projectionState);
+//   const posInsideOfInUseRange = projectionsInUse.some(
+//     ({ from, to }) => pos >= from && pos <= to
+//   );
+//   return posInsideOfInUseRange;
+// }
 
 function handleSimpleUpdate(
   state: PopoverMenuState,

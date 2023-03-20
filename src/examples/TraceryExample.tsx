@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from "react";
 import StandardProjections from "../projections/standard-bundle";
-import { buttonListProjection } from "./VegaExample";
-// import { Tracery } from "./tracery-errata/tracery";
-import tracery, { generate, TraceryNode, NodeAction } from "./tracery";
+import tracery, { generate, TraceryNode } from "./tracery";
 import { simpleParse } from "../lib/utils";
 import "../stylesheets/tracery-example.css";
-import { maybeTrim } from "./example-utils";
 import { Projection } from "../lib/projections";
 
 import Editor from "../components/Editor";
@@ -32,13 +29,13 @@ const classnames = (inp: Record<string, boolean>) =>
     .join(" ");
 
 function TraceryCascadeVis(props: {
-  node: TraceryNode | NodeAction;
+  node: TraceryNode;
   first: boolean;
   onClick: (node: TraceryNode) => void;
   selectedNodes: string[];
 }) {
   const { node, first, onClick, selectedNodes } = props;
-  const children = [...(node.children || []), ...(node.preactions || [])];
+  const children = node.children || [];
   if (first) {
     return (
       <div className="flex">
@@ -65,7 +62,7 @@ function TraceryCascadeVis(props: {
         onClick(node);
       }}
     >
-      {node.childRule} {"->"} {node.finishedText}
+      {node.childRule} {"->"} {<div>{node.finishedText}</div>}
       {children.length ? (
         <div className="flex">
           {children.map((child, idx) => (
@@ -85,8 +82,9 @@ function TraceryCascadeVis(props: {
   );
 }
 
-function generateRoots(currentCode: string) {
+function generateRoots(currentCode: string, randomKey: string) {
   return generate(false, {
+    randomKey,
     generateCount: 1,
     mode: undefined,
     grammar: tracery.createGrammar(simpleParse(currentCode, {})),
@@ -103,16 +101,6 @@ function getAllNodes(root: TraceryNode) {
     (current.children || []).forEach((child) => queue.push(child));
   }
   return allNodes;
-}
-
-function unpeelRoot(root: TraceryNode[]) {
-  return root.length === 0
-    ? {}
-    : Object.fromEntries(
-        getAllNodes(root[0])
-          .filter((x) => x.symbol)
-          .map((x) => [x.symbol, x])
-      );
 }
 
 type Range = {
@@ -148,16 +136,6 @@ function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
     ]
   );
 }
-
-const recursiveSlice = (str: string, slices: number[]): string[] => {
-  const [head, ...tail] = slices;
-  if (!head) {
-    return [str];
-  }
-  const front = str.slice(0, head);
-  const back = str.slice(head);
-  return [front, ...recursiveSlice(back, tail)];
-};
 
 const recurseToRoot = (node: TraceryNode): TraceryNode[] =>
   [node].concat(node.parent ? recurseToRoot(node.parent) : []);
@@ -248,14 +226,15 @@ function TraceryExample() {
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [keyPath, setKeyPath] = useState<(string | number)[]>([]);
   const [roots, setRoots] = useState<TraceryNode[]>([]);
+  const [randomKey, setRandomKey] = useState("tracery is a fun time");
   const grammar = simpleParse(currentCode, {});
   useEffect(() => {
-    setRoots(generateRoots(currentCode));
-  }, []);
+    setRoots(generateRoots(currentCode, randomKey));
+  }, [currentCode]);
 
   function clickNode(node: TraceryNode) {
     const nodeId = node.id;
-    setSelectedNodes([nodeId as string]);
+    setSelectedNodes(selectedNodes.includes(nodeId) ? [] : [nodeId as string]);
   }
 
   useEffect(() => {
@@ -278,27 +257,24 @@ function TraceryExample() {
   const materializedNodes = ranges.filter(({ node }) =>
     selectedNodes.includes(node.id)
   );
-  // const cutPoints = materializedNodes.flatMap(({ from, to }) => [from, to]);
-  // const slices = recursiveSlice(txt, cutPoints);
 
   return (
     <div className="flex-down">
-      {/* {roots.length && (
-        <div>
-          <WordVisualization node={roots[0]} />
-        </div>
-      )} */}
       <div>
-        <h3>
-          Output X{" "}
-          <button onClick={() => setRoots(generateRoots(currentCode))}>
-            Regenerate
-          </button>
-        </h3>
         <h1>
           <div>{txt}</div>
           <div></div>
         </h1>
+      </div>
+      <div>
+        <button
+          onClick={() => {
+            setRandomKey(`${Math.random()}`);
+            setRoots(generateRoots(currentCode, randomKey));
+          }}
+        >
+          Update RandomSeed
+        </button>
       </div>
       {roots.length && (
         <div>
@@ -373,32 +349,7 @@ function TraceryExample() {
               query: { type: "index", query },
               class: "tracery-in-use",
             })),
-            // {
-            //   type: "tooltip",
-            //   query: {
-            //     type: "function",
-            //     query: (val, type) => {
-            //       return "PropertyName" === type && unpeeledRoot[maybeTrim(val)];
-            //     },
-            //   },
-            //   name: "TraceryEditor2",
-            //   projection: (props) => {
-            //     const key = `${props.keyPath[0]}`.split("___")[0];
-            //     if (unpeeledRoot[key]) {
-            //       return (
-            //         <div>
-            //           <TraceryCascadeVis
-            //             selectedNodes={selectedNodes}
-            //             node={unpeeledRoot[key]}
-            //             first={false}
-            //             onClick={(node) => clickNode(node)}
-            //           />
-            //         </div>
-            //       );
-            //     }
-            //     return <div></div>;
-            //   },
-            // },
+
             ...assembleHighlight(materializedNodes, grammar),
           ] as Projection[]
         }

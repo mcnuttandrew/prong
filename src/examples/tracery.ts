@@ -1,4 +1,10 @@
 // Forked from http://tracery.io/editor/js/tracery/tracery.js
+import seedrandom from "seedrandom";
+
+let rng = seedrandom("hello.");
+function random() {
+  return rng();
+}
 interface Rule {}
 // interface Section {
 //   raw: string;
@@ -15,69 +21,6 @@ type Sections = {
 };
 type Modifier = (s: string) => string;
 
-/**
- * @author Kate
- */
-
-var itSpacer = "";
-class NodeIterator {
-  node: TraceryNode;
-  childIndex: number;
-  mode: 0 | 1 | 2;
-  constructor(node: TraceryNode) {
-    this.node = node;
-    this.childIndex = -1;
-    this.mode = 0;
-  }
-  // Go to the next
-  next() {
-    // Actions for this node
-    // 0: Just entered
-    // 1: Start children
-    // 2: Children finished, exit
-
-    switch (this.mode) {
-      case 0:
-        itSpacer += "   ";
-        this.mode = 1;
-        return { log: itSpacer + "Enter " + this.node };
-
-      case 1:
-        if (!this.node.children || this.node.children.length === 0) {
-          this.mode = 2;
-          return {
-            log: itSpacer + "start children: no children",
-          };
-        } else {
-          var childCount = this.node.children.length;
-          this.node = this.node.children[0];
-          this.mode = 0;
-          return {
-            log: itSpacer + "starting 0 of " + childCount + " children",
-          };
-        }
-      case 2:
-        itSpacer = itSpacer.substring(3);
-
-        // Find a sibling
-        if (this.node.parent) {
-          // Attempt sibling
-          var nextSib = this.node.childIndex + 1;
-          if (this.node.parent.children![nextSib] !== undefined) {
-            this.node = this.node.parent.children![nextSib];
-            this.mode = 0;
-            return { log: itSpacer + " starting sibling " + nextSib };
-          } else {
-            this.node = this.node.parent;
-            this.mode = 2;
-            return { log: itSpacer + " no remaining siblings, exit to parent" };
-          }
-        }
-        return null;
-    }
-  }
-}
-
 function isVowel(c: string) {
   var c2 = c.toLowerCase();
   return c2 === "a" || c2 === "e" || c2 === "i" || c2 === "o" || c2 === "u";
@@ -92,7 +35,7 @@ function isAlphaNum(c: string) {
 var baseEngModifiers: Record<string, Modifier> = {
   varyTune: function (s: string) {
     var s2 = "";
-    var d = Math.ceil(Math.random() * 5);
+    var d = Math.ceil(random() * 5);
     for (var i = 0; i < s.length; i++) {
       var c = s.charCodeAt(i) - 97;
       if (c >= 0 && c < 26) {
@@ -221,7 +164,7 @@ export class TraceryNode {
     if (!this.grammar) {
       console.warn("No grammar specified for this node", this);
     }
-    this.id = `${Math.random()}`;
+    this.id = `${random()}`;
   }
   toString() {
     return "Node('" + this.raw + "' " + this.type + " d:" + this.depth + ")";
@@ -289,7 +232,6 @@ export class TraceryNode {
           // Create all the preactions from the raw syntax
           if (parsed.preactions.length > 0) {
             this.preactions = [];
-            console.log(parsed.preactions);
             for (var i = 0; i < parsed.preactions.length; i++) {
               this.preactions[i] = new NodeAction(
                 this,
@@ -302,8 +244,8 @@ export class TraceryNode {
             // TODO
 
             // Activate all the preactions
-            for (var i = 0; i < this.preactions.length; i++) {
-              this.preactions[i].activate();
+            for (var idx = 0; idx < this.preactions.length; idx++) {
+              this.preactions[idx].activate();
             }
           }
 
@@ -321,10 +263,10 @@ export class TraceryNode {
           this.expandChildren(selectedRule, !!preventRecursion);
 
           // Apply modifiers
-          for (var i = 0; i < this.modifiers.length; i++) {
+          for (var jdx = 0; jdx < this.modifiers.length; jdx++) {
             // @ts-ignore
-            var mod = this.grammar.modifiers[this.modifiers[i]];
-            if (!mod) this.finishedText += "((." + this.modifiers[i] + "))";
+            var mod = this.grammar.modifiers[this.modifiers[jdx]];
+            if (!mod) this.finishedText += `((.${this.modifiers[jdx]}))`;
             else this.finishedText = mod(this.finishedText);
           }
           // Perform post-actions
@@ -351,7 +293,7 @@ export class TraceryNode {
 // 0 Push: [key:rule]
 // 1 Pop: [key:POP]
 // 2 function: [functionName(param0,param1)] (TODO!)
-class NodeAction {
+export class NodeAction {
   node: TraceryNode;
   target: any;
   type: 0 | 1 | 2;
@@ -461,8 +403,8 @@ class RuleSet {
     // Is there a ranked order?
     if (this.ranking) {
       for (var i = 0; i < this.ranking.length; i++) {
-        var v = this.ranking.getRule();
-        if (v !== null && v !== undefined) return v;
+        var vDx = this.ranking.getRule();
+        if (vDx !== null && vDx !== undefined) return vDx;
       }
 
       // Still no returned value?
@@ -497,7 +439,7 @@ class RuleSet {
           break;
         default:
           index = Math.floor(
-            Math.pow(Math.random(), this.falloff) * this.defaultRules.length
+            Math.pow(random(), this.falloff) * this.defaultRules.length
           );
           break;
       }
@@ -523,7 +465,7 @@ function fyshuffle(array: any[]) {
   // While there remain elements to shuffle...
   while (0 !== currentIndex) {
     // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
+    randomIndex = Math.floor(random() * currentIndex);
     currentIndex -= 1;
 
     // And swap it with the current element.
@@ -859,6 +801,7 @@ interface App {
   grammar: Grammar;
   generatedRoots: TraceryNode[];
   origin?: string;
+  randomKey: string;
 }
 
 // var app = {
@@ -877,17 +820,13 @@ function generateRoot(app: App) {
 export function generate(preventRecursion: boolean, app: App) {
   // Clear the grammar
   app.grammar.clearState();
+  rng = seedrandom(app.randomKey);
 
   app.generatedRoots = [];
   for (var i = 0; i < app.generateCount; i++) {
     var root = generateRoot(app);
     root.expand(preventRecursion);
     app.generatedRoots[i] = root;
-    //  root.visualizeExpansion($("#output .content"));
-
-    // app.stepIterator = new NodeIterator(root);
   }
-  console.log(app);
   return app.generatedRoots;
-  //   refreshVisualization();
 }
