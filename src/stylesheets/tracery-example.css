@@ -19,3 +19,13 @@
 .cascade-container--selected {
     background-color: aqua;
 }
+
+
+
+.tracery-in-use {
+    background-color: aquamarine;
+}
+
+.example-highlighter {
+    background: red;
+}

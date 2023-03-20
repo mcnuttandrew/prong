@@ -2,8 +2,10 @@ import { Decoration } from "@codemirror/view";
 import { SimpleWidget } from "../widgets";
 import { cmStatePlugin } from "../cmState";
 import { popOverState } from "../popover-menu/PopoverState";
-import { classNames } from "../utils";
+import { classNames, syntaxNodeToKeyPath, codeString } from "../utils";
 import { SyntaxNode } from "@lezer/common";
+import { runProjectionQuery } from "../query";
+import { EditorView } from "@codemirror/view";
 
 const simpleTypes = new Set([
   // "{",
@@ -47,9 +49,31 @@ export function pickNodetoHighlight(node: SyntaxNode): SyntaxNode {
   return node;
 }
 
+function prepareHighlightString(view: EditorView, node: SyntaxNode) {
+  const { schemaTypings, projections } = view.state.field(cmStatePlugin);
+  const keyPath = syntaxNodeToKeyPath(node, codeString(view, 0));
+  const highlights = projections
+    .filter(
+      (proj) =>
+        proj.type === "highlight" && // todo covert these args to named args
+        runProjectionQuery(
+          proj.query,
+          keyPath,
+          codeString(view, node.from, node.to),
+          schemaTypings[`${node.from}-${node.to}`],
+          node.type.name,
+          // @ts-ignore
+          proj.id
+        )
+    )
+    .map((x: any) => x.class);
+  return highlights.join(" ");
+}
+
 const Highlighter: SimpleWidget = {
   checkForAdd: (type, view, node) => {
     const { schemaTypings, diagnostics } = view.state.field(cmStatePlugin);
+
     const { highlightNode } = view.state.field(popOverState);
     const isTargetableType = simpleTypes.has(node.type.name);
     const hasTyping = schemaTypings[`${node.from}-${node.to}`];
@@ -60,8 +84,9 @@ const Highlighter: SimpleWidget = {
       !!highlightNode &&
       highlightNode.from === node.from &&
       highlightNode.to === node.to;
-
+    const highlights = prepareHighlightString(view, node);
     return (
+      highlights.length ||
       (hasTyping && hasTyping.length) ||
       isTargetableType ||
       hasDiagnosticError ||
@@ -71,6 +96,8 @@ const Highlighter: SimpleWidget = {
   addNode: (view, from, to, node) => {
     const { diagnostics } = view.state.field(cmStatePlugin);
     const { highlightNode } = view.state.field(popOverState);
+    const highlights = prepareHighlightString(view, node);
+
     const hasDiagnosticError = !!diagnostics.find(
       (x) => x.from === node.from && x.to === node.to
     );
@@ -92,6 +119,7 @@ const Highlighter: SimpleWidget = {
     const highlight = Decoration.mark({
       attributes: {
         class: classNames({
+          [highlights]: true,
           "cm-annotation-highlighter": true,
           "cm-annotation-highlighter-selected": isHighlightNode,
           [`cm-annotation-highlighter-${level}`]: true,

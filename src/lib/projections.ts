@@ -47,13 +47,21 @@ export interface ProjectionFullTooltip extends ProjectionBase {
 export interface ProjectionInline extends ProjectionBase {
   type: "inline";
   hasInternalState: boolean;
+  // am should replace and replace-multiline combine?
   mode: "replace" | "prefix" | "suffix" | "replace-multiline";
+}
+
+export interface ProjectionHighlight extends ProjectionBase {
+  type: "highlight";
+  query: ProjectionQuery;
+  class: string;
 }
 
 export type Projection =
   | ProjectionInline
   | ProjectionTooltip
-  | ProjectionFullTooltip;
+  | ProjectionFullTooltip
+  | ProjectionHighlight;
 
 function widgetBuilder(
   projectionsInUse: ProjectionMaterialization[],

@@ -201,14 +201,9 @@ function assembleHighlight(
     return temp;
   });
   return dedup(queries).map((query) => ({
-    type: "inline",
-    mode: "replace",
+    type: "highlight",
     query: { type: "index", query },
-    projection: (props) => (
-      <div style={{ background: "green" }}>{props.currentValue}</div>
-    ),
-    name: "ASD",
-    hasInternalState: false,
+    class: "example-highlighter",
   })) as Projection[];
 }
 
@@ -222,11 +217,31 @@ function keyPathToNode(
     const key = `${keyPath[0]}`.split("___")[0];
     return nodes.find((node) => (node.symbol as unknown as string) === key);
   }
-  // console.log(keyPath);
   const value = grammar[keyPath[0]]?.at(keyPath[1] as number);
-  // console.log(nodes, value, "here");
   return nodes.find((node) => node.raw === value);
 }
+
+function nodeToKeyPath(
+  node: TraceryNode,
+  grammar: Record<string, string[]>
+): (string | number)[][] {
+  const symbol = node.symbol as unknown as string;
+  if (!(symbol && node.childRule)) {
+    return [];
+  }
+  const index = (grammar[symbol] || []).findIndex((x) => x === node.childRule);
+  if (!isNaN(index) && index > -1) {
+    return [[symbol, index], [`${symbol}___key`]];
+  } else {
+    return [];
+  }
+}
+
+const insertInto = (str: string, idx: number, subStr: string) => {
+  return `${str.slice(0, idx)}${subStr}${str.slice(idx)}`;
+};
+
+const pick = (arr: any[]) => arr[Math.floor(Math.random())];
 
 function TraceryExample() {
   const [currentCode, setCurrentCode] = useState(initialCode);
@@ -237,32 +252,34 @@ function TraceryExample() {
   useEffect(() => {
     setRoots(generateRoots(currentCode));
   }, []);
-  // const unpeeledRoot = unpeelRoot(roots);
-  const availableSymbols = roots.flatMap((root) =>
-    Object.keys(root.grammar.symbols || {})
-  );
-  console.log(availableSymbols);
-  const ranges = roots.length ? computeRanges(roots[0]) : [];
+
   function clickNode(node: TraceryNode) {
     const nodeId = node.id;
     setSelectedNodes([nodeId as string]);
   }
-
-  const txt = roots.length ? roots[0].finishedText || "" : "";
-  const materializedNodes = ranges.filter(({ node }) =>
-    selectedNodes.includes(node.id)
-  );
-  // const cutPoints = materializedNodes.flatMap(({ from, to }) => [from, to]);
-  // const slices = recursiveSlice(txt, cutPoints);
 
   useEffect(() => {
     if (!roots.length) {
       return;
     }
     const targetedNode = keyPathToNode(keyPath, roots[0], grammar);
-    console.log("targeted node", targetedNode);
     setSelectedNodes(targetedNode ? [targetedNode?.id] : []);
   }, [keyPath]);
+
+  const availableSymbols = roots.flatMap((root) =>
+    Object.keys(root.grammar.symbols || {})
+  );
+
+  const ranges = roots.length ? computeRanges(roots[0]) : [];
+  const inUseKeys = ranges.flatMap((range) =>
+    nodeToKeyPath(range.node, grammar)
+  );
+  const txt = roots.length ? roots[0].finishedText || "" : "";
+  const materializedNodes = ranges.filter(({ node }) =>
+    selectedNodes.includes(node.id)
+  );
+  // const cutPoints = materializedNodes.flatMap(({ from, to }) => [from, to]);
+  // const slices = recursiveSlice(txt, cutPoints);
 
   return (
     <div className="flex-down">
@@ -299,71 +316,92 @@ function TraceryExample() {
         onChange={(x) => setCurrentCode(x)}
         height={"800px"}
         onTargetNodeChanged={(newKeyPath) => setKeyPath(newKeyPath)}
-        projections={[
-          ...StandardProjections.filter((x) => x.name !== "ColorChip"),
-          {
-            type: "full-tooltip",
-            query: {
-              type: "nodeType",
-              query: ["Number", "String", "Null", "False", "True"],
-            },
-            name: "TraceryEditor",
-            projection: (props) => {
-              // todo this part should turn into an autocomplete right?
-              return (
-                <div>
-                  <span>Insert reference to</span>
-                  {availableSymbols.map((key) => (
+        projections={
+          [
+            ...StandardProjections.filter((x) => x.name !== "ColorChip"),
+            {
+              type: "full-tooltip",
+              query: {
+                type: "nodeType",
+                query: ["Number", "String", "Null", "False", "True"],
+              },
+              name: "TraceryEditor",
+              projection: (props) => {
+                // todo this part should turn into an autocomplete right?
+                return (
+                  <div>
+                    <span>Insert reference to</span>
+                    {availableSymbols.map((key) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          const cursorPos = props.cursorPositions[0].from;
+                          if (!cursorPos) {
+                            return;
+                          }
+
+                          props.setCode(
+                            insertInto(currentCode, cursorPos, `#${key}#`)
+                          );
+                        }}
+                      >
+                        {key}
+                      </button>
+                    ))}
                     <button
-                      key={key}
                       onClick={() => {
                         const cursorPos = props.cursorPositions[0].from;
                         if (!cursorPos) {
                           return;
                         }
-                        props.setCode(
-                          `${currentCode.slice(
-                            0,
-                            cursorPos
-                          )} #${key}# ${currentCode.slice(cursorPos)}`
+                        const newCode = insertInto(
+                          currentCode,
+                          cursorPos,
+                          `[MY_VARIABLE:#${pick(availableSymbols)}#]`
                         );
+                        props.setCode(newCode);
                       }}
                     >
-                      {key}
+                      Create new context
                     </button>
-                  ))}
-                </div>
-              );
+                  </div>
+                );
+              },
             },
-          },
-          // {
-          //   type: "tooltip",
-          //   query: {
-          //     type: "function",
-          //     query: (val, type) => {
-          //       return "PropertyName" === type && unpeeledRoot[maybeTrim(val)];
-          //     },
-          //   },
-          //   name: "TraceryEditor2",
-          //   projection: (props) => {
-          //     const key = `${props.keyPath[0]}`.split("___")[0];
-          //     if (unpeeledRoot[key]) {
-          //       return (
-          //         <div>
-          //           <TraceryCascadeVis
-          //             selectedNodes={selectedNodes}
-          //             node={unpeeledRoot[key]}
-          //             first={false}
-          //             onClick={(node) => clickNode(node)}
-          //           />
-          //         </div>
-          //       );
-          //     }
-          //     return <div></div>;
-          //   },
-          // },
-          ...assembleHighlight(materializedNodes, grammar),
-        ]}
+            ...inUseKeys.map((query) => ({
+              type: "highlight",
+              query: { type: "index", query },
+              class: "tracery-in-use",
+            })),
+            // {
+            //   type: "tooltip",
+            //   query: {
+            //     type: "function",
+            //     query: (val, type) => {
+            //       return "PropertyName" === type && unpeeledRoot[maybeTrim(val)];
+            //     },
+            //   },
+            //   name: "TraceryEditor2",
+            //   projection: (props) => {
+            //     const key = `${props.keyPath[0]}`.split("___")[0];
+            //     if (unpeeledRoot[key]) {
+            //       return (
+            //         <div>
+            //           <TraceryCascadeVis
+            //             selectedNodes={selectedNodes}
+            //             node={unpeeledRoot[key]}
+            //             first={false}
+            //             onClick={(node) => clickNode(node)}
+            //           />
+            //         </div>
+            //       );
+            //     }
+            //     return <div></div>;
+            //   },
+            // },
+            ...assembleHighlight(materializedNodes, grammar),
+          ] as Projection[]
+        }
       />
     </div>
   );
