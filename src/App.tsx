@@ -8,6 +8,7 @@ import SimpleExample from "./examples/SimpleExample";
 import ProduceExample from "./examples/ProduceExample";
 import InSituFigure1 from "./examples/InSituFigure1";
 import VegaLiteStyler from "./examples/VegaLiteStyler";
+import Tracery from "./examples/TraceryExample";
 
 const routes: { name: string; Component: () => JSX.Element }[] = [
   { name: "vega-lite", Component: VegaLiteExampleApp },
@@ -16,6 +17,7 @@ const routes: { name: string; Component: () => JSX.Element }[] = [
   { name: "simple", Component: SimpleExample },
   { name: "in-situ-figure-1", Component: InSituFigure1 },
   { name: "vega-lite-styler", Component: VegaLiteStyler },
+  { name: "tracery", Component: Tracery },
 ];
 
 function Root() {

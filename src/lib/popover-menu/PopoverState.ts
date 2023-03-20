@@ -5,11 +5,9 @@ import { SyntaxNode } from "@lezer/common";
 import { Transaction } from "@codemirror/state";
 import { showTooltip } from "@codemirror/view";
 import { cmStatePlugin } from "../cmState";
-import { projectionState } from "../projections";
 import {
   codeStringState,
   getMenuTargetNode,
-  generateCleanUpButton,
   syntaxNodeToKeyPath,
 } from "../utils";
 import { potentiallyFilterContentForGesture } from "../search";
@@ -61,13 +59,13 @@ function cursorBehaviorIsValid(tr: Transaction) {
   return !(moreThanOneSelection || selectionWiderThanOne);
 }
 
-function selectionInsideProjection(tr: Transaction, pos: number) {
-  const { projectionsInUse } = tr.state.field(projectionState);
-  const posInsideOfInUseRange = projectionsInUse.some(
-    ({ from, to }) => pos >= from && pos <= to
-  );
-  return posInsideOfInUseRange;
-}
+// function selectionInsideProjection(tr: Transaction, pos: number) {
+//   const { projectionsInUse } = tr.state.field(projectionState);
+//   const posInsideOfInUseRange = projectionsInUse.some(
+//     ({ from, to }) => pos >= from && pos <= to
+//   );
+//   return posInsideOfInUseRange;
+// }
 
 function handleSimpleUpdate(
   state: PopoverMenuState,
@@ -152,16 +150,10 @@ const specialPriority: Record<string, number> = {
 function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
-  const cleanUpButton = generateCleanUpButton(
-    tr.selection,
-    targetNode,
-    fullCode
-  );
 
   let contents = [
     ...generateMenuContent(targetNode, schemaTypings, fullCode),
     ...prepDiagnostics(diagnostics, targetNode),
-    cleanUpButton,
   ] as MenuRow[];
 
   return potentiallyFilterContentForGesture(
@@ -190,12 +182,15 @@ function getProjectionContents(
   const typings = schemaTypings[`${targetNode.from}-${targetNode.to}`];
   return projections
     .filter((proj) =>
+      // todo covert these args to named args
       runProjectionQuery(
         proj.query,
         keyPath,
         targetNodeValue,
         typings,
-        targetNode.type.name
+        targetNode.type.name,
+        // @ts-ignore
+        proj.id
       )
     )
     .filter((proj) => tooltipTypes.has(proj.type));
@@ -235,6 +230,7 @@ export function buildProjectionsForMenu(props: {
             (x) => x.from === node.from && x.to === node.to
           ),
           typings: schemaTypings[`${node.from}-${node.to}`],
+          cursorPositions: [...view.state.selection.ranges],
         }),
       },
     ],
@@ -286,7 +282,8 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       return state;
     }
     // handle multi-cursor stuff appropriately and dont show popover through a projection
-    if (!cursorBehaviorIsValid(tr) || selectionInsideProjection(tr, pos)) {
+    // if (!cursorBehaviorIsValid(tr) || selectionInsideProjection(tr, pos)) {
+    if (!cursorBehaviorIsValid(tr)) {
       return { ...state, tooltip: null };
     }
 
@@ -314,6 +311,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     );
     const hasProjectionContent =
       getProjectionContents(tr.state, targetNode, currentCodeSlice).length > 0;
+
     return {
       ...state,
       hasProjectionContent,

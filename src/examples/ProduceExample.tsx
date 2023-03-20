@@ -4,6 +4,7 @@ import Editor from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
 import standardBundle from "../projections/standard-bundle";
 import { Projection } from "../lib/projections";
+import { maybeTrim } from "./example-utils";
 
 const schema: JSONSchema7 = {
   $id: "https://example.com/arrays.schema.json",
@@ -92,18 +93,6 @@ const exampleData = `{
   ]
 }`;
 
-const targVals = new Set([
-  "PropertyName",
-  "Number",
-  "String",
-  "Null",
-  "False",
-  "True",
-]);
-const maybeTrim = (x: string) => {
-  return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
-};
-
 const blue = "#0551A5";
 const green = "#17885C";
 const red = "#A21615";
@@ -119,8 +108,8 @@ const DestringProjection: Projection = {
   type: "inline",
   mode: "replace",
   query: {
-    type: "function",
-    query: (_, type) => targVals.has(type),
+    type: "nodeType",
+    query: ["PropertyName", "Number", "String", "Null", "False", "True"],
   },
   projection: (props) => (
     <div

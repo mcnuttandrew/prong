@@ -1,0 +1,31 @@
+.cascade-node {
+    border: thin solid black;
+    border-radius: 15px;
+    padding: 5px 5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.cascade-container {
+    border: thin solid black;
+    border-radius: 15px;
+    padding: 5px 5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.cascade-container--selected {
+    background-color: aqua;
+}
+
+
+
+.tracery-in-use {
+    background-color: aquamarine;
+}
+
+.example-highlighter {
+    background: red;
+}

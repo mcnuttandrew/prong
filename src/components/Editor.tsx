@@ -16,26 +16,29 @@ import {
   cmStatePlugin,
   setSchema,
   setProjections,
+  setUpdateHook,
   cmStateView,
 } from "../lib/cmState";
 import PopoverPlugin from "../lib/popover-menu";
 import ProjectionPlugin from "../lib/projections";
 import { simpleUpdate } from "../lib/utils";
 import Panel from "../lib/dock";
+import { popOverState } from "../lib/popover-menu/PopoverState";
+import { syntaxNodeToKeyPath } from "../lib/utils";
 
-type Props = {
+const languageConf = new Compartment();
+export type SchemaMap = Record<string, any>;
+
+export default function Editor(props: {
   onChange: (code: string) => void;
   code: string;
   schema: any; // TODO fix
   projections?: Projection[];
   height?: string;
-};
-
-const languageConf = new Compartment();
-export type SchemaMap = Record<string, any>;
-
-export default function Editor(props: Props) {
-  const { schema, code, onChange, projections, height } = props;
+  onTargetNodeChanged?: (newNode: any, oldNode: any) => void;
+}) {
+  const { schema, code, onChange, projections, height, onTargetNodeChanged } =
+    props;
 
   const [view, setView] = useState<EditorView | null>(null);
   const cmParent = useRef<HTMLDivElement>(null);
@@ -46,6 +49,19 @@ export default function Editor(props: Props) {
       if (v.docChanged) {
         const newCode = v.state.doc.toString();
         onChange(newCode);
+      }
+      if (onTargetNodeChanged) {
+        const oldNode = v.startState.field(popOverState).targetNode;
+        const newNode = v.state.field(popOverState).targetNode;
+        const nodeIsActuallyNew = !(
+          oldNode?.from === newNode?.from && oldNode?.to === newNode?.to
+        );
+        if (nodeIsActuallyNew) {
+          onTargetNodeChanged(
+            newNode ? syntaxNodeToKeyPath(newNode.node, code) : newNode,
+            oldNode ? syntaxNodeToKeyPath(oldNode.node, code) : false
+          );
+        }
       }
     });
     const editorState = EditorState.create({
@@ -91,6 +107,13 @@ export default function Editor(props: Props) {
       simpleUpdate(view, 0, view.state.doc.length, code);
     }
   }, [code, view]);
+  useEffect(() => {
+    setTimeout(() => {
+      view?.dispatch({
+        effects: [setUpdateHook.of([(code: string) => onChange(code)])],
+      });
+    });
+  }, [view, onChange]);
   return (
     <div className="editor-container" style={height ? { height } : {}}>
       <div ref={cmParent} className="editor-target" />

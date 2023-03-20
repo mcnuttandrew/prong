@@ -11,12 +11,8 @@ import { NodeType, SyntaxNode } from "@lezer/common";
 import { Range, EditorState } from "@codemirror/state";
 import isEqual from "lodash.isequal";
 
-import SimpleBoolWidget from "./widgets/bool-widget";
-import SimpleColorWidget from "./widgets/color-widget";
-import ClickTargetWidget from "./widgets/click-target-widget";
 import { cmStatePlugin } from "./cmState";
 import { popOverState } from "./popover-menu/PopoverState";
-import { projectionState, getInUseRanges } from "./projections";
 
 import Highlighter from "./widgets/highlighter";
 
@@ -49,13 +45,7 @@ export interface SimpleWidgetStateVersion {
   ) => Range<Decoration>[];
   eventSubscriptions: EventSubs;
 }
-const simpleWidgets: SimpleWidget[] = [
-  SimpleBoolWidget,
-  SimpleColorWidget,
-  Highlighter,
-  ClickTargetWidget,
-  // SimpleSliderWidget,
-];
+const simpleWidgets: SimpleWidget[] = [Highlighter];
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];

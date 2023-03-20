@@ -27,6 +27,7 @@ export interface ProjectionProps {
   fullCode: string;
   typings: any[];
   diagnosticErrors: Diagnostic[];
+  cursorPositions: any[];
 }
 
 interface ProjectionBase {
@@ -46,20 +47,28 @@ export interface ProjectionFullTooltip extends ProjectionBase {
 export interface ProjectionInline extends ProjectionBase {
   type: "inline";
   hasInternalState: boolean;
+  // am should replace and replace-multiline combine?
   mode: "replace" | "prefix" | "suffix" | "replace-multiline";
+}
+
+export interface ProjectionHighlight extends ProjectionBase {
+  type: "highlight";
+  query: ProjectionQuery;
+  class: string;
 }
 
 export type Projection =
   | ProjectionInline
   | ProjectionTooltip
-  | ProjectionFullTooltip;
+  | ProjectionFullTooltip
+  | ProjectionHighlight;
 
 function widgetBuilder(
   projectionsInUse: ProjectionMaterialization[],
   state: EditorState
 ) {
   const widgets: Range<Decoration>[] = [];
-  const { schemaTypings } = state.field(cmStatePlugin);
+  const { schemaTypings, codeUpdateHook } = state.field(cmStatePlugin);
   // for (const { from, to } of view.visibleRanges) {
   syntaxTree(state).iterate({
     from: 0,
@@ -73,7 +82,8 @@ function widgetBuilder(
             projection.projection as ProjectionInline,
             currentCodeSlice,
             node,
-            schemaTypings[`${node.from}-${node.to}`]
+            schemaTypings[`${node.from}-${node.to}`],
+            codeUpdateHook
           );
 
           projWidget
@@ -173,7 +183,9 @@ function shouldAddProjectionPreGuard(
     keyPath,
     currentCodeSlice,
     typings,
-    syntaxNode.type.name
+    syntaxNode.type.name,
+    // @ts-ignore
+    projection.id
   );
 }
 
