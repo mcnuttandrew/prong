@@ -22,7 +22,7 @@ const CleanUp: Projection = {
       </button>
     );
   },
-  name: "CleanUp",
+  name: "Utils",
 };
 
 export default CleanUp;

@@ -113,7 +113,7 @@ function VegaExampleApp() {
       code={currentCode}
       onChange={(x) => setCurrentCode(x)}
       projections={[
-        ...StandardProjections,
+        ...Object.values(StandardProjections),
         {
           type: "full-tooltip",
           query: { type: "schemaMatch", query: ["exprString", "signal"] },

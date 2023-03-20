@@ -294,9 +294,18 @@ function TraceryExample() {
         onTargetNodeChanged={(newKeyPath) => setKeyPath(newKeyPath)}
         projections={
           [
-            ...StandardProjections.filter((x) => x.name !== "ColorChip"),
+            ...[
+              // BooleanTarget,
+              "CleanUp",
+              // 'ClickTarget',
+              // 'ColorChip',
+              // 'ConvertHex',
+              "InsertRandomWord",
+              // 'TooltipColorNamePicker',
+              // 'TooltipHexColorPicker',
+            ].map((x) => StandardProjections[x]),
             {
-              type: "full-tooltip",
+              type: "tooltip",
               query: {
                 type: "nodeType",
                 query: ["Number", "String", "Null", "False", "True"],
