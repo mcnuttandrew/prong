@@ -121,7 +121,6 @@ const DestringProjection: Projection = {
       {maybeTrim(props.currentValue)}
     </div>
   ),
-  name: "Destring",
   hasInternalState: false,
 };
 

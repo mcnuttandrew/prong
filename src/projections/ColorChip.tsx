@@ -28,7 +28,6 @@ const ColorChip: Projection = {
       <div className="cm-color-widget" style={{ background: value }}></div>
     );
   },
-  name: "ColorChip",
   hasInternalState: false,
 };
 

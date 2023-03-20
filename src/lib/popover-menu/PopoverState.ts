@@ -12,7 +12,11 @@ import {
 } from "../utils";
 import { potentiallyFilterContentForGesture } from "../search";
 import { runProjectionQuery } from "../query";
-import { Projection } from "../projections";
+import {
+  Projection,
+  ProjectionFullTooltip,
+  ProjectionTooltip,
+} from "../projections";
 import { prepDiagnostics } from "../compute-menu-contents";
 import { pickNodetoHighlight } from "../widgets/highlighter";
 
@@ -206,32 +210,34 @@ export function buildProjectionsForMenu(props: {
   const { fullCode, state, node, currentCodeSlice, view } = props;
   const { schemaTypings, diagnostics } = state.field(cmStatePlugin);
   if (!node) {
-    return [];
+    return [] as MenuRow[];
   }
   const keyPath = syntaxNodeToKeyPath(node, fullCode);
   return getProjectionContents(state, node!, currentCodeSlice).map((proj) => ({
-    label: proj.name,
+    label: (proj as ProjectionFullTooltip | ProjectionTooltip).name,
     elements: [
       {
         type: "projection",
         projectionType: proj.type,
-        element: proj.projection({
-          node,
-          keyPath,
-          currentValue: currentCodeSlice,
-          setCode: (code) => {
-            view.dispatch({
-              changes: { from: 0, to: fullCode.length, insert: code },
-              selection: state.selection,
-            });
-          },
-          fullCode,
-          diagnosticErrors: diagnostics.filter(
-            (x) => x.from === node.from && x.to === node.to
-          ),
-          typings: schemaTypings[`${node.from}-${node.to}`],
-          cursorPositions: [...view.state.selection.ranges],
-        }),
+        element: (proj as ProjectionFullTooltip | ProjectionTooltip).projection(
+          {
+            node,
+            keyPath,
+            currentValue: currentCodeSlice,
+            setCode: (code) => {
+              view.dispatch({
+                changes: { from: 0, to: fullCode.length, insert: code },
+                selection: state.selection,
+              });
+            },
+            fullCode,
+            diagnosticErrors: diagnostics.filter(
+              (x) => x.from === node.from && x.to === node.to
+            ),
+            typings: schemaTypings[`${node.from}-${node.to}`],
+            cursorPositions: [...view.state.selection.ranges],
+          }
+        ),
       },
     ],
   }));

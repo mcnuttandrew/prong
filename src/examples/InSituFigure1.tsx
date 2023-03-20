@@ -241,7 +241,6 @@ function InSituFigure1() {
       projections={[
         ...Object.values(StandardProjections),
         {
-          name: "inline-widget",
           projection: buildHistogramProjection(preComputedHistograms),
           hasInternalState: false,
           type: "inline",
