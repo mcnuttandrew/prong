@@ -72,14 +72,24 @@ function widgetBuilder(
   const widgets: Range<Decoration>[] = [];
   const { schemaTypings, codeUpdateHook } = state.field(cmStatePlugin);
   // for (const { from, to } of view.visibleRanges) {
+  console.log("hehe", projectionsInUse);
+  const logger = new Set();
   syntaxTree(state).iterate({
     from: 0,
     to: state.doc.length,
     enter: ({ node, from, to, type }) => {
       const currentCodeSlice = codeStringState(state, from, to);
+      let blockChildren = false;
+      logger.add(`${from}-${to}`);
+      // if (from === 151 && to === 31440) {
+      //   console.log("??????");
+      // }
       projectionsInUse
         .filter((x) => x.from === from && x.to === to)
         .forEach((projection) => {
+          if (blockChildren) {
+            return;
+          }
           const projWidget = InlineProjectWidgetFactory(
             projection.projection as ProjectionInline,
             currentCodeSlice,
@@ -87,16 +97,29 @@ function widgetBuilder(
             schemaTypings[`${node.from}-${node.to}`],
             codeUpdateHook
           );
+          // if (
+          //   projection.projection.type === "inline" &&
+          //   (projection.projection.mode === "replace" ||
+          //     projection.projection.mode === "replace-multiline")
+          // ) {
+          //   blockChildren = true;
+          // }
 
           projWidget
             .addNode(state, from, to, node)
             .forEach((w) => widgets.push(w));
         });
+      if (blockChildren) {
+        console.log("hard bail");
+        return false;
+      }
     },
   });
   // }
   try {
-    return Decoration.set(widgets.sort((a, b) => a.from - b.from));
+    const result = Decoration.set(widgets.sort((a, b) => a.from - b.from));
+    console.log("assembled widgets", widgets, result, logger);
+    return result;
   } catch (e) {
     console.log(e);
     console.log("problem creating widgets");
@@ -106,7 +129,13 @@ function widgetBuilder(
 
 export const getInUseRanges = (projectionsInUse: ProjectionMaterialization[]) =>
   projectionsInUse.reduce((acc, row) => {
-    acc.add(`${row.from}-${row.to}`);
+    if (
+      row.projection.type === "inline" &&
+      (row.projection.mode === "replace" ||
+        row.projection.mode === "replace-multiline")
+    ) {
+      acc.add(`${row.from}-${row.to}`);
+    }
     return acc;
   }, new Set<`${number}-${number}`>());
 
@@ -126,7 +155,8 @@ export const projectionView = ViewPlugin.fromClass(
       );
       if (update.viewportChanged || stateValuesChanged) {
         const { projectionsInUse } = update.view.state.field(projectionState);
-        this.decorations = widgetBuilder(projectionsInUse, update.view.state);
+        // TODO FIX
+        // this.decorations = widgetBuilder(projectionsInUse, update.view.state);
       }
     }
   },
@@ -160,11 +190,11 @@ export const projectionState: StateField<ProjectionState> = StateField.define({
 
 const multilineProjectionState: StateField<DecorationSet> = StateField.define({
   create: () => Decoration.none,
-  update: (state, tr) =>
-    widgetBuilder(
-      identifyProjectionLocations(tr.state).multilineLocations,
-      tr.state
-    ),
+  update: (state, tr) => {
+    const locations = identifyProjectionLocations(tr.state).multilineLocations;
+    console.log("locations", locations, widgetBuilder(locations, tr.state));
+    return widgetBuilder(locations, tr.state);
+  },
   provide: (f) => EditorView.decorations.from(f),
 });
 
@@ -180,7 +210,8 @@ function shouldAddProjectionPreGuard(
     syntaxNode.from,
     syntaxNode.to
   );
-  return runProjectionQuery(
+
+  const result = runProjectionQuery(
     projection.query,
     keyPath,
     currentCodeSlice,
@@ -189,6 +220,7 @@ function shouldAddProjectionPreGuard(
     // @ts-ignore
     projection.id
   );
+  return result;
 }
 
 const shouldAddProjection: typeof shouldAddProjectionPreGuard = (...args) => {
@@ -201,7 +233,7 @@ const shouldAddProjection: typeof shouldAddProjectionPreGuard = (...args) => {
   }
 };
 
-function identifyProjectionLocations(state: EditorState) {
+function identifyProjectionLocationsPreCache(state: EditorState) {
   const inlineLocations: ProjectionMaterialization[] = [];
   const multilineLocations: ProjectionMaterialization[] = [];
   const { projections, schemaTypings } = state.field(cmStatePlugin);
@@ -211,6 +243,7 @@ function identifyProjectionLocations(state: EditorState) {
   syntaxTree(state).iterate({
     enter: ({ from, to, node }) => {
       const baseRange = state.selection.ranges[0];
+      let blockChildren = false;
       inlineProjections.forEach((projection) => {
         const isReplace = projection.mode === "replace";
         if (
@@ -225,15 +258,54 @@ function identifyProjectionLocations(state: EditorState) {
         const typings = schemaTypings[`${node.from}-${node.to}`];
         if (shouldAddProjection(node, state, projection, typings)) {
           if (projection.mode === "replace-multiline") {
+            blockChildren = true;
             multilineLocations.push({ from, to, projection });
           } else {
+            if (isReplace) {
+              blockChildren = true;
+            }
             inlineLocations.push({ from, to, projection });
           }
         }
       });
+      if (blockChildren) {
+        return false;
+      }
     },
   });
   return { multilineLocations, inlineLocations };
+}
+
+let cachedResult: any = { multilineLocations: [], inlineLocations: [] };
+let cacheKey: any = {
+  code: undefined,
+  // targetRange: undefined,
+  projections: undefined,
+  schemaTypings: undefined,
+};
+const getters: Record<string, (state: EditorState) => any> = {
+  code: (state) => codeStringState(state, 0),
+  // targetRange: (state) => state.selection.ranges[0],
+  projections: (state) => state.field(cmStatePlugin).projections,
+  schemaTypings: (state) => state.field(cmStatePlugin).schemaTypings,
+};
+function identifyProjectionLocations(state: EditorState) {
+  const newCache = Object.fromEntries(
+    Object.entries(getters).map(([key, getter]) => [key, getter(state)])
+  );
+  const logger: Record<string, boolean> = {};
+  const cacheEqual = Object.keys(newCache).every((key) => {
+    const result = isEqual(newCache[key], cacheKey[key]);
+    logger[key] = result;
+    return result;
+  });
+  if (cacheEqual) {
+    return cachedResult;
+  }
+  const result = identifyProjectionLocationsPreCache(state);
+  cachedResult = result;
+  cacheKey = newCache;
+  return result;
 }
 
 export default function projectionPlugin(): Extension {

@@ -44,3 +44,12 @@ export function analyzeVegaCode(
     console.log(err);
   }
 }
+
+export type Table = Record<string, any>[];
+export function extractFieldNames(data: Table) {
+  const fieldNames = new Set<string>([]);
+  data.forEach((row) => {
+    Object.keys(row).forEach((fieldName) => fieldNames.add(fieldName));
+  });
+  return Array.from(fieldNames);
+}

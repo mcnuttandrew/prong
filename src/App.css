@@ -171,11 +171,39 @@
   outline: none;
 }
 
+body, html, #root {
+  height: 100%;
+}
+
+#header {
+  background: #333;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .root {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  height: 100%;
+}
+
+.link-container a:visited, .link-container a, #header a, #header a:visited {
+  color: white;
+}
+
+#intro-page {
+  padding: 50px;
+}
+
+.link-container {
+  background: #333;
+  color: white;
+  height: 100%;
+  min-width: 300px;
+  padding: 10px;
 }
 
 .cm-editor {

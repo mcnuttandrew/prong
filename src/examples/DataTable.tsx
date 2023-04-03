@@ -3,15 +3,8 @@ import { ProjectionProps } from "../lib/projections";
 import { simpleParse } from "../lib/utils";
 import prettifier from "../lib/vendored/prettifier";
 import { setIn } from "../lib/utils";
+import { extractFieldNames, Table } from "./example-utils";
 
-type Table = Record<string, any>[];
-function extractFieldNames(data: Table) {
-  const fieldNames = new Set<string>([]);
-  data.forEach((row) => {
-    Object.keys(row).forEach((fieldName) => fieldNames.add(fieldName));
-  });
-  return Array.from(fieldNames);
-}
 const letters = ["penguins", "flowers", "wheat", "squids", "dough", "bags"];
 
 function RenderCell(props: {
@@ -202,7 +195,7 @@ export default function DataTable(props: ExtendedProjectionProps): JSX.Element {
   const { externalUpdate, keyPath, fullCode, hideTable } = props;
   const parsed = simpleParse(props.currentValue);
   if (!Array.isArray(parsed) || !parsed.length) {
-    return <div>Loading...</div>;
+    return <div>Loading data table...</div>;
   } else {
     return (
       <DataTableComponent
