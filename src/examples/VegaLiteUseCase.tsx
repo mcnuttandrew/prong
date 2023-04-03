@@ -73,11 +73,7 @@ const Shelf: FC<{
         <div className="shelf-content">
           <div>{parsedCurrentValue}</div>
           <div
-            onClick={() => {
-              // const currentCode = getCurrentCode();
-              const update = setIn(keyPath, false, currentCode);
-              setCurrentCode(update);
-            }}
+            onClick={() => setCurrentCode(setIn(keyPath, false, currentCode))}
           >
             ⦻
           </div>
@@ -222,7 +218,7 @@ function VegaLiteExampleApp() {
             onChange={(x) => setCurrentCode(x)}
             projections={
               [
-                // ...Object.values(standardBundle),
+                ...Object.values(standardBundle),
                 {
                   query: {
                     type: "index",
@@ -287,23 +283,15 @@ function VegaLiteExampleApp() {
                   mode: "replace",
                   projection: () => {
                     const marks = [
-                      "arc",
                       "area",
                       "bar",
-                      "boxplot",
                       "circle",
-                      "errorband",
-                      "errorbar",
-                      "geoshape",
-                      "image",
                       "line",
                       "point",
                       "rect",
                       "rule",
                       "square",
-                      "text",
                       "tick",
-                      "trail",
                     ];
                     return (
                       <select

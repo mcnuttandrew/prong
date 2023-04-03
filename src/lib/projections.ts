@@ -155,8 +155,7 @@ export const projectionView = ViewPlugin.fromClass(
       );
       if (update.viewportChanged || stateValuesChanged) {
         const { projectionsInUse } = update.view.state.field(projectionState);
-        // TODO FIX
-        // this.decorations = widgetBuilder(projectionsInUse, update.view.state);
+        this.decorations = widgetBuilder(projectionsInUse, update.view.state);
       }
     }
   },
@@ -277,18 +276,18 @@ function identifyProjectionLocationsPreCache(state: EditorState) {
 }
 
 let cachedResult: any = { multilineLocations: [], inlineLocations: [] };
-let cacheKey: any = {
-  code: undefined,
-  // targetRange: undefined,
-  projections: undefined,
-  schemaTypings: undefined,
-};
+
 const getters: Record<string, (state: EditorState) => any> = {
   code: (state) => codeStringState(state, 0),
   // targetRange: (state) => state.selection.ranges[0],
   projections: (state) => state.field(cmStatePlugin).projections,
-  schemaTypings: (state) => state.field(cmStatePlugin).schemaTypings,
+  schemaTypings: (state) =>
+    Object.keys(state.field(cmStatePlugin).schemaTypings),
+  // treeSize: (state) => syntaxTree(state).length,
 };
+let cacheKey = Object.fromEntries(
+  Object.values(getters).map((x) => [x, undefined])
+);
 function identifyProjectionLocations(state: EditorState) {
   const newCache = Object.fromEntries(
     Object.entries(getters).map(([key, getter]) => [key, getter(state)])
@@ -300,6 +299,7 @@ function identifyProjectionLocations(state: EditorState) {
     return result;
   });
   if (cacheEqual) {
+    console.log("cache hit", syntaxTree(state));
     return cachedResult;
   }
   const result = identifyProjectionLocationsPreCache(state);

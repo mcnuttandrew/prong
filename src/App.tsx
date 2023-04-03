@@ -36,16 +36,10 @@ const routes: {
 function Root() {
   const [postMarkdown, setPostMarkdown] = useState("");
 
-  // useEffect with an empty dependency array (`[]`) runs only once
   useEffect(() => {
     fetch(markup)
       .then((response) => response.text())
-      .then((text) => {
-        // Logs a string of Markdown content.
-        // Now you could use e.g. <rexxars/react-markdown> to render it.
-        // console.log(text);
-        setPostMarkdown(text);
-      });
+      .then((text) => setPostMarkdown(text));
   }, []);
   const groups = routes.reduce((acc, row) => {
     acc[row.zone] = (acc[row.zone] || []).concat(row);
