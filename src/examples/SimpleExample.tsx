@@ -23,7 +23,7 @@ function SimpleExample() {
       onChange={(x) => {
         setCurrentCode(x);
       }}
-      projections={standardBundle}
+      projections={Object.values(standardBundle)}
     />
   );
 }

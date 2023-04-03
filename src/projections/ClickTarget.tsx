@@ -5,7 +5,6 @@ const ClickTarget: Projection = {
   type: "inline",
   mode: "suffix",
   projection: () => <span>❒</span>,
-  name: "ClickTarget",
   hasInternalState: false,
 };
 

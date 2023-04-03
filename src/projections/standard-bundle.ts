@@ -7,13 +7,15 @@ import BooleanTarget from "./Boolean";
 import ColorChip from "./ColorChip";
 import CleanUp from "./CleanUp";
 
-export default [
-  ColorNameProjection,
-  ColorProjection,
-  HexConversionProject,
-  RandomWordProjection,
-  ClickTarget,
+const bundle = {
   BooleanTarget,
-  ColorChip,
   CleanUp,
-] as Projection[];
+  ClickTarget,
+  ColorChip,
+  ConvertHex: HexConversionProject,
+  InsertRandomWord: RandomWordProjection,
+  TooltipColorNamePicker: ColorNameProjection,
+  TooltipHexColorPicker: ColorProjection,
+} as Record<string, Projection>;
+
+export default bundle;

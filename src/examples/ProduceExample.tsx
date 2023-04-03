@@ -2,7 +2,7 @@ import React from "react";
 
 import Editor from "../components/Editor";
 import { JSONSchema7 } from "json-schema";
-import standardBundle from "../projections/standard-bundle";
+import StandardProjections from "../projections/standard-bundle";
 import { Projection } from "../lib/projections";
 import { maybeTrim } from "./example-utils";
 
@@ -121,7 +121,6 @@ const DestringProjection: Projection = {
       {maybeTrim(props.currentValue)}
     </div>
   ),
-  name: "Destring",
   hasInternalState: false,
 };
 
@@ -138,7 +137,10 @@ function ProduceExample() {
         schema={schema}
         code={currentCode}
         onChange={(x) => setCurrentCode(x)}
-        projections={[...standardBundle, DestringProjection]}
+        projections={[
+          ...Object.values(StandardProjections),
+          DestringProjection,
+        ]}
       />
       <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
     </div>

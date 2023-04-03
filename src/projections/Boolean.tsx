@@ -22,7 +22,6 @@ const BooleanTarget: Projection = {
       </div>
     );
   },
-  name: "BooleanTarget",
   hasInternalState: false,
 };
 

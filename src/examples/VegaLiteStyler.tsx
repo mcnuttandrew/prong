@@ -85,7 +85,7 @@ function VegaLiteExampleApp() {
           onChange={(x) => setCurrentCode(x)}
           height={"800px"}
           projections={[
-            ...StandardProjections,
+            ...Object.values(StandardProjections),
             {
               type: "tooltip",
               name: "Switch to",
