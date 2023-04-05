@@ -93,7 +93,6 @@ export function runProjectionQuery(
   if (cache[cacheKey]) {
     return cache[cacheKey];
   }
-
   let pass = false;
   switch (query.type) {
     case "index":

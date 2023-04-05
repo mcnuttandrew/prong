@@ -72,24 +72,16 @@ function widgetBuilder(
   const widgets: Range<Decoration>[] = [];
   const { schemaTypings, codeUpdateHook } = state.field(cmStatePlugin);
   // for (const { from, to } of view.visibleRanges) {
-  console.log("hehe", projectionsInUse);
   const logger = new Set();
   syntaxTree(state).iterate({
     from: 0,
     to: state.doc.length,
     enter: ({ node, from, to, type }) => {
       const currentCodeSlice = codeStringState(state, from, to);
-      let blockChildren = false;
       logger.add(`${from}-${to}`);
-      // if (from === 151 && to === 31440) {
-      //   console.log("??????");
-      // }
       projectionsInUse
         .filter((x) => x.from === from && x.to === to)
         .forEach((projection) => {
-          if (blockChildren) {
-            return;
-          }
           const projWidget = InlineProjectWidgetFactory(
             projection.projection as ProjectionInline,
             currentCodeSlice,
@@ -97,28 +89,16 @@ function widgetBuilder(
             schemaTypings[`${node.from}-${node.to}`],
             codeUpdateHook
           );
-          // if (
-          //   projection.projection.type === "inline" &&
-          //   (projection.projection.mode === "replace" ||
-          //     projection.projection.mode === "replace-multiline")
-          // ) {
-          //   blockChildren = true;
-          // }
 
           projWidget
             .addNode(state, from, to, node)
             .forEach((w) => widgets.push(w));
         });
-      if (blockChildren) {
-        console.log("hard bail");
-        return false;
-      }
     },
   });
   // }
   try {
     const result = Decoration.set(widgets.sort((a, b) => a.from - b.from));
-    console.log("assembled widgets", widgets, result, logger);
     return result;
   } catch (e) {
     console.log(e);
@@ -191,7 +171,6 @@ const multilineProjectionState: StateField<DecorationSet> = StateField.define({
   create: () => Decoration.none,
   update: (state, tr) => {
     const locations = identifyProjectionLocations(tr.state).multilineLocations;
-    console.log("locations", locations, widgetBuilder(locations, tr.state));
     return widgetBuilder(locations, tr.state);
   },
   provide: (f) => EditorView.decorations.from(f),
@@ -299,7 +278,6 @@ function identifyProjectionLocations(state: EditorState) {
     return result;
   });
   if (cacheEqual) {
-    console.log("cache hit", syntaxTree(state));
     return cachedResult;
   }
   const result = identifyProjectionLocationsPreCache(state);

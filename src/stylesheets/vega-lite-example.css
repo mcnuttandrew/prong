@@ -1,16 +1,37 @@
-.pill {
+.vl-demo {
+    padding: 50px;
+}
 
+.vl-demo .editor-container {
+    width: 750px;
+    max-height: 800px;
+}
+
+.vl-demo .chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    overflow: auto;
+}
+
+.pill, .shelf-content {
     background-color: white;
-    border: 1px dashed gray;
+    color: white;
+    /* border: 1px dashed gray; */
     cursor: move;
-    margin-bottom: 1.5rem;
+    /* margin-bottom: 1.5rem; */
     margin-right: 1.5rem;
     padding: 0.5rem 1rem;
+    background: #009879;
+    border-radius: 30px;
 }
 
 .shelf {
     align-items: center;
-    border-radius: 20px;
+    /* border-radius: 20px; */
+    border: 1px dashed gray;
     color: white;
     display: flex;
     height: 1em;
@@ -26,6 +47,18 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
+}
+
+.shelf.shelf-empty {
+    background-color: gray;
+}
+
+.shelf.shelf-full {
+    background-color: none;
+}
+
+.shelf.shelf-droppable {
+    background-color: lightgray;
 }
 
 .counter {
@@ -52,6 +85,18 @@
     width: 100px;
     white-space: normal;
     text-align: center;
+}
+
+/* .editor-container {
+    max-width: 50%;
+} */
+
+.data-container {
+    border: thin solid black;
+    border-radius: 5px;
+    display: flex;
+    /* align-items: ; */
+    padding: 5px;
 }
 
 /* styler example */

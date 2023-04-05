@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect } from "react";
+import React, { useState, FC, useEffect, useRef } from "react";
 
 import { VegaLite } from "react-vega";
 import "../stylesheets/vega-lite-example.css";
@@ -13,9 +13,43 @@ import DataTable from "./DataTable";
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import Editor from "../components/Editor";
 import { ProjectionProps, Projection } from "../../src/lib/projections";
-import { simpleParse, setIn } from "../lib/utils";
+import { simpleParse, setIn, classNames } from "../lib/utils";
 import { vegaLiteCode } from "./example-data";
 import { extractFieldNames } from "./example-utils";
+
+const usePersistedState = (name: string, defaultValue: any) => {
+  const [value, setValue] = useState(defaultValue);
+  const nameRef = useRef(name);
+
+  useEffect(() => {
+    try {
+      const storedValue = localStorage.getItem(name);
+      if (storedValue !== null) setValue(storedValue);
+      else localStorage.setItem(name, defaultValue);
+    } catch {
+      setValue(defaultValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(nameRef.current, value);
+    } catch {}
+  }, [value]);
+
+  useEffect(() => {
+    const lastName = nameRef.current;
+    if (name !== lastName) {
+      try {
+        localStorage.setItem(name, value);
+        nameRef.current = name;
+        localStorage.removeItem(lastName);
+      } catch {}
+    }
+  }, [name]);
+
+  return [value, setValue];
+};
 
 const Pill: FC<{ name: string }> = function Pill(props) {
   const { name } = props;
@@ -54,17 +88,16 @@ const Shelf: FC<{
   }));
 
   const isActive = canDrop && isOver;
-  const backgroundColor = isActive
-    ? "darkgreen"
-    : canDrop
-    ? "darkkhaki"
-    : "#222";
   const parsedCurrentValue = simpleParse(currentValue, currentValue);
   return (
     <div
       ref={drop}
-      className="shelf"
-      style={{ backgroundColor }}
+      className={classNames({
+        shelf: true,
+        "shelf-empty": !isActive && !parsedCurrentValue,
+        "shelf-full": !isActive && parsedCurrentValue,
+        "shelf-droppable": isActive && !parsedCurrentValue,
+      })}
       data-testid="dustbin"
     >
       {isActive && !parsedCurrentValue && "Release to drop"}
@@ -73,7 +106,7 @@ const Shelf: FC<{
         <div className="shelf-content">
           <div>{parsedCurrentValue}</div>
           <div
-            onClick={() => setCurrentCode(setIn(keyPath, false, currentCode))}
+            onClick={() => setCurrentCode(setIn(keyPath, '""', currentCode))}
           >
             ⦻
           </div>
@@ -104,6 +137,46 @@ const UploadAndInline: React.FC<ProjectionProps> = (props) => {
             const prepped = `{\n\t"values": [\n\t\t${insertCode}\n\t]}`;
             const newCode = setIn(keyPath, prepped, fullCode);
             setCode(newCode);
+          };
+          reader.readAsText(file);
+        }}
+      />
+    </label>
+  );
+};
+
+const UploadDataset: React.FC<{
+  setCode: (code: string) => void;
+  fullCode: string;
+}> = ({ setCode, fullCode }) => {
+  return (
+    <label className="flex-down">
+      Upload JSON File
+      <input
+        type="file"
+        accept="json"
+        name="file"
+        onChange={(event) => {
+          const file = event.target.files![0];
+          var reader = new FileReader();
+          reader.onload = function (event) {
+            const result = event.target!.result;
+            const inlinedData = simpleParse(result, []);
+            const insertCode = inlinedData
+              .map((x: any) => JSON.stringify(x))
+              .join(",\n\t\t");
+            setCode(
+              prettifier(
+                simpleParse(
+                  setIn(
+                    ["data", "values", "values___value"],
+                    `[${insertCode}]`,
+                    fullCode
+                  ),
+                  {}
+                )
+              )
+            );
           };
           reader.readAsText(file);
         }}
@@ -167,7 +240,10 @@ function getMarkType(currentCode: string): string | null {
 }
 
 function VegaLiteExampleApp() {
-  const [currentCode, setCurrentCode] = useState(vegaLiteCode);
+  const [currentCode, setCurrentCode] = usePersistedState(
+    "currentCodeVLDemo",
+    vegaLiteCode
+  );
   const [showDataTable, setShowDataTable] = useState<boolean>(true);
   const [fields, setFields] = useState<string[]>([]);
   const [markType, setMarkType] = useState<string | null>(null);
@@ -178,39 +254,50 @@ function VegaLiteExampleApp() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="App">
+      <div className="App vl-demo">
         <div>
-          <div>Upload dataset </div>
-          <div>
-            Pick from a predefined one
+          <b>Select Data</b>
+          <div className="flex data-container">
+            <UploadDataset fullCode={currentCode} setCode={setCurrentCode} />
             <div>
-              {["penguins.json", "barley.json", "wheat.json"].map((file) => {
-                return (
-                  <button
-                    key={file}
-                    onClick={() =>
-                      buildFileGet(file, currentCode).then((x) =>
-                        setCurrentCode(x)
-                      )
-                    }
-                  >
-                    {file}
-                  </button>
-                );
-              })}
+              Pick from a predefined one
+              <div>
+                {["penguins.json", "barley.json", "wheat.json"].map((file) => {
+                  return (
+                    <button
+                      key={file}
+                      onClick={() =>
+                        buildFileGet(file, currentCode).then((x) =>
+                          setCurrentCode(x)
+                        )
+                      }
+                    >
+                      {file}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
-        <div className="flex">
-          {fields.map((x) => (
-            <Pill name={x} key={x} />
-          ))}
+        <div>
+          <b>Columns from selected dataset</b>
+          <div className="data-container">
+            {fields.map((x) => (
+              <Pill name={x} key={x} />
+            ))}
+          </div>
         </div>
-        {!showDataTable && (
-          <button onClick={() => setShowDataTable(true)}>
-            Show data table
-          </button>
-        )}
+        <div>
+          {!showDataTable && (
+            <button onClick={() => setShowDataTable(true)}>
+              Show data table
+            </button>
+          )}
+
+          <button onClick={() => setCurrentCode(vegaLiteCode)}>Reset</button>
+        </div>
+
         <div className="flex">
           <Editor
             schema={VegaLiteV5Schema}
@@ -246,11 +333,9 @@ function VegaLiteExampleApp() {
                   name: "Switch to",
                 } as Projection,
                 showDataTable && {
-                  // query: { query: ["InlineDataset"], type: "schemaMatch" },
                   query: {
                     type: "index",
                     query: ["data", "values", "values___value"],
-                    // query: ["data", "values"],
                   },
                   type: "inline",
                   name: "data table",
@@ -265,7 +350,6 @@ function VegaLiteExampleApp() {
                   mode: "replace-multiline",
                 },
                 {
-                  // query: ["data", "values", "*"],
                   query: {
                     type: "index",
                     query: ["encoding", "*", "field", "field___value"],
@@ -317,7 +401,7 @@ function VegaLiteExampleApp() {
               ].filter((x) => x) as Projection[]
             }
           />
-          <div>
+          <div className="chart-container">
             <VegaLite spec={simpleParse(currentCode, {})} />
           </div>
         </div>

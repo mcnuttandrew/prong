@@ -29,3 +29,7 @@
 .example-highlighter {
     background: red;
 }
+
+.tracery-app-root {
+    padding: 50px;
+}
