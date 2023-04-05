@@ -4,13 +4,14 @@ import { HashRouter, Route, Routes, Link, useLocation } from "react-router-dom";
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
-import VegaExampleApp from "./examples/VegaExample";
+// import VegaExampleApp from "./examples/VegaExample";
 import SimpleExample from "./examples/SimpleExample";
 import ProduceExample from "./examples/ProduceExample";
 import InSituFigure1 from "./examples/InSituFigure1";
 import VegaLiteStyler from "./examples/VegaLiteStyler";
 import Tracery from "./examples/TraceryExample";
 import VegaLiteUseCase from "./examples/VegaLiteUseCase";
+import VegaUseCase from "./examples/VegaUseCase";
 
 import markup from "./demo-page.md";
 // console.log(markup);
@@ -20,15 +21,16 @@ const routes: {
   zone: "Case Studies" | "Debugging";
 }[] = [
   { name: "vega-lite", Component: VegaLiteUseCase, zone: "Case Studies" },
+  { name: "vega", Component: VegaUseCase, zone: "Case Studies" },
   {
     name: "vega-lite-debugging",
     Component: VegaLiteExampleApp,
     zone: "Debugging",
   },
-  { name: "vega", Component: VegaExampleApp, zone: "Debugging" },
+  // { name: "vega-debug", Component: VegaExampleApp, zone: "Debugging" },
   { name: "produce", Component: ProduceExample, zone: "Case Studies" },
   { name: "simple", Component: SimpleExample, zone: "Debugging" },
-  { name: "in-situ-figure-1", Component: InSituFigure1, zone: "Case Studies" },
+  { name: "in-situ-figure-1", Component: InSituFigure1, zone: "Debugging" },
   { name: "vega-lite-styler", Component: VegaLiteStyler, zone: "Debugging" },
   { name: "tracery", Component: Tracery, zone: "Debugging" },
 ];

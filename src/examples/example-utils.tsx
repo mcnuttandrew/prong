@@ -1,24 +1,8 @@
 import * as vega from "vega";
 import { parse, View } from "vega";
 
-import { simpleParse } from "../lib/utils";
-
-export function isDataTable(input: any): boolean {
-  // array
-  if (!Array.isArray(input)) {
-    return false;
-  }
-  // array of objects
-  if (!input.every((x) => typeof x === "object")) {
-    return false;
-  }
-
-  const types = Array.from(
-    new Set(input.flatMap((row) => Object.values(row).map((el) => typeof el)))
-  );
-  const allowed = new Set(["string", "number", "boolean"]);
-  return types.every((typ) => allowed.has(typ));
-}
+import { simpleParse, setIn } from "../lib/utils";
+import { ProjectionProps } from "../lib/projections";
 
 export const maybeTrim = (x: string) => {
   return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
@@ -53,3 +37,23 @@ export function extractFieldNames(data: Table) {
   });
   return Array.from(fieldNames);
 }
+
+export const buttonListProjection =
+  (list: string[], currentCode: string) => (props: ProjectionProps) => {
+    return (
+      <div>
+        {list.map((item) => {
+          return (
+            <button
+              key={item}
+              onClick={() =>
+                props.setCode(setIn(props.keyPath, `"${item}"`, currentCode))
+              }
+            >
+              {item}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };

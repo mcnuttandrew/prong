@@ -19,7 +19,7 @@ import {
   vegaLiteLinechart,
 } from "./example-data";
 
-import { buttonListProjection } from "./VegaExample";
+import { buttonListProjection } from "./example-utils";
 
 import { VegaLite } from "react-vega";
 
