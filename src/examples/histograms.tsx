@@ -307,15 +307,15 @@ function buildHistogramProjection(
 export const sparkPositions = [
   "right",
   "left",
-  "above",
-  "below",
-  "inline transparent",
-  "inline opaque",
-  "expand inline",
-  "left margin",
-  "right margin",
-  "inline start",
-  "inline end",
+  // "above",
+  // "below",
+  // "inline transparent",
+  // "inline opaque",
+  // "expand inline",
+  // "left margin",
+  // "right margin",
+  // "inline start",
+  // "inline end",
 ] as const;
 export const sparkTypes = ["line", "bar", "heatmap"];
 export type SparkPos = typeof sparkPositions[number];

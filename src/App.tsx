@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { HashRouter, Route, Routes, Link, useLocation } from "react-router-dom";
+import { HashRouter, Route, Routes, Link } from "react-router-dom";
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
-// import VegaExampleApp from "./examples/VegaExample";
 import SimpleExample from "./examples/SimpleExample";
 import ProduceExample from "./examples/ProduceExample";
 import InSituFigure1 from "./examples/InSituFigure1";
@@ -14,25 +13,24 @@ import VegaLiteUseCase from "./examples/VegaLiteUseCase";
 import VegaUseCase from "./examples/VegaUseCase";
 
 import markup from "./demo-page.md";
-// console.log(markup);
 const routes: {
   name: string;
   Component: () => JSX.Element;
-  zone: "Case Studies" | "Debugging";
+  zone: "Case Studies" | "Debugging" | "Examples";
 }[] = [
   { name: "vega-lite", Component: VegaLiteUseCase, zone: "Case Studies" },
   { name: "vega", Component: VegaUseCase, zone: "Case Studies" },
+  { name: "produce", Component: ProduceExample, zone: "Examples" },
   {
     name: "vega-lite-debugging",
     Component: VegaLiteExampleApp,
     zone: "Debugging",
   },
-  // { name: "vega-debug", Component: VegaExampleApp, zone: "Debugging" },
-  { name: "produce", Component: ProduceExample, zone: "Case Studies" },
+
   { name: "simple", Component: SimpleExample, zone: "Debugging" },
-  { name: "in-situ-figure-1", Component: InSituFigure1, zone: "Debugging" },
-  { name: "vega-lite-styler", Component: VegaLiteStyler, zone: "Debugging" },
-  { name: "tracery", Component: Tracery, zone: "Debugging" },
+  { name: "in-situ-figure-1", Component: InSituFigure1, zone: "Examples" },
+  { name: "vega-lite-styler", Component: VegaLiteStyler, zone: "Examples" },
+  { name: "tracery", Component: Tracery, zone: "Examples" },
 ];
 
 function Root() {
@@ -43,54 +41,46 @@ function Root() {
       .then((response) => response.text())
       .then((text) => setPostMarkdown(text));
   }, []);
-  const groups = routes.reduce((acc, row) => {
-    acc[row.zone] = (acc[row.zone] || []).concat(row);
-    return acc;
-  }, {} as Record<string, typeof routes>);
+
   return (
     <div className="root">
-      <div className="link-container">
-        {Object.entries(groups).map(([name, groupRoutes]) => {
-          return (
-            <div key={name}>
-              <h1>{name}</h1>
-              {groupRoutes.map(({ name }) => (
-                <h1 key={name}>
-                  <Link to={name}>{name}</Link>
-                </h1>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-      <div id="intro-page">
-        <ReactMarkdown>{postMarkdown}</ReactMarkdown>
-      </div>
-    </div>
-  );
-}
-
-function Header() {
-  const x = useLocation();
-  const atHead = x.pathname === "/";
-  return (
-    <div id="header">
-      <Link to={"/"}> JSONG</Link>
-      {!atHead && <Link to={"/"}>Return to Home</Link>}
+      <ReactMarkdown>{postMarkdown}</ReactMarkdown>
     </div>
   );
 }
 
 function App() {
+  const groups = routes.reduce((acc, row) => {
+    acc[row.zone] = (acc[row.zone] || []).concat(row);
+    return acc;
+  }, {} as Record<string, typeof routes>);
   return (
     <HashRouter>
-      <Header />
-      <Routes>
-        {routes.map(({ name, Component }) => (
-          <Route element={<Component />} path={name} key={name} />
-        ))}
-        <Route element={<Root />} path="/" />
-      </Routes>
+      <div className="flex proot">
+        <div className="link-container">
+          <h1>
+            <Link to={"/"}>JSONG</Link>
+          </h1>
+          {Object.entries(groups).map(([name, groupRoutes]) => {
+            return (
+              <div key={name}>
+                <h3 className="">{name}</h3>
+                {groupRoutes.map(({ name }) => (
+                  <div key={name}>
+                    <Link to={name}>{name}</Link>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+        <Routes>
+          {routes.map(({ name, Component }) => (
+            <Route element={<Component />} path={name} key={name} />
+          ))}
+          <Route element={<Root />} path="/" />
+        </Routes>
+      </div>
     </HashRouter>
   );
 }

@@ -171,14 +171,14 @@
   outline: none;
 }
 
-body, html, #root {
+body, html, #root, .proot {
   height: 100%;
 }
 
 #header {
   background: #333;
   color: white;
-  padding: 20px;
+  padding: 10px 20px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -188,14 +188,11 @@ body, html, #root {
   align-items: center;
   display: flex;
   height: 100%;
+  padding: 50px;
 }
 
 .link-container a:visited, .link-container a, #header a, #header a:visited {
   color: white;
-}
-
-#intro-page {
-  padding: 50px;
 }
 
 .link-container {
@@ -204,6 +201,8 @@ body, html, #root {
   height: 100%;
   min-width: 300px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
 .cm-editor {

@@ -65,7 +65,8 @@ function VegaLiteExampleApp() {
   return (
     <div className="styler-app flex">
       <div className="flex-down">
-        <h5>Predefined Themes</h5>
+        <h1>Style Builder</h1>
+        <b>Predefined Themes</b>
         <div className="flex">
           {Object.entries(themes).map(([themeName, theme]) => {
             return (
@@ -79,6 +80,7 @@ function VegaLiteExampleApp() {
           })}
         </div>
 
+        <b>Current Style</b>
         <Editor
           schema={updatedSchema}
           code={currentCode}
@@ -95,22 +97,25 @@ function VegaLiteExampleApp() {
           ]}
         />
       </div>
-      <div className="chart-container">
-        {[
-          vegaLiteScatterPlot,
-          vegaLiteCode,
-          vegaLiteHeatmap,
-          vegaLiteStreamgraph,
-          vegaLiteLinechart,
-        ].map((spec, idx) => {
-          return (
-            <VegaLite
-              key={idx}
-              spec={JSON.parse(spec)}
-              config={simpleParse(currentCode, {})}
-            />
-          );
-        })}
+      <div>
+        <h3>Style Examples</h3>
+        <div className="chart-container">
+          {[
+            vegaLiteScatterPlot,
+            vegaLiteCode,
+            vegaLiteHeatmap,
+            vegaLiteStreamgraph,
+            vegaLiteLinechart,
+          ].map((spec, idx) => {
+            return (
+              <VegaLite
+                key={idx}
+                spec={JSON.parse(spec)}
+                config={simpleParse(currentCode, {})}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -103,6 +103,7 @@
 
 .styler-app {
     width: 100%;
+    padding: 50px;
 }
 
 .styler-app .editor-container {
@@ -114,6 +115,9 @@
 .styler-app .chart-container {
     display: flex;
     flex-wrap: wrap;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
 }
 
 /* table */

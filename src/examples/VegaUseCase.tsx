@@ -207,7 +207,7 @@ function VegaUseCase() {
             },
             query: { type: "function", query: () => true },
           },
-          buildSparkProjection(preComputedHistograms, "right", "line"),
+          buildSparkProjection(preComputedHistograms, "right", "bar"),
           {
             type: "full-tooltip",
             query: {
