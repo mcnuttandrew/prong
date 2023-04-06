@@ -12,7 +12,6 @@ import {
   extractFieldNames,
   extractScaleNames,
   DataTable,
-  buildHistogramProjection,
   isDataTable,
   buildSparkProjection,
 } from "./histograms";
