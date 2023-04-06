@@ -15,6 +15,7 @@ import { cmStatePlugin } from "./cmState";
 import { popOverState } from "./popover-menu/PopoverState";
 
 import Highlighter from "./widgets/highlighter";
+import { getInUseRanges, projectionState } from "./projections";
 
 type EventSubs = { [x: string]: (e: MouseEvent, view: EditorView) => any };
 export interface SimpleWidget {
@@ -45,22 +46,21 @@ export interface SimpleWidgetStateVersion {
   ) => Range<Decoration>[];
   eventSubscriptions: EventSubs;
 }
-const simpleWidgets: SimpleWidget[] = [Highlighter];
 
 function createWidgets(view: EditorView) {
   const widgets: Range<Decoration>[] = [];
   // todo maybe this won't break?
-  // const { projectionsInUse } = view.state.field(projectionState);
-  // const inUseRanges = getInUseRanges(projectionsInUse);
+  const { projectionsInUse } = view.state.field(projectionState);
+  const blockedRanges = getInUseRanges(projectionsInUse);
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,
       to,
       enter: ({ node, from, to, type }) => {
-        // if (inUseRanges.has(`${from}-${to}`)) {
-        //   return;
-        // }
-        simpleWidgets.forEach(({ checkForAdd, addNode }) => {
+        if (blockedRanges.has(`${from}-${to}`)) {
+          return false;
+        }
+        [Highlighter].forEach(({ checkForAdd, addNode }) => {
           if (!checkForAdd(type, view, node)) {
             return;
           }
@@ -86,22 +86,22 @@ function createWidgets(view: EditorView) {
 }
 
 // create event handler for all in play widgets
-const subscriptions = simpleWidgets.reduce((acc, row) => {
-  Object.entries(row.eventSubscriptions).forEach(([eventName, sub]) => {
-    acc[eventName] = (acc[eventName] || []).concat(sub);
-  });
-  return acc;
-}, {} as { [eventName: string]: any[] });
-const eventHandlers = Object.entries(subscriptions).reduce(
-  (handlers: EventSubs, [eventName, subs]) => {
-    handlers[eventName] = (event, view) => {
-      subs.forEach((sub) => sub(event, view));
-    };
+// const subscriptions = simpleWidgets.reduce((acc, row) => {
+//   Object.entries(row.eventSubscriptions).forEach(([eventName, sub]) => {
+//     acc[eventName] = (acc[eventName] || []).concat(sub);
+//   });
+//   return acc;
+// }, {} as { [eventName: string]: any[] });
+// const eventHandlers = Object.entries(subscriptions).reduce(
+//   (handlers: EventSubs, [eventName, subs]) => {
+//     handlers[eventName] = (event, view) => {
+//       subs.forEach((sub) => sub(event, view));
+//     };
 
-    return handlers;
-  },
-  {}
-);
+//     return handlers;
+//   },
+//   {}
+// );
 // build the widgets
 export const widgetsPlugin = ViewPlugin.fromClass(
   class {
@@ -134,6 +134,6 @@ export const widgetsPlugin = ViewPlugin.fromClass(
   },
   {
     decorations: (v) => v.decorations,
-    eventHandlers,
+    // eventHandlers,
   }
 );

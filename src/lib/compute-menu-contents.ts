@@ -196,11 +196,19 @@ export function generateMenuContent(
   const schemaChunk = getSchemaForRetargetedNode(syntaxNode, schemaMap);
 
   const content: MenuRow[] = [
-    evalSchemaChunks,
-    evalTypeBasedContent,
-    evalParentBasedContent,
+    { name: "evalSchemaChunks", fun: evalSchemaChunks },
+    { name: "evalTypeBasedContent", fun: evalTypeBasedContent },
+    { name: "evalParentBasedContent", fun: evalParentBasedContent },
   ]
-    .flatMap((fun) => fun(syntaxNode, schemaChunk, fullCode))
+    .flatMap(({ fun, name }) => {
+      try {
+        return fun(syntaxNode, schemaChunk, fullCode);
+      } catch (e) {
+        console.log("error in ", name);
+        console.error(e);
+        return [];
+      }
+    })
     .filter((x) => x);
 
   let computedMenuContents = simpleMerge(content).filter(

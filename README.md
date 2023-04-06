@@ -138,6 +138,8 @@ These come in a variety of flavors
 { type: "index"; query: (number | string)[] }
 ```
 
+Note that is strictly the fastest and most accurate of the query types, as we can identify things unambiguously.
+
 - **Regex Queries**:
 
 ```ts

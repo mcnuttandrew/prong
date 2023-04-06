@@ -241,6 +241,10 @@ function absPathToKeyPath(
         if (absPath.at(idx + 1)) {
           const arrayKey = absPath[idx + 1].index;
           keyPath.push(arrayKey);
+        } else if (absPath[idx - 1].nodeType === "Property") {
+          // this may lead to bug watch out
+          const terminal = keyPath.at(-1);
+          keyPath.push(`${terminal}___value`);
         }
         break;
       case "Object":
@@ -280,6 +284,18 @@ function absPathToKeyPath(
 const getNestedVal = (props: (string | number)[], obj: any) =>
   props.reduce((a, prop) => a[prop], obj);
 
+let prevCode: string | undefined = undefined;
+let prevVal: any = {};
+const parseWithCache = (code: string): any => {
+  if (prevCode && code === prevCode) {
+    return prevVal;
+  }
+  const result = Json.parse(code);
+  prevVal = result;
+  prevCode = code;
+  return result;
+};
+
 let codeKey = "";
 let pathCache: Record<string, (string | number)[]> = {};
 export function syntaxNodeToKeyPath(
@@ -296,7 +312,7 @@ export function syntaxNodeToKeyPath(
   const absPath = syntaxNodeToAbsPath(node);
   let parsedRoot = {};
   try {
-    parsedRoot = Json.parse(fullCode);
+    parsedRoot = parseWithCache(fullCode);
   } catch (e) {
     console.error(e);
     console.error("ERROR CREATING PATH", fullCode);

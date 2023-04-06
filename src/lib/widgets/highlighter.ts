@@ -72,6 +72,7 @@ function prepareHighlightString(view: EditorView, node: SyntaxNode) {
 
 const Highlighter: SimpleWidget = {
   checkForAdd: (type, view, node) => {
+    // return false;
     const { schemaTypings, diagnostics } = view.state.field(cmStatePlugin);
 
     const { highlightNode } = view.state.field(popOverState);

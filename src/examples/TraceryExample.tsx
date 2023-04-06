@@ -4,6 +4,7 @@ import tracery, { generate, TraceryNode } from "./tracery";
 import { simpleParse } from "../lib/utils";
 import "../stylesheets/tracery-example.css";
 import { Projection } from "../lib/projections";
+import { maybeTrim } from "./example-utils";
 
 import Editor from "../components/Editor";
 
@@ -219,6 +220,16 @@ const insertInto = (str: string, idx: number, subStr: string) => {
   return `${str.slice(0, idx)}${subStr}${str.slice(idx)}`;
 };
 
+function unpeelRoot(root: TraceryNode[]) {
+  return root.length === 0
+    ? {}
+    : Object.fromEntries(
+        getAllNodes(root[0])
+          .filter((x) => x.symbol)
+          .map((x) => [x.symbol, x])
+      );
+}
+
 const pick = (arr: any[]) => arr[Math.floor(Math.random())];
 
 function TraceryExample() {
@@ -227,6 +238,7 @@ function TraceryExample() {
   const [keyPath, setKeyPath] = useState<(string | number)[]>([]);
   const [roots, setRoots] = useState<TraceryNode[]>([]);
   const [randomKey, setRandomKey] = useState("tracery is a fun time");
+  const unpeeledRoot = unpeelRoot(roots);
   const grammar = simpleParse(currentCode, {});
   useEffect(() => {
     setRoots(generateRoots(currentCode, randomKey));
@@ -259,7 +271,7 @@ function TraceryExample() {
   );
 
   return (
-    <div className="flex-down">
+    <div className="flex-down tracery-app-root">
       <div>
         <h1>
           <div>{txt}</div>
@@ -276,7 +288,7 @@ function TraceryExample() {
           Update RandomSeed
         </button>
       </div>
-      {roots.length && (
+      {/* {roots.length && (
         <div>
           <TraceryCascadeVis
             node={roots[0]}
@@ -285,7 +297,7 @@ function TraceryExample() {
             onClick={(node) => clickNode(node)}
           />
         </div>
-      )}
+      )} */}
       <Editor
         schema={TracerySchema}
         code={currentCode}
@@ -294,16 +306,36 @@ function TraceryExample() {
         onTargetNodeChanged={(newKeyPath) => setKeyPath(newKeyPath)}
         projections={
           [
-            ...[
-              // BooleanTarget,
-              "CleanUp",
-              // 'ClickTarget',
-              // 'ColorChip',
-              // 'ConvertHex',
-              "InsertRandomWord",
-              // 'TooltipColorNamePicker',
-              // 'TooltipHexColorPicker',
-            ].map((x) => StandardProjections[x]),
+            StandardProjections.CleanUp,
+            StandardProjections.InsertRandomWord,
+            {
+              type: "tooltip",
+              query: {
+                type: "function",
+                query: (val, type) => {
+                  return (
+                    "PropertyName" === type && unpeeledRoot[maybeTrim(val)]
+                  );
+                },
+              },
+              name: "TraceryEditor2",
+              projection: (props) => {
+                const key = `${props.keyPath[0]}`.split("___")[0];
+                if (unpeeledRoot[key]) {
+                  return (
+                    <div>
+                      <TraceryCascadeVis
+                        selectedNodes={selectedNodes}
+                        node={unpeeledRoot[key]}
+                        first={false}
+                        onClick={(node) => clickNode(node)}
+                      />
+                    </div>
+                  );
+                }
+                return <div></div>;
+              },
+            },
             {
               type: "tooltip",
               query: {
