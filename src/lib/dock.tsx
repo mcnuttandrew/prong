@@ -26,7 +26,6 @@ if (!monocleTarget) {
   const body = document.querySelector("body")!;
   monocleTarget = document.createElement("div");
   monocleTarget.id = "cm-monocle";
-  // .setAttribute("id", "cm-monocle");
   body?.appendChild(monocleTarget);
 }
 
