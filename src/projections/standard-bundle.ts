@@ -6,6 +6,7 @@ import ClickTarget from "./ClickTarget";
 import BooleanTarget from "./Boolean";
 import ColorChip from "./ColorChip";
 import CleanUp from "./CleanUp";
+import NumberSlider from "./NumberSlider";
 
 const bundle = {
   BooleanTarget,
@@ -14,6 +15,7 @@ const bundle = {
   ColorChip,
   ConvertHex: HexConversionProject,
   InsertRandomWord: RandomWordProjection,
+  NumberSlider,
   TooltipColorNamePicker: ColorNameProjection,
   TooltipHexColorPicker: ColorProjection,
 } as Record<string, Projection>;

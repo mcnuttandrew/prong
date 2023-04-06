@@ -99,6 +99,18 @@
   border-radius: 100%;
 }
 
+/* NUMBER SLIDER */
+
+.cm-number-slider {
+  position: relative;
+}
+
+.cm-number-slider-label {
+  position: absolute;
+  font-size: 8px;
+  top: -5px;
+  pointer-events: none;
+}
 
 /* GENERIC WIDGET STUFF */
 

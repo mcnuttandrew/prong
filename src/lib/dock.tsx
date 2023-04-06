@@ -147,6 +147,9 @@ class Monocle extends React.Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentDidMount() {
+    while (monocleTarget!.firstChild) {
+      monocleTarget!.removeChild(monocleTarget!.firstChild);
+    }
     monocleTarget!.appendChild(this.el);
     if (this.props.monoclePos.x === null) {
       this.props.setMonoclePos(JSON.stringify({ x: 0, y: 0 }));
@@ -155,6 +158,7 @@ class Monocle extends React.Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentWillUnmount() {
+    console.log("unmounting?");
     monocleTarget!.removeChild(this.el);
     monocleTarget?.setAttribute("style", "display: none");
   }
