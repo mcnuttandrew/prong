@@ -59,12 +59,13 @@ We include a variety of common projections that you might find useful
 
 ```ts
 {
-  BooleanTarget, // add check boxes to boolea
+  BooleanTarget, // add check boxes to boolean
     CleanUp, // add a "clean up" button to the menu that pretty formats the code
     ClickTarget, // add like rectangles that make it feel nice to click {s
     ColorChip, // add a little colored circle next to colors
     ConvertHex, // add a button to the tooltip that allows you to convert named colors to hex
     InsertRandomWord, // insert a random word
+    NumberSlider, // number slider
     TooltipColorNamePicker, // select a named color from a fancy menu of web colors
     TooltipHexColorPicker; // select a color using a hex color picker
 }
