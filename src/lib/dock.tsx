@@ -23,7 +23,6 @@ import { filterContents } from "./search";
 let monocleTarget: HTMLDivElement | null =
   document.querySelector("#cm-monocle");
 if (!monocleTarget) {
-  console.log("here");
   const body = document.querySelector("body")!;
   monocleTarget = document.createElement("div");
   monocleTarget.id = "cm-monocle";
