@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect, useRef } from "react";
+import React, { useState, FC, useEffect } from "react";
 
 import { VegaLite } from "react-vega";
 import "../stylesheets/vega-lite-example.css";
@@ -15,41 +15,7 @@ import Editor from "../components/Editor";
 import { ProjectionProps, Projection } from "../../src/lib/projections";
 import { simpleParse, setIn, classNames } from "../lib/utils";
 import { vegaLiteCode } from "./example-data";
-import { extractFieldNames } from "./example-utils";
-
-const usePersistedState = (name: string, defaultValue: any) => {
-  const [value, setValue] = useState(defaultValue);
-  const nameRef = useRef(name);
-
-  useEffect(() => {
-    try {
-      const storedValue = localStorage.getItem(name);
-      if (storedValue !== null) setValue(storedValue);
-      else localStorage.setItem(name, defaultValue);
-    } catch {
-      setValue(defaultValue);
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(nameRef.current, value);
-    } catch {}
-  }, [value]);
-
-  useEffect(() => {
-    const lastName = nameRef.current;
-    if (name !== lastName) {
-      try {
-        localStorage.setItem(name, value);
-        nameRef.current = name;
-        localStorage.removeItem(lastName);
-      } catch {}
-    }
-  }, [name]);
-
-  return [value, setValue];
-};
+import { extractFieldNames, usePersistedState } from "./example-utils";
 
 const Pill: FC<{ name: string }> = function Pill(props) {
   const { name } = props;
