@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from "react";
+
 import * as vega from "vega";
 import { parse, View } from "vega";
 
@@ -8,6 +10,39 @@ export const maybeTrim = (x: string) => {
   return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
 };
 
+export const usePersistedState = (name: string, defaultValue: any) => {
+  const [value, setValue] = useState(defaultValue);
+  const nameRef = useRef(name);
+
+  useEffect(() => {
+    try {
+      const storedValue = localStorage.getItem(name);
+      if (storedValue !== null) setValue(storedValue);
+      else localStorage.setItem(name, defaultValue);
+    } catch {
+      setValue(defaultValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(nameRef.current, value);
+    } catch {}
+  }, [value]);
+
+  useEffect(() => {
+    const lastName = nameRef.current;
+    if (name !== lastName) {
+      try {
+        localStorage.setItem(name, value);
+        nameRef.current = name;
+        localStorage.removeItem(lastName);
+      } catch {}
+    }
+  }, [name]);
+
+  return [value, setValue];
+};
 export function analyzeVegaCode(
   currentCode: string,
   analysis: (viewState: { signals?: any; data?: any }) => void
