@@ -210,7 +210,7 @@ These queries allow you to check for a given AST node type. The JSON AST include
 ```ts
 {
   type: "function";
-  query: (value: string, nodeType: NodeType) => boolean;
+  query: (value: string, nodeType: NodeType, keyPath: KeyPath) => boolean;
 }
 ```
 

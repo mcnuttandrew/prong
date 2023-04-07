@@ -2,7 +2,11 @@ import { JSONSchema } from "./JSONSchemaTypes";
 import { SyntaxNode } from "@lezer/common";
 
 type NodeType = SyntaxNode["type"]["name"];
-type functionQueryType = (value: string, nodeType: NodeType) => boolean;
+type functionQueryType = (
+  value: string,
+  nodeType: NodeType,
+  keyPath: (string | number)[]
+) => boolean;
 export type ProjectionQuery =
   | { type: "function"; query: functionQueryType }
   | { type: "index"; query: (number | string)[] }
@@ -38,9 +42,10 @@ function valueQuery(query: string[], nodeValue: string): boolean {
 function functionQuery(
   query: functionQueryType,
   nodeValue: string,
-  nodeType: NodeType
+  nodeType: NodeType,
+  keyPath: (string | number)[]
 ) {
-  return query(nodeValue, nodeType);
+  return query(nodeValue, nodeType, keyPath);
 }
 
 function regexQuery(query: RegExp, nodeValue: string) {
@@ -99,7 +104,7 @@ export function runProjectionQuery(
       pass = keyPathMatchesQuery(query.query, keyPath);
       break;
     case "function":
-      pass = functionQuery(query.query as any, nodeValue, nodeType);
+      pass = functionQuery(query.query as any, nodeValue, nodeType, keyPath);
       break;
     case "nodeType":
       pass = nodeTypeMatch(query.query, nodeType);

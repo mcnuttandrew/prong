@@ -9,6 +9,7 @@ import CleanUp from "./CleanUp";
 import NumberSlider from "./NumberSlider";
 import SortObject from "./SortObject";
 import Debugger from "./Debugger";
+// import HeuristicJSONFixes from "./HeuristicJSONFixes";
 
 const bundle = {
   BooleanTarget,
@@ -17,6 +18,7 @@ const bundle = {
   ColorChip,
   ConvertHex: HexConversionProject,
   Debugger,
+  HeuristicJSONFixes,
   InsertRandomWord,
   NumberSlider,
   SortObject,
