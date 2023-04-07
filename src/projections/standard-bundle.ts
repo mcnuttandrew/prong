@@ -18,7 +18,7 @@ const bundle = {
   ColorChip,
   ConvertHex: HexConversionProject,
   Debugger,
-  HeuristicJSONFixes,
+  // HeuristicJSONFixes,
   InsertRandomWord,
   NumberSlider,
   SortObject,
