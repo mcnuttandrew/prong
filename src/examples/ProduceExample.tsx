@@ -11,6 +11,7 @@ const schema: JSONSchema7 = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   description: "A representation of a person, company, organization, or place",
   type: "object",
+  required: ["fruit", "vegetables", "meta"],
   properties: {
     fruits: {
       type: "array",
@@ -21,6 +22,10 @@ const schema: JSONSchema7 = {
       type: "array",
       description: "just a boring ol list of vegetables",
       items: { $ref: "#/$defs/veggie" },
+    },
+    meta: {
+      type: "string",
+      description: "just meta data dont worry about it",
     },
   },
   $defs: {

@@ -152,6 +152,7 @@ function PopOverMenuContents(props: {
                     menuElement={element}
                     eventDispatch={eventDispatch}
                     allElementsInGroupAreOfThisType={allElementsSameType}
+                    parentGroup={row}
                     isSelected={
                       selectedRouting &&
                       selectedRouting[0] === idx &&

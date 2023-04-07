@@ -9,8 +9,8 @@ const Debugger: Projection = {
       .filter((x) => x);
     return (
       <div>
-        Node Type: {props.node.type.name}
-        Schema Types: {JSON.stringify(types)}
+        Node Type: "{props.node.type.name}"
+        {`, Schema Types: ${JSON.stringify(types)}, `}
         KeyPath: {JSON.stringify(props.keyPath)}
       </div>
     );

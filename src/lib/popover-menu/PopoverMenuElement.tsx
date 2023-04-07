@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { classNames } from "../utils";
 import { MenuEvent } from "../modify-json";
+import { MenuRow } from "../compute-menu-contents";
 
 type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
@@ -9,9 +10,11 @@ type MenuElementRenderer<T> = (props: {
   menuElement: T;
   isSelected: boolean;
   allElementsInGroupAreOfThisType: boolean;
+  parentGroup: MenuRow;
 }) => JSX.Element;
 
 const DisplayElement: MenuElementRenderer<any> = (props) => {
+  const isLintError = props.parentGroup.label === "Lint error";
   return (
     <div
       className={classNames({
@@ -19,6 +22,7 @@ const DisplayElement: MenuElementRenderer<any> = (props) => {
         "cm-annotation-widget-element": true,
         "cm-annotation-widget-element-selected": props.isSelected,
       })}
+      style={isLintError ? { color: "red" } : {}}
     >
       <ReactMarkdown>{props.menuElement.content.trim()}</ReactMarkdown>
     </div>
