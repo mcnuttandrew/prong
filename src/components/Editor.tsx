@@ -104,7 +104,10 @@ export default function Editor(props: {
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
-      simpleUpdate(view, 0, view.state.doc.length, code);
+      // hack :(
+      setTimeout(() => {
+        simpleUpdate(view, 0, view.state.doc.length, code);
+      }, 100);
     }
   }, [code, view]);
   useEffect(() => {

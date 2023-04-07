@@ -159,7 +159,6 @@ class Monocle extends React.Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentWillUnmount() {
-    console.log("unmounting?");
     monocleTarget!.removeChild(this.el);
     monocleTarget?.setAttribute("style", "display: none");
   }
