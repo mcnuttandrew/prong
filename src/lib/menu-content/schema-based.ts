@@ -535,7 +535,7 @@ const ArrayItemBuilder: SchemaBasedComponent = ({ content, node }) => {
     });
   });
   const output: MenuRow[] = [{ label: "Insert", elements }];
-  if (targetNode.parent?.type.name !== "array") {
+  if (targetNode?.parent?.type.name !== "array") {
     const inner: MenuElement = {
       type: "button",
       content: "Empty Array",

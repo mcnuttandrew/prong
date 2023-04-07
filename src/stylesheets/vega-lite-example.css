@@ -152,3 +152,24 @@
     font-weight: bold;
     color: #009879;
 }
+
+/* SUGGESTION STUFF */
+
+.suggestion-taker {
+    background: white;
+    border: thin dashed black;
+    border-radius: 5px;
+    border-left: 12px solid #009879;
+}
+
+.suggestion-taker button {
+    border: none;
+    cursor: point;
+}
+
+.suggestion-taker .accept-button {
+    background-color: #009879;
+    color: white;
+}
+
+.suggestion-taker .reject-button {}

@@ -51,6 +51,7 @@ export default function Editor(props: {
         onChange(newCode);
       }
       if (onTargetNodeChanged) {
+        const codeHere = v.state.doc.toString();
         const oldNode = v.startState.field(popOverState).targetNode;
         const newNode = v.state.field(popOverState).targetNode;
         const nodeIsActuallyNew = !(
@@ -58,8 +59,8 @@ export default function Editor(props: {
         );
         if (nodeIsActuallyNew) {
           onTargetNodeChanged(
-            newNode ? syntaxNodeToKeyPath(newNode.node, code) : newNode,
-            oldNode ? syntaxNodeToKeyPath(oldNode.node, code) : false
+            newNode ? syntaxNodeToKeyPath(newNode.node, codeHere) : newNode,
+            oldNode ? syntaxNodeToKeyPath(oldNode.node, codeHere) : false
           );
         }
       }

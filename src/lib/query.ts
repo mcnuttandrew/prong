@@ -10,6 +10,7 @@ type functionQueryType = (
 export type ProjectionQuery =
   | { type: "function"; query: functionQueryType }
   | { type: "index"; query: (number | string)[] }
+  | { type: "multi-index"; query: (number | string)[][] }
   | { type: "regex"; query: RegExp }
   | { type: "value"; query: string[] }
   | { type: "schemaMatch"; query: string[] }
@@ -100,6 +101,9 @@ export function runProjectionQuery(
   }
   let pass = false;
   switch (query.type) {
+    case "multi-index":
+      pass = query.query.some((q) => keyPathMatchesQuery(q, keyPath));
+      break;
     case "index":
       pass = keyPathMatchesQuery(query.query, keyPath);
       break;
