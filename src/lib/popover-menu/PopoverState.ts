@@ -228,7 +228,7 @@ export function buildProjectionsForMenu(props: {
             setCode: (code) => {
               view.dispatch({
                 changes: { from: 0, to: fullCode.length, insert: code },
-                selection: state.selection,
+                // selection: state.selection,
               });
             },
             fullCode,

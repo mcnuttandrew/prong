@@ -64,8 +64,10 @@ We include a variety of common projections that you might find useful
     ClickTarget, // add like rectangles that make it feel nice to click {s
     ColorChip, // add a little colored circle next to colors
     ConvertHex, // add a button to the tooltip that allows you to convert named colors to hex
+    Debugger, // for each AST show all the information we have about it in the tooltip
     InsertRandomWord, // insert a random word
     NumberSlider, // number slider
+    SortObject, // Sort the keys in an object
     TooltipColorNamePicker, // select a named color from a fancy menu of web colors
     TooltipHexColorPicker; // select a color using a hex color picker
 }

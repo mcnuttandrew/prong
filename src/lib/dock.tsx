@@ -123,6 +123,7 @@ function Content(props: {
                   eventDispatch={eventDispatch}
                   allElementsInGroupAreOfThisType={allElementsSameType}
                   isSelected={false}
+                  parentGroup={row}
                   key={jdx}
                 />
               ))}
