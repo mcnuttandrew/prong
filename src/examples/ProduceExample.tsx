@@ -11,7 +11,7 @@ const schema: JSONSchema7 = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
   description: "A representation of a person, company, organization, or place",
   type: "object",
-  required: ["fruit", "vegetables", "meta"],
+  required: ["fruits", "vegetables", "meta"],
   properties: {
     fruits: {
       type: "array",
@@ -95,7 +95,8 @@ const exampleData = `{
       "veggieName": "broccoli",
       "veggieLike": false
     }
-  ]
+  ],
+  "meta": "ignore this meta data"
 }`;
 
 const blue = "#0551A5";
@@ -129,6 +130,14 @@ const DestringProjection: Projection = {
   hasInternalState: false,
 };
 
+const HideMeta: Projection = {
+  type: "inline",
+  mode: "replace",
+  query: { type: "index", query: ["meta"] },
+  projection: () => <div></div>,
+  hasInternalState: false,
+};
+
 function ProduceExample() {
   const [currentCode, setCurrentCode] = React.useState(exampleData);
   const [numRows, setNumRows] = React.useState(0);
@@ -145,6 +154,7 @@ function ProduceExample() {
         projections={[
           ...Object.values(StandardProjections),
           DestringProjection,
+          HideMeta,
         ]}
       />
       <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
