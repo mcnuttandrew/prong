@@ -190,22 +190,7 @@ function VegaUseCase() {
           ...Object.entries(StandardProjections)
             .filter(([name, proj]) => name !== "RandomWord")
             .map(([name, proj]) => proj),
-          {
-            type: "tooltip",
-            name: "debug",
-            projection: (props) => {
-              const types = (props.typings || [])
-                .flatMap((typ) => [typ.$$labeledType, typ.type, typ.$$refName])
-                .filter((x) => x);
-              return (
-                <div>
-                  types: {JSON.stringify(types)} keypath:{" "}
-                  {JSON.stringify(props.keyPath)}
-                </div>
-              );
-            },
-            query: { type: "function", query: () => true },
-          },
+
           buildSparkProjection(preComputedHistograms, "right", "bar"),
           {
             type: "full-tooltip",

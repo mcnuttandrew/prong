@@ -11,6 +11,7 @@ import { syntaxTree } from "@codemirror/language";
 import { SyntaxNode } from "@lezer/common";
 import { Range } from "@codemirror/state";
 import isEqual from "lodash.isequal";
+import { popOverState } from "./popover-menu/PopoverState";
 
 import { syntaxNodeToKeyPath, codeStringState } from "./utils";
 import { runProjectionQuery, ProjectionQuery } from "./query";
@@ -258,6 +259,10 @@ let cachedResult: any = { multilineLocations: [], inlineLocations: [] };
 
 const getters: Record<string, (state: EditorState) => any> = {
   code: (state) => codeStringState(state, 0),
+  targetNode: (state) => {
+    const node = state.field(popOverState).targetNode;
+    return `${node?.from || 0}-${node?.to || 0}`;
+  },
   // targetRange: (state) => state.selection.ranges[0],
   projections: (state) => state.field(cmStatePlugin).projections,
   schemaTypings: (state) =>

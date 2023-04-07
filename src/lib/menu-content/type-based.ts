@@ -4,7 +4,6 @@ import {
   nodeToId,
   MenuRow,
   retargetToAppropriateNode,
-  literalTypes,
 } from "../compute-menu-contents";
 
 import { boundCheck } from "../modify-json";
@@ -208,20 +207,22 @@ const BooleanComponent: TypeComponent = ({ node }) => [
 ];
 
 const simpleLiteral: TypeComponent = ({ node }) => {
-  const elements: MenuElement[] = Object.entries(literalTypes)
-    .filter(([key]) => key.toLowerCase() !== node.type.name.toLowerCase())
-    .map(([key, value]) => {
-      return {
-        type: "button",
-        content: key,
-        onSelect: {
-          type: "simpleSwap",
-          nodeId: nodeToId(node),
-          payload: value,
-        },
-      };
-    });
-  return [{ label: "Switch to", elements }];
+  return [];
+  // disabled bc it adds too much noise and not enough content
+  // const elements: MenuElement[] = Object.entries(literalTypes)
+  //   .filter(([key]) => key.toLowerCase() !== node.type.name.toLowerCase())
+  //   .map(([key, value]) => {
+  //     return {
+  //       type: "button",
+  //       content: key,
+  //       onSelect: {
+  //         type: "simpleSwap",
+  //         nodeId: nodeToId(node),
+  //         payload: value,
+  //       },
+  //     };
+  //   });
+  // return [{ label: "Switch to", elements }];
 };
 
 const composeComponents =

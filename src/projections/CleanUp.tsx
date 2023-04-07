@@ -13,8 +13,10 @@ const CleanUp: Projection = {
           const parsed = simpleParse(props.fullCode, false);
           let payload = props.fullCode;
           if (parsed) {
+            console.log("did parse");
             payload = prettifier(parsed, { maxLength: 60 });
           }
+          console.log(payload);
           props.setCode(payload);
         }}
       >
