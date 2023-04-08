@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useReducer } from "react";
 import StandardProjections from "../projections/standard-bundle";
 import merge from "lodash.merge";
 import { Projection } from "../lib/projections";
@@ -87,9 +87,13 @@ const simpleValues: Record<string, any> = {
   array: [],
   number: 0,
   boolean: true,
-  string: "Test",
+  string: "",
 };
 function pickSimpleType(schemas: any[]) {
+  const enums = schemas.flatMap((x) => x.enum).filter((x) => x);
+  if (enums.length) {
+    return enums[0];
+  }
   const types = schemas.flatMap((x) => x.type).filter((x) => x);
   const foundType = types.find((type) => type in simpleValues);
   return foundType ? simpleValues[foundType] : "";
@@ -103,6 +107,7 @@ const pathToFragment = (schema: any, path: string) => {
   [...stages]
     .reverse()
     .filter((x) => x !== "properties")
+    .filter((x) => !x.startsWith("anyOf["))
     .forEach((stage) => {
       if (!newObject) {
         newObject = { [stage]: simpleType };
@@ -127,6 +132,7 @@ function synthesizeSuggestions(
       schema?.description,
       schema?.$$labeledType,
       schema?.$$refName,
+      ...(schema?.enum || []),
     ].filter((x) => {
       if (!x || !x.length) {
         return false;
@@ -139,7 +145,6 @@ function synthesizeSuggestions(
   });
   const suggestions = matches
     // hack, just remove all the array ones
-    .filter((x) => !x.path.includes("["))
     .filter((x) => {
       const suggestedKeyPath = pathToKeyPath(x.path);
       // intentional that keyPath can be shorter than suggestedKeyPath and get through
@@ -170,33 +175,41 @@ function synthesizeSuggestions(
   return suggestions;
 }
 
-function QueryBar(props: { executeSearch: (search: string) => void }) {
+function QueryBar(props: {
+  executeSearch: (search: string) => void;
+  children: JSX.Element[];
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   return (
     <div>
       <b>Doc Search</b>
-      <div className="doc-search-query-bar">
-        <input
-          aria-label="Search query"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="flex">
+        <div className="doc-search-query-bar">
+          <input
+            aria-label="Search query"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <button
+          onClick={() => {
+            props.executeSearch(searchQuery);
+            setSearchQuery("");
+          }}
+        >
+          run search
+        </button>
+        {props.children}
       </div>
-      <button
-        onClick={() => {
-          props.executeSearch(searchQuery);
-          setSearchQuery("");
-        }}
-      >
-        run search
-      </button>
     </div>
   );
 }
 
 function pathToKeyPath(path: string) {
   const stages = path.replace("$.properties.", "").split(".");
-  return stages.filter((x) => x !== "properties");
+  return stages
+    .filter((x) => x !== "properties")
+    .filter((x) => !x.startsWith("anyOf["));
 }
 
 function materializeSuggestions(currentCode: string, suggestions: any[]) {
@@ -377,29 +390,33 @@ function BuildSuggestionProjection(
     projection: (props) => {
       return (
         <div className="suggestion-taker">
-          <button
-            className="accept-button"
-            onClick={() =>
-              dispatch({
-                type: "acceptSuggestion",
-                payload: props.keyPath,
-              })
-            }
-          >
-            ✓
-          </button>
+          <div className="accept-area">
+            <button
+              className="accept-button"
+              onClick={() =>
+                dispatch({
+                  type: "acceptSuggestion",
+                  payload: props.keyPath,
+                })
+              }
+            >
+              ✓
+            </button>
+          </div>
           {props.currentValue}
-          <button
-            className="reject-button"
-            onClick={() =>
-              dispatch({
-                type: "rejectSuggestion",
-                payload: props.keyPath,
-              })
-            }
-          >
-            ╳
-          </button>
+          <div className="reject-area">
+            <button
+              className="reject-button"
+              onClick={() =>
+                dispatch({
+                  type: "rejectSuggestion",
+                  payload: props.keyPath,
+                })
+              }
+            >
+              ╳
+            </button>
+          </div>
         </div>
       );
     },
@@ -427,6 +444,21 @@ function VegaLiteExampleApp() {
             );
           })}
         </div>
+        <QueryBar
+          executeSearch={(query) =>
+            dispatch({ type: "setQuery", payload: query })
+          }
+        >
+          {!!state.suggestions.length && (
+            <div>
+              <button
+                onClick={() => dispatch({ type: "setSuggestion", payload: [] })}
+              >
+                Dismiss Suggestions
+              </button>
+            </div>
+          )}
+        </QueryBar>
 
         <b>Current Style</b>
         <Editor
@@ -441,7 +473,9 @@ function VegaLiteExampleApp() {
           height={"400px"}
           projections={
             [
-              ...Object.values(StandardProjections),
+              ...Object.entries(StandardProjections)
+                .filter(([x]) => x !== "Debugger")
+                .map(([_, x]) => x),
               {
                 type: "tooltip",
                 name: "Switch to",
@@ -451,20 +485,6 @@ function VegaLiteExampleApp() {
               state.suggestions.length &&
                 BuildSuggestionProjection(state, dispatch),
             ].filter((x) => x) as Projection[]
-          }
-        />
-        {!!state.suggestions.length && (
-          <div>
-            <button
-              onClick={() => dispatch({ type: "setSuggestion", payload: [] })}
-            >
-              Dismiss Suggestions
-            </button>
-          </div>
-        )}
-        <QueryBar
-          executeSearch={(query) =>
-            dispatch({ type: "setQuery", payload: query })
           }
         />
       </div>

@@ -157,14 +157,24 @@
 
 .suggestion-taker {
     background: white;
-    border: thin dashed black;
+    border: thin solid 009879;
     border-radius: 5px;
     border-left: 12px solid #009879;
+    display: flex;
+}
+
+.suggestion-taker .accept-area {
+    background: #009879;
+}
+
+.suggestion-taker .accept-area, .suggestion-taker .reject-area {
+    display: inline;
 }
 
 .suggestion-taker button {
     border: none;
-    cursor: point;
+    cursor: pointer;
+    display: inline;
 }
 
 .suggestion-taker .accept-button {
@@ -172,4 +182,7 @@
     color: white;
 }
 
-.suggestion-taker .reject-button {}
+.suggestion-taker .reject-area, .suggestion-taker .reject-button {
+    background-color: #dddddd;
+    border-radius: 5px;
+}
