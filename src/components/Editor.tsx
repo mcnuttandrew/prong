@@ -86,7 +86,13 @@ export default function Editor(props: {
       parent: cmParent.current!,
     });
     setView(view);
-    return () => view.destroy();
+    return () => {
+      const monocle = document.querySelector("#cm-monocle");
+      while (monocle && monocle.firstChild) {
+        monocle.removeChild(monocle.firstChild);
+      }
+      view.destroy();
+    };
     // eslint-disable-next-line
   }, []);
 

@@ -29,7 +29,7 @@ const routes: {
 
   { name: "simple", Component: SimpleExample, zone: "Debugging" },
   { name: "in-situ-figure-1", Component: InSituFigure1, zone: "Examples" },
-  { name: "vega-lite-styler", Component: VegaLiteStyler, zone: "Case Studies" },
+  { name: "vega-styler", Component: VegaLiteStyler, zone: "Case Studies" },
   { name: "tracery", Component: Tracery, zone: "Examples" },
 ];
 

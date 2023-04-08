@@ -172,7 +172,15 @@ function synthesizeSuggestions(
       };
     })
     .filter((x) => x);
-  return suggestions;
+  const pathSeen = new Set<string>([]);
+  return suggestions.filter((x: any) => {
+    const path = JSON.stringify(pathToKeyPath(x.path));
+    if (pathSeen.has(path)) {
+      return false;
+    }
+    pathSeen.add(path);
+    return true;
+  });
 }
 
 function QueryBar(props: {
@@ -393,12 +401,12 @@ function BuildSuggestionProjection(
           <div className="accept-area">
             <button
               className="accept-button"
-              onClick={() =>
+              onClick={() => {
                 dispatch({
                   type: "acceptSuggestion",
                   payload: props.keyPath,
-                })
-              }
+                });
+              }}
             >
               ✓
             </button>
@@ -425,6 +433,7 @@ function BuildSuggestionProjection(
 
 function VegaLiteExampleApp() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  console.log(state.suggestions);
   return (
     <div className="styler-app flex">
       <div className="flex-down">
