@@ -12,12 +12,8 @@ function ColorPicker(props: {
   const { onChange, initialColor } = props;
   const [color, setColor] = useState(initialColor);
   return (
-    <div className="flex">
-      <HexColorPicker
-        color={initialColor}
-        onChange={(newColor) => setColor(newColor)}
-      />
-      <div className="flex-down">
+    <div className="flex-down">
+      <div className="flex">
         <div>
           Old{" "}
           <div
@@ -38,6 +34,10 @@ function ColorPicker(props: {
           <button onClick={() => onChange(color)}>Change</button>
         </div>
       </div>
+      <HexColorPicker
+        color={initialColor}
+        onChange={(newColor) => setColor(newColor)}
+      />
     </div>
   );
 }

@@ -1,3 +1,10 @@
+:root {
+  /* --blue: #1e90ff;
+  --white: #ffffff; */
+  --menu-background: gainsboro;
+  --menu-accent: #009979;
+}
+
 /*  We have our own custom color picker button */
 .pickr {
   display: none;
@@ -99,6 +106,10 @@
   border-radius: 100%;
 }
 
+.cm-annotation-widget-element .react-colorful {
+  width: 440px;
+}
+
 /* NUMBER SLIDER */
 
 .cm-number-slider {
@@ -130,8 +141,8 @@
 }
 
 .cm-annotation-menu {
-  background: #EEEEEE;
-  border-left: 15px solid #D8D8D8;
+  background: var(--menu-background);
+  border-left: 15px solid var(--menu-accent);
   border-radius: 5px;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
   font-family: sans-serif;
@@ -244,7 +255,7 @@ body, html, #root, .proot {
 }
 
 .cm-annotation-widget-popover-container-row:last-child {
-  border-color: #EEEEEE;
+  border-color: var(--menu-background);
 }
 
 .cm-annotation-widget-popover-container-row-label {
@@ -257,7 +268,7 @@ body, html, #root, .proot {
   text-align: center; */
   /* width: 40px; */
   width: 100%;
-  border-left: solid 5px #EEEEEE;
+  border-left: solid 5px var(--menu-background);
 }
 
 .cm-annotation-widget-popover-container-row-pagination {
@@ -287,7 +298,7 @@ body, html, #root, .proot {
 }
 
 .cm-annotation-widget-element, .cm-annotation-widget-popover-container-row {
-  border-left: solid 5px #EEEEEE;
+  border-left: solid 5px var(--menu-background);
 }
 
 .cm-annotation-widget-popover-container-row.cm-annotation-widget-element-selected {
@@ -298,6 +309,14 @@ body, html, #root, .proot {
   border: 2px solid lightcoral;
 }
 
+
+.cm-annotation-widget-element--color-chip {
+  height: 10px;
+  width: 10px;
+  border-radius: 100%;
+  display: inline-block;
+
+}
 
 .cm-annotation-render-widget-display p {
   margin: 0;
@@ -379,7 +398,8 @@ div[tabindex="-1"]:focus {
 /* DOCK */
 
 .cm-dock {
-  background: #EEEEEE;
+  /* background: #EEEEEE; */
+  background: var(--menu-background);
 }
 
 .cm-dock-label {
@@ -401,17 +421,17 @@ div[tabindex="-1"]:focus {
 #cm-monocle .cm-dock {
   padding: 5px 20px;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
-  border-left: 15px solid #D8D8D8;
+  border-left: 15px solid var(--menu-accent);
 }
 
 .cm-monocle-drag-target {
   border-radius: 5px;
   position: absolute;
 
-  left: -25px;
+  left: -17px;
   top: -25px;
   border-radius: 100%;
-  background-color: #009979;
+  background-color: var(--menu-accent);
   cursor: pointer;
   width: 50px;
   height: 50px;

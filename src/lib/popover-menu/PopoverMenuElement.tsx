@@ -3,8 +3,8 @@ import ReactMarkdown from "react-markdown";
 import { classNames } from "../utils";
 import { MenuEvent } from "../modify-json";
 import { MenuRow } from "../compute-menu-contents";
-import { simpleParse } from "../utils";
 import { parseTree, Node } from "jsonc-parser";
+import { colorNames, colorRegex } from "../utils";
 
 type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
@@ -122,6 +122,14 @@ const ButtonElement: MenuElementRenderer<any> = ({
       })}
     >
       <button onClick={() => eventDispatch(onSelect, true)}>
+        {colorNames[reformattedContent] && (
+          <span
+            className="cm-annotation-widget-element--color-chip"
+            style={{
+              background: colorNames[reformattedContent],
+            }}
+          />
+        )}
         {reformattedContent}
       </button>
       {label && <div>{label}</div>}

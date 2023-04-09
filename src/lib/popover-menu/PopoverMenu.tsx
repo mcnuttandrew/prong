@@ -5,7 +5,7 @@ import { EditorView, TooltipView } from "@codemirror/view";
 import { StateField } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import { filterContents } from "../search";
-
+import { usePersistedState } from "../../examples/example-utils";
 import { cmStatePlugin } from "../cmState";
 import {
   classNames,
@@ -146,7 +146,7 @@ export function RenderRow(props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
 }) {
   const [page, setPage] = useState(0);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = usePersistedState("cm-menu-pagesize", 20);
   const { row, selectedRouting, idx, setSelectedRouting, eventDispatch } =
     props;
   const { label, elements } = row;
@@ -170,12 +170,27 @@ export function RenderRow(props: {
       >
         {label}
       </div>
-      {els.length > pageSize && (
+      {els.length > 20 && (
         <div className="cm-annotation-widget-popover-container-row-pagination">
           <button onClick={() => setPage(Math.max(0, page - 1))}>Prev</button>
           <span>{`Showing ${pageSize * page} - ${
             pageSize * (page + 1)
           } out of ${els.length}`}</span>
+          <span>
+            (Page Size{" "}
+            <select
+              aria-label="page size selector"
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+            >
+              {[10, 20, 50, 100].map((num) => (
+                <option value={num} key={num}>
+                  {num}
+                </option>
+              ))}
+            </select>
+            )
+          </span>
           <button
             onClick={() =>
               setPage(Math.min(Math.floor(els.length / pageSize), page + 1))
