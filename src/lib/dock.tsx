@@ -10,12 +10,12 @@ import {
   buildProjectionsForMenu,
   maybeFilterToFullProjection,
 } from "./popover-menu/PopoverState";
+import { RenderRow } from "./popover-menu/PopoverMenu";
 import {
   MenuRow,
   retargetToAppropriateNode,
   simpleMerge,
 } from "./compute-menu-contents";
-import PopoverMenuElement from "./popover-menu/PopoverMenuElement";
 import { MenuEvent, modifyCodeByCommand } from "./modify-json";
 import { codeString, simpleUpdate, getCursorPos, simpleParse } from "./utils";
 import { filterContents } from "./search";
@@ -54,38 +54,28 @@ function Content(props: {
   // todo also support other actions from the dock
   if (!docked) {
     return (
-      <div>
-        Press Escape to dock the menu or{" "}
-        {setDock && <button onClick={() => setDock(true)}>click here</button>}
+      <div className="cm-dock">
+        <div className="cm-dock-label">
+          Press Escape to dock the menu or{" "}
+          {setDock && <button onClick={() => setDock(true)}>click here</button>}
+        </div>
       </div>
     );
   }
   return (
     <div className="cm-dock">
       <div className="cm-dock-label">
-        {/* {!docked && (
-          <div>
-            Press Escape to dock the menu or{" "}
-            {setDock && (
-              <button onClick={() => setDock(true)}>click here↓</button>
-            )}
-          </div>
-        )} */}
-        {/* {docked && (
-          <div>
-            Press CMD+. to undock the menu or{" "}
-            {setDock && (
-              <button onClick={() => setDock(false)}>click here↑</button>
-            )}
-          </div>
-        )} */}
-
         {docked && (
-          <div>
-            Press CMD+. to reattach the menu
-            {setDock && (
-              <button onClick={() => setDock(false)}>click here</button>
-            )}
+          <div className="flex-down">
+            <div>
+              <b>Menu</b>
+            </div>
+            <div>
+              Press CMD+. to reattach the menu
+              {setDock && (
+                <button onClick={() => setDock(false)}>or click here</button>
+              )}
+            </div>
           </div>
         )}
         {docked && (
@@ -101,36 +91,16 @@ function Content(props: {
           </div>
         )}
       </div>
-
-      {filteredContent.map((row, idx) => {
-        const { label, elements } = row;
-        const initialType = (row.elements as any)?.type;
-        const allElementsSameType =
-          !!initialType &&
-          row.elements.every((x: any) => x?.type === initialType);
-        return (
-          <div
-            className={"cm-annotation-widget-popover-container-row"}
-            key={idx}
-          >
-            <div className={"cm-annotation-widget-popover-container-row-label"}>
-              {label}
-            </div>
-            <div className="cm-annotation-widget-popover-container-row-content">
-              {(elements || []).map((element, jdx, arr) => (
-                <PopoverMenuElement
-                  menuElement={element}
-                  eventDispatch={eventDispatch}
-                  allElementsInGroupAreOfThisType={allElementsSameType}
-                  isSelected={false}
-                  parentGroup={row}
-                  key={jdx}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      {filteredContent.map((row, idx) => (
+        <RenderRow
+          row={row}
+          idx={idx}
+          key={idx}
+          eventDispatch={eventDispatch}
+          selectedRouting={false}
+          setSelectedRouting={false}
+        />
+      ))}
     </div>
   );
 }

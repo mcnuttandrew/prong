@@ -12,32 +12,38 @@ function ColorPicker(props: {
   const { onChange, initialColor } = props;
   const [color, setColor] = useState(initialColor);
   return (
-    <div className="flex">
-      <HexColorPicker
-        color={initialColor}
-        onChange={(newColor) => setColor(newColor)}
-      />
-      <div className="flex-down">
-        <div>
+    <div className="flex-down">
+      <div className="flex space-between">
+        <div className="flex centering">
           Old{" "}
           <div
             style={{
+              borderRadius: "100%",
               background: initialColor,
-              width: "30px",
+              width: "20px",
               height: "20px",
             }}
           ></div>
         </div>
-        <div>
-          new{" "}
+        <div className="flex centering">
+          New{" "}
           <div
-            style={{ background: color, width: "30px", height: "20px" }}
+            style={{
+              background: color,
+              width: "20px",
+              height: "20px",
+              borderRadius: "100%",
+            }}
           ></div>
         </div>
         <div>
           <button onClick={() => onChange(color)}>Change</button>
         </div>
       </div>
+      <HexColorPicker
+        color={initialColor}
+        onChange={(newColor) => setColor(newColor)}
+      />
     </div>
   );
 }

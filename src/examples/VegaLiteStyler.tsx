@@ -195,6 +195,11 @@ function QueryBar(props: {
         <div className="doc-search-query-bar">
           <input
             aria-label="Search query"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                props.executeSearch(searchQuery);
+              }
+            }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -202,7 +207,6 @@ function QueryBar(props: {
         <button
           onClick={() => {
             props.executeSearch(searchQuery);
-            setSearchQuery("");
           }}
         >
           run search
@@ -433,7 +437,6 @@ function BuildSuggestionProjection(
 
 function VegaLiteExampleApp() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  console.log(state.suggestions);
   return (
     <div className="styler-app flex">
       <div className="flex-down">
@@ -485,7 +488,13 @@ function VegaLiteExampleApp() {
           projections={
             [
               ...Object.entries(StandardProjections)
-                .filter(([x]) => x !== "Debugger")
+                .filter(([x]) => {
+                  const skipSet = new Set<keyof typeof StandardProjections>([
+                    "Debugger",
+                    "TooltipColorNamePicker",
+                  ]);
+                  return !skipSet.has(x);
+                })
                 .map(([_, x]) => x),
               {
                 type: "tooltip",

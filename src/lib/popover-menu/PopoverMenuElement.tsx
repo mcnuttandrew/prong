@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import { classNames } from "../utils";
 import { MenuEvent } from "../modify-json";
 import { MenuRow } from "../compute-menu-contents";
+import { parseTree, Node } from "jsonc-parser";
+import { colorNames, colorRegex } from "../utils";
 
 type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
@@ -70,24 +72,70 @@ const InputElement: MenuElementRenderer<any> = (props) => {
   );
 };
 
+function treeToShortString(node: Node): string {
+  if (!node.children) {
+    if (node.type === "string" && !node.value.length) {
+      return '""';
+    }
+    return `${node.value}`;
+  }
+  if (node.type === "property") {
+    const key = treeToShortString(node.children[0]);
+    const value = treeToShortString(node.children[1]);
+    return `${key}: ${value}`;
+  }
+  const innerContent = node.children
+    .flatMap((child) => treeToShortString(child))
+    .join(", ");
+  if (node.type === "array") {
+    return `[${innerContent}]`;
+  }
+  if (node.type === "object") {
+    return `{${innerContent}}`;
+  }
+  return "";
+}
+
+function maybeGenerateShortRep(content: string) {
+  const parsed = parseTree(content);
+  if (!parsed || parsed.type !== "object") {
+    return content;
+  }
+  return treeToShortString(parsed);
+}
+
 const ButtonElement: MenuElementRenderer<any> = ({
   isSelected,
   menuElement: { onSelect, content, label },
   eventDispatch,
   allElementsInGroupAreOfThisType,
-}) => (
-  <div
-    className={classNames({
-      flex: !allElementsInGroupAreOfThisType,
-      "flex-down": allElementsInGroupAreOfThisType,
-      "cm-annotation-widget-element": true,
-      "cm-annotation-widget-element-selected": isSelected,
-    })}
-  >
-    <button onClick={() => eventDispatch(onSelect, true)}>{content}</button>
-    {label && <div>{label}</div>}
-  </div>
-);
+}) => {
+  const reformattedContent = !label ? maybeGenerateShortRep(content) : content;
+
+  return (
+    <div
+      className={classNames({
+        flex: !allElementsInGroupAreOfThisType,
+        "flex-down": allElementsInGroupAreOfThisType,
+        "cm-annotation-widget-element": true,
+        "cm-annotation-widget-element-selected": isSelected,
+      })}
+    >
+      <button onClick={() => eventDispatch(onSelect, true)}>
+        {colorNames[reformattedContent] && (
+          <span
+            className="cm-annotation-widget-element--color-chip"
+            style={{
+              background: colorNames[reformattedContent],
+            }}
+          />
+        )}
+        {reformattedContent}
+      </button>
+      {label && <div>{label}</div>}
+    </div>
+  );
+};
 
 const ProjectionElement: MenuElementRenderer<any> = ({
   isSelected,
