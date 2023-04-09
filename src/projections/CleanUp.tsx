@@ -1,6 +1,7 @@
 import React from "react";
-import { format, applyEdits } from "jsonc-parser";
 import { Projection } from "../lib/projections";
+import prettifier from "../lib/vendored/prettifier";
+import { simpleParse } from "../lib/utils";
 
 const CleanUp: Projection = {
   query: { type: "nodeType", query: ["Object", "Array", "[", "]", "{", "}"] },
@@ -9,19 +10,15 @@ const CleanUp: Projection = {
     return (
       <button
         onClick={() => {
-          const edits = format(
-            props.fullCode,
-            {
-              offset: props.node.from,
-              length: props.node.to - props.node.from,
-            },
-            { tabSize: 4, insertSpaces: true, eol: "\n" }
-          );
-          const payload = applyEdits(props.fullCode, edits);
+          const parsed = simpleParse(props.fullCode, false);
+          let payload = props.fullCode;
+          if (parsed) {
+            payload = prettifier(parsed, { maxLength: 60 });
+          }
           props.setCode(payload);
         }}
       >
-        Clean up target
+        Clean Up
       </button>
     );
   },
