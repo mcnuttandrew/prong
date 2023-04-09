@@ -159,7 +159,6 @@ class Monocle extends React.Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentWillUnmount() {
-    console.log("unmounting?");
     monocleTarget!.removeChild(this.el);
     monocleTarget?.setAttribute("style", "display: none");
   }
@@ -182,12 +181,13 @@ class Monocle extends React.Component<MonocleProps, { dragging: boolean }> {
                 document.onmousemove = (e) => {
                   e.preventDefault();
                   this.props.setMonoclePos(
-                    JSON.stringify({ x: e.clientX, y: e.clientY })
+                    JSON.stringify({ x: e.clientX, y: e.clientY + 25 })
                   );
                 };
-              }}
-              onMouseUp={() => {
-                document.onmousemove = null;
+                document.onmouseup = () => {
+                  document.onmousemove = null;
+                  document.onmouseup = null;
+                };
               }}
             />
           )}

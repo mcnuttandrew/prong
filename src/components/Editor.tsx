@@ -51,6 +51,7 @@ export default function Editor(props: {
         onChange(newCode);
       }
       if (onTargetNodeChanged) {
+        const codeHere = v.state.doc.toString();
         const oldNode = v.startState.field(popOverState).targetNode;
         const newNode = v.state.field(popOverState).targetNode;
         const nodeIsActuallyNew = !(
@@ -58,8 +59,8 @@ export default function Editor(props: {
         );
         if (nodeIsActuallyNew) {
           onTargetNodeChanged(
-            newNode ? syntaxNodeToKeyPath(newNode.node, code) : newNode,
-            oldNode ? syntaxNodeToKeyPath(oldNode.node, code) : false
+            newNode ? syntaxNodeToKeyPath(newNode.node, codeHere) : newNode,
+            oldNode ? syntaxNodeToKeyPath(oldNode.node, codeHere) : false
           );
         }
       }
@@ -85,7 +86,13 @@ export default function Editor(props: {
       parent: cmParent.current!,
     });
     setView(view);
-    return () => view.destroy();
+    return () => {
+      const monocle = document.querySelector("#cm-monocle");
+      while (monocle && monocle.firstChild) {
+        monocle.removeChild(monocle.firstChild);
+      }
+      view.destroy();
+    };
     // eslint-disable-next-line
   }, []);
 
@@ -104,7 +111,10 @@ export default function Editor(props: {
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
-      simpleUpdate(view, 0, view.state.doc.length, code);
+      // hack :(
+      setTimeout(() => {
+        simpleUpdate(view, 0, view.state.doc.length, code);
+      }, 100);
     }
   }, [code, view]);
   useEffect(() => {
