@@ -33,7 +33,7 @@ import prettifier from "../lib/vendored/prettifier";
 import traverse from "@json-schema-tools/traverse";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
-let updatedSchema = {
+const updatedSchema = {
   ...VegaLiteV5Schema,
   $ref: "#/definitions/Config",
 };
@@ -185,7 +185,7 @@ function synthesizeSuggestions(
 
 function QueryBar(props: {
   executeSearch: (search: string) => void;
-  children: JSX.Element[];
+  children: JSX.Element;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   return (
@@ -458,7 +458,7 @@ function VegaLiteExampleApp() {
             dispatch({ type: "setQuery", payload: query })
           }
         >
-          {!!state.suggestions.length && (
+          {!!state.suggestions.length ? (
             <div>
               <button
                 onClick={() => dispatch({ type: "setSuggestion", payload: [] })}
@@ -466,6 +466,8 @@ function VegaLiteExampleApp() {
                 Dismiss Suggestions
               </button>
             </div>
+          ) : (
+            <></>
           )}
         </QueryBar>
 
