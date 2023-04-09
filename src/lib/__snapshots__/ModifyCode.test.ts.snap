@@ -2,10 +2,10 @@
 
 exports[`modifyCodeByCommand - addElementAsSiblingInArray (empty array) 1`] = `"{\\"example\\": [-9]}"`;
 
-exports[`modifyCodeByCommand - addElementAsSiblingInArray 1`] = `
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 1 1`] = `
 "{
     \\"a\\": {
-      \\"b\\": [-9, 1, 2, 
+      \\"b\\": [-9,1, 2, 
         3],
       \\"c\\": true,
     },
@@ -15,11 +15,11 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 1`] = `
   }"
 `;
 
-exports[`modifyCodeByCommand - addElementAsSiblingInArray 2`] = `
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 2 1`] = `
 "{
     \\"a\\": {
       \\"b\\": [1, 2, 
-        3, -9],
+        3,-9],
       \\"c\\": true,
     },
     \\"d\\": null,
@@ -28,7 +28,7 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 2`] = `
   }"
 `;
 
-exports[`modifyCodeByCommand - addElementAsSiblingInArray 3`] = `
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 3 1`] = `
 "{
     \\"a\\": {
       \\"b\\": [1, 2, 
@@ -41,7 +41,7 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 3`] = `
   }"
 `;
 
-exports[`modifyCodeByCommand - addElementAsSiblingInArray 4`] = `
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 4 1`] = `
 "{
     \\"a\\": {
       \\"b\\": [1, -9, 2, 
@@ -54,10 +54,11 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 4`] = `
   }"
 `;
 
-exports[`modifyCodeByCommand - addElementAsSiblingInArray 5`] = `
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 4 2`] = `
 "{
     \\"a\\": {
-      \\"b\\": [1, 2, -9, 
+      \\"b\\": [1, 2,  
+        -9,  
         3],
       \\"c\\": true,
     },
@@ -67,11 +68,13 @@ exports[`modifyCodeByCommand - addElementAsSiblingInArray 5`] = `
   }"
 `;
 
-exports[`modifyCodeByCommand - addElementAsSiblingInArray 6`] = `
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 4 3`] = `
 "{
     \\"a\\": {
       \\"b\\": [1, 2, 
-        3, -9],
+        3, 
+        -9 
+        ],
       \\"c\\": true,
     },
     \\"d\\": null,

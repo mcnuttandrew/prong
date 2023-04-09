@@ -64,6 +64,9 @@ export type DataTable = Record<string, number | string | boolean | undefined>[];
 export function createHistograms(
   data: DataTable
 ): Record<string, d3.Bin<number, number>[]> {
+  if (data.length === 0) {
+    return {};
+  }
   const keys = Object.keys(data[0]);
   const histograms: Record<string, d3.Bin<number, number>[]> = {};
   keys
