@@ -183,7 +183,7 @@ const hasType = (
   node: SyntaxNode | undefined,
   type: SyntaxNode["type"]["name"]
 ) => node?.type.name === type;
-function computeSeperations(
+function computeSeparations(
   prev: SyntaxNode | undefined,
   target: SyntaxNode,
   next: SyntaxNode | undefined,
@@ -193,6 +193,7 @@ function computeSeperations(
   if (hasType(target, "⚠")) {
     text = text.slice(0, target.from) + text.slice(target.to);
   }
+  // region has new line
   const regionHasNl = (from: number, to: number) =>
     text.slice(from, to).includes("\n");
   const prevToTarg = (prev && text.slice(prev.to, target.from)) || "";
@@ -247,7 +248,7 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   const nextSib = approxTarget.nextSibling!;
   const prevSib = approxTarget.prevSibling!;
 
-  const { prevSep, nextSep, indentation } = computeSeperations(
+  const { prevSep, nextSep, indentation } = computeSeparations(
     prevSib,
     approxTarget,
     nextSib,
@@ -325,68 +326,98 @@ function rotateToAdaptivePosition(
   return next;
 }
 
-// always add as sibling following the target
-// not sure how to target an empty array?
+// todo: this function has a ton of overlap with the object version, maybe combine?
 const addElementAsSiblingInArray: ModifyCmd<addElementAsSiblingInArrayEvent> = (
-  { payload },
-  node,
-  _,
-  cursorPos
+  ...args
 ) => {
-  // WIP
-  let from: number;
-  let to: number;
-  let value = payload;
+  const output = addElementAsSiblingInArrayPre(...args);
+
+  const skips = (output?.value || "")
+    .split("\n")
+    .map((x) => x.replace(/\s/g, ""))
+    .map((x, idx, arr) => {
+      if (idx === 0 || idx === arr.length - 1) {
+        return false;
+      }
+      return x.length === 0 ? idx : false;
+    });
+  const value = output!.value
+    .split("\n")
+    .filter((_, idx) => !skips[idx])
+    .join("\n");
+
+  return output ? { ...output, value } : undefined;
+};
+
+// cases
+// [|]
+// [|1]
+// [1|]
+// [1,|2]
+// [1,|]
+const addElementAsSiblingInArrayPre: ModifyCmd<
+  addElementAsSiblingInArrayEvent
+> = (event, node, text, cursorPos) => {
+  const { payload } = event;
+  // retarget to the object if we're somewhere inside
   let syntaxNode = node;
-  if (node.type.name === "Array") {
-    syntaxNode = syntaxNode.firstChild!;
-  }
-  syntaxNode = rotateToAdaptivePosition(syntaxNode, cursorPos);
-  // adapt to the position by rotating to the position from here
-  // criterion: find the item just before that one after it
-  const currentTypeIsBracket = syntaxNode.type.name === "[";
-  // const prevType = syntaxNode.prevSibling?.type.name || "⚠";
-  const nextType = syntaxNode.nextSibling?.type.name || "⚠";
-  // const prevTypeIsBracket = new Set(["⚠", "["]).has(prevType);
-  const nextTypeIsBracket = new Set(["⚠", "]"]).has(nextType);
-
-  // case: []
-  if (currentTypeIsBracket && nextType === "]") {
-    from = syntaxNode.from;
-    to = syntaxNode.to;
-    value = `[${payload}`;
+  if (!hasType(syntaxNode, "Array")) {
+    syntaxNode = syntaxNode.parent!;
+    if (!hasType(syntaxNode, "Array")) {
+      throw Error("Add Array Element error");
+    }
   }
 
-  // case [X1]
-  if (currentTypeIsBracket && !nextTypeIsBracket) {
-    from = syntaxNode.from;
-    to = syntaxNode.from;
-    value = `[${payload}, `;
+  let approxTarget = rotateToAdaptivePosition(
+    syntaxNode.firstChild || syntaxNode,
+    cursorPos
+  );
+  if (approxTarget.nextSibling && hasType(approxTarget.nextSibling, "⚠")) {
+    approxTarget = approxTarget.nextSibling;
+  }
+  const nextSib = approxTarget.nextSibling!;
+  const prevSib = approxTarget.prevSibling!;
+
+  const { prevSep, nextSep } = computeSeparations(
+    prevSib,
+    approxTarget,
+    nextSib,
+    text
+  );
+  const indentation = "";
+  const prefixA = (hasType(prevSib, "[") ? "" : ",") + prevSep;
+  let suffix =
+    (hasType(nextSib, "]") || hasType(approxTarget, "]") ? "" : ",") + nextSep;
+
+  if (hasType(approxTarget, "⚠")) {
+    return {
+      value: `${prefixA}${indentation}${payload}${suffix}`,
+      from: prevSib.to,
+      to: nextSib.from - (hasType(nextSib, "]") ? 1 : 0),
+    };
+  }
+  if (hasType(approxTarget, "]")) {
+    return {
+      value: `${prefixA}${indentation}${payload}${suffix}`,
+      from: prevSib.to,
+      to: approxTarget.to - 1,
+    };
   }
 
-  if (!currentTypeIsBracket && !nextTypeIsBracket) {
-    from = syntaxNode.to + 1;
-    to = syntaxNode.to + 1;
-    value = ` ${payload},`;
-  }
+  const prefixB = (hasType(approxTarget, "[") ? "" : ",") + prevSep;
 
-  if (!currentTypeIsBracket && nextType === "]") {
-    from = syntaxNode.to;
-    to = syntaxNode.to;
-    value = `, ${payload}`;
+  if (hasType(approxTarget, "[")) {
+    return {
+      value: `${prefixB}${indentation}${payload}${suffix}`,
+      from: approxTarget.from + 1,
+      to: nextSib.from,
+    };
   }
-  if (!currentTypeIsBracket && nextType === "⚠") {
-    from = syntaxNode.to;
-    to = syntaxNode.to;
-    value = `, ${payload}`;
-  }
-
-  if (currentTypeIsBracket && !nextTypeIsBracket) {
-    from = syntaxNode.from;
-    to = syntaxNode.nextSibling!.from;
-  }
-
-  return { value, from: from!, to: to! };
+  return {
+    value: `${prefixB}${indentation}${payload}${suffix}`,
+    from: approxTarget.to,
+    to: nextSib!.from,
+  };
 };
 
 const climbToRoot = (node: SyntaxNode): SyntaxNode =>

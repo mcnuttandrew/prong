@@ -117,16 +117,19 @@ const DestringProjection: Projection = {
     type: "nodeType",
     query: ["PropertyName", "Number", "String", "Null", "False", "True"],
   },
-  projection: (props) => (
-    <div
-      style={{
-        color: coloring[props.node.type.name] || "black",
-        background: props.diagnosticErrors.length ? "lightsalmon" : "none",
-      }}
-    >
-      {maybeTrim(props.currentValue)}
-    </div>
-  ),
+  projection: (props) => {
+    const val = maybeTrim(props.currentValue);
+    return (
+      <div
+        style={{
+          color: coloring[props.node.type.name] || "black",
+          background: props.diagnosticErrors.length ? "lightsalmon" : "none",
+        }}
+      >
+        {val.length ? val : '""'}
+      </div>
+    );
+  },
   hasInternalState: false,
 };
 
