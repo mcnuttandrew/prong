@@ -1,7 +1,6 @@
 import React, { useState, useReducer } from "react";
 import StandardProjections from "../projections/standard-bundle";
 import merge from "lodash.merge";
-import { modify, applyEdits } from "jsonc-parser";
 import { Projection } from "../lib/projections";
 import {
   dark,
@@ -196,6 +195,11 @@ function QueryBar(props: {
         <div className="doc-search-query-bar">
           <input
             aria-label="Search query"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                props.executeSearch(searchQuery);
+              }
+            }}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -203,7 +207,6 @@ function QueryBar(props: {
         <button
           onClick={() => {
             props.executeSearch(searchQuery);
-            setSearchQuery("");
           }}
         >
           run search

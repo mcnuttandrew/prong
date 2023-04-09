@@ -1,15 +1,11 @@
 :root {
   /* --blue: #1e90ff;
   --white: #ffffff; */
-  --menu-background: gainsboro;
+  --menu-background: #f5f5f5;
   --menu-accent: #009979;
 }
 
 /*  We have our own custom color picker button */
-.pickr {
-  display: none;
-}
-
 .flex {
   display: flex;
 }
@@ -25,6 +21,15 @@
 
 .position-absolute {
   position: absolute;
+}
+
+.centering {
+  align-items: center;
+  justify-content: center;
+}
+
+.space-between {
+  justify-content: space-between;
 }
 
 /* NUMBER WIDGET (todo remove) */
@@ -108,6 +113,7 @@
 
 .cm-annotation-widget-element .react-colorful {
   width: 440px;
+  height: 140px
 }
 
 /* NUMBER SLIDER */
@@ -400,6 +406,7 @@ div[tabindex="-1"]:focus {
 .cm-dock {
   /* background: #EEEEEE; */
   background: var(--menu-background);
+  border-radius: 5px;
 }
 
 .cm-dock-label {
@@ -407,6 +414,14 @@ div[tabindex="-1"]:focus {
   display: flex;
   font-size: 10px;
   justify-content: space-between;
+}
+
+.cm-dock-label button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  text-decoration: underline;
 }
 
 #cm-monocle {

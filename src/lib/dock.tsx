@@ -54,9 +54,11 @@ function Content(props: {
   // todo also support other actions from the dock
   if (!docked) {
     return (
-      <div>
-        Press Escape to dock the menu or{" "}
-        {setDock && <button onClick={() => setDock(true)}>click here</button>}
+      <div className="cm-dock">
+        <div className="cm-dock-label">
+          Press Escape to dock the menu or{" "}
+          {setDock && <button onClick={() => setDock(true)}>click here</button>}
+        </div>
       </div>
     );
   }
@@ -64,11 +66,16 @@ function Content(props: {
     <div className="cm-dock">
       <div className="cm-dock-label">
         {docked && (
-          <div>
-            Press CMD+. to reattach the menu
-            {setDock && (
-              <button onClick={() => setDock(false)}>click here</button>
-            )}
+          <div className="flex-down">
+            <div>
+              <b>Menu</b>
+            </div>
+            <div>
+              Press CMD+. to reattach the menu
+              {setDock && (
+                <button onClick={() => setDock(false)}>or click here</button>
+              )}
+            </div>
           </div>
         )}
         {docked && (
