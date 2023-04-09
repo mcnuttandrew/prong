@@ -260,6 +260,23 @@ body, html, #root, .proot {
   border-left: solid 5px #EEEEEE;
 }
 
+.cm-annotation-widget-popover-container-row-pagination {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+}
+
+.cm-annotation-widget-popover-container-row-pagination button {
+  font-size: 10px;
+  background: none;
+  text-decoration: underline;
+  cursor: pointer;
+  border: none;
+}
+
 .cm-annotation-widget-popover-container-row-content {
   display: flex;
   flex-wrap: wrap;
@@ -326,7 +343,11 @@ div[tabindex="-1"]:focus {
   border-radius: 12px;
   cursor: pointer;
   font-size: 13px;
-  text-decoration: underline;
+  /* text-decoration: underline; */
+  background: #009979;
+  color: white;
+  padding: 3px 14px;
+  margin-bottom: 1px;
 }
 
 
@@ -390,7 +411,7 @@ div[tabindex="-1"]:focus {
   left: -25px;
   top: -25px;
   border-radius: 100%;
-  background-color: rebeccapurple;
+  background-color: #009979;
   cursor: pointer;
   width: 50px;
   height: 50px;

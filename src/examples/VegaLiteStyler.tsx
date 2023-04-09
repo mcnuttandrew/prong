@@ -1,6 +1,7 @@
 import React, { useState, useReducer } from "react";
 import StandardProjections from "../projections/standard-bundle";
 import merge from "lodash.merge";
+import { modify, applyEdits } from "jsonc-parser";
 import { Projection } from "../lib/projections";
 import {
   dark,

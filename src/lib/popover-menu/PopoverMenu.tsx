@@ -123,48 +123,85 @@ function PopOverMenuContents(props: {
             />
           </div>
         )}
-        {filteredMenu.map((row, idx) => {
-          const { label, elements } = row;
-          const initialType = (row.elements as any)?.type;
-          const allElementsSameType =
-            !!initialType &&
-            row.elements.every((x: any) => x?.type === initialType);
-          return (
-            <div
-              className={classNames({
-                "cm-annotation-widget-popover-container-row": true,
-                "cm-annotation-widget-element-selected":
-                  selectedRouting &&
-                  selectedRouting[0] === idx &&
-                  selectedRouting[1] === 0,
-              })}
-              key={idx}
-            >
-              <div
-                className={"cm-annotation-widget-popover-container-row-label"}
-                onClick={() => setSelectedRouting([idx, 0])}
-              >
-                {label}
-              </div>
-              <div className="cm-annotation-widget-popover-container-row-content">
-                {(elements || []).map((element, jdx, arr) => (
-                  <PopoverMenuElement
-                    menuElement={element}
-                    eventDispatch={eventDispatch}
-                    allElementsInGroupAreOfThisType={allElementsSameType}
-                    parentGroup={row}
-                    isSelected={
-                      selectedRouting &&
-                      selectedRouting[0] === idx &&
-                      selectedRouting[1] === jdx + 1
-                    }
-                    key={jdx}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
+        {filteredMenu.map((row, idx) => (
+          <RenderRow
+            key={idx}
+            row={row}
+            selectedRouting={selectedRouting}
+            idx={idx}
+            setSelectedRouting={setSelectedRouting}
+            eventDispatch={eventDispatch}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function RenderRow(props: {
+  row: MenuRow;
+  selectedRouting: false | SelectionRoute;
+  idx: number;
+  setSelectedRouting: false | ((newRoute: SelectionRoute) => void);
+  eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;
+}) {
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
+  const { row, selectedRouting, idx, setSelectedRouting, eventDispatch } =
+    props;
+  const { label, elements } = row;
+  const initialType = (row.elements as any)?.type;
+  const allElementsSameType =
+    !!initialType && row.elements.every((x: any) => x?.type === initialType);
+  const els = elements || [];
+  return (
+    <div
+      className={classNames({
+        "cm-annotation-widget-popover-container-row": true,
+        "cm-annotation-widget-element-selected":
+          selectedRouting &&
+          selectedRouting[0] === idx &&
+          selectedRouting[1] === 0,
+      })}
+    >
+      <div
+        className={"cm-annotation-widget-popover-container-row-label"}
+        onClick={() => setSelectedRouting && setSelectedRouting([idx, 0])}
+      >
+        {label}
+      </div>
+      {els.length > pageSize && (
+        <div className="cm-annotation-widget-popover-container-row-pagination">
+          <button onClick={() => setPage(Math.max(0, page - 1))}>Prev</button>
+          <span>{`Showing ${pageSize * page} - ${
+            pageSize * (page + 1)
+          } out of ${els.length}`}</span>
+          <button
+            onClick={() =>
+              setPage(Math.min(Math.floor(els.length / pageSize), page + 1))
+            }
+          >
+            Next
+          </button>
+        </div>
+      )}
+      <div className="cm-annotation-widget-popover-container-row-content">
+        {els
+          .slice(page * pageSize, (page + 1) * pageSize)
+          .map((element, jdx, arr) => (
+            <PopoverMenuElement
+              menuElement={element}
+              eventDispatch={eventDispatch}
+              allElementsInGroupAreOfThisType={allElementsSameType}
+              parentGroup={row}
+              isSelected={
+                selectedRouting &&
+                selectedRouting[0] === idx &&
+                selectedRouting[1] === jdx + 1
+              }
+              key={jdx}
+            />
+          ))}
       </div>
     </div>
   );
