@@ -112,7 +112,7 @@
 }
 
 .cm-annotation-widget-element .react-colorful {
-  width: 440px;
+  width: 420px;
   height: 140px
 }
 
@@ -155,7 +155,7 @@
   max-height: 300px;
   overflow-y: auto;
   padding-left: 5px;
-  width: 420px;
+  width: 440px;
   z-index: 1000;
 }
 
@@ -196,7 +196,7 @@
 }
 
 .cm-annotation-widget-popover-container {
-  max-width: 400px;
+  max-width: 420px;
   outline: none;
 }
 

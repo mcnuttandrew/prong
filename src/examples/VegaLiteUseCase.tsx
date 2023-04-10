@@ -15,7 +15,11 @@ import Editor from "../components/Editor";
 import { ProjectionProps, Projection } from "../../src/lib/projections";
 import { simpleParse, setIn, classNames } from "../lib/utils";
 import { vegaLiteCode } from "./example-data";
-import { extractFieldNames, usePersistedState } from "./example-utils";
+import {
+  extractFieldNames,
+  usePersistedState,
+  buildInlineDropDownProjection,
+} from "./example-utils";
 
 const Pill: FC<{ name: string }> = function Pill(props) {
   const { name } = props;
@@ -326,13 +330,9 @@ function VegaLiteExampleApp() {
                   name: "dnd",
                   mode: "replace",
                 },
-                markType && {
-                  query: { type: "index", query: ["mark", "mark___value"] },
-                  type: "inline",
-                  hasInternalState: false,
-                  mode: "replace",
-                  projection: () => {
-                    const marks = [
+                markType &&
+                  buildInlineDropDownProjection(
+                    [
                       "area",
                       "bar",
                       "circle",
@@ -342,27 +342,11 @@ function VegaLiteExampleApp() {
                       "rule",
                       "square",
                       "tick",
-                    ];
-                    return (
-                      <select
-                        value={markType}
-                        onChange={(e) => {
-                          setCurrentCode(
-                            setIn(
-                              ["mark", "mark___value"],
-                              `"${e.target.value}"`,
-                              currentCode
-                            )
-                          );
-                        }}
-                      >
-                        {marks.map((mark) => (
-                          <option key={mark}>{mark}</option>
-                        ))}
-                      </select>
-                    );
-                  },
-                },
+                    ],
+                    markType,
+                    ["mark", "mark___value"]
+                  ),
+
                 BuildUploadAndInline(["data"]),
               ].filter((x) => x) as Projection[]
             }

@@ -4,7 +4,11 @@ import StandardProjections from "../projections/standard-bundle";
 import VegaSchema from "../constants/vega-schema.json";
 
 import { ProjectionProps, Projection } from "../lib/projections";
-import { analyzeVegaCode, buttonListProjection } from "./example-utils";
+import {
+  analyzeVegaCode,
+  buttonListProjection,
+  buildInlineDropDownProjection,
+} from "./example-utils";
 import VegaExpressionEditor from "./VegaExpressionEditor";
 import {
   createHistograms,
@@ -15,8 +19,7 @@ import {
   isDataTable,
   buildSparkProjection,
 } from "./histograms";
-
-import { setIn } from "../lib/utils";
+import { setIn, simpleParse } from "../lib/utils";
 
 const initialSpec = `{
   "data": [
@@ -132,15 +135,24 @@ function ExpressionEditorProjection(props: EditorProps) {
     setCode(props.currentValue.slice(1, props.currentValue.length - 1));
   }, [props.currentValue]);
   return (
-    <div style={{ width: "405px" }}>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
+    <div className="signal-editor">
+      <div
+        className="signal-editor-list"
+        style={{ display: "flex", flexWrap: "wrap" }}
+      >
         {Object.entries(props.signals).map(([key, value]) => (
           <div key={key} style={{ marginRight: "5px" }}>
             <b>{key}</b>: {JSON.stringify(value)}
           </div>
         ))}
       </div>
-      <div style={{ display: "flex" }}>
+      <div className="flex">
+        <VegaExpressionEditor
+          onChange={(update) => setCode(update)}
+          code={code}
+          terms={Object.keys(props.signals)}
+          onError={(e) => setError(e)}
+        />
         <button
           onClick={() => {
             props.setCode(setIn(props.keyPath, `"${code}"`, props.fullCode));
@@ -148,16 +160,35 @@ function ExpressionEditorProjection(props: EditorProps) {
         >
           UPDATE
         </button>
-        {error && <div style={{ color: "red" }}>{error}</div>}
       </div>
-      <VegaExpressionEditor
-        onChange={(update) => setCode(update)}
-        code={code}
-        terms={Object.keys(props.signals)}
-        onError={(e) => setError(e)}
-      />
+      {error && <div style={{ color: "red" }}>{error}</div>}
     </div>
   );
+}
+
+const mapProjections = [
+  "albers",
+  "albersUsa",
+  "azimuthalEqualArea",
+  "azimuthalEquidistant",
+  "conicConformal",
+  "conicEqualArea",
+  "conicEquidistant",
+  "equalEarth",
+  "equirectangular",
+  "gnomonic",
+  "identity",
+  "mercator",
+  "mollweide",
+  "naturalEarth1",
+  "orthographic",
+  "stereographic",
+  "transverseMercator",
+];
+function getMapProjectionTypes(currentCode: string): string[] {
+  return ((simpleParse(currentCode, {})?.projections || []) as any[])
+    .map((proj) => proj?.type || false)
+    .filter((x) => x);
 }
 
 function VegaUseCase() {
@@ -167,19 +198,20 @@ function VegaUseCase() {
   const [fieldNames, setFieldNames] = useState<string[]>([]);
   const [scaleNames, setScales] = useState<string[]>([]);
   const [signals, setSignals] = useState<any>({});
+  const [mapProjectionTypes, setMapProjectionTypes] = useState<string[]>([]);
 
   useEffect(() => {
-    analyzeVegaCode(currentCode, ({ data }) => {
+    analyzeVegaCode(currentCode, ({ data, signals }) => {
       const namedPairs = Object.entries(data)
         .filter(([key, dataSet]) => isDataTable(dataSet))
         .map(([key, data]) => [key, createHistograms(data as DataTable)]);
       setPrecomputedHistograms(Object.fromEntries(namedPairs));
       setSignals(signals);
       setFieldNames(extractFieldNames(data || {}));
+      setMapProjectionTypes(getMapProjectionTypes(currentCode));
     });
     setScales(extractScaleNames(currentCode));
   }, [currentCode]);
-
   return (
     <Editor
       schema={VegaSchema}
@@ -199,12 +231,17 @@ function VegaUseCase() {
               query: ["exprString", "signal", "expr"],
             },
             name: "Signal Editor",
-            projection: (props) => {
-              return (
-                <ExpressionEditorProjection {...props} signals={signals} />
-              );
-            },
+            projection: (props) => (
+              <ExpressionEditorProjection {...props} signals={signals} />
+            ),
           },
+          ...mapProjectionTypes.map((mapProj, idx) =>
+            buildInlineDropDownProjection(
+              mapProjections,
+              mapProjectionTypes[idx],
+              ["projections", idx, "type", "type___value"]
+            )
+          ),
           {
             type: "tooltip",
             query: {
