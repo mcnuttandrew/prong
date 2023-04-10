@@ -4,7 +4,7 @@ import * as vega from "vega";
 import { parse, View } from "vega";
 
 import { simpleParse, setIn } from "../lib/utils";
-import { ProjectionProps } from "../lib/projections";
+import { ProjectionProps, Projection } from "../lib/projections";
 
 export const maybeTrim = (x: string) => {
   return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
@@ -92,3 +92,29 @@ export const buttonListProjection =
       </div>
     );
   };
+
+export const buildInlineDropDownProjection = (
+  options: string[],
+  currentValue: string,
+  indexTarget: (string | number)[]
+): Projection => ({
+  query: { type: "index", query: indexTarget },
+  type: "inline",
+  hasInternalState: false,
+  mode: "replace",
+  projection: ({ setCode, fullCode }) => {
+    return (
+      <select
+        value={currentValue}
+        aria-label="generic selector"
+        onChange={(e) =>
+          setCode(setIn(indexTarget, `"${e.target.value}"`, fullCode))
+        }
+      >
+        {options.map((opt) => (
+          <option key={opt}>{opt}</option>
+        ))}
+      </select>
+    );
+  },
+});

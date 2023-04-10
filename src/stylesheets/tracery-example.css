@@ -17,17 +17,17 @@
 }
 
 .cascade-container--selected {
-    background-color: aqua;
+    background-color: #004a995d;
 }
 
 
 
 .tracery-in-use {
-    background-color: aquamarine;
+    background-color: #0099785d;
 }
 
 .example-highlighter {
-    background: red;
+    background: #004a995d;
 }
 
 .tracery-app-root {

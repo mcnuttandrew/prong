@@ -2,9 +2,17 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { javascript } from "@codemirror/lang-javascript";
+import { tags } from "@lezer/highlight";
 import { basicSetup } from "codemirror";
-import { EditorView, ViewUpdate } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
+import {
+  EditorView,
+  ViewUpdate,
+  ViewPlugin,
+  DecorationSet,
+  Decoration,
+} from "@codemirror/view";
+import { EditorState, Range } from "@codemirror/state";
+import { parser } from "@lezer/javascript";
 
 import * as vegaExpression from "vega-expression";
 import { walk } from "estree-walker";
@@ -17,13 +25,9 @@ import {
 
 import { simpleUpdate } from "../lib/utils";
 
-let myTheme = EditorView.theme({
-  ".cm-activeLine": { backgroundColor: "none" },
-  ".cm-gutters": { display: "none" },
-});
-
 export type SchemaMap = Record<string, any>;
-
+// vegaExpression.
+// javascript.
 function tryExpression(code: string, signals: string[]): null | string {
   const signalSet = new Set(signals);
   try {
@@ -68,8 +72,8 @@ export default function Editor(props: {
     const editorState = EditorState.create({
       extensions: [
         basicSetup,
+        analogSyntaxHighlighter,
         javascript(),
-        myTheme,
         localExtension,
         autocomplete(terms),
       ],
@@ -115,7 +119,11 @@ function from(list: string[]): CompletionSource {
 }
 
 function autocomplete(words: string[]) {
-  return autocompletion({ activateOnTyping: true, override: [from(words)] });
+  return autocompletion({
+    activateOnTyping: true,
+    override: [from(words)],
+    closeOnBlur: false,
+  });
 }
 
 const terms = [
@@ -298,3 +306,53 @@ const terms = [
 ];
 
 const termSet = new Set(terms);
+
+const blue = "#0551A5";
+const green = "#17885C";
+const red = "#A21615";
+// const black = "#000";
+const colorMap: Record<string, string> = {
+  Number: green,
+  String: red,
+  VariableName: blue,
+};
+
+function doSyntaxHighlighting(view: EditorView) {
+  const widgets: Range<Decoration>[] = [];
+  const code = view.state.doc.sliceString(0);
+  parser.parse(code).iterate({
+    from: 0,
+    to: code.length,
+    enter: ({ node, from, to, type }) => {
+      if (colorMap[node.type.name]) {
+        const style = `color: ${colorMap[node.type.name]}`;
+        const syntaxHighlight = Decoration.mark({ attributes: { style } });
+        widgets.push(syntaxHighlight.range(from, to));
+      }
+    },
+  });
+  try {
+    return Decoration.set(widgets.sort((a, b) => a.from - b.from));
+  } catch (e) {
+    console.log(e);
+    console.log("problem creating widgets");
+    return Decoration.set([]);
+  }
+}
+
+const analogSyntaxHighlighter = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+
+    constructor(view: EditorView) {
+      this.decorations = doSyntaxHighlighting(view);
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = doSyntaxHighlighting(update.view);
+      }
+    }
+  },
+  { decorations: (v) => v.decorations }
+);
