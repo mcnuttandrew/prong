@@ -44,7 +44,9 @@ function Root() {
 
   return (
     <div className="root">
-      <ReactMarkdown>{postMarkdown}</ReactMarkdown>
+      <div className="md-container">
+        <ReactMarkdown>{postMarkdown}</ReactMarkdown>
+      </div>
     </div>
   );
 }
@@ -58,9 +60,13 @@ function App() {
     <HashRouter>
       <div className="flex proot">
         <div className="link-container">
-          <h1>
-            <Link to={"/"}>JSONG</Link>
-          </h1>
+          <Link to={"/"}>
+            <img
+              src={"./logo.png"}
+              alt="logo for jsong. black and white bird face surrounded by white splatters."
+            />
+            <h1>JSONG</h1>
+          </Link>
           {Object.entries(groups).map(([name, groupRoutes]) => {
             return (
               <div key={name}>

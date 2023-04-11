@@ -1,7 +1,7 @@
-# JSONG
+# JSONG: A Protectional JSON Editor
 
 Welcome to the demo page for our tool JSONG.
-This tool is described in detail in our under review paper "Yours for a JSONG: Modular contextual editor augmentations for JSON DSLs almost for free".
+This tool is described in detail in our under review paper "Projection JSON Editors for Low, Low Prices.".
 
 This page contains debugging views that are used to develop the system as well as several example usages.
 

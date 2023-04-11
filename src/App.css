@@ -204,6 +204,18 @@ body, html, #root, .proot {
   height: 100%;
 }
 
+.proot .link-container img {
+  width: 300px;
+}
+
+.proot .link-container h1 {
+  position: absolute;
+  left: 29%;
+  top: 51px;
+  color: #333;
+  text-decoration: none;
+}
+
 #header {
   background: #333;
   color: white;
@@ -219,6 +231,16 @@ body, html, #root, .proot {
   flex-direction: column;
   height: 100%;
   padding: 50px;
+  width: 100%;
+}
+
+.md-container {
+  max-width: 600px;
+  text-align: center;
+}
+
+.md-container a, .md-container a:visited {
+  color: #009979;
 }
 
 .link-container a:visited, .link-container a, #header a, #header a:visited {
@@ -226,13 +248,14 @@ body, html, #root, .proot {
 }
 
 .link-container {
-  background: #333;
+  background: #222222ef;
   color: white;
   height: 100%;
   min-width: 300px;
   padding: 10px;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .cm-editor {
