@@ -6,11 +6,12 @@ import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
 import SimpleExample from "./examples/SimpleExample";
 import ProduceExample from "./examples/ProduceExample";
-import InSituFigure1 from "./examples/InSituFigure1";
+import InSituVis from "./examples/InSituVis";
 import VegaLiteStyler from "./examples/VegaLiteStyler";
 import Tracery from "./examples/TraceryExample";
 import VegaLiteUseCase from "./examples/VegaLiteUseCase";
 import VegaUseCase from "./examples/VegaUseCase";
+import QuiteModeCompare from "./examples/QuietModeCompare";
 
 import markup from "./demo-page.md";
 const routes: {
@@ -28,9 +29,10 @@ const routes: {
   },
 
   { name: "simple", Component: SimpleExample, zone: "Debugging" },
-  { name: "in-situ-figure-1", Component: InSituFigure1, zone: "Examples" },
+  { name: "in-situ-vis", Component: InSituVis, zone: "Examples" },
   { name: "vega-styler", Component: VegaLiteStyler, zone: "Case Studies" },
   { name: "tracery", Component: Tracery, zone: "Examples" },
+  { name: "quite-mode", Component: QuiteModeCompare, zone: "Examples" },
 ];
 
 function Root() {

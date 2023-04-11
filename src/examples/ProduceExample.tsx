@@ -5,99 +5,7 @@ import { JSONSchema7 } from "json-schema";
 import StandardProjections from "../projections/standard-bundle";
 import { Projection } from "../lib/projections";
 import { maybeTrim } from "./example-utils";
-
-const schema: JSONSchema7 = {
-  $id: "https://example.com/arrays.schema.json",
-  $schema: "https://json-schema.org/draft/2020-12/schema",
-  description: "A representation of a person, company, organization, or place",
-  type: "object",
-  required: ["fruits", "vegetables", "meta"],
-  properties: {
-    fruits: {
-      type: "array",
-      description: "wowza what a list of fruit! awoooga",
-      items: { $ref: "#/$defs/fruitie" },
-    },
-    vegetables: {
-      type: "array",
-      description: "just a boring ol list of vegetables",
-      items: { $ref: "#/$defs/veggie" },
-    },
-    meta: {
-      type: "string",
-      description: "just meta data dont worry about it",
-    },
-  },
-  $defs: {
-    veggie: {
-      type: "object",
-      required: ["veggieName", "veggieLike"],
-      properties: {
-        veggieName: {
-          type: "string",
-          description: "The name of the vegetable.",
-        },
-        veggieLike: {
-          type: "boolean",
-          description: "Do I like this vegetable?",
-        },
-        veggieStarRating: {
-          $ref: "#/$defs/veggieStar",
-        },
-      },
-    },
-    veggieStar: {
-      anyOf: [
-        {
-          description: "Stars out of 5",
-          maximum: 5,
-          minimum: 0,
-          type: "number",
-        },
-        {
-          enum: ["Thumbs Up", "Thumbs Down"],
-          type: "string",
-        },
-      ],
-    },
-    fruitie: {
-      enum: [
-        "Apple",
-        "Apricot",
-        "Avocado",
-        "Banana",
-        "Blackberry",
-        "Blueberry",
-        "Cherry",
-        "Coconut",
-        "Cucumber",
-        "Durian",
-        "Dragonfruit",
-        "Fig",
-        "Gooseberry",
-        "Grape",
-        "Guava",
-      ],
-      type: "string",
-      description: "Options for fruit that are allowed",
-    },
-  },
-};
-
-const exampleData = `{
-  "fruits": [ "apple", "orange", "#c71585" ],
-  "vegetables": [
-    {
-      "veggieName": "potato",
-      "veggieLike": true
-    },
-    {
-      "veggieName": "broccoli",
-      "veggieLike": false
-    }
-  ],
-  "meta": "ignore this meta data"
-}`;
+import { produceSchema, produceExample } from "./example-data";
 
 const blue = "#0551A5";
 const green = "#17885C";
@@ -142,7 +50,7 @@ const HideMeta: Projection = {
 };
 
 function ProduceExample() {
-  const [currentCode, setCurrentCode] = React.useState(exampleData);
+  const [currentCode, setCurrentCode] = React.useState(produceExample);
   const [numRows, setNumRows] = React.useState(0);
 
   return (
@@ -151,7 +59,7 @@ function ProduceExample() {
         <h1>ha ha fruit</h1>
       ))}
       <Editor
-        schema={schema}
+        schema={produceSchema}
         code={currentCode}
         onChange={(x) => setCurrentCode(x)}
         projections={[

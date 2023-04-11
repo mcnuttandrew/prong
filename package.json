@@ -58,10 +58,11 @@
   "scripts": {
     "start": "REACT_APP_DISABLE_LIVE_RELOAD=true react-scripts start",
     "trad-start": "react-scripts start",
-    "build": "DISABLE_ESLINT_PLUGIN='true' react-scripts build && npm run prep-data-prod",
+    "build": "DISABLE_ESLINT_PLUGIN='true' react-scripts build && npm run prep-data-prod && npm run cp-quiets",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src",
+    "cp-quiets": "cp src/examples/Quiet* ./public/",
     "prep-data-prod": "rm -rf build/data && mkdir build/data && cp node_modules/vega-datasets/data/* ./build/data/",
     "prep-data": "rm -rf public/data && mkdir public/data && cp node_modules/vega-datasets/data/* ./public/data/"
   },
