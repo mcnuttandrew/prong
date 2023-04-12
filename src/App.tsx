@@ -121,9 +121,16 @@ function Explanation(props: { explanation: string }) {
     return <></>;
   }
   return (
-    <div style={{ marginTop: "15px" }}>
+    <div
+      style={{
+        marginTop: "30px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <h3 className="">Example Explanation</h3>
-      <div>
+      <div style={{ padding: "0 5px", width: "300px" }}>
         <ReactMarkdown>{explanation}</ReactMarkdown>
       </div>
     </div>
@@ -140,15 +147,25 @@ function App() {
       <div className="flex proot">
         <div className="link-container">
           <Link to={"/"}>
-            <img
-              src={"./logo.png"}
-              alt="logo for jsong. black and white bird face surrounded by white splatters."
-            />
-            <h1>JSONG</h1>
+            <div className="hero">
+              <img
+                src={"./logo.png"}
+                alt="logo for jsong. black and white bird face surrounded by white splatters."
+              />
+              <h1>JSONG</h1>
+            </div>
           </Link>
           {Object.entries(groups).map(([name, groupRoutes]) => {
             return (
-              <div key={name} style={{ marginTop: "15px" }}>
+              <div
+                key={name}
+                style={{
+                  marginTop: "15px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <h3 className="">{name}</h3>
                 {groupRoutes.map(({ name }) => (
                   <div key={name}>
