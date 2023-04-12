@@ -232,7 +232,11 @@ function VegaLiteExampleApp() {
             <div>
               Pick from a predefined one
               <div>
-                {["penguins.json", "barley.json", "wheat.json"].map((file) => {
+                {[
+                  // "penguins.json",
+                  "barley.json",
+                  "wheat.json",
+                ].map((file) => {
                   return (
                     <button
                       key={file}

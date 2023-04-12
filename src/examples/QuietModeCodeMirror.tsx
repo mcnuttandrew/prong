@@ -24,7 +24,7 @@ const coloring: Record<string, string> = {
 const trim = (x: string) =>
   x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
 
-function QuiteModeCodeMirror(props: {
+function QuietModeCodeMirror(props: {
   onChange: (code: string) => void;
   code: string;
 }) {
@@ -40,7 +40,7 @@ function QuiteModeCodeMirror(props: {
     });
 
     const editorState = EditorState.create({
-      extensions: [basicSetup, quiteMode, json(), localExtension],
+      extensions: [basicSetup, quietMode, json(), localExtension],
       doc: code,
     })!;
     const view = new EditorView({
@@ -68,12 +68,12 @@ function QuiteModeCodeMirror(props: {
   );
 }
 
-class QuiteWidget extends WidgetType {
+class QuietWidget extends WidgetType {
   constructor(readonly content: string, readonly nodeType: string) {
     super();
   }
 
-  eq(other: QuiteWidget): boolean {
+  eq(other: QuietWidget): boolean {
     return this.content === other.content;
   }
 
@@ -87,14 +87,14 @@ class QuiteWidget extends WidgetType {
     return wrap;
   }
 }
-const quiteMode = ViewPlugin.fromClass(
+const quietMode = ViewPlugin.fromClass(
   class {
     decorations: DecorationSet;
     constructor(view: EditorView) {
-      this.decorations = this.makeQuiteRepresentation(view);
+      this.decorations = this.makeQuietRepresentation(view);
     }
 
-    makeQuiteRepresentation(view: EditorView) {
+    makeQuietRepresentation(view: EditorView) {
       const widgets: Range<Decoration>[] = [];
       const code = view.state.doc.sliceString(0);
       syntaxTree(view.state).iterate({
@@ -102,7 +102,7 @@ const quiteMode = ViewPlugin.fromClass(
         to: code.length,
         enter: ({ node, from, to, type }) => {
           if (coloring[node.type.name]) {
-            const widget = new QuiteWidget(code.slice(from, to), type.name);
+            const widget = new QuietWidget(code.slice(from, to), type.name);
             widgets.push(Decoration.replace({ widget }).range(from, to));
           }
         },
@@ -117,11 +117,11 @@ const quiteMode = ViewPlugin.fromClass(
 
     update(update: ViewUpdate) {
       if (update.docChanged || update.viewportChanged) {
-        this.decorations = this.makeQuiteRepresentation(update.view);
+        this.decorations = this.makeQuietRepresentation(update.view);
       }
     }
   },
   { decorations: (v) => v.decorations }
 );
 
-export default QuiteModeCodeMirror;
+export default QuietModeCodeMirror;

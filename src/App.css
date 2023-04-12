@@ -226,7 +226,7 @@ body, html, #root, .proot {
 }
 
 .root {
-  align-items: center;
+  /* align-items: center; */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -236,7 +236,8 @@ body, html, #root, .proot {
 
 .md-container {
   max-width: 600px;
-  text-align: center;
+  height: calc(100% - 100px);
+  overflow-y: scroll;
 }
 
 .md-container a, .md-container a:visited {
@@ -251,11 +252,13 @@ body, html, #root, .proot {
   background: #222222ef;
   color: white;
   height: 100%;
-  min-width: 300px;
+  /* min-width: 300px; */
+  width: 320px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   position: relative;
+  text-align: center;
 }
 
 .cm-editor {
