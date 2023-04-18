@@ -242,6 +242,7 @@ function TraceryExample() {
   const grammar = simpleParse(currentCode, {});
   useEffect(() => {
     setRoots(generateRoots(currentCode, randomKey));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCode]);
 
   function clickNode(node: TraceryNode) {
@@ -255,6 +256,7 @@ function TraceryExample() {
     }
     const targetedNode = keyPathToNode(keyPath, roots[0], grammar);
     setSelectedNodes(targetedNode ? [targetedNode?.id] : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyPath]);
 
   const availableSymbols = roots.flatMap((root) =>

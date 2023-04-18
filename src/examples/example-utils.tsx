@@ -22,6 +22,7 @@ export const usePersistedState = (name: string, defaultValue: any) => {
     } catch {
       setValue(defaultValue);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export const usePersistedState = (name: string, defaultValue: any) => {
         localStorage.removeItem(lastName);
       } catch {}
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
 
   return [value, setValue];

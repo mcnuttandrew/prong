@@ -2,7 +2,6 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { javascript } from "@codemirror/lang-javascript";
-import { tags } from "@lezer/highlight";
 import { basicSetup } from "codemirror";
 import {
   EditorView,

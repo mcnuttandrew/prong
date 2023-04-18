@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { HashRouter, Route, Routes, Link, useLocation } from "react-router-dom";
+import { HashRouter, Route, Routes, Link } from "react-router-dom";
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
