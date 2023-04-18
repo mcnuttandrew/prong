@@ -14,7 +14,7 @@ const nodeTypes = ["PropertyName", "Number", "String", "Null", "False", "True"];
 const trim = (x: string) =>
   x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;
 
-const QuietModeJSONG = (props: {
+const QuietModeUs = (props: {
   onChange: (code: string) => void;
   code: string;
 }) => (
@@ -38,4 +38,4 @@ const QuietModeJSONG = (props: {
   />
 );
 
-export default QuietModeJSONG;
+export default QuietModeUs;

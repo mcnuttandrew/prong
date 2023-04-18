@@ -1,6 +1,6 @@
-# JSONG
+# Prong
 
-This is the repo for the JSONG editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
+This is the repo for the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
 The basic dependencies of this system are code mirror (which we wrap) and react (which we use as means to specify the extensions).
 Additionally a number of libraries have been forked to support this work, see src/lib/vendor (this won't matter to you, its more an acknowledgement of work).
 
@@ -77,7 +77,7 @@ You dont have to include any of them or all of them, its presented as an object 
 
 ## Projections
 
-The central design abstraction in JSONG are projections. These are lightweight ways to modify the text within the editor to fit your goals.
+The central design abstraction in Prong are projections. These are lightweight ways to modify the text within the editor to fit your goals.
 
 There are four types of projections.
 

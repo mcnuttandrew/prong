@@ -82,7 +82,7 @@ const routes: {
     Component: QuietModeCompare,
     zone: "Examples",
     explanation:
-      'This example compares how long a minimal instantiation of the "quiet mode" view (which removes double quotes) is in both JSONG as well as base Code Mirror. ',
+      'This example compares how long a minimal instantiation of the "quiet mode" view (which removes double quotes) is in both Prong as well as base Code Mirror. ',
   },
 ];
 
@@ -150,9 +150,9 @@ function App() {
             <div className="hero">
               <img
                 src={"./logo.png"}
-                alt="logo for jsong. black and white bird face surrounded by white splatters."
+                alt="logo for prong. black and white bird face surrounded by white splatters."
               />
-              <h1>JSONG</h1>
+              <h1>Prong</h1>
             </div>
           </Link>
           {Object.entries(groups).map(([name, groupRoutes]) => {
