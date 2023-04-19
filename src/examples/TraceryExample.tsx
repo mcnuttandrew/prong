@@ -264,7 +264,6 @@ function unpeelRoot(root: TraceryNode[]) {
 }
 
 const pick = (arr: any[]) => arr[Math.floor(Math.random())];
-// ÆÅÆ
 // https://blixtdev.com/how-to-use-contenteditable-with-react/
 const Editable = (props: {
   txt: string;
