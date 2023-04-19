@@ -37,7 +37,7 @@ function TraceryCascadeVis(props: {
   selectedNodes: string[];
 }) {
   const { node, first, onClick, selectedNodes } = props;
-  const children = node.children || [];
+  const children = node.children || [] || node.preactions;
   if (first) {
     return (
       <div className="flex">
@@ -100,7 +100,9 @@ function getAllNodes(root: TraceryNode) {
   while (queue.length) {
     const current = queue.shift()!;
     allNodes.push(current);
-    (current.children || []).forEach((child) => queue.push(child));
+    (current.children || (current.preactions as any[]) || []).forEach((child) =>
+      queue.push(child)
+    );
   }
   return allNodes;
 }
@@ -113,7 +115,9 @@ type Range = {
   id: string;
   children: Range[];
   parent: Range | undefined;
+  colorIdx: number;
 };
+let colorIdx = 0;
 function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
   let offset = 0;
   const selfLength = (node.finishedText || "").length;
@@ -125,21 +129,26 @@ function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
     id: node.id,
     children: [],
     parent: undefined,
+    colorIdx,
   };
-  const children = (node.children || []).reduce((acc: Range[], child) => {
-    const childLength = (child.finishedText || "").length;
-    const result = computeRanges(
-      child,
-      (from || 0) + offset,
-      (from || 0) + offset + childLength
-    );
-    if (result.length) {
-      target.children.push(result.at(-1)!);
-    }
-    offset += childLength;
-    result.forEach((x: any) => acc.push(x));
-    return acc;
-  }, []);
+  colorIdx = (colorIdx + 1) % 20;
+  const children = (node.children || (node.preactions as any[]) || []).reduce(
+    (acc: Range[], child) => {
+      const childLength = (child.finishedText || "").length;
+      const result = computeRanges(
+        child,
+        (from || 0) + offset,
+        (from || 0) + offset + childLength
+      );
+      if (result.length) {
+        target.children.push(result.at(-1)!);
+      }
+      offset += childLength;
+      result.forEach((x: any) => acc.push(x));
+      return acc;
+    },
+    []
+  );
   return children.concat([target]);
 }
 const addParentsToRanges = (node: Range) => {
@@ -212,16 +221,21 @@ function keyPathToNode(
 }
 
 function nodeToKeyPath(
-  node: TraceryNode,
+  range: Range,
   grammar: Record<string, string[]>
-): (string | number)[][] {
-  const symbol = node.symbol as unknown as string;
-  if (!(symbol && node.childRule)) {
+): { keyPath: (string | number)[]; range: Range }[] {
+  const symbol = range.node.symbol as unknown as string;
+  if (!(symbol && range.node.childRule)) {
     return [];
   }
-  const index = (grammar[symbol] || []).findIndex((x) => x === node.childRule);
+  const index = (grammar[symbol] || []).findIndex(
+    (x) => x === range.node.childRule
+  );
   if (!isNaN(index) && index > -1) {
-    return [[symbol, index], [`${symbol}___key`]];
+    return [
+      { keyPath: [symbol, index], range },
+      { keyPath: [`${symbol}___key`], range },
+    ];
   } else {
     return [];
   }
@@ -250,22 +264,42 @@ function unpeelRoot(root: TraceryNode[]) {
 }
 
 const pick = (arr: any[]) => arr[Math.floor(Math.random())];
-
+// ÆÅÆ
 // https://blixtdev.com/how-to-use-contenteditable-with-react/
-const Editable = (props: { txt: string; setTxt: (txt: string) => void }) => {
+const Editable = (props: {
+  txt: string;
+  setTxt: (txt: string) => void;
+  outOfSync: boolean;
+}) => {
+  const { outOfSync, setTxt, txt } = props;
+  const [content, setContent] = useState(txt);
+  useEffect(() => {
+    setContent(txt);
+  }, [txt, outOfSync]);
   const onContentBlur = React.useCallback((evt) => {
-    props.setTxt(evt.currentTarget.innerHTML);
+    if (outOfSync) {
+      setTxt(txt);
+      setContent(txt);
+    } else {
+      setTxt(evt.currentTarget.innerHTML);
+      setContent(evt.currentTarget.innerHTML);
+    }
   }, []);
 
   return (
-    <div
-      contentEditable
-      onBlur={onContentBlur}
-      onInput={(e) => {
-        props.setTxt(`${e.currentTarget.textContent}`);
-      }}
-      dangerouslySetInnerHTML={{ __html: props.txt }}
-    />
+    <div>
+      <div
+        contentEditable
+        onBlur={onContentBlur}
+        onInput={(e) => {
+          const val = `${e.currentTarget.textContent}`;
+          setContent(val);
+          setTxt(val);
+        }}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+      {outOfSync && <div>Out of Sync</div>}
+    </div>
   );
 };
 
@@ -282,6 +316,7 @@ function manualStrat(
     return;
   }
   const newRoots = generateRoots(oldCode, randomKey);
+  colorIdx = 0;
   const ranges = newRoots.length ? computeRanges(newRoots[0]) : [];
   const idx = newString.split("").findIndex((el, idx) => el !== oldString[idx]);
   const isSwap = newString.length === oldString.length;
@@ -300,11 +335,11 @@ function manualStrat(
     }
     return acc;
   }, undefined);
-  if (!minTarget) {
+  if (!minTarget || !ranges.length) {
     console.log("whoops couldnt find anything");
     return;
   }
-  const raw = ranges[0].node.grammar.raw;
+  const raw = ranges[0]?.node?.grammar?.raw;
   const symbolTarget = climbToSymbol(minTarget.node);
   if (!symbolTarget) {
     console.log("no symbol");
@@ -358,7 +393,7 @@ function synthChange(
   oldString: string,
   oldCode: string,
   randomKey: string,
-  setCode: (code: string) => void
+  setCode: (code: string | false) => void
 ) {
   const parsedObj = simpleParse(oldCode, false);
   if (!parsedObj) {
@@ -398,22 +433,47 @@ function synthChange(
       console.log("manual worked");
       setCode(result);
     } else {
+      setCode(false);
       console.log("fail");
     }
   }
+}
+
+function findMinNode(rootRange: Range, idx: number): Range | false {
+  if (!rootRange.children) {
+    return rootRange.from <= idx && rootRange.to >= idx ? rootRange : false;
+  }
+  let bestScore = Infinity;
+  let bestChoice = rootRange;
+  rootRange.children.forEach((child) => {
+    const bestInSubTree = findMinNode(child, idx);
+    if (!bestInSubTree) {
+      return;
+    }
+    if (bestInSubTree.from <= idx && bestInSubTree.to > idx) {
+      const width = bestInSubTree.to - bestInSubTree.from;
+      if (width < bestScore) {
+        bestScore = width;
+        bestChoice = bestInSubTree;
+      }
+    }
+  });
+
+  return bestChoice;
 }
 
 function TraceryExample() {
   const [currentCode, setCurrentCode] = useState(initialCode);
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [keyPath, setKeyPath] = useState<(string | number)[]>([]);
+  const [outOfSync, setOutOfSync] = useState<boolean>(false);
   const [roots, setRoots] = useState<TraceryNode[]>([]);
   const [randomKey, setRandomKey] = useState("tracery is a fun time");
   const unpeeledRoot = unpeelRoot(roots);
   const grammar = simpleParse(currentCode, {});
   useEffect(() => {
     setRoots(generateRoots(currentCode, randomKey));
-  }, [currentCode]);
+  }, [currentCode, randomKey]);
 
   function clickNode(node: TraceryNode) {
     const nodeId = node.id;
@@ -432,32 +492,62 @@ function TraceryExample() {
     Object.keys(root.grammar.symbols || {})
   );
 
+  colorIdx = 0;
   const ranges = roots.length ? computeRanges(roots[0]) : [];
+  console.log(roots);
   ranges.forEach((x) => addParentsToRanges(x));
-  const inUseKeys = ranges.flatMap((range) =>
-    nodeToKeyPath(range.node, grammar)
-  );
+  const inUseKeys = ranges
+    .flatMap((range) => nodeToKeyPath(range, grammar))
+    .filter((x) => x);
   const txt = roots.length ? roots[0].finishedText || "" : "";
-  const materializedNodes = ranges.filter(({ node }) =>
-    selectedNodes.includes(node.id)
-  );
+  // const materializedNodes = ranges.filter(({ node }) =>
+  //   selectedNodes.includes(node.id)
+  // );
 
   return (
     <div className="flex-down tracery-app-root">
       <div>
         <h1>
+          {/* <div
+            style={{
+              position: "absolute",
+              pointerEvents: "none",
+              opacity: 0.2,
+            }}
+          >
+            {ranges.length > 1 &&
+              txt.split("").map((char, idx) => {
+                const minNode = findMinNode(ranges.at(-1)!, idx);
+                const colorIdx = minNode ? minNode.colorIdx : 0;
+                return (
+                  <span
+                    key={idx}
+                    className={`tracery-in-use tracery-in-use-${colorIdx}`}
+                  >
+                    {char}
+                  </span>
+                );
+              })}
+          </div> */}
           <Editable
             txt={txt}
+            outOfSync={outOfSync}
             setTxt={(newTargetString) => {
-              // const cursorDiffAt = txt
-              //   .split("")
-              //   .findIndex((el, idx) => el !== newTargetString[idx]);
               synthChange(
                 newTargetString,
                 txt,
                 currentCode,
                 randomKey,
-                (code) => setCurrentCode(code)
+                (code) => {
+                  if (code) {
+                    setCurrentCode(code);
+                    setOutOfSync(false);
+                  } else {
+                    console.log("reject");
+                    setOutOfSync(true);
+                    setCurrentCode(currentCode);
+                  }
+                }
               );
             }}
           />
@@ -498,13 +588,10 @@ function TraceryExample() {
               type: "tooltip",
               query: {
                 type: "function",
-                query: (val, type) => {
-                  return (
-                    "PropertyName" === type && unpeeledRoot[maybeTrim(val)]
-                  );
-                },
+                query: (val, type) =>
+                  "PropertyName" === type && unpeeledRoot[maybeTrim(val)],
               },
-              name: "TraceryEditor2",
+              name: "TraceryEditor",
               projection: (props) => {
                 const key = `${props.keyPath[0]}`.split("___")[0];
                 if (unpeeledRoot[key]) {
@@ -571,13 +658,13 @@ function TraceryExample() {
                 );
               },
             },
-            ...inUseKeys.map((query) => ({
+            ...inUseKeys.map((query, idx) => ({
               type: "highlight",
-              query: { type: "index", query },
-              class: "tracery-in-use",
+              query: { type: "index", query: query?.keyPath },
+              class: `tracery-in-use tracery-in-use-${query.range.colorIdx}`,
             })),
 
-            ...assembleHighlight(materializedNodes, grammar),
+            // ...assembleHighlight(materializedNodes, grammar),
           ] as Projection[]
         }
       />
