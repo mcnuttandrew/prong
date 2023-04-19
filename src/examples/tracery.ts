@@ -343,7 +343,7 @@ export class NodeAction {
         // @ts-ignore
         grammar.pushRules(this.target, this.ruleText, this);
         // @ts-ignore
-        console.log("Push rules:" + this.target + " " + this.ruleText);
+        // console.log("Push rules:" + this.target + " " + this.ruleText);
         break;
       case 1:
         break;
