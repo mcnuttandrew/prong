@@ -5,6 +5,7 @@ import { simpleParse } from "../lib/utils";
 import "../stylesheets/tracery-example.css";
 import { Projection } from "../lib/projections";
 import { maybeTrim } from "./example-utils";
+import { setIn } from "../lib/utils";
 
 import Editor from "../components/Editor";
 
@@ -110,33 +111,43 @@ type Range = {
   to: number;
   text: string;
   id: string;
+  children: Range[];
+  parent: Range | undefined;
 };
 function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
   let offset = 0;
   const selfLength = (node.finishedText || "").length;
-  return (node.children || []).reduce(
-    (acc: any, child) => {
-      const childLength = (child.finishedText || "").length;
-      const result = computeRanges(
-        child,
-        (from || 0) + offset,
-        (from || 0) + offset + childLength
-      );
-      offset += childLength;
-      result.forEach((x: any) => acc.push(x));
-      return acc;
-    },
-    [
-      {
-        node,
-        from: from || 0,
-        to: to || selfLength,
-        text: node.finishedText,
-        id: node.id,
-      },
-    ]
-  );
+  const target: Range = {
+    node,
+    from: from || 0,
+    to: to || selfLength,
+    text: node.finishedText as string,
+    id: node.id,
+    children: [],
+    parent: undefined,
+  };
+  const children = (node.children || []).reduce((acc: Range[], child) => {
+    const childLength = (child.finishedText || "").length;
+    const result = computeRanges(
+      child,
+      (from || 0) + offset,
+      (from || 0) + offset + childLength
+    );
+    if (result.length) {
+      target.children.push(result.at(-1)!);
+    }
+    offset += childLength;
+    result.forEach((x: any) => acc.push(x));
+    return acc;
+  }, []);
+  return children.concat([target]);
 }
+const addParentsToRanges = (node: Range) => {
+  node.children.forEach((child) => {
+    child.parent = node;
+    addParentsToRanges(child);
+  });
+};
 
 const recurseToRoot = (node: TraceryNode): TraceryNode[] =>
   [node].concat(node.parent ? recurseToRoot(node.parent) : []);
@@ -220,6 +231,14 @@ const insertInto = (str: string, idx: number, subStr: string) => {
   return `${str.slice(0, idx)}${subStr}${str.slice(idx)}`;
 };
 
+const deleteAt = (str: string, idx: number) => {
+  return str.substring(0, idx) + str.substring(idx + 1, str.length);
+};
+
+const swapAt = (str: string, idx: number, subStr: string) => {
+  return str.slice(0, idx) + subStr + str.slice(idx + subStr.length);
+};
+
 function unpeelRoot(root: TraceryNode[]) {
   return root.length === 0
     ? {}
@@ -231,6 +250,158 @@ function unpeelRoot(root: TraceryNode[]) {
 }
 
 const pick = (arr: any[]) => arr[Math.floor(Math.random())];
+
+// https://blixtdev.com/how-to-use-contenteditable-with-react/
+const Editable = (props: { txt: string; setTxt: (txt: string) => void }) => {
+  const onContentBlur = React.useCallback((evt) => {
+    props.setTxt(evt.currentTarget.innerHTML);
+  }, []);
+
+  return (
+    <div
+      contentEditable
+      onBlur={onContentBlur}
+      onInput={(e) => {
+        props.setTxt(`${e.currentTarget.textContent}`);
+      }}
+      dangerouslySetInnerHTML={{ __html: props.txt }}
+    />
+  );
+};
+
+const climbToSymbol = (node: TraceryNode): TraceryNode | undefined =>
+  node.symbol ? node : node.parent ? climbToSymbol(node.parent) : undefined;
+
+function manualStrat(
+  newString: string,
+  oldString: string,
+  oldCode: string,
+  randomKey: string
+) {
+  if (newString.length < oldString.length) {
+    return;
+  }
+  const newRoots = generateRoots(oldCode, randomKey);
+  const ranges = newRoots.length ? computeRanges(newRoots[0]) : [];
+  const idx = newString.split("").findIndex((el, idx) => el !== oldString[idx]);
+  const isSwap = newString.length === oldString.length;
+  const newChar = newString[idx];
+
+  const minTarget = ranges.reduce((acc: Range | undefined, row) => {
+    const insideRange = row.from <= idx - 1 && row.to >= idx;
+    if (!acc) {
+      return insideRange ? row : acc;
+    }
+    // not sure about this soft bound
+    const width = row.to - row.from;
+    const oldWidth = acc.to - acc.to;
+    if (insideRange) {
+      return width <= oldWidth ? row : acc;
+    }
+    return acc;
+  }, undefined);
+  if (!minTarget) {
+    console.log("whoops couldnt find anything");
+    return;
+  }
+  const raw = ranges[0].node.grammar.raw;
+  const symbolTarget = climbToSymbol(minTarget.node);
+  if (!symbolTarget) {
+    console.log("no symbol");
+    return;
+  }
+  const symbol = symbolTarget.symbol as unknown as string | undefined;
+  const row = raw[symbol as any];
+  const oldVal = minTarget.text;
+  const posInOldRow = row.findIndex((x: string) => x === oldVal);
+  if (posInOldRow === -1) {
+    return;
+  }
+  const slicePoint = idx - minTarget.from;
+  const newText = isSwap
+    ? `"${swapAt(minTarget.text, slicePoint, newChar)}"`
+    : `"${insertInto(minTarget.text, slicePoint, newChar)}"`;
+  return setIn([symbol, posInOldRow], newText, oldCode);
+}
+
+function getChange(
+  newString: string,
+  oldString: string
+): { isSwap: boolean; isDelete: boolean; newSub: string | undefined } {
+  if (newString.length < oldString.length) {
+    return { isSwap: false, isDelete: true, newSub: undefined };
+  }
+  const isSwap = newString.length === oldString.length;
+  if (isSwap) {
+    const idx = newString
+      .split("")
+      .findIndex((el, idx) => el !== oldString[idx]);
+    return { isSwap, isDelete: false, newSub: newString[idx] };
+  }
+  for (let idx = 0; idx < newString.length; idx++) {
+    for (let jdx = idx - 1; jdx < newString.length; jdx++) {
+      const newVersion = newString.slice(0, idx) + newString.slice(jdx);
+      if (newVersion === oldString) {
+        return {
+          isSwap: false,
+          isDelete: false,
+          newSub: newString.slice(idx, jdx),
+        };
+      }
+    }
+  }
+  return { isSwap: false, isDelete: false, newSub: newString };
+}
+
+function synthChange(
+  newString: string,
+  oldString: string,
+  oldCode: string,
+  randomKey: string,
+  setCode: (code: string) => void
+) {
+  const parsedObj = simpleParse(oldCode, false);
+  if (!parsedObj) {
+    console.log("bailed");
+    return;
+  }
+  let success = false;
+  const { isDelete, newSub, isSwap } = getChange(newString, oldString);
+  Object.entries(parsedObj as Record<string, string[]>).forEach(
+    ([key, values]) => {
+      values.forEach((val, idx) => {
+        val.split("").forEach((_, jdx) => {
+          if (success) {
+            return;
+          }
+          const newVal = isDelete
+            ? deleteAt(val, jdx)
+            : isSwap
+            ? swapAt(val, jdx, `${newSub}`)
+            : insertInto(val, jdx, `${newSub}`);
+          const newCode = setIn([key, idx], `"${newVal}"`, oldCode);
+          const newRoots = generateRoots(newCode, randomKey);
+          if (newRoots.length) {
+            const txt = newRoots.length ? newRoots[0].finishedText || "" : "";
+            if (txt.toLowerCase() === newString.toLowerCase()) {
+              success = true;
+              setCode(newCode);
+            }
+          }
+        });
+      });
+    }
+  );
+  if (!success) {
+    const result = manualStrat(newString, oldString, oldCode, randomKey);
+    if (result) {
+      console.log("manual worked");
+      setCode(result);
+    } else {
+      console.log("fail");
+    }
+  }
+}
 
 function TraceryExample() {
   const [currentCode, setCurrentCode] = useState(initialCode);
@@ -262,6 +433,7 @@ function TraceryExample() {
   );
 
   const ranges = roots.length ? computeRanges(roots[0]) : [];
+  ranges.forEach((x) => addParentsToRanges(x));
   const inUseKeys = ranges.flatMap((range) =>
     nodeToKeyPath(range.node, grammar)
   );
@@ -274,7 +446,21 @@ function TraceryExample() {
     <div className="flex-down tracery-app-root">
       <div>
         <h1>
-          <div>{txt}</div>
+          <Editable
+            txt={txt}
+            setTxt={(newTargetString) => {
+              // const cursorDiffAt = txt
+              //   .split("")
+              //   .findIndex((el, idx) => el !== newTargetString[idx]);
+              synthChange(
+                newTargetString,
+                txt,
+                currentCode,
+                randomKey,
+                (code) => setCurrentCode(code)
+              );
+            }}
+          />
           <div></div>
         </h1>
       </div>
