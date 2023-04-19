@@ -75,7 +75,7 @@ const routes: {
     Component: Tracery,
     zone: "Examples",
     explanation:
-      "This example looks at the procedural generative language [Tracery](https://tracery.io/), which supports automatic narrative generation for contexts like [twitter bots](https://cheapbotsdonequick.com/) (rip). The rules define a simple generative grammar which is then randomly unfolded to get a given iteration. The custom views here support some highlighting which elements were drawn on as well as a debugging view inspired by the [Tracery Editor](http://tracery.io/editor/)",
+      "This example looks at the procedural generative language [Tracery](https://tracery.io/), which supports automatic narrative generation for contexts like [twitter bots](https://cheapbotsdonequick.com/) (rip). The rules define a simple generative grammar which is then randomly unfolded to get a given iteration. The custom views here support some highlighting which elements were drawn on as well as a debugging view inspired by the [Tracery Editor](http://tracery.io/editor/). This example also supports limited bidirectional manipulation, such that the you can modify the output and have those edits propagate to the grammar.",
   },
   {
     name: "quiet-mode",
