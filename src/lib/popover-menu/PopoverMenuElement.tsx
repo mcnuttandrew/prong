@@ -4,7 +4,7 @@ import { classNames } from "../utils";
 import { MenuEvent } from "../modify-json";
 import { MenuRow } from "../compute-menu-contents";
 import { parseTree, Node } from "jsonc-parser";
-import { colorNames, colorRegex } from "../utils";
+import { colorNames } from "../utils";
 
 type MenuElementRenderer<T> = (props: {
   eventDispatch: (menuEvent: MenuEvent, shouldCloseMenu?: boolean) => void;

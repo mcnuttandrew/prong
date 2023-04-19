@@ -485,6 +485,7 @@ function TraceryExample() {
     }
     const targetedNode = keyPathToNode(keyPath, roots[0], grammar);
     setSelectedNodes(targetedNode ? [targetedNode?.id] : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyPath]);
 
   const availableSymbols = roots.flatMap((root) =>

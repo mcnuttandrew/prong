@@ -1,7 +1,6 @@
 import React from "react";
 
 import Editor from "../components/Editor";
-import { JSONSchema7 } from "json-schema";
 import StandardProjections from "../projections/standard-bundle";
 import { Projection } from "../lib/projections";
 import { maybeTrim } from "./example-utils";
