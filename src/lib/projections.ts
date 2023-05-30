@@ -72,7 +72,6 @@ function widgetBuilder(
 ) {
   const widgets: Range<Decoration>[] = [];
   const { schemaTypings, codeUpdateHook } = state.field(cmStatePlugin);
-  // for (const { from, to } of view.visibleRanges) {
   const logger = new Set();
   syntaxTree(state).iterate({
     from: 0,
@@ -97,7 +96,7 @@ function widgetBuilder(
         });
     },
   });
-  // }
+
   try {
     const result = Decoration.set(widgets.sort((a, b) => a.from - b.from));
     return result;
@@ -221,6 +220,9 @@ function identifyProjectionLocationsPreCache(state: EditorState) {
   ) as ProjectionInline[];
   syntaxTree(state).iterate({
     enter: ({ from, to, node }) => {
+      if (node.node.type.name === "⚠") {
+        return;
+      }
       const baseRange = state.selection.ranges[0];
       let blockChildren = false;
       inlineProjections.forEach((projection) => {

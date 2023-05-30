@@ -223,83 +223,6 @@ export function syntaxNodeToAbsPath(node: SyntaxNode): AbsPathItem[] {
   return (parent ? syntaxNodeToAbsPath(parent) : []).concat(add);
 }
 
-/**
- * Transform an absolute path item list into our key path notation
- * @param absPath
- * @param root
- * @returns
- */
-function absPathToKeyPath(
-  absPath: AbsPathItem[],
-  root: any
-): (string | number)[] {
-  const keyPath: (string | number)[] = [];
-  const pointerLog = [];
-  let idx = 1;
-  while (idx < absPath.length) {
-    const item = absPath[idx];
-    const pointer = getNestedVal(keyPath, root);
-    pointerLog.push(pointer);
-    switch (item.nodeType) {
-      case "Array":
-        if (absPath.at(idx + 1)) {
-          const arrayKey = absPath[idx + 1].index;
-          keyPath.push(arrayKey);
-        } else if (absPath[idx - 1].nodeType === "Property") {
-          // this may lead to bug watch out
-          const terminal = keyPath.at(-1);
-          keyPath.push(`${terminal}___value`);
-        }
-        break;
-      case "Object":
-        if (absPath.at(idx + 1)) {
-          const nextItem = absPath[idx + 1]; // a property node
-          const targetIndex = nextItem.index;
-          // TODO there's a bug here, not sure what
-          // console.log("bugger", targetIndex, pointer);
-          const objKey = Object.keys(pointer)[targetIndex];
-          keyPath.push(objKey);
-        }
-        break;
-      case "Property":
-        break;
-      case "PropertyName":
-        const PropertyNameTerminal = keyPath.pop();
-        keyPath.push(`${PropertyNameTerminal}___key`);
-        break;
-      case "Number":
-      case "String":
-      case "Boolean":
-        const prevItem = absPath[idx - 1];
-        if (prevItem.nodeType === "Property") {
-          const terminal = keyPath.at(-1);
-          keyPath.push(`${terminal}___value`);
-        }
-        break;
-      default:
-        break;
-    }
-
-    idx++;
-  }
-  return keyPath;
-}
-
-const getNestedVal = (props: (string | number)[], obj: any) =>
-  props.reduce((a, prop) => a[prop], obj);
-
-let prevCode: string | undefined = undefined;
-let prevVal: any = {};
-const parseWithCache = (code: string): any => {
-  if (prevCode && code === prevCode) {
-    return prevVal;
-  }
-  const result = Json.parse(code);
-  prevVal = result;
-  prevCode = code;
-  return result;
-};
-
 let codeKey = "";
 let pathCache: Record<string, (string | number)[]> = {};
 export function syntaxNodeToKeyPath(
@@ -313,26 +236,16 @@ export function syntaxNodeToKeyPath(
   if (pathCache[cacheKey]) {
     return pathCache[cacheKey];
   }
-  const absPath = syntaxNodeToAbsPath(node);
-  let parsedRoot = {};
-  try {
-    parsedRoot = parseWithCache(fullCode);
-  } catch (e) {
-    console.error(e);
-    console.error("ERROR CREATING PATH", fullCode);
-    return [];
+  const loc = Json.getLocation(fullCode, node.from);
+  const path = loc.path;
+  if (node.type.name === "PropertyName") {
+    path[path.length - 1] = `${path.at(-1)}___key`;
+  } else if (node.parent?.type.name === "Property") {
+    path.push(`${path.at(-1)}___value`);
   }
-
-  try {
-    const resultPath = absPathToKeyPath(absPath, parsedRoot);
-    pathCache[cacheKey] = resultPath;
-    codeKey = fullCode;
-    return pathCache[cacheKey];
-  } catch (e) {
-    console.error(e);
-    console.error("ERROR CREATING PATH", absPath, parsedRoot);
-    return [];
-  }
+  pathCache[cacheKey] = loc.path;
+  codeKey = fullCode;
+  return loc.path;
 }
 
 function findParseTargetWidth(
