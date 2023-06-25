@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
+
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 
 import "./App.css";
@@ -12,6 +12,9 @@ import Tracery from "./examples/TraceryExample";
 import VegaLiteUseCase from "./examples/VegaLiteUseCase";
 import VegaUseCase from "./examples/VegaUseCase";
 import QuietModeCompare from "./examples/QuietModeCompare";
+
+import StyledMarkdown from "./examples/StyledMarkdown";
+import ReactMarkdown from "react-markdown";
 
 import markup from "./demo-page.md";
 const routes: {
@@ -108,8 +111,8 @@ function Root() {
   return (
     <div className="root">
       <div className="md-container">
-        <ReactMarkdown>{postMarkdown}</ReactMarkdown>
-        <ReactMarkdown>{docs}</ReactMarkdown>
+        <StyledMarkdown content={postMarkdown} />
+        <StyledMarkdown content={docs} />
       </div>
     </div>
   );
