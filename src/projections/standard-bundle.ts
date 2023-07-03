@@ -17,7 +17,7 @@ const bundle = {
   ClickTarget,
   ColorChip,
   ConvertHex: HexConversionProject,
-  Debugger,
+  // Debugger,
   // HeuristicJSONFixes,
   InsertRandomWord,
   NumberSlider,
