@@ -134,7 +134,7 @@ const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
     from = objNode.prevSibling!.to;
     to = objNode.nextSibling!.from;
   }
-  return { value: "", from: from!, to: to! };
+  return { value: "", from: from, to: to };
 };
 
 const removeElementFromArray: ModifyCmd<removeElementFromArrayEvent> = (
@@ -167,7 +167,7 @@ const removeElementFromArray: ModifyCmd<removeElementFromArrayEvent> = (
     from = syntaxNode.prevSibling!.to;
     to = syntaxNode.nextSibling!.from;
   }
-  return { value: "", from: from!, to: to! };
+  return { value: "", from: from, to: to };
 };
 
 const simpleSwap: ModifyCmd<simpleSwapEvent> = (value, syntaxNode) => {
@@ -284,7 +284,7 @@ const addObjectKeyPre: ModifyCmd<addObjectKeyEvent> = (
   return {
     value: `${prefixB}${indentation}${key}: ${value}${suffix}`,
     from: approxTarget.to,
-    to: nextSib!.from,
+    to: nextSib.from,
   };
 };
 
@@ -318,7 +318,7 @@ function rotateToAdaptivePosition(
   if (node.type.name === "Object" || node.type.name === "Array") {
     next = node.firstChild!;
   } else {
-    next = node!.parent!.firstChild!;
+    next = node.parent!.firstChild!;
   }
   while (next.nextSibling && next.nextSibling.from < cursorPos) {
     next = next.nextSibling;
@@ -386,7 +386,7 @@ const addElementAsSiblingInArrayPre: ModifyCmd<
   );
   const indentation = "";
   const prefixA = (hasType(prevSib, "[") ? "" : ",") + prevSep;
-  let suffix =
+  const suffix =
     (hasType(nextSib, "]") || hasType(approxTarget, "]") ? "" : ",") + nextSep;
 
   if (hasType(approxTarget, "⚠")) {
@@ -416,7 +416,7 @@ const addElementAsSiblingInArrayPre: ModifyCmd<
   return {
     value: `${prefixB}${indentation}${payload}${suffix}`,
     from: approxTarget.to,
-    to: nextSib!.from,
+    to: nextSib.from,
   };
 };
 

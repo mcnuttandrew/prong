@@ -67,7 +67,10 @@ const ObjPicker: SchemaBasedComponent = (props) => {
         content,
         onSelect: {
           type: "addObjectKey",
-          payload: { key: `"${content}"`, value: materializeAnyOfOption(prop) },
+          payload: {
+            key: `"${content as string}"`,
+            value: materializeAnyOfOption(prop),
+          },
           nodeId: nodeToId(node),
         },
       };
@@ -405,7 +408,7 @@ const AnyOfPicker: SchemaBasedComponent = (props) => {
             // },
             currentNodeType !== opt.type && {
               type: "button",
-              content: `${opt.type}`,
+              content: `${opt.type as string}`,
               onSelect: {
                 type: "simpleSwap",
                 payload: simpleTypeMap[opt.type],

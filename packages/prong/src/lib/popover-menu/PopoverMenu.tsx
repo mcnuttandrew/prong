@@ -90,7 +90,7 @@ function PopOverMenuContents(props: {
     }
   }, [selectedRouting]);
 
-  let filteredMenu = searchTerm
+  const filteredMenu = searchTerm
     ? filterContents(searchTerm, menuContents)
     : menuContents;
   return (
@@ -283,7 +283,7 @@ class Tooltip {
     });
 
     // todo use this cache
-    let fullMenuContents = simpleMerge(
+    const fullMenuContents = simpleMerge(
       maybeFilterToFullProjection([...menuContents, ...projectionContents])
     );
 

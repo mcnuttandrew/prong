@@ -64,7 +64,8 @@ export function equals(one: any, other: any): boolean {
     return false;
   }
 
-  var i: number, key: string;
+  let i: number;
+  let key: string;
 
   if (Array.isArray(one)) {
     if (one.length !== other.length) {
@@ -76,13 +77,13 @@ export function equals(one: any, other: any): boolean {
       }
     }
   } else {
-    var oneKeys: string[] = [];
+    const oneKeys: string[] = [];
 
     for (key in one) {
       oneKeys.push(key);
     }
     oneKeys.sort();
-    var otherKeys: string[] = [];
+    const otherKeys: string[] = [];
     for (key in other) {
       otherKeys.push(key);
     }

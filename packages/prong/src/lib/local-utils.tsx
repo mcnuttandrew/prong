@@ -18,7 +18,9 @@ export const usePersistedState = (name: string, defaultValue: any) => {
   useEffect(() => {
     try {
       localStorage.setItem(nameRef.current, value);
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
   }, [value]);
 
   useEffect(() => {
@@ -28,7 +30,9 @@ export const usePersistedState = (name: string, defaultValue: any) => {
         localStorage.setItem(name, value);
         nameRef.current = name;
         localStorage.removeItem(lastName);
-      } catch {}
+      } catch (e) {
+        console.error(e);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);

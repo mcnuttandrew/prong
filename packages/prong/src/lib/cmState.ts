@@ -80,7 +80,11 @@ export const cmStateView = ViewPlugin.fromClass(
         lintCode(schema, code).then((diagnostics) =>
           setDiagnostics.of(diagnostics)
         ),
-      ]).then((effects) => view.dispatch({ effects }));
+      ])
+        .then((effects) => view.dispatch({ effects }))
+        .catch((e) => {
+          console.error(e);
+        });
     }
 
     update(update: ViewUpdate) {

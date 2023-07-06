@@ -156,7 +156,7 @@ function computeContents(tr: Transaction, targetNode: SyntaxNode) {
   const { schemaTypings, diagnostics } = tr.state.field(cmStatePlugin);
   const fullCode = tr.state.doc.toString();
 
-  let contents = [
+  const contents = [
     ...generateMenuContent(targetNode, schemaTypings, fullCode),
     ...prepDiagnostics(diagnostics, targetNode),
   ] as MenuRow[];
@@ -214,7 +214,7 @@ export function buildProjectionsForMenu(props: {
     return [] as MenuRow[];
   }
   const keyPath = syntaxNodeToKeyPath(node, fullCode);
-  return getProjectionContents(state, node!, currentCodeSlice).map((proj) => ({
+  return getProjectionContents(state, node, currentCodeSlice).map((proj) => ({
     label: (proj as ProjectionFullTooltip | ProjectionTooltip).name,
     elements: [
       {
@@ -272,7 +272,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
 
     // main path
     const targetNode = getMenuTargetNode(tr.state);
-    let pos = tr.state.selection.ranges[0].from;
+    const pos = tr.state.selection.ranges[0].from;
 
     // dont show up before user initiates things
     if (state.menuState === "preFirstUse") {

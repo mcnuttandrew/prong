@@ -81,7 +81,7 @@ const simpleMatchers = {
   value: valueQuery,
   function: functionQuery,
 };
-let cache: Record<string, boolean> = {};
+const cache: Record<string, boolean> = {};
 export function runProjectionQuery(
   query: ProjectionQuery,
   keyPath: (string | number)[],

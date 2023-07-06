@@ -6,7 +6,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "jest",
-    "prepack": "json -f package.json -I -e \"delete this.devDependencies; delete this.dependencies\""
+    "prepack": "json -f package.json -I -e \"delete this.devDependencies; delete this.dependencies\"",
+    "lint": "eslint src/"
   },
   "dependencies": {
     "@codemirror/commands": "^6.1.2",

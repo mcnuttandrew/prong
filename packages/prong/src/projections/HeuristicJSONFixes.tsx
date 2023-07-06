@@ -18,12 +18,12 @@ const HeuristicJSONFixes: Projection = {
       return (
         <button
           onClick={() => {
-            let newVal = val
+            let newVal: string = val
               .split("")
               .filter((x: string) => !quotes.has(x) && x !== ",")
               .join("");
             newVal = `"${newVal}"`;
-            let endsInComma = val.at(-1) === ",";
+            const endsInComma: boolean = val.at(-1) === ",";
             if (endsInComma) {
               newVal = `${newVal},`;
             }

@@ -208,8 +208,7 @@ function ColorNamePicker(props: {
   const { cb, initColor } = props;
   const strippedInitColor = stripColor(initColor);
   const initColorGroup = Object.entries(colorGroups).find(
-    ([_, colors]) =>
-      colors.includes(initColor) || colors.includes(strippedInitColor)
+    (x) => x[1].includes(initColor) || x[1].includes(strippedInitColor)
   );
   if (!initColorGroup) {
     throw new Error("Invalid color passed to the color name picker");
@@ -280,7 +279,7 @@ export const ColorNameProjection: Projection = {
     return (
       <ColorNamePicker
         cb={(newColor) => {
-          setCode(setIn(keyPath, `"${newColor}"`, fullCode));
+          setCode(setIn(keyPath, `"${newColor!}"`, fullCode));
         }}
         initColor={currentValue}
       />

@@ -98,11 +98,11 @@ function getSchemaForRetargetedNode(
   node: SyntaxNode,
   schemaMap: SchemaMap
 ): JSONSchema7[] {
-  let targetNode = retargetToAppropriateNode(node);
+  const targetNode = retargetToAppropriateNode(node);
   const from = targetNode.from;
   const to = targetNode.to;
 
-  let schemaChunk: JSONSchema7[] = schemaMap[`${from}-${to}`];
+  const schemaChunk: JSONSchema7[] = schemaMap[`${from}-${to}`];
   return schemaChunk;
   // todo remove below
   // if (schemaChunk?.length > 1) {

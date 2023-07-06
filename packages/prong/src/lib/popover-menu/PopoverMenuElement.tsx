@@ -43,7 +43,7 @@ const InputElement: MenuElementRenderer<any> = (props) => {
     const response = {
       ...menuElement.onSelect,
       payload: {
-        key: `"${ref.current?.value}"`,
+        key: `"${ref.current?.value!}"`,
         value: menuElement.onSelect.payload.value,
       },
     };
@@ -59,7 +59,7 @@ const InputElement: MenuElementRenderer<any> = (props) => {
     >
       <input
         ref={ref}
-        title={`Input element for ${menuElement.label}`}
+        title={`Input element for ${menuElement.label as string}`}
         onKeyPress={(e) => {
           if (e.key === "Enter") {
             e.stopPropagation();
@@ -77,7 +77,7 @@ function treeToShortString(node: Node): string {
     if (node.type === "string" && !node.value.length) {
       return '""';
     }
-    return `${node.value}`;
+    return `${node.value as string}`;
   }
   if (node.type === "property") {
     const key = treeToShortString(node.children[0]);

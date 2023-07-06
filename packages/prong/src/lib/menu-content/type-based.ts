@@ -254,7 +254,7 @@ export function evalTypeBasedContent(
   const type = syntaxNode.type.name;
   const output: MenuRow[] = [];
 
-  let typeBasedProperty: TypeComponent | null = typeBasedComponents[type];
+  const typeBasedProperty: TypeComponent | null = typeBasedComponents[type];
 
   if (typeBasedProperty) {
     typeBasedProperty(componentProps).forEach((x) => output.push(x));

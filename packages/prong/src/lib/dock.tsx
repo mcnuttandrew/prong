@@ -208,7 +208,7 @@ function RenderPopoverDocked(props: {
     });
   }, [buildTriggerRerender]);
   // TODO dock mode removed for now
-  let isMonocle = true;
+  const isMonocle = true;
   const content = (
     <Content
       menuContents={menuContents}
@@ -238,7 +238,7 @@ function RenderPopoverDocked(props: {
 }
 
 function panel(view: EditorView): Panel {
-  let dom = document.createElement("div");
+  const dom = document.createElement("div");
   let triggerRerender: any = () => {};
   const element = createElement(RenderPopoverDocked, {
     buildTriggerRerender: (binder) => {

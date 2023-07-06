@@ -31,5 +31,16 @@ module.exports = {
     "@typescript-eslint/no-unsafe-member-access": 0,
     "@typescript-eslint/no-unsafe-return": 0,
     "@typescript-eslint/no-non-null-asserted-optional-chain": 0,
+    "react-refresh/only-export-components": 0,
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-unused-vars": [
+      "warn", // or "error"
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      },
+    ],
   },
 };

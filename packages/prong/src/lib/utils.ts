@@ -239,9 +239,9 @@ export function syntaxNodeToKeyPath(
   const loc = Json.getLocation(fullCode, node.from);
   const path = loc.path;
   if (node.type.name === "PropertyName") {
-    path[path.length - 1] = `${path.at(-1)}___key`;
+    path[path.length - 1] = `${path.at(-1)!}___key`;
   } else if (node.parent?.type.name === "Property") {
-    path.push(`${path.at(-1)}___value`);
+    path.push(`${path.at(-1)!}___value`);
   }
   pathCache[cacheKey] = loc.path;
   codeKey = fullCode;
@@ -262,23 +262,26 @@ function findParseTargetWidth(
     case "null":
     case "string":
       return "error";
-    case "array":
+    case "array": {
       const nextItemArray = (tree.children || [])[head as number];
       return nextItemArray
         ? findParseTargetWidth(nextItemArray, tail)
         : "error";
-    case "object":
+    }
+    case "object": {
       const itemProp = (tree.children || []).find((property) => {
         const [key] = property.children || [];
         return key ? key.value === head : "error";
       });
       return !itemProp ? "error" : findParseTargetWidth(itemProp, keyPath);
-    case "property":
+    }
+    case "property": {
       const [key, value] = tree.children!;
       if (`${tail[0]}`.includes("___key")) {
         return { from: key.offset, to: key.offset + key.length };
       }
       return findParseTargetWidth(value, tail);
+    }
     default:
       return "error";
   }
@@ -343,7 +346,7 @@ export function getMenuTargetNode(state: EditorState) {
   });
 
   const target = possibleMenuTargets.reduce(
-    (acc: { dist: Number; target: SyntaxNode | null }, row) => {
+    (acc: { dist: number; target: SyntaxNode | null }, row) => {
       const dist = row.to - row.from;
       // these hueristics try to pick out an free typing (denoted via an error)
       if (
