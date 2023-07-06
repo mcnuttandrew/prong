@@ -7,13 +7,14 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
+      logDiagnostics: true,
       insertTypesEntry: true,
     }),
   ],
   build: {
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
-      name: "MyLib",
+      name: "prong",
       formats: ["es", "umd"],
       fileName: (format) => `prong.${format}.js`,
     },

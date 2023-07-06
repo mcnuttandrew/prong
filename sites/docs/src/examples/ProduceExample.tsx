@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Editor, StandardBundle, Projection, utils } from "prong";
 import { produceSchema, produceExample } from "./example-data";
 
@@ -44,8 +45,8 @@ const HideMeta: Projection = {
 };
 
 function ProduceExample() {
-  const [currentCode, setCurrentCode] = React.useState(produceExample);
-  const [numRows, setNumRows] = React.useState(0);
+  const [currentCode, setCurrentCode] = useState(produceExample);
+  const [numRows, setNumRows] = useState(0);
 
   return (
     <div>

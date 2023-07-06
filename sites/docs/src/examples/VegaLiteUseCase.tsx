@@ -85,7 +85,7 @@ const Shelf: FC<{
   );
 };
 
-const UploadAndInline: React.FC<ProjectionProps> = (props) => {
+const UploadAndInline: FC<ProjectionProps> = (props) => {
   const { keyPath, fullCode, setCode } = props;
   return (
     <label>
@@ -114,7 +114,7 @@ const UploadAndInline: React.FC<ProjectionProps> = (props) => {
   );
 };
 
-const UploadDataset: React.FC<{
+const UploadDataset: FC<{
   setCode: (code: string) => void;
   fullCode: string;
 }> = ({ setCode, fullCode }) => {

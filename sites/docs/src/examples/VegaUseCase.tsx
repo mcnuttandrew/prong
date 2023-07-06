@@ -208,7 +208,7 @@ function VegaUseCase() {
   useEffect(() => {
     analyzeVegaCode(currentCode, ({ data, signals }) => {
       const namedPairs = Object.entries(data)
-        .filter(([key, dataSet]) => isDataTable(dataSet))
+        .filter(([_key, dataSet]) => isDataTable(dataSet))
         .map(([key, data]) => [key, createHistograms(data as DataTable)]);
       setPrecomputedHistograms(Object.fromEntries(namedPairs));
       setSignals(signals);
@@ -225,8 +225,8 @@ function VegaUseCase() {
       projections={
         [
           ...Object.entries(StandardBundle)
-            .filter(([name, proj]) => name !== "RandomWord")
-            .map(([name, proj]) => proj),
+            .filter(([name, _proj]) => name !== "RandomWord")
+            .map(([_name, proj]) => proj),
 
           buildSparkProjection(preComputedHistograms, "right", "bar"),
           {
@@ -236,11 +236,11 @@ function VegaUseCase() {
               query: ["exprString", "signal", "expr"],
             },
             name: "Signal Editor",
-            projection: (props) => (
+            projection: (props: ProjectionProps) => (
               <ExpressionEditorProjection {...props} signals={signals} />
             ),
           },
-          ...mapProjectionTypes.map((mapProj, idx) =>
+          ...mapProjectionTypes.map((_mapProj, idx) =>
             buildInlineDropDownProjection(
               mapProjections,
               mapProjectionTypes[idx],

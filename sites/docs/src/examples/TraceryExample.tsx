@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { StandardBundle, Projection, utils, Editor } from "prong";
 import tracery, { generate, TraceryNode } from "./tracery";
 import "../stylesheets/tracery-example.css";
@@ -269,7 +269,7 @@ const Editable = (props: {
   useEffect(() => {
     setContent(txt);
   }, [txt, outOfSync]);
-  const onContentBlur = React.useCallback((evt) => {
+  const onContentBlur = useCallback((evt) => {
     if (outOfSync) {
       setTxt(txt);
       setContent(txt);

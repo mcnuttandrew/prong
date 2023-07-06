@@ -30,6 +30,5 @@ module.exports = {
     "@typescript-eslint/no-unsafe-assignment": 0,
     "@typescript-eslint/no-unsafe-member-access": 0,
     "@typescript-eslint/no-unsafe-return": 0,
-    "no-switch-case-fall-through": false,
   },
 };
