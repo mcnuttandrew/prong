@@ -57,7 +57,7 @@ The library consists of a single component it has a type like
 
 We include a variety of common projections that you might find useful
 
-```tsx
+```ts
 {
   BooleanTarget, // add check boxes to boolean
     CleanUp, // add a "clean up" button to the menu that pretty formats the code
@@ -164,7 +164,7 @@ These come in a variety of flavors
 
 - **Index Queries**:
 
-```tsx
+```ts
 { type: "index"; query: (number | string)[] }
 ```
 
@@ -172,7 +172,7 @@ Where number|string is a key path. Note that is strictly the fastest and most ac
 
 - **Regex Queries**:
 
-```tsx
+```ts
 {
   type: "regex";
   query: RegExp;
@@ -183,7 +183,7 @@ Check if a value matches a regex
 
 - **Value Queries**:
 
-```tsx
+```ts
 { type: "value"; query: string[] }
 ```
 
@@ -191,7 +191,7 @@ Check if a value is equal to any of several strings.
 
 - **Schema Queries**:
 
-```tsx
+```ts
 { type: "schemaMatch"; query: string[] }
 ```
 
@@ -199,7 +199,7 @@ Check if a node has inferred type (from the JSON Schema) equal to one of several
 
 - **Node Type Queries**:
 
-```tsx
+```ts
 { type: "nodeType"; query: NodeType[] };
 ```
 
@@ -207,7 +207,7 @@ These queries allow you to check for a given AST node type. The JSON AST include
 
 - **Function Queries**:
 
-```tsx
+```ts
 {
   type: "function";
   query: (value: string, nodeType: NodeType, keyPath: KeyPath) => boolean;

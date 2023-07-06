@@ -1,0 +1,508 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+
+:root {
+  /* --blue: #1e90ff;
+  --white: #ffffff; */
+  --menu-background: #f5f5f5;
+  --menu-accent: #009979;
+}
+
+/*  We have our own custom color picker button */
+.flex {
+  display: flex;
+}
+
+.flex-down {
+  display: flex;
+  flex-direction: column;
+}
+
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
+.centering {
+  align-items: center;
+  justify-content: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+/* NUMBER WIDGET (todo remove) */
+
+.cm-num-widget {
+  display: inline-block;
+  font-family: monospace;
+}
+
+.cm-inc-widget {
+  margin-left: 5px;
+  margin-right: 1px;
+  line-height: 1;
+  padding: 0;
+}
+
+.cm-dec-widget {
+  margin-right: 3px;
+  line-height: 1;
+  padding: 0;
+}
+
+/* CLICK TARGET WIDGET */
+
+.cm-container-click-target {
+  display: inline-block;
+  font-family: monospace;
+}
+
+.cm-container-click-target button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 0.8;
+  margin-left: 0px;
+  margin-right: 5px;
+  padding: 0;
+}
+
+
+/* BOOLEAN WIDGET */
+
+.cm-bool-widget {
+  display: inline-block;
+}
+
+.cm-bool-checkbox-widget {
+  margin: 0 3px 0 0px;
+  position: relative;
+  top: 2px;
+}
+
+.cm-slider-widget {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* INLINE COLOR NAME WIDGET */
+
+.cm-color-widget {
+  display: inline-block;
+
+  /*  CodeMirror has white-space: pre by default
+   Resetting here fixes a visual glitch where some whitespace in the color picker code
+   makes the widget align weirdly */
+  white-space: normal;
+}
+
+
+.cm-color-name-widget {
+  display: inline-block;
+  vertical-align: super;
+}
+
+.cm-color-widget {
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-radius: 100%;
+}
+
+.cm-annotation-widget-element .react-colorful {
+  width: 420px;
+  height: 140px
+}
+
+/* NUMBER SLIDER */
+
+.cm-number-slider {
+  position: relative;
+}
+
+.cm-number-slider-label {
+  position: absolute;
+  font-size: 8px;
+  top: -5px;
+  pointer-events: none;
+}
+
+/* GENERIC WIDGET STUFF */
+
+.cm-annotation-widget, .cm-projection-widget {
+  display: inline-block;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.cm-annotation-widget {
+  border-bottom: 1px dotted black;
+}
+
+.ͼ2 .cm-tooltip {
+  border: none;
+  background-color: transparent !important;
+}
+
+.cm-annotation-menu {
+  background: var(--menu-background);
+  border-left: 15px solid var(--menu-accent);
+  border-radius: 5px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+  font-family: sans-serif;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-left: 5px;
+  width: 440px;
+  z-index: 1000;
+}
+
+.cm-annotation-menu-control {
+  position: absolute;
+  border: none;
+  left: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.cm-annotation-menu-control--top {
+  top: 0;
+  left: -4px;
+  font-size: 10px;
+}
+
+.cm-annotation-menu-control--bottom {
+  bottom: 0;
+
+}
+
+.cm-annotation-widget-popover--search-bar {
+  /* background: #EEEEEE; */
+  /* bottom: 0; */
+  /* position: absolute; */
+  width: 100%;
+}
+
+/* EDITOR STUFF */
+
+.editor-container {
+  position: relative;
+}
+
+.editor-target {
+  height: 100%;
+}
+
+.cm-annotation-widget-popover-container {
+  max-width: 420px;
+  outline: none;
+}
+
+body, html, #root, .proot {
+  height: 100%;
+}
+
+
+
+.proot .link-container h1 {
+  position: absolute;
+  left: 29%;
+  top: 51px;
+  color: #333;
+  text-decoration: none;
+}
+
+#header {
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.root {
+  /* align-items: center; */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 50px;
+  width: 100%;
+}
+
+.hero {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  /* justify-content: center; */
+  height: 300px;
+  width: 300px;
+}
+
+.hero img {
+  width: 300px;
+  position: absolute;
+}
+
+.md-container {
+  max-width: 600px;
+  height: calc(100% - 100px);
+  overflow-y: scroll;
+}
+
+.md-container a, .md-container a:visited {
+  color: #009979;
+}
+
+.link-container a:visited, .link-container a, #header a, #header a:visited {
+  color: white;
+}
+
+.link-container {
+  align-items: center;
+  background: #222222ef;
+  color: white;
+  height: 100%;
+  /* min-width: 300px; */
+  width: 320px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  text-align: center;
+}
+
+.cm-editor {
+  height: 100%
+}
+
+.cm-scroller {
+  overflow: auto
+}
+
+
+/* POPOVER STUFF */
+
+.cm-tooltip-autocomplete.cm-tooltip {
+  max-width: 400px
+}
+
+.cm-annotation-widget-popover-container-row {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  margin-top: 2px;
+  border-bottom: thin dotted black;
+  font-size: 13px;
+  flex-direction: column;
+}
+
+.cm-annotation-widget-popover-container-row:last-child {
+  border-color: var(--menu-background);
+}
+
+.cm-annotation-widget-popover-container-row-label {
+  /* align-items: center; */
+  cursor: pointer;
+  display: flex;
+  font-weight: bold;
+  font-size: 10px;
+  /* justify-content: center;
+  text-align: center; */
+  /* width: 40px; */
+  width: 100%;
+  border-left: solid 5px var(--menu-background);
+}
+
+.cm-annotation-widget-popover-container-row-pagination {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+}
+
+.cm-annotation-widget-popover-container-row-pagination button {
+  font-size: 10px;
+  background: none;
+  text-decoration: underline;
+  cursor: pointer;
+  border: none;
+}
+
+.cm-annotation-widget-popover-container-row-content {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cm-annotation-widget-element, .cm-annotation-widget-popover-container-row {
+  border-left: solid 5px var(--menu-background);
+}
+
+.cm-annotation-widget-popover-container-row.cm-annotation-widget-element-selected {
+  border-left: solid 5px lightcoral;
+}
+
+.cm-annotation-widget-element.cm-annotation-widget-element-selected {
+  border: 2px solid lightcoral;
+}
+
+
+.cm-annotation-widget-element--color-chip {
+  height: 10px;
+  width: 10px;
+  border-radius: 100%;
+  display: inline-block;
+
+}
+
+.cm-annotation-render-widget-display p {
+  margin: 0;
+}
+
+/* TODO make more specific */
+div[tabindex="-1"]:focus {
+  outline: 0;
+}
+
+
+/* highlighter */
+.cm-line {
+  line-height: 20px;
+}
+
+
+.cm-annotation-highlighter {
+  cursor: pointer;
+  border: thin dotted gray;
+}
+
+.cm-annotation-highlighter-selected {
+  border: thin solid gray;
+}
+
+.cm-annotation-highlighter-1 {
+  text-underline-offset: 2px;
+  text-decoration-color: rebeccapurple;
+}
+
+
+.cm-annotation-highlighter-2,
+.cm-annotation-highlighter-3,
+.cm-annotation-highlighter-4 {
+  text-decoration: none;
+  border: none;
+
+}
+
+.cm-annotation-widget-element button {
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 13px;
+  /* text-decoration: underline; */
+  background: #009979;
+  color: white;
+  padding: 3px 14px;
+  margin-bottom: 1px;
+}
+
+
+
+.cm-line {
+  border-left: 3px solid white;
+  transition: border-color 0.2s;
+}
+
+.cm-gutterElement.cm-activeLineGutter, .cm-activeLine.cm-line, .cm-line:has(.cm-annotation-highlighter-selected) {
+  background-color: rgba(102, 51, 153, 0.1);
+}
+
+.cm-line:has(.cm-annotation-highlighter-selected) {
+  border-left: 3px solid rebeccapurple;
+}
+
+.cm-linter-highlight {
+  background-color: lightcoral;
+}
+
+
+.cm-tooltip-autocomplete {
+
+  right: 0 !important;
+}
+
+
+/* DOCK */
+
+.cm-dock {
+  /* background: #EEEEEE; */
+  background: var(--menu-background);
+  border-radius: 5px;
+}
+
+.cm-dock-label {
+  align-items: center;
+  display: flex;
+  font-size: 10px;
+  justify-content: space-between;
+}
+
+.cm-dock-label button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  text-decoration: underline;
+}
+
+#cm-monocle {
+  display: none;
+}
+
+.cm-monocle-container {
+  position: absolute;
+  width: 500px;
+}
+
+#cm-monocle .cm-dock {
+  padding: 5px 20px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+  border-left: 15px solid var(--menu-accent);
+}
+
+.cm-monocle-drag-target {
+  border-radius: 5px;
+  position: absolute;
+
+  left: -17px;
+  top: -25px;
+  border-radius: 100%;
+  background-color: var(--menu-accent);
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+}

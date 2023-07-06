@@ -1,7 +1,7 @@
 name: Test and lint
 on: [push]
 jobs:
-  build-and-deploy:
+  test-and-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -9,9 +9,12 @@ jobs:
 
       - name: Install 🔧
         run: yarn
+        working-directory: ./packages/prong
 
-      - name: Test
+      - name: Test 🔬
         run: yarn test
+        working-directory: ./packages/prong
 
-      - name: Lint
+      - name: Lint 🧵
         run: yarn lint
+        working-directory: ./packages/prong
