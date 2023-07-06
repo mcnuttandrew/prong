@@ -5,13 +5,13 @@
   "scripts": {
     "dev": "vite",
     "old-build": "tsc && vite build",
-    "build": "tsc && vite build && npm run prep-data-prod && npm run cp-quiets && npm run cp-docs",
+    "build": "vite build && npm run prep-data-prod && npm run cp-quiets && npm run cp-docs",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "cp-quiets": "cp src/examples/Quiet* ./public/",
-    "cp-docs": "cp README.md ./public/",
-    "prep-data-prod": "mkdir -p dist/data && rm -rf dist/data && mkdir dist/data && cp node_modules/vega-datasets/data/* ./dist/data/",
-    "prep-data": "rm -rf public/data && mkdir public/data && cp node_modules/vega-datasets/data/* ./public/data/"
+    "cp-quiets": "cp ./src/examples/Quiet* ./public/",
+    "cp-docs": "cp ../../README.md ./public/",
+    "prep-data-prod": "mkdir -p dist/data && rm -rf dist/data && mkdir dist/data && cp ../../node_modules/vega-datasets/data/* ./dist/data/",
+    "prep-data": "rm -rf public/data && mkdir public/data && cp ../../node_modules/vega-datasets/data/* ./public/data/"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.1.4",
