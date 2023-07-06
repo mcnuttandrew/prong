@@ -71,7 +71,7 @@ function Content(props: {
             <div>
               <b>Menu</b>
             </div>
-            <div>Click the circle to drag and place this menu.</div>
+            <div>Click the circle to drag and place this menu</div>
             <div>
               Press CMD+. to reattach the menu
               {setDock && (
@@ -185,8 +185,8 @@ function RenderPopoverDocked(props: {
   const [monoclePos, setMonoclePos] = usePersistedState(
     "cm-monocle-position",
     `{
-    x: null,
-    y: null,
+    x: 300,
+    y: 300,
   }`
   );
   const [menuContents, setMenuContents] = useState<MenuRow[]>([]);

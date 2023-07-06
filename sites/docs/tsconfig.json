@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "types": ["../../packages/prong/dist/index.d.ts"],
     "paths": {
-      "library-a": ["../../packages/prong"]
+      "prong": ["../../packages/prong"]
     },
 
     /* Bundler mode */
