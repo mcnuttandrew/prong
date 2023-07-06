@@ -1,24 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`generateMenuContent - fruit 1`] = `
-Object {
-  "0-206": Array [
-    Object {
-      "$defs": Object {
-        "veggie": Object {
-          "properties": Object {
-            "veggieLike": Object {
+{
+  "0-206": [
+    {
+      "$defs": {
+        "veggie": {
+          "properties": {
+            "veggieLike": {
               "$$labeledType": "veggieLike",
               "description": "Do I like this vegetable?",
               "type": "boolean",
             },
-            "veggieName": Object {
+            "veggieName": {
               "$$labeledType": "veggieName",
               "description": "The name of the vegetable.",
               "type": "string",
             },
           },
-          "required": Array [
+          "required": [
             "veggieName",
             "veggieLike",
           ],
@@ -28,31 +28,31 @@ Object {
       "$id": "https://example.com/arrays.schema.json",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "description": "A representation of a person, company, organization, or place",
-      "properties": Object {
-        "fruits": Object {
+      "properties": {
+        "fruits": {
           "$$labeledType": "fruits",
-          "items": Object {
+          "items": {
             "type": "string",
           },
           "type": "array",
         },
-        "vegetables": Object {
+        "vegetables": {
           "$$labeledType": "vegetables",
-          "items": Object {
+          "items": {
             "$$refName": "#/$defs/veggie",
-            "properties": Object {
-              "veggieLike": Object {
+            "properties": {
+              "veggieLike": {
                 "$$labeledType": "veggieLike",
                 "description": "Do I like this vegetable?",
                 "type": "boolean",
               },
-              "veggieName": Object {
+              "veggieName": {
                 "$$labeledType": "veggieName",
                 "description": "The name of the vegetable.",
                 "type": "string",
               },
             },
-            "required": Array [
+            "required": [
               "veggieName",
               "veggieLike",
             ],
@@ -64,91 +64,91 @@ Object {
       "type": "object",
     },
   ],
-  "119-123": Array [
-    Object {
+  "119-123": [
+    {
       "$$labeledType": "veggieLike",
       "description": "Do I like this vegetable?",
       "type": "boolean",
     },
   ],
-  "135-200": Array [
-    Object {
+  "135-200": [
+    {
       "$$refName": "#/$defs/veggie",
-      "properties": Object {
-        "veggieLike": Object {
+      "properties": {
+        "veggieLike": {
           "$$labeledType": "veggieLike",
           "description": "Do I like this vegetable?",
           "type": "boolean",
         },
-        "veggieName": Object {
+        "veggieName": {
           "$$labeledType": "veggieName",
           "description": "The name of the vegetable.",
           "type": "string",
         },
       },
-      "required": Array [
+      "required": [
         "veggieName",
         "veggieLike",
       ],
       "type": "object",
     },
   ],
-  "14-43": Array [
-    Object {
+  "14-43": [
+    {
       "$$labeledType": "fruits",
-      "items": Object {
+      "items": {
         "type": "string",
       },
       "type": "array",
     },
   ],
-  "157-167": Array [
-    Object {
+  "157-167": [
+    {
       "$$labeledType": "veggieName",
       "description": "The name of the vegetable.",
       "type": "string",
     },
   ],
-  "16-23": Array [
-    Object {
+  "16-23": [
+    {
       "type": "string",
     },
   ],
-  "189-194": Array [
-    Object {
+  "189-194": [
+    {
       "$$labeledType": "veggieLike",
       "description": "Do I like this vegetable?",
       "type": "boolean",
     },
   ],
-  "25-33": Array [
-    Object {
+  "25-33": [
+    {
       "type": "string",
     },
   ],
-  "35-41": Array [
-    Object {
+  "35-41": [
+    {
       "type": "string",
     },
   ],
-  "61-204": Array [
-    Object {
+  "61-204": [
+    {
       "$$labeledType": "vegetables",
-      "items": Object {
+      "items": {
         "$$refName": "#/$defs/veggie",
-        "properties": Object {
-          "veggieLike": Object {
+        "properties": {
+          "veggieLike": {
             "$$labeledType": "veggieLike",
             "description": "Do I like this vegetable?",
             "type": "boolean",
           },
-          "veggieName": Object {
+          "veggieName": {
             "$$labeledType": "veggieName",
             "description": "The name of the vegetable.",
             "type": "string",
           },
         },
-        "required": Array [
+        "required": [
           "veggieName",
           "veggieLike",
         ],
@@ -157,30 +157,30 @@ Object {
       "type": "array",
     },
   ],
-  "67-129": Array [
-    Object {
+  "67-129": [
+    {
       "$$refName": "#/$defs/veggie",
-      "properties": Object {
-        "veggieLike": Object {
+      "properties": {
+        "veggieLike": {
           "$$labeledType": "veggieLike",
           "description": "Do I like this vegetable?",
           "type": "boolean",
         },
-        "veggieName": Object {
+        "veggieName": {
           "$$labeledType": "veggieName",
           "description": "The name of the vegetable.",
           "type": "string",
         },
       },
-      "required": Array [
+      "required": [
         "veggieName",
         "veggieLike",
       ],
       "type": "object",
     },
   ],
-  "89-97": Array [
-    Object {
+  "89-97": [
+    {
       "$$labeledType": "veggieName",
       "description": "The name of the vegetable.",
       "type": "string",
@@ -190,14 +190,14 @@ Object {
 `;
 
 exports[`generateMenuContent - fruit 2`] = `
-Array [
-  Object {
-    "elements": Array [
-      Object {
-        "content": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
-        "onSelect": Object {
+[
+  {
+    "elements": [
+      {
+        "content": "{"veggieName":"","veggieLike":true}",
+        "onSelect": {
           "nodeId": "135-200",
-          "payload": "{\\"veggieName\\":\\"\\",\\"veggieLike\\":true}",
+          "payload": "{"veggieName":"","veggieLike":true}",
           "type": "addElementAsSiblingInArray",
         },
         "type": "button",
@@ -205,11 +205,11 @@ Array [
     ],
     "label": "Insert",
   },
-  Object {
-    "elements": Array [
-      Object {
+  {
+    "elements": [
+      {
         "content": "Empty Array",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "47-59",
           "payload": "[]",
           "type": "simpleSwap",
@@ -219,19 +219,19 @@ Array [
     ],
     "label": "Switch to",
   },
-  Object {
-    "elements": Array [
-      Object {
+  {
+    "elements": [
+      {
         "content": "remove key",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "47-59",
           "type": "removeObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "Swap with prev",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "47-204",
           "type": "decreaseItemIdx",
         },
@@ -244,122 +244,122 @@ Array [
 `;
 
 exports[`generateMenuContent - vega 1`] = `
-Array [
-  Object {
-    "elements": Array [
-      Object {
+[
+  {
+    "elements": [
+      {
         "content": "as",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"as\\"",
+          "payload": {
+            "key": ""as"",
             "value": "{}",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "base",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"base\\"",
+          "payload": {
+            "key": ""base"",
             "value": "0",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "divide",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"divide\\"",
+          "payload": {
+            "key": ""divide"",
             "value": "{}",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "interval",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"interval\\"",
+          "payload": {
+            "key": ""interval"",
             "value": "true",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "maxbins",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"maxbins\\"",
+          "payload": {
+            "key": ""maxbins"",
             "value": "0",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "minstep",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"minstep\\"",
+          "payload": {
+            "key": ""minstep"",
             "value": "0",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "name",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"name\\"",
-            "value": "\\"\\"",
+          "payload": {
+            "key": ""name"",
+            "value": """",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "span",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"span\\"",
+          "payload": {
+            "key": ""span"",
             "value": "0",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "steps",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
-            "key": "\\"steps\\"",
+          "payload": {
+            "key": ""steps"",
             "value": "{}",
           },
           "type": "addObjectKey",
         },
         "type": "button",
       },
-      Object {
+      {
         "label": "Add field",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": Object {
+          "payload": {
             "key": "$$INPUT_BIND",
             "value": "null",
           },
@@ -370,463 +370,463 @@ Array [
     ],
     "label": "Add Field",
   },
-  Object {
-    "elements": Array [
-      Object {
-        "content": "{\\"type\\":\\"aggregate\\"}",
-        "onSelect": Object {
+  {
+    "elements": [
+      {
+        "content": "{"type":"aggregate"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"aggregate\\"}",
+          "payload": "{"type":"aggregate"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"bin\\",\\"field\\":\\"{ } \\",\\"extent\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"bin","field":"{ } ","extent":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"bin\\",\\"field\\":\\"{ } \\",\\"extent\\":\\"[ ] \\"}",
+          "payload": "{"type":"bin","field":"{ } ","extent":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"collect\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"collect"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"collect\\"}",
+          "payload": "{"type":"collect"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"contour\\",\\"size\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"contour","size":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"contour\\",\\"size\\":\\"[ ] \\"}",
+          "payload": "{"type":"contour","size":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"countpattern\\",\\"field\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"countpattern","field":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"countpattern\\",\\"field\\":\\"{ } \\"}",
+          "payload": "{"type":"countpattern","field":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"cross\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"cross"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"cross\\"}",
+          "payload": "{"type":"cross"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"crossfilter\\",\\"fields\\":\\"[ ] \\",\\"query\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"crossfilter","fields":"[ ] ","query":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"crossfilter\\",\\"fields\\":\\"[ ] \\",\\"query\\":\\"[ ] \\"}",
+          "payload": "{"type":"crossfilter","fields":"[ ] ","query":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"density\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"density"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"density\\"}",
+          "payload": "{"type":"density"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"dotbin\\",\\"field\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"dotbin","field":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"dotbin\\",\\"field\\":\\"{ } \\"}",
+          "payload": "{"type":"dotbin","field":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"extent\\",\\"field\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"extent","field":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"extent\\",\\"field\\":\\"{ } \\"}",
+          "payload": "{"type":"extent","field":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"filter\\",\\"expr\\":\\"\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"filter","expr":""}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"filter\\",\\"expr\\":\\"\\"}",
+          "payload": "{"type":"filter","expr":""}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"flatten\\",\\"fields\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"flatten","fields":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"flatten\\",\\"fields\\":\\"[ ] \\"}",
+          "payload": "{"type":"flatten","fields":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"fold\\",\\"fields\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"fold","fields":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"fold\\",\\"fields\\":\\"[ ] \\"}",
+          "payload": "{"type":"fold","fields":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"force\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"force"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"force\\"}",
+          "payload": "{"type":"force"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"formula\\",\\"expr\\":\\"\\",\\"as\\":\\"\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"formula","expr":"","as":""}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"formula\\",\\"expr\\":\\"\\",\\"as\\":\\"\\"}",
+          "payload": "{"type":"formula","expr":"","as":""}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"geojson\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"geojson"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"geojson\\"}",
+          "payload": "{"type":"geojson"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"geopath\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"geopath"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"geopath\\"}",
+          "payload": "{"type":"geopath"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"geopoint\\",\\"projection\\":\\"\\",\\"fields\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"geopoint","projection":"","fields":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"geopoint\\",\\"projection\\":\\"\\",\\"fields\\":\\"[ ] \\"}",
+          "payload": "{"type":"geopoint","projection":"","fields":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"geoshape\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"geoshape"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"geoshape\\"}",
+          "payload": "{"type":"geoshape"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"graticule\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"graticule"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"graticule\\"}",
+          "payload": "{"type":"graticule"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"heatmap\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"heatmap"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"heatmap\\"}",
+          "payload": "{"type":"heatmap"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"identifier\\",\\"as\\":\\"\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"identifier","as":""}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"identifier\\",\\"as\\":\\"\\"}",
+          "payload": "{"type":"identifier","as":""}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"impute\\",\\"field\\":\\"{ } \\",\\"key\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"impute","field":"{ } ","key":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"impute\\",\\"field\\":\\"{ } \\",\\"key\\":\\"{ } \\"}",
+          "payload": "{"type":"impute","field":"{ } ","key":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"isocontour\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"isocontour"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"isocontour\\"}",
+          "payload": "{"type":"isocontour"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"joinaggregate\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"joinaggregate"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"joinaggregate\\"}",
+          "payload": "{"type":"joinaggregate"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"kde\\",\\"field\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"kde","field":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"kde\\",\\"field\\":\\"{ } \\"}",
+          "payload": "{"type":"kde","field":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"kde2d\\",\\"size\\":\\"[ ] \\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"kde2d","size":"[ ] ","x":"{ } ","y":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"kde2d\\",\\"size\\":\\"[ ] \\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "payload": "{"type":"kde2d","size":"[ ] ","x":"{ } ","y":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"label\\",\\"size\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"label","size":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"label\\",\\"size\\":\\"[ ] \\"}",
+          "payload": "{"type":"label","size":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"linkpath\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"linkpath"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"linkpath\\"}",
+          "payload": "{"type":"linkpath"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"loess\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"loess","x":"{ } ","y":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"loess\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "payload": "{"type":"loess","x":"{ } ","y":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"lookup\\",\\"from\\":\\"\\",\\"key\\":\\"{ } \\",\\"fields\\":\\"[ ] \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"lookup","from":"","key":"{ } ","fields":"[ ] "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"lookup\\",\\"from\\":\\"\\",\\"key\\":\\"{ } \\",\\"fields\\":\\"[ ] \\"}",
+          "payload": "{"type":"lookup","from":"","key":"{ } ","fields":"[ ] "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"nest\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"nest"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"nest\\"}",
+          "payload": "{"type":"nest"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"pack\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"pack"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"pack\\"}",
+          "payload": "{"type":"pack"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"partition\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"partition"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"partition\\"}",
+          "payload": "{"type":"partition"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"pie\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"pie"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"pie\\"}",
+          "payload": "{"type":"pie"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"pivot\\",\\"field\\":\\"{ } \\",\\"value\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"pivot","field":"{ } ","value":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"pivot\\",\\"field\\":\\"{ } \\",\\"value\\":\\"{ } \\"}",
+          "payload": "{"type":"pivot","field":"{ } ","value":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"project\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"project"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"project\\"}",
+          "payload": "{"type":"project"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"quantile\\",\\"field\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"quantile","field":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"quantile\\",\\"field\\":\\"{ } \\"}",
+          "payload": "{"type":"quantile","field":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"regression\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"regression","x":"{ } ","y":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"regression\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "payload": "{"type":"regression","x":"{ } ","y":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":\\"0\\",\\"filter\\":\\"null\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"resolvefilter","ignore":"0","filter":"null"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"resolvefilter\\",\\"ignore\\":\\"0\\",\\"filter\\":\\"null\\"}",
+          "payload": "{"type":"resolvefilter","ignore":"0","filter":"null"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"sample\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"sample"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"sample\\"}",
+          "payload": "{"type":"sample"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"sequence\\",\\"start\\":\\"0\\",\\"stop\\":\\"0\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"sequence","start":"0","stop":"0"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"sequence\\",\\"start\\":\\"0\\",\\"stop\\":\\"0\\"}",
+          "payload": "{"type":"sequence","start":"0","stop":"0"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"stack\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"stack"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"stack\\"}",
+          "payload": "{"type":"stack"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"stratify\\",\\"key\\":\\"{ } \\",\\"parentKey\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"stratify","key":"{ } ","parentKey":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"stratify\\",\\"key\\":\\"{ } \\",\\"parentKey\\":\\"{ } \\"}",
+          "payload": "{"type":"stratify","key":"{ } ","parentKey":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"timeunit\\",\\"field\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"timeunit","field":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"timeunit\\",\\"field\\":\\"{ } \\"}",
+          "payload": "{"type":"timeunit","field":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"tree\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"tree"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"tree\\"}",
+          "payload": "{"type":"tree"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"treelinks\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"treelinks"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"treelinks\\"}",
+          "payload": "{"type":"treelinks"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"treemap\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"treemap"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"treemap\\"}",
+          "payload": "{"type":"treemap"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"voronoi\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"voronoi","x":"{ } ","y":"{ } "}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"voronoi\\",\\"x\\":\\"{ } \\",\\"y\\":\\"{ } \\"}",
+          "payload": "{"type":"voronoi","x":"{ } ","y":"{ } "}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"window\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"window"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"window\\"}",
+          "payload": "{"type":"window"}",
           "type": "simpleSwap",
         },
         "type": "button",
       },
-      Object {
-        "content": "{\\"type\\":\\"wordcloud\\"}",
-        "onSelect": Object {
+      {
+        "content": "{"type":"wordcloud"}",
+        "onSelect": {
           "nodeId": "721-938",
-          "payload": "{\\"type\\":\\"wordcloud\\"}",
+          "payload": "{"type":"wordcloud"}",
           "type": "simpleSwap",
         },
         "type": "button",
@@ -834,19 +834,19 @@ Array [
     ],
     "label": "Switch to",
   },
-  Object {
-    "elements": Array [
-      Object {
+  {
+    "elements": [
+      {
         "content": "Remove Item",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
           "type": "removeElementFromArray",
         },
         "type": "button",
       },
-      Object {
+      {
         "content": "Swap with next",
-        "onSelect": Object {
+        "onSelect": {
           "nodeId": "721-938",
           "type": "increaseItemIdx",
         },

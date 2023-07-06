@@ -2,9 +2,9 @@ import { generateMenuContent } from "./compute-menu-contents";
 import { findNodeByText } from "./test-utils";
 import { createNodeMap } from "./utils";
 import { vegaCode } from "../../../../sites/docs/src/examples/example-data";
-import VegaSchema from "../../../../sites/docs/src/constants/vega-schema.json";
 import { materializeAnyOfOption } from "./menu-content/schema-based";
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const VegaSchema = require("../../../../sites/docs/src/constants/vega-schema.json");
 const schema = {
   $id: "https://example.com/arrays.schema.json",
   $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -63,11 +63,11 @@ test("generateMenuContent - fruit", async () => {
 });
 
 test("generateMenuContent - vega", async () => {
-  const targ = findNodeByText(vegaCode, `"transform"`)!.parent?.lastChild
+  const target = findNodeByText(vegaCode, `"transform"`)!.parent?.lastChild
     ?.firstChild?.nextSibling!;
   const nodeMap = await createNodeMap(VegaSchema, vegaCode);
   // expect(nodeMap).toMatchSnapshot();
-  const menuContent = generateMenuContent(targ, nodeMap, vegaCode);
+  const menuContent = generateMenuContent(target, nodeMap, vegaCode);
   expect(menuContent).toMatchSnapshot();
 });
 
