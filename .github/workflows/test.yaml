@@ -3,15 +3,17 @@ on: [push]
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
+    paths:
+      - "packages/prong/**"
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.1
 
       - name: Install 🔧
-        run: cd packages/prong && yarn
+        run: yarn
 
       - name: Test
-        run: cd packages/prong && yarn test
+        run: yarn test
 
       - name: Lint
-        run: cd packages/prong && yarn lint
+        run: yarn lint
