@@ -7,7 +7,7 @@ Additionally a number of libraries have been forked to support this work, see sr
 ## Quick start example usage
 
 ```tsx
-import React, { useState } from "react";
+import { useState } from "react";
 
 import Editor from "../components/Editor";
 import standardBundle from "../projections/standard-bundle";
