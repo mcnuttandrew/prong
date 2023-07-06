@@ -1,0 +1,632 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray (empty array) 1`] = `"{\\"example\\": [-9]}"`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 1 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [-9,1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 2 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3,-9],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 3 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        [-9]],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 4 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, -9, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 4 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2,  
+        -9,  
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addElementAsSiblingInArray 4 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3, 
+        -9 
+        ],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (boundary effects) 1`] = `
+"{
+    \\"test\\": null,
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (buggy mark) 1`] = `"{\\"mark\\": {\\"type\\":\\"bar\\",  \\"color\\": \\"\\"  }} "`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
+"{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieStarRating\\": 0,
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieLike\\": true
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 1`] = `"{\\"arc\\": {}}"`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 2`] = `"{ \\"bar\\": { },     \\"point\\": { }      }"`;
+
+exports[`modifyCodeByCommand - addObjectKey (cursorPos version) 3`] = `"{\\"bar\\": { },  \\"point\\": { }   }"`;
+
+exports[`modifyCodeByCommand - addObjectKey (fruit insert 0) 1`] = `
+"
+{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieStar\\": [1, 2, 3],
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieLike\\": true 
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (fruit insert 1) 1`] = `
+"
+{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieStar\\": [1, 2, 3],
+      \\"veggieLike\\": true 
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey (fruit insert 2) 1`] = `
+"
+{
+  \\"fruits\\": [ \\"apple\\", \\"orange\\", \\"#c71585\\" ],
+  \\"vegetables\\": [
+    {
+      \\"veggieName\\": \\"potato\\",
+      \\"veggieLike\\": true,
+          \\"veggieStar\\": [1, 2, 3]
+    },
+    {
+      \\"veggieName\\": \\"broccoli\\",
+      \\"veggieLike\\": false
+    }
+  ]
+}"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey 1`] = `
+"{
+    \\"J\\": [6, 7, 8],
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5, \\"J\\": [6, 7, 8] }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - addObjectKey 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  \\"J\\": {\\"X\\": \\"Y\\"}
+  }"
+`;
+
+exports[`modifyCodeByCommand - addObjectKeyEvent (legend insert) 1`] = `
+"
+{
+  \\"padding\\": 5,
+    \\"legends\\": [],
+  \\"signals\\": []
+}
+"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [2, 1, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 3, 
+        2],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 4`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 5`] = `
+"{
+    \\"d\\": null,
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 6`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"d\\": null,
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - decreaseItemIdx 7`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"I\\": \\"example\\",
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [2, 1, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 3, 
+        2],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 4`] = `
+"{
+    \\"d\\": null,
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 5`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"d\\": null,
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 6`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"I\\": \\"example\\",
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+  }"
+`;
+
+exports[`modifyCodeByCommand - increaseItemIdx 7`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 4`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 5`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 6`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeElementFromArray 7`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 1`] = `
+"{
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }]
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 4`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 5`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4}],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 6`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{}],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - removeObjectKey 7`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": true,
+    },
+    \\"d\\": null,
+    \\"e\\": [{}],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - simpleSwap 1`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": false,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - simpleSwap 2`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": \\"hot dog sports\\",
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - simpleSwap 3`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": 0,
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
+
+exports[`modifyCodeByCommand - simpleSwap 4`] = `
+"{
+    \\"a\\": {
+      \\"b\\": [1, 2, 
+        3],
+      \\"c\\": {\\"squid\\": [\\"dough\\", false, \\"bag\\", 0]},
+    },
+    \\"d\\": null,
+    \\"e\\": [{ \\"f\\": 4, \\"g\\": 5 }],
+    \\"I\\": \\"example\\",
+  }"
+`;
