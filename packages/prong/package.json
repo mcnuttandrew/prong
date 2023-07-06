@@ -2,7 +2,7 @@
   "name": "prong",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": " vite build --watch --config vite.config.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "jest",

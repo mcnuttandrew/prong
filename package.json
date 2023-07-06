@@ -1,6 +1,15 @@
 {
     "name": "prong",
     "private": true,
+    "scripts": {
+        "start:docs": "cd sites/docs && yarn dev",
+        "start:prong": "cd packages/prong && yarn dev",
+        "start": "run-p start:docs start:prong"
+    },
+    "devDependencies": {
+        "lerna": "^4.0.0",
+        "npm-run-all": "^4.1.5"
+    },
     "workspaces": {
         "packages": [
             "packages/*",
