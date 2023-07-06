@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type d3 from "d3";
 import { bin } from "d3-array";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
@@ -224,7 +225,7 @@ type Histogram = d3.Bin<number, number>[];
 
 function buildHistogramProjection(
   preComputedHistograms: PreComputedHistograms,
-  sparkPosition: SparkPos,
+  _sparkPosition: SparkPos,
   sparkType: SparkType
 ) {
   return function HistogramProjection(props: ProjectionProps) {

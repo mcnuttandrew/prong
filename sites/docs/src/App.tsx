@@ -90,7 +90,7 @@ const routes: {
 ];
 
 function Root() {
-  const [postMarkdown, setPostMarkdown] = useState("");
+  const [postMarkdown, _setPostMarkdown] = useState("");
   const [docs, setDocs] = useState("");
 
   useEffect(() => {
@@ -105,7 +105,8 @@ function Root() {
             "(this won't matter to you, its more an acknowledgement of work)."
           )[1]
         )
-      );
+      )
+      .catch((e) => console.error(e));
   }, []);
 
   return (
@@ -179,7 +180,7 @@ function App() {
             );
           })}
           <Routes>
-            {routes.map(({ name, Component, explanation }) => (
+            {routes.map(({ name, explanation }) => (
               <Route
                 element={<Explanation explanation={explanation} />}
                 path={name}

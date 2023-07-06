@@ -95,7 +95,7 @@ function InSituFigure1() {
   useEffect(() => {
     analyzeVegaCode(currentCode, ({ data }) => {
       const namedPairs = Object.entries(data)
-        .filter(([key, dataSet]) => isDataTable(dataSet))
+        .filter(([_key, dataSet]) => isDataTable(dataSet))
         .map(([key, data]) => [key, createHistograms(data as DataTable)]);
       setPrecomputedHistograms(Object.fromEntries(namedPairs));
     });
@@ -125,7 +125,7 @@ function InSituFigure1() {
               id="spark-type-picker"
               title="Select a position for the spark line"
               value={sparkType}
-              onChange={(e) => setSparkType(e.target.value as SparkType)}
+              onChange={(e) => setSparkType(e.target.value)}
             >
               {sparkTypes.map((val) => (
                 <option key={val}>{val}</option>

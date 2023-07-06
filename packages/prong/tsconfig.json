@@ -4,6 +4,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "ES2020", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "declaration": true,
 
     /* Bundler mode */
     "moduleResolution": "node",

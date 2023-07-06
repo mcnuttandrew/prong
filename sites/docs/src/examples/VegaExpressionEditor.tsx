@@ -41,7 +41,7 @@ function tryExpression(code: string, signals: string[]): null | string {
       },
     });
   } catch (e) {
-    return `${e}`;
+    return `${e as any as string}`;
   }
   return null;
 }
@@ -320,7 +320,7 @@ function doSyntaxHighlighting(view: EditorView) {
   parser.parse(code).iterate({
     from: 0,
     to: code.length,
-    enter: ({ node, from, to, type }) => {
+    enter: ({ node, from, to }) => {
       if (colorMap[node.type.name]) {
         const style = `color: ${colorMap[node.type.name]}`;
         const syntaxHighlight = Decoration.mark({ attributes: { style } });

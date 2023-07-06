@@ -124,8 +124,8 @@ function synthesizeSuggestions(
     return [];
   }
   const matches: any[] = [];
-  traverse(updatedSchema, (schema, isCycle, path, parent) => {
-    let queryMatches = [
+  traverse(updatedSchema, (schema, _isCycle, path, parent) => {
+    const queryMatches = [
       schema?.description,
       schema?.$$labeledType,
       schema?.$$refName,

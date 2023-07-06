@@ -3,12 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import * as vega from "vega";
 import { parse, View } from "vega";
 
-import { utils } from "prong";
+import { utils, ProjectionProps, Projection } from "prong";
 const { simpleParse, setIn } = utils;
-import {
-  ProjectionProps,
-  Projection,
-} from "../../../../packages/prong/lib/projections";
 
 export const usePersistedState = (name: string, defaultValue: any) => {
   const [value, setValue] = useState(defaultValue);
@@ -53,14 +49,19 @@ export function analyzeVegaCode(
     const code = simpleParse(currentCode, {});
     const spec = parse(code, {}, { ast: true });
     const view = new View(spec).initialize();
-    view.runAsync().then(() => {
-      const x = view.getState({
-        signals: vega.truthy,
-        data: vega.truthy,
-        recurse: true,
+    view
+      .runAsync()
+      .then(() => {
+        const x = view.getState({
+          signals: vega.truthy,
+          data: vega.truthy,
+          recurse: true,
+        });
+        analysis(x);
+      })
+      .catch((e) => {
+        console.error(e);
       });
-      analysis(x);
-    });
   } catch (err) {
     console.log(err);
   }

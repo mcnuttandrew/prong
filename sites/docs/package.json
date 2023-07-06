@@ -1,13 +1,17 @@
 {
-  "name": "my-site",
+  "name": "prong-docs",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "old-build": "tsc && vite build",
+    "build": "tsc && vite build && npm run prep-data-prod && npm run cp-quiets && npm run cp-docs",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cp-quiets": "cp src/examples/Quiet* ./public/",
+    "cp-docs": "cp README.md ./public/",
+    "prep-data-prod": "mkdir -p dist/data && rm -rf dist/data && mkdir dist/data && cp node_modules/vega-datasets/data/* ./dist/data/",
+    "prep-data": "rm -rf public/data && mkdir public/data && cp node_modules/vega-datasets/data/* ./public/data/"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.1.4",
@@ -15,6 +19,7 @@
     "d3-scale": "^4.0.2",
     "d3-scale-chromatic": "^3.0.0",
     "d3-shape": "^3.2.0",
+    "estree-walker": "^3.0.3",
     "lodash.merge": "^4.6.2",
     "prong": "*",
     "react": "^17.0.2",
@@ -28,7 +33,7 @@
     "react-vega": "^7.6.0",
     "seedrandom": "^3.0.5",
     "vega": "^5.22.1",
-    "vega-datasets": "^2.5.4",
+    "vega-datasets": "^2.7.0",
     "vega-embed": "^6.21.3",
     "vega-expression": "^5.0.0",
     "vega-lite": "^5.6.1"

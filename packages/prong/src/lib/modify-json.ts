@@ -107,8 +107,8 @@ const removeObjectKey: ModifyCmd<removeObjectKeyEvent> = (
   const objNode =
     syntaxNode.type.name === "Property" ? syntaxNode : syntaxNode.parent!;
 
-  let from: number;
-  let to: number;
+  let from: number = syntaxNode.from;
+  let to: number = syntaxNode.to;
 
   const prevType = objNode.prevSibling!.type.name;
   const nextType = objNode.nextSibling!.type.name;
@@ -141,8 +141,8 @@ const removeElementFromArray: ModifyCmd<removeElementFromArrayEvent> = (
   _value,
   syntaxNode
 ) => {
-  let from: number;
-  let to: number;
+  let from: number = syntaxNode.from;
+  let to: number = syntaxNode.to;
   const prevType = syntaxNode.prevSibling?.type.name || "⚠";
   const nextType = syntaxNode.nextSibling?.type.name || "⚠";
   const prevTypeIsBracket = new Set(["⚠", "["]).has(prevType);

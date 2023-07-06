@@ -5,6 +5,10 @@
     "lib": ["ES2022","ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "types": ["../../packages/prong/dist/index.d.ts"],
+    "paths": {
+      "library-a": ["../../packages/prong"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

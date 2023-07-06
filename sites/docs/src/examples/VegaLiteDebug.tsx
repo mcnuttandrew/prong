@@ -3,7 +3,7 @@ import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
 import { Editor, ProjectionProps, Projection, utils } from "prong";
 import { vegaLiteCode } from "./example-data";
 
-function CounterProjection(props: ProjectionProps) {
+function CounterProjection(_props: ProjectionProps) {
   const [count, setCount] = useState(0);
   return (
     <div className="counter" onClick={() => setCount(count + 1)}>
@@ -25,7 +25,7 @@ function VegaLiteExampleApp() {
     }, 5000);
   }, [timer, clockRunning]);
 
-  function DynamicProjection(props: ProjectionProps) {
+  function DynamicProjection(_props: ProjectionProps) {
     return <div className="dynamic-projection-example">Timer: ({timer})</div>;
   }
   const fields = ["penguins", "flowers", "wheat", "squids"];

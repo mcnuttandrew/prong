@@ -3,14 +3,20 @@ import { useState, FC, useEffect } from "react";
 import { VegaLite } from "react-vega";
 import "../stylesheets/vega-lite-example.css";
 
-import { prettifier, StandardBundle, Editor, utils } from "prong";
+import {
+  prettifier,
+  StandardBundle,
+  Editor,
+  utils,
+  ProjectionProps,
+  Projection,
+} from "prong";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import DataTable from "./DataTable";
 
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
-import { ProjectionProps, Projection } from "../../src/lib/projections";
 import { vegaLiteCode } from "./example-data";
 import {
   extractFieldNames,
