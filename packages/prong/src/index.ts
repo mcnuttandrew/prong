@@ -4,3 +4,5 @@ export * as utils from "./lib/utils";
 export { default as prettifier } from "./lib/vendored/prettifier";
 
 export { type Projection, type ProjectionProps } from "./lib/projections";
+
+import "../../../sites/docs/src/App.css";
