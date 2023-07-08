@@ -8,6 +8,7 @@ The basic dependencies of this system are code mirror (which we wrap) and react 
 ```tsx
 import { useState } from "react";
 import { Editor, StandardBundle } from "prong-editor";
+import "prong-editor/style.css";
 
 const exampleData = `{
     "a": {
@@ -38,6 +39,8 @@ To install follow the usual methods:
 ```
 yarn add prong-editor
 ```
+
+Dont forget to import our css file!
 
 ## Component
 
