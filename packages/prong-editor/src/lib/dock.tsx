@@ -120,6 +120,10 @@ class Monocle extends Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentDidMount() {
+    console.log("there", monocleTarget);
+    if (monocleTarget?.getAttribute("style") === "display: block") {
+      return;
+    }
     while (monocleTarget!.firstChild) {
       monocleTarget!.removeChild(monocleTarget!.firstChild);
     }
@@ -131,8 +135,14 @@ class Monocle extends Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentWillUnmount() {
-    monocleTarget!.removeChild(this.el);
-    monocleTarget?.setAttribute("style", "display: none");
+    console.log("here", monocleTarget);
+    if (monocleTarget) {
+      // monocleTarget.removeChild(this.el);
+      while (monocleTarget.firstChild) {
+        monocleTarget.removeChild(monocleTarget.firstChild);
+      }
+      monocleTarget?.setAttribute("style", "display: none");
+    }
   }
 
   render() {

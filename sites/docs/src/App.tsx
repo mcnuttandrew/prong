@@ -87,6 +87,7 @@ const routes: {
     explanation:
       'This example compares how long a minimal instantiation of the "quiet mode" view (which removes double quotes) is in both Prong as well as base Code Mirror. ',
   },
+
 ];
 
 function Root() {
