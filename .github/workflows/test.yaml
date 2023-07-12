@@ -9,12 +9,12 @@ jobs:
 
       - name: Install 🔧
         run: yarn
-        working-directory: ./packages/prong
+        working-directory: ./packages/prong-editor
 
       - name: Test 🔬
         run: yarn test
-        working-directory: ./packages/prong
+        working-directory: ./packages/prong-editor
 
       - name: Lint 🧵
         run: yarn lint
-        working-directory: ./packages/prong
+        working-directory: ./packages/prong-editor
