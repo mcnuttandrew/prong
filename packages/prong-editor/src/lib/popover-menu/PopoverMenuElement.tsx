@@ -52,7 +52,6 @@ const InputElement: MenuElementRenderer<any> = (props) => {
   return (
     <div
       className={classNames({
-        flex: true,
         "cm-annotation-widget-element": true,
         "cm-annotation-widget-element-selected": props.isSelected,
       })}
@@ -115,8 +114,8 @@ const ButtonElement: MenuElementRenderer<any> = ({
   return (
     <div
       className={classNames({
-        flex: !allElementsInGroupAreOfThisType,
-        "flex-down": allElementsInGroupAreOfThisType,
+        "prong-flex": !allElementsInGroupAreOfThisType,
+        "prong-flex-down": allElementsInGroupAreOfThisType,
         "cm-annotation-widget-element": true,
         "cm-annotation-widget-element-selected": isSelected,
       })}

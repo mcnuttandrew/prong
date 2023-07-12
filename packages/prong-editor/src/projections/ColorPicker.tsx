@@ -12,9 +12,9 @@ function ColorPicker(props: {
   const { onChange, initialColor } = props;
   const [color, setColor] = useState(initialColor);
   return (
-    <div className="flex-down">
-      <div className="flex space-between">
-        <div className="flex centering">
+    <div className="prong-flex-down">
+      <div className="prong-flex space-between">
+        <div className="prong-flex centering">
           Old{" "}
           <div
             style={{
@@ -25,7 +25,7 @@ function ColorPicker(props: {
             }}
           ></div>
         </div>
-        <div className="flex centering">
+        <div className="prong-flex centering">
           New{" "}
           <div
             style={{

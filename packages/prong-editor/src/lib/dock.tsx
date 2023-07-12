@@ -67,7 +67,7 @@ function Content(props: {
     <div className="cm-dock">
       <div className="cm-dock-label">
         {docked && (
-          <div className="flex-down">
+          <div className="prong-flex-down">
             <div>
               <b>Menu</b>
             </div>
