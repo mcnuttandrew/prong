@@ -126,12 +126,7 @@ function Explanation(props: { explanation: string }) {
   }
   return (
     <div
-      style={{
-        marginTop: "30px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
+    className="explanation-container"
     >
       <h3 className="">Example Explanation</h3>
       <div style={{ padding: "0 5px", width: "300px" }}>
@@ -163,12 +158,7 @@ function App() {
             return (
               <div
                 key={name}
-                style={{
-                  marginTop: "15px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
+                className="inner-link-container"
               >
                 <h3 className="">{name}</h3>
                 {groupRoutes.map(({ name }) => (

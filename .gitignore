@@ -25,3 +25,5 @@ yarn-error.log*
 public/data/*
 public/data/
 *.es.js
+
+sites/docs/public/README.md
