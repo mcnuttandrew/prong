@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Editor, StandardBundle, Projection, utils } from "prong";
+import { Editor, StandardBundle, Projection, utils } from "prong-editor";
 import { produceSchema, produceExample } from "./example-data";
 
 const blue = "#0551A5";

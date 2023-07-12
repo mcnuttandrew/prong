@@ -1,9 +1,9 @@
 {
-    "name": "prong",
+    "name": "prong-editor",
     "private": true,
     "scripts": {
         "start:docs": "cd sites/docs && yarn dev",
-        "start:prong": "cd packages/prong && yarn dev",
+        "start:prong": "cd packages/prong-editor && yarn dev",
         "start": "run-p start:docs start:prong"
     },
     "devDependencies": {

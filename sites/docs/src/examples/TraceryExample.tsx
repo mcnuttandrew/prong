@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { StandardBundle, Projection, utils, Editor } from "prong";
+import { StandardBundle, Projection, utils, Editor } from "prong-editor";
 import tracery, { generate, TraceryNode } from "./tracery";
 import "../stylesheets/tracery-example.css";
 

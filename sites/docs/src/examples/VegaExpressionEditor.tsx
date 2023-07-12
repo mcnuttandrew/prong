@@ -20,7 +20,7 @@ import {
   CompletionSource,
   snippet,
 } from "@codemirror/autocomplete";
-import { utils } from "prong";
+import { utils } from "prong-editor";
 
 export type SchemaMap = Record<string, any>;
 // vegaExpression.

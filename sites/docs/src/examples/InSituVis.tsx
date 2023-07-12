@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Editor, StandardBundle } from "prong";
+import { Editor, StandardBundle } from "prong-editor";
 import VegaSchema from "../constants/vega-schema.json";
 import { analyzeVegaCode } from "./example-utils";
 import {

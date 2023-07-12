@@ -1,16 +1,15 @@
 # Prong
 
-This is the repo for the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
+This is the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
 The basic dependencies of this system are code mirror (which we wrap) and react (which we use as means to specify the extensions).
-Additionally a number of libraries have been forked to support this work, see src/lib/vendor (this won't matter to you, its more an acknowledgement of work).
 
 ## Quick start example usage
 
 ```tsx
 import { useState } from "react";
 
-import Editor from "../components/Editor";
-import standardBundle from "../projections/standard-bundle";
+import { Editor, StandardBundle } from "prong-editor";
+import "prong-editor/style.css";
 
 const exampleData = `{
     "a": {
@@ -30,13 +29,19 @@ function SimpleExample() {
       schema={{}}
       code={currentCode}
       onChange={(x) => setCurrentCode(x)}
-      projections={Object.values(standardBundle)}
+      projections={Object.values(StandardBundle)}
     />
   );
 }
 ```
 
-Installation instructions hidden for review.
+To install follow the usual methods:
+
+```
+yarn add prong-editor
+```
+
+Dont forget to import our css file!
 
 ## Component
 
@@ -57,7 +62,7 @@ The library consists of a single component it has a type like
 
 We include a variety of common projections that you might find useful
 
-```ts
+```tsx
 {
   BooleanTarget, // add check boxes to boolean
     CleanUp, // add a "clean up" button to the menu that pretty formats the code
@@ -164,7 +169,7 @@ These come in a variety of flavors
 
 - **Index Queries**:
 
-```ts
+```tsx
 { type: "index"; query: (number | string)[] }
 ```
 
@@ -172,7 +177,7 @@ Where number|string is a key path. Note that is strictly the fastest and most ac
 
 - **Regex Queries**:
 
-```ts
+```tsx
 {
   type: "regex";
   query: RegExp;
@@ -183,7 +188,7 @@ Check if a value matches a regex
 
 - **Value Queries**:
 
-```ts
+```tsx
 { type: "value"; query: string[] }
 ```
 
@@ -191,7 +196,7 @@ Check if a value is equal to any of several strings.
 
 - **Schema Queries**:
 
-```ts
+```tsx
 { type: "schemaMatch"; query: string[] }
 ```
 
@@ -199,7 +204,7 @@ Check if a node has inferred type (from the JSON Schema) equal to one of several
 
 - **Node Type Queries**:
 
-```ts
+```tsx
 { type: "nodeType"; query: NodeType[] };
 ```
 
@@ -207,7 +212,7 @@ These queries allow you to check for a given AST node type. The JSON AST include
 
 - **Function Queries**:
 
-```ts
+```tsx
 {
   type: "function";
   query: (value: string, nodeType: NodeType, keyPath: KeyPath) => boolean;

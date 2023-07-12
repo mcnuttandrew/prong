@@ -1,4 +1,4 @@
-import { Editor } from "prong";
+import { Editor } from "prong-editor";
 import { produceSchema } from "./example-data";
 
 const coloring: Record<string, string> = {

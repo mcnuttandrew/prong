@@ -14,7 +14,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
-      name: "prong",
+      name: "prong-editor",
       formats: ["es", "umd"],
       fileName: (format) => `prong.${format}.js`,
     },

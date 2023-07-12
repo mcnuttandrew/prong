@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Editor, StandardBundle } from "prong";
+import { Editor, StandardBundle } from "prong-editor";
 
 const exampleData = `{
     "a": {

@@ -1,6 +1,6 @@
 {
-  "short_name": "Prong",
-  "name": "Prong",
+  "short_name": "prong-editor",
+  "name": "prong-editor",
   "icons": [],
   "start_url": ".",
   "display": "standalone",

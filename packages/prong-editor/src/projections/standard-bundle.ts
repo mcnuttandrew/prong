@@ -1,7 +1,7 @@
 import { ColorNameProjection, HexConversionProject } from "./ColorNamePicker";
 import TooltipHexColorPicker from "./ColorPicker";
 import { Projection } from "../lib/projections";
-import InsertRandomWord from "./RandomWord";
+// import InsertRandomWord from "./RandomWord";
 import ClickTarget from "./ClickTarget";
 import BooleanTarget from "./Boolean";
 import ColorChip from "./ColorChip";
@@ -19,7 +19,7 @@ const bundle = {
   ConvertHex: HexConversionProject,
   // Debugger,
   // HeuristicJSONFixes,
-  InsertRandomWord,
+  // InsertRandomWord,//broken bc of friendly words
   NumberSlider,
   SortObject,
   TooltipColorNamePicker: ColorNameProjection,

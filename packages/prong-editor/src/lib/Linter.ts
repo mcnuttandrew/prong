@@ -1,6 +1,6 @@
 import { linter } from "@codemirror/lint";
 import { produceLintValidations } from "./vendored/validator";
-import { codeString } from "../lib/utils";
+import { codeString } from "./utils";
 import { cmStatePlugin } from "./cmState";
 import { parser } from "@lezer/json";
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import VegaLiteV5Schema from "../constants/vega-lite-v5-schema.json";
-import { Editor, ProjectionProps, Projection, utils } from "prong";
+import { Editor, ProjectionProps, Projection, utils } from "prong-editor";
 import { vegaLiteCode } from "./example-data";
 
 function CounterProjection(_props: ProjectionProps) {
