@@ -49,16 +49,16 @@
     "vite-jest": "^0.1.4",
     "vite-plugin-dts": "^0.9.9"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "peerDependencies": {
-    "react": "^16.8.0 || 17.x",
-    "react-dom": "^16.8.0 || 17.x"
+    "react": "17.x",
+    "react-dom": "7.x"
   },
   "files": [
     "dist"
   ],
-  "main": "./dist/prong.umd.js",
-  "module": "./dist/prong.es.js",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {

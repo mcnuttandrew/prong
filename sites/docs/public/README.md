@@ -3,6 +3,8 @@
 This is the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
 The basic dependencies of this system are code mirror (which we wrap) and react (which we use as means to specify the extensions).
 
+This is described in our upcoming paper "Projectional Editors for JSON DSLs"
+
 ## Quick start example usage
 
 ```tsx

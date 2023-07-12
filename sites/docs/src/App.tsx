@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import 'prong-editor/style.css'
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
@@ -14,9 +16,8 @@ import VegaUseCase from "./examples/VegaUseCase";
 import QuietModeCompare from "./examples/QuietModeCompare";
 
 import StyledMarkdown from "./examples/StyledMarkdown";
-import ReactMarkdown from "react-markdown";
 
-// import markup from "./demo-page.md";
+
 const routes: {
   name: string;
   Component: () => JSX.Element;
@@ -90,29 +91,24 @@ const routes: {
 ];
 
 function Root() {
-  const [postMarkdown, _setPostMarkdown] = useState("");
   const [docs, setDocs] = useState("");
 
   useEffect(() => {
-    // fetch(markup)
-    //   .then((response) => response.text())
-    //   .then((text) => setPostMarkdown(text));
     fetch("./README.md")
       .then((x) => x.text())
-      .then((x) =>
+      .then((x) => {
         setDocs(
-          x.split(
-            "(this won't matter to you, its more an acknowledgement of work)."
-          )[1]
+          x
         )
+      }
       )
-      .catch((e) => console.error(e));
+      // .catch((e) => console.error(e));
   }, []);
+
 
   return (
     <div className="root">
       <div className="md-container">
-        <StyledMarkdown content={postMarkdown} />
         <StyledMarkdown content={docs} />
       </div>
     </div>
