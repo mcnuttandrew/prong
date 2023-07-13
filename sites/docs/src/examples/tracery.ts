@@ -549,7 +549,7 @@ class Grammar {
     const keys = Object.keys(this.symbols || {});
     for (let i = 0; i < keys.length; i++) {
       // @ts-ignore
-      this.symbols![keys[i]].clearState();
+      this.symbols[keys[i]].clearState();
     }
   }
 
@@ -628,10 +628,10 @@ class Grammar {
 
     // Failover to alternative subgrammars
     for (let i = 0; i < (this.subgrammars || []).length; i++) {
-      const gram = this.subgrammars![i];
-      if (gram?.symbols && gram?.symbols[key as string])
+      const gram = this.subgrammars[i];
+      if (gram?.symbols && gram?.symbols[key])
         //@ts-ignore
-        return gram.symbols[key as string].selectRule();
+        return gram.symbols[key].selectRule();
     }
 
     return `((${key}))`;

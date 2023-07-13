@@ -35,12 +35,12 @@ function tryExpression(code: string, signals: string[]): null | string {
           !parentIsProperty && // to catch the padding.top type cases
           !(termSet.has(node.name) || signalSet.has(node.name))
         ) {
-          throw new Error(`${node.name} is not a recongized keyword`);
+          throw new Error(`${node.name} is not a recognized keyword`);
         }
       },
     });
   } catch (e) {
-    return `${e as any as string}`;
+    return `${e}`;
   }
   return null;
 }
@@ -77,7 +77,7 @@ export default function Editor(props: {
     })!;
     const view = new EditorView({
       state: editorState,
-      parent: cmParent.current!,
+      parent: cmParent.current,
     });
     setView(view);
     return () => view.destroy();

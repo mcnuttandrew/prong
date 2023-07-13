@@ -158,9 +158,7 @@ const LineChart: SparkRenderer = (props) => {
     .x((d: any) => xScale(d.x0))
     .y((d) => yScale(d.length));
   const pathString = lineScale(histogram as any);
-  const path = (
-    <path d={pathString as string} fill="none" stroke="brown" key={"item"} />
-  );
+  const path = <path d={pathString} fill="none" stroke="brown" key={"item"} />;
   const res = histogram.map((bin, idx) => {
     const isSelected =
       selectedBin && selectedBin.x0 === bin.x0 && selectedBin?.x1 === bin.x1;
@@ -273,15 +271,8 @@ function buildHistogramProjection(
     };
 
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-        }}
-      >
-        <svg height={height} width={width} style={{ overflow: "visible" }}>
+      <div className="visible-histogram">
+        <svg height={height} width={width}>
           <g transform="translate(0, 2.5)">
             <rect
               width={width}

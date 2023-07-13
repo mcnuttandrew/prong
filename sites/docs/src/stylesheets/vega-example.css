@@ -1,0 +1,42 @@
+.visible-histogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.visible-histogram>svg {
+    overflow: visible;
+}
+
+/*  */
+
+.signal-editor {
+    width: 405px;
+}
+
+.signal-editor-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.signal-editor-list--item {
+    margin-right: 5px;
+}
+
+.signal-editor-error-message {
+    color: red;
+}
+
+.signal-editor .expression-editor .cm-activeLine {
+    background-color: rgba(102, 51, 153, 0);
+}
+
+.signal-editor .expression-editor .cm-gutters {
+    display: none;
+}
+
+
+.signal-editor .cm-tooltip.cm-tooltip-autocomplete>ul>li {
+    background: gainsboro;
+}

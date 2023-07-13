@@ -24,6 +24,8 @@ import {
   buildSparkProjection,
 } from "./histograms";
 
+import "../stylesheets/vega-example.css";
+
 const initialSpec = `{
   "data": [
     {
@@ -139,20 +141,9 @@ function ExpressionEditorProjection(props: EditorProps) {
   }, [props.currentValue]);
   return (
     <div className="signal-editor">
-      <div
-        className="signal-editor-list"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="signal-editor-list">
         {Object.entries(props.signals).map(([key, value]) => (
-          <div
-            key={key}
-            style={{
-              marginRight: "5px",
-            }}
-          >
+          <div className="signal-editor-list--item" key={key}>
             <b>{key}</b>: {JSON.stringify(value)}
           </div>
         ))}
@@ -174,7 +165,7 @@ function ExpressionEditorProjection(props: EditorProps) {
           UPDATE
         </button>
       </div>
-      {error && <div style={{ color: "red" }}>{error}</div>}
+      {error && <div className="signal-editor-error-message">{error}</div>}
     </div>
   );
 }

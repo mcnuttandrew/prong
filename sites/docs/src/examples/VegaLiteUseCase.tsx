@@ -104,10 +104,10 @@ const UploadAndInline: FC<ProjectionProps> = (props) => {
         accept="json"
         name="file"
         onChange={(event) => {
-          const file = event.target.files![0];
+          const file = event.target.files[0];
           const reader = new FileReader();
           reader.onload = function (event) {
-            const result = event.target!.result;
+            const result = event.target.result;
             const inlinedData = utils.simpleParse(result, []);
             const insertCode = inlinedData
               .map((x: any) => JSON.stringify(x))
@@ -135,10 +135,10 @@ const UploadDataset: FC<{
         accept="json"
         name="file"
         onChange={(event) => {
-          const file = event.target.files![0];
+          const file = event.target.files[0];
           const reader = new FileReader();
           reader.onload = function (event) {
-            const result = event.target!.result;
+            const result = event.target.result;
             const inlinedData = utils.simpleParse(result, []);
             const insertCode = inlinedData
               .map((x: any) => JSON.stringify(x))

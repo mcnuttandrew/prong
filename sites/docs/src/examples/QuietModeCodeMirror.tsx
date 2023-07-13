@@ -44,7 +44,7 @@ function QuietModeCodeMirror(props: {
     })!;
     const view = new EditorView({
       state: editorState,
-      parent: cmParent.current!,
+      parent: cmParent.current,
     });
     setView(view);
     return () => view.destroy();
@@ -68,7 +68,10 @@ function QuietModeCodeMirror(props: {
 }
 
 class QuietWidget extends WidgetType {
-  constructor(readonly content: string, readonly nodeType: string) {
+  constructor(
+    readonly content: string,
+    readonly nodeType: string
+  ) {
     super();
   }
 
