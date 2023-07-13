@@ -36,7 +36,9 @@
     "react-syntax-highlighter": "^15.5.0",
     "react-vega": "^7.6.0",
     "seedrandom": "^3.0.5",
+    "typescript": "^5.1.6",
     "vega": "^5.25.0",
+    "vega-datasets": "^2.7.0",
     "vega-expression": "^5.1.0",
     "vega-lite": "^5.13.0",
     "vega-themes": "^2.13.0"
@@ -57,8 +59,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.1",
     "prettier": "^3.0.0",
-    "typescript": "^5.1.6",
-    "vega-datasets": "^2.7.0",
     "vite": "^4.4.0"
   }
 }
