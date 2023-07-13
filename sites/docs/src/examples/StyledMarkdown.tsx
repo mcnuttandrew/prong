@@ -2,13 +2,16 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { xonokai } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ReactMarkdown from "react-markdown";
 
+const MaskedMarkdown = ReactMarkdown as any;
+const MaskedHighlight = SyntaxHighlighter as any;
 function StyledMarkdown(props: { content: string }) {
+  // @ts-ignore
   return (
-    <ReactMarkdown
+    <MaskedMarkdown
       components={{
         code({ inline, className, children, ...props }) {
           return !inline ? (
-            <SyntaxHighlighter
+            <MaskedHighlight
               {...props}
               children={String(children).replace(/\n$/, "")}
               style={xonokai}
@@ -24,7 +27,7 @@ function StyledMarkdown(props: { content: string }) {
       }}
     >
       {props.content}
-    </ReactMarkdown>
+    </MaskedMarkdown>
   );
 }
 export default StyledMarkdown;

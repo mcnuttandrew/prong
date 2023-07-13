@@ -329,7 +329,7 @@ export default function createTooltip(
 ) {
   return (view: EditorView): TooltipView => {
     const state = view.state;
-    let newCache = mapObj(getters, (getter) => getter(view, state));
+    const newCache = mapObj(getters, (getter) => getter(view, state));
     if (cacheEqual(cacheKey, newCache)) {
       return toolTipCache as Tooltip;
     }

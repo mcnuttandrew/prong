@@ -171,7 +171,8 @@ class Monocle extends Component<MonocleProps, { dragging: boolean }> {
               }}
             />
           )}
-          {this.props.children}
+          {/* @ts-ignore */}
+          {this.props.children as any}
         </div>
       </div>,
       this.el

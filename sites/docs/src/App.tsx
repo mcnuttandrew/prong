@@ -120,6 +120,7 @@ function Explanation(props: { explanation: string }) {
     <div className="explanation-container">
       <h3 className="">Example Explanation</h3>
       <div style={{ padding: "0 5px", width: "300px" }}>
+        {/* @ts-ignore */}
         <ReactMarkdown>{explanation}</ReactMarkdown>
       </div>
     </div>
