@@ -4,7 +4,6 @@ import { VegaLite } from "react-vega";
 import "../stylesheets/vega-lite-example.css";
 
 import {
-  prettifier,
   StandardBundle,
   Editor,
   utils,
@@ -22,6 +21,7 @@ import {
   extractFieldNames,
   usePersistedState,
   buildInlineDropDownProjection,
+  classNames,
 } from "./example-utils";
 
 const Pill: FC<{ name: string }> = function Pill(props) {
@@ -68,7 +68,7 @@ const Shelf: FC<{
   return (
     <div
       ref={drop}
-      className={utils.classNames({
+      className={classNames({
         shelf: true,
         "shelf-empty": !isActive && !parsedCurrentValue,
         "shelf-full": !isActive && parsedCurrentValue,
@@ -105,7 +105,7 @@ const UploadAndInline: FC<ProjectionProps> = (props) => {
         name="file"
         onChange={(event) => {
           const file = event.target.files![0];
-          var reader = new FileReader();
+          const reader = new FileReader();
           reader.onload = function (event) {
             const result = event.target!.result;
             const inlinedData = utils.simpleParse(result, []);
@@ -144,7 +144,7 @@ const UploadDataset: FC<{
               .map((x: any) => JSON.stringify(x))
               .join(",\n\t\t");
             setCode(
-              prettifier(
+              utils.prettifier(
                 utils.simpleParse(
                   utils.setIn(
                     ["data", "values", "values___value"],
@@ -190,7 +190,7 @@ function buildFileGet(fileName: string, currentCode: string) {
   return fetch(`./data/${fileName}`)
     .then((x) => x.text())
     .then((x) => {
-      return prettifier(
+      return utils.prettifier(
         utils.simpleParse(
           utils.setIn(["data", "values", "values___value"], x, currentCode),
           {}

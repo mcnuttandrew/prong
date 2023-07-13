@@ -43,5 +43,6 @@ module.exports = {
         caughtErrorsIgnorePattern: "^_",
       },
     ],
+    "@typescript-eslint/restrict-template-expressions": 0,
   },
 };

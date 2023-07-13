@@ -3,7 +3,7 @@
 This is the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
 The basic dependencies of this system are code mirror (which we wrap) and react (which we use as means to specify the extensions).
 
-This is described in our upcoming paper "Projectional Editors for JSON DSLs"
+This is described in our upcoming paper "Projectional Editors for JSON DSLs". Please note that this is research grade software, so there are bugs and issues throughout.
 
 ## Quick start example usage
 
@@ -82,6 +82,41 @@ We include a variety of common projections that you might find useful
 
 You dont have to include any of them or all of them, its presented as an object so you can select what you want.
 
+## Utils
+
+We provide a handful utilities to make the construction of these editors less painful:
+
+```ts
+// make a simple modification to a json string
+function setIn(
+  keyPath: (string | number)[],
+  newValue: any,
+  content: string
+): string;
+```
+
+```ts
+// a simple prettification algorithm tuned to json specifically
+function prettifier(
+  passedObj: any,
+  options?: {
+    indent?: string | undefined;
+    maxLength?: number | undefined;
+    replacer?: ((this: any, key: string, value: any) => any) | undefined;
+  }
+): string;
+```
+
+```ts
+// a simple wrapper around a forgiving json parser
+function simpleParse(content: any, defaultVal?: {}): any;
+```
+
+```ts
+// maybe remove double quotes from a string, handy for some styling tasks
+const maybeTrim: (x: string) => string;
+```
+
 ## Projections
 
 The central design abstraction in Prong are projections. These are lightweight ways to modify the text within the editor to fit your goals.
@@ -101,6 +136,8 @@ Here are the types for each of the objects
   type: "tooltip";
 }
 ```
+
+(Note that `Projection` and `ProjectionProps` are both exported types)
 
 ```tsx
 {

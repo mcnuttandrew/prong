@@ -319,11 +319,14 @@ export function applyAllCmds(content: string, updates: UpdateDispatch[]) {
 
 export function createNodeMap(schema: any, doc: string) {
   return getMatchingSchemas(schema, doc).then((matches) => {
-    return matches.reduce((acc, { node, schema }) => {
-      const [from, to] = [node.offset, node.offset + node.length];
-      acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
-      return acc;
-    }, {} as { [x: string]: any });
+    return matches.reduce(
+      (acc, { node, schema }) => {
+        const [from, to] = [node.offset, node.offset + node.length];
+        acc[`${from}-${to}`] = (acc[`${from}-${to}`] || []).concat(schema);
+        return acc;
+      },
+      {} as { [x: string]: any }
+    );
   });
 }
 
@@ -395,9 +398,6 @@ export function getCursorPos(state: EditorState) {
   const range = ranges[0];
   return range.anchor;
 }
-
-// const climbToRoot = (node: SyntaxNode): SyntaxNode =>
-//   node.parent ? climbToRoot(node.parent) : node;
 
 export const maybeTrim = (x: string) => {
   return x.at(0) === '"' && x.at(-1) === '"' ? x.slice(1, x.length - 1) : x;

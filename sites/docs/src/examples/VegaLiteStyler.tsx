@@ -2,7 +2,6 @@ import { useState, useReducer } from "react";
 import {
   StandardBundle,
   Projection,
-  prettifier,
   Editor,
   utils,
 } from "../../../../packages/prong-editor/src/index";
@@ -228,7 +227,7 @@ function pathToKeyPath(path: string) {
 
 function materializeSuggestions(currentCode: string, suggestions: any[]) {
   const parsedRoot = utils.simpleParse(currentCode, {});
-  const allCombined = prettifier(
+  const allCombined = utils.prettifier(
     suggestions.reduce(
       (acc, { suggestion }) => merge(acc, { ...suggestion }),
       parsedRoot
@@ -455,7 +454,7 @@ function VegaLiteExampleApp() {
                 onClick={() =>
                   dispatch({
                     type: "setCode",
-                    payload: prettifier(theme),
+                    payload: utils.prettifier(theme),
                   })
                 }
               >
