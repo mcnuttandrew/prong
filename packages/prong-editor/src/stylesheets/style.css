@@ -1,3 +1,10 @@
+:root {
+    /* --blue: #1e90ff;
+  --white: #ffffff; */
+    --menu-background: #f5f5f5;
+    --menu-accent: #009979;
+}
+
 /* UTILS */
 
 .prong-flex {
