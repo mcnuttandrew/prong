@@ -1,3 +1,5 @@
+/* eslint-disable no-case-declarations */
+/* eslint-disable @typescript-eslint/no-empty-interface */
 // Forked from http://tracery.io/editor/js/tracery/tracery.js
 import seedrandom from "seedrandom";
 
@@ -22,7 +24,7 @@ type Sections = {
 type Modifier = (s: string) => string;
 
 function isVowel(c: string) {
-  var c2 = c.toLowerCase();
+  const c2 = c.toLowerCase();
   return c2 === "a" || c2 === "e" || c2 === "i" || c2 === "o" || c2 === "u";
 }
 
@@ -32,14 +34,14 @@ function isAlphaNum(c: string) {
   );
 }
 
-var baseEngModifiers: Record<string, Modifier> = {
+const baseEngModifiers: Record<string, Modifier> = {
   varyTune: function (s: string) {
-    var s2 = "";
-    var d = Math.ceil(random() * 5);
-    for (var i = 0; i < s.length; i++) {
-      var c = s.charCodeAt(i) - 97;
+    let s2 = "";
+    const d = Math.ceil(random() * 5);
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i) - 97;
       if (c >= 0 && c < 26) {
-        var v2 = ((c + d) % 13) + 97;
+        const v2 = ((c + d) % 13) + 97;
         s2 += String.fromCharCode(v2);
       } else {
         s2 += String.fromCharCode(c + 97);
@@ -49,9 +51,9 @@ var baseEngModifiers: Record<string, Modifier> = {
   },
 
   capitalizeAll: function (s: string) {
-    var s2 = "";
-    var capNext = true;
-    for (var i = 0; i < s.length; i++) {
+    let s2 = "";
+    let capNext = true;
+    for (let i = 0; i < s.length; i++) {
       if (!isAlphaNum(s.charAt(i))) {
         capNext = true;
         s2 += s.charAt(i);
@@ -132,7 +134,7 @@ export class TraceryNode {
   raw: string;
   type: TraceryNodeType;
   preactions?: NodeAction[];
-  symbol?: Symbol;
+  symbol?: symbol;
   modifiers?: Modifier[];
   id: string;
 
@@ -167,7 +169,8 @@ export class TraceryNode {
     this.id = `${random()}`;
   }
   toString() {
-    return "Node('" + this.raw + "' " + this.type + " d:" + this.depth + ")";
+    // return "Node('" + this.raw + "' " + this.type + " d:" + this.depth + ")";
+    return `Node('${this.raw}' ${this.type} d:${this.depth})`;
   }
 
   // Expand the node (with the given child rule)
@@ -181,8 +184,8 @@ export class TraceryNode {
     this.childRule = childRule;
     if (this.childRule !== undefined) {
       // @ts-ignore
-      var sections = tracery.parse(childRule);
-      for (var i = 0; i < sections.length; i++) {
+      const sections = tracery.parse(childRule);
+      for (let i = 0; i < sections.length; i++) {
         this.children[i] = new TraceryNode(this, i, sections[i]);
         if (!preventRecursion) this.children[i].expand(preventRecursion);
 
@@ -223,7 +226,7 @@ export class TraceryNode {
           // Parse to find any actions, and figure out what the symbol is
           this.preactions = [];
 
-          var parsed = tracery.parseTag(this.raw);
+          const parsed = tracery.parseTag(this.raw);
 
           // Break into symbol actions and modifiers
           this.symbol = parsed.symbol;
@@ -232,7 +235,7 @@ export class TraceryNode {
           // Create all the preactions from the raw syntax
           if (parsed.preactions.length > 0) {
             this.preactions = [];
-            for (var i = 0; i < parsed.preactions.length; i++) {
+            for (let i = 0; i < parsed.preactions.length; i++) {
               this.preactions[i] = new NodeAction(
                 this,
                 // @ts-ignore
@@ -244,7 +247,7 @@ export class TraceryNode {
             // TODO
 
             // Activate all the preactions
-            for (var idx = 0; idx < this.preactions.length; idx++) {
+            for (let idx = 0; idx < this.preactions.length; idx++) {
               this.preactions[idx].activate();
             }
           }
@@ -253,7 +256,7 @@ export class TraceryNode {
 
           // Expand (passing the node, this allows tracking of recursion depth)
           // @ts-ignore
-          var selectedRule = this.grammar.selectRule(this.symbol, this);
+          const selectedRule = this.grammar.selectRule(this.symbol, this);
 
           if (!selectedRule) {
             this.expansionErrors.push({
@@ -263,9 +266,9 @@ export class TraceryNode {
           this.expandChildren(selectedRule, !!preventRecursion);
 
           // Apply modifiers
-          for (var jdx = 0; jdx < this.modifiers.length; jdx++) {
+          for (let jdx = 0; jdx < this.modifiers.length; jdx++) {
             // @ts-ignore
-            var mod = this.grammar.modifiers[this.modifiers[jdx]];
+            const mod = this.grammar.modifiers[this.modifiers[jdx]];
             if (!mod) this.finishedText += `((.${this.modifiers[jdx]}))`;
             else this.finishedText = mod(this.finishedText);
           }
@@ -307,7 +310,7 @@ export class NodeAction {
 
     this.node = node;
 
-    var sections = raw.split(":");
+    const sections = raw.split(":");
     this.target = sections[0];
 
     // No colon? A function!
@@ -327,7 +330,7 @@ export class NodeAction {
   }
 
   activate() {
-    var grammar = this.node.grammar;
+    const grammar = this.node.grammar;
     switch (this.type) {
       case 0:
         // @ts-ignore
@@ -389,12 +392,12 @@ class RuleSet {
     // console.log("Get rule", this.raw);
     // Is there a conditional?
     if (this.conditionalRule) {
-      var value = this.grammar.expand(this.conditionalRule);
+      const value = this.grammar.expand(this.conditionalRule);
       // does this value match any of the conditionals?
       // @ts-ignore
       if (this.conditionalValues && this.conditionalValues[value]) {
         // @ts-ignore
-        var v = this.conditionalValues[value].getRule();
+        const v = this.conditionalValues[value].getRule();
         if (v !== null && v !== undefined) return v;
       }
       // No returned value?
@@ -402,8 +405,8 @@ class RuleSet {
 
     // Is there a ranked order?
     if (this.ranking) {
-      for (var i = 0; i < this.ranking.length; i++) {
-        var vDx = this.ranking.getRule();
+      for (let i = 0; i < this.ranking.length; i++) {
+        const vDx = this.ranking.getRule();
         if (vDx !== null && vDx !== undefined) return vDx;
       }
 
@@ -411,7 +414,7 @@ class RuleSet {
     }
 
     if (this.defaultRules !== undefined) {
-      var index = 0;
+      let index = 0;
       // Select from this basic array of rules
 
       // Get the distribution
@@ -423,7 +426,9 @@ class RuleSet {
             // make an array
             this.shuffledDeck = fyshuffle(
               // @ts-ignore
+              // eslint-disable-next-line prefer-spread
               Array.apply(null, { length: this.defaultRules.length }).map(
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 Number.call,
                 Number
               )
@@ -458,7 +463,7 @@ class RuleSet {
 }
 
 function fyshuffle(array: any[]) {
-  var currentIndex = array.length,
+  let currentIndex = array.length,
     temporaryValue,
     randomIndex;
 
@@ -504,7 +509,7 @@ class Symbol {
   }
 
   pushRules(rawRules: Rule) {
-    var rules = new RuleSet(this.grammar, rawRules);
+    const rules = new RuleSet(this.grammar, rawRules);
     if (!this.stack) {
       this.stack = [];
     }
@@ -532,7 +537,7 @@ class Symbol {
 class Grammar {
   raw?: any;
   modifiers: Record<string, any>;
-  symbols?: Record<string, Symbol>;
+  symbols?: Record<string, symbol>;
   subgrammars?: Grammar[];
   distribution?: Distribution;
   constructor(raw: any) {
@@ -541,15 +546,17 @@ class Grammar {
   }
 
   clearState() {
-    var keys = Object.keys(this.symbols || {});
-    for (var i = 0; i < keys.length; i++) {
+    const keys = Object.keys(this.symbols || {});
+    for (let i = 0; i < keys.length; i++) {
+      // @ts-ignore
       this.symbols![keys[i]].clearState();
     }
   }
 
   addModifiers(mods: Record<string, Modifier>) {
     // copy over the base modifiers
-    for (var key in mods) {
+    for (const key in mods) {
+      // eslint-disable-next-line no-prototype-builtins
       if (mods.hasOwnProperty(key)) {
         this.modifiers[key] = mods[key];
       }
@@ -563,8 +570,10 @@ class Grammar {
 
     if (this.raw) {
       // Add all rules to the grammar
-      for (var key in this.raw) {
+      for (const key in this.raw) {
+        // eslint-disable-next-line no-prototype-builtins
         if (this.raw.hasOwnProperty(key)) {
+          //@ts-ignore
           this.symbols[key] = new Symbol(this, key, this.raw[key]);
         }
       }
@@ -574,7 +583,7 @@ class Grammar {
   createRoot(rule: RuleSet | string) {
     // Create a node and subnodes
     // @ts-ignore
-    var root = new TraceryNode(this, 0, {
+    const root = new TraceryNode(this, 0, {
       type: -1,
       raw: rule,
     });
@@ -583,7 +592,7 @@ class Grammar {
   }
 
   expand(rule: RuleSet) {
-    var root = this.createRoot(rule);
+    const root = this.createRoot(rule);
     root.expand();
     return root;
   }
@@ -609,6 +618,7 @@ class Grammar {
   popRules(key: string) {
     if (!(this.symbols && this.symbols[key]))
       throw Error("No symbol for key " + key);
+    //@ts-ignore
     this.symbols[key].popRules();
   }
 
@@ -617,9 +627,10 @@ class Grammar {
     if (this.symbols[key]) return this.symbols[key].selectRule(node);
 
     // Failover to alternative subgrammars
-    for (var i = 0; i < (this.subgrammars || []).length; i++) {
+    for (let i = 0; i < (this.subgrammars || []).length; i++) {
       const gram = this.subgrammars![i];
       if (gram?.symbols && gram?.symbols[key as string])
+        //@ts-ignore
         return gram.symbols[key as string].selectRule();
     }
 
@@ -643,7 +654,7 @@ const tracery = {
   // Parse the contents of a tag
   parseTag: function (tagContents: string) {
     const parsed: {
-      symbol?: Symbol;
+      symbol?: symbol;
       preactions: NodeAction[];
       postactions: NodeAction[];
       modifiers: Modifier[];
@@ -672,7 +683,7 @@ const tracery = {
     if (symbolSection === undefined) {
       //   throw ("no main section in " + tagContents);
     } else {
-      let components = symbolSection.split(".");
+      const components = symbolSection.split(".");
       // @ts-ignore
       parsed.symbol = components[0];
       // @ts-ignore
@@ -684,7 +695,7 @@ const tracery = {
   parse: function (rule: RuleSet) {
     let depth = 0;
     let inTag = false;
-    let sections: Sections = [];
+    const sections: Sections = [];
     let escaped = false;
 
     sections.errors = [];
@@ -695,12 +706,13 @@ const tracery = {
     function createSection(start: number, end: number, type: string) {
       if (end - start < 1) {
         // @ts-ignore
-        sections.errors.push(start + ": 0-length section of type " + type);
+        sections.errors.push(`${start}: 0-length section of type ${type}`);
       }
-      var rawSubstring;
+      let rawSubstring;
       if (lastEscapedChar !== undefined) {
         rawSubstring =
           // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           escapedSubstring + rule.substring(lastEscapedChar + 1, end);
       } else {
         // @ts-ignore
@@ -716,10 +728,10 @@ const tracery = {
     }
 
     // @ts-ignore
-    for (var i = 0; i < rule.length; i++) {
+    for (let i = 0; i < rule.length; i++) {
       if (!escaped) {
         // @ts-ignore
-        var c = rule.charAt(i);
+        const c = rule.charAt(i);
 
         switch (c) {
           // Enter a deeper bracketed section
@@ -762,6 +774,7 @@ const tracery = {
           case "\\":
             escaped = true;
             // @ts-ignore
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             escapedSubstring = escapedSubstring + rule.substring(start, i);
             start = i + 1;
             // @ts-ignore
@@ -810,7 +823,7 @@ interface App {
 //   grammar: grammar,
 // };
 function generateRoot(app: App) {
-  var origin = app.origin;
+  let origin = app.origin;
   if (!origin) {
     origin = "origin";
   }
@@ -823,8 +836,8 @@ export function generate(preventRecursion: boolean, app: App) {
   rng = seedrandom(app.randomKey);
 
   app.generatedRoots = [];
-  for (var i = 0; i < app.generateCount; i++) {
-    var root = generateRoot(app);
+  for (let i = 0; i < app.generateCount; i++) {
+    const root = generateRoot(app);
     root.expand(preventRecursion);
     app.generatedRoots[i] = root;
   }

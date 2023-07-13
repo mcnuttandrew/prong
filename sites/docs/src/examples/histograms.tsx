@@ -261,7 +261,7 @@ function buildHistogramProjection(
       pointerEvents: "none",
       x:
         xScale.bandwidth() / 2 +
-        (!!selectedBin ? xScale(selectedBin.x0 as any) || 0 : 0),
+        (selectedBin ? xScale(selectedBin.x0 as any) || 0 : 0),
     };
     const chartProps = {
       histogram,

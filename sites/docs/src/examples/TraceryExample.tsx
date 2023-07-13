@@ -95,7 +95,7 @@ function generateRoots(currentCode: string, randomKey: string) {
 
 function getAllNodes(root: TraceryNode) {
   const allNodes = [];
-  let queue = [root];
+  const queue = [root];
   while (queue.length) {
     const current = queue.shift()!;
     allNodes.push(current);
@@ -282,6 +282,7 @@ const Editable = (props: {
       setTxt(evt.currentTarget.innerHTML);
       setContent(evt.currentTarget.innerHTML);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -477,7 +478,7 @@ function TraceryExample() {
 
   function clickNode(node: TraceryNode) {
     const nodeId = node.id;
-    setSelectedNodes(selectedNodes.includes(nodeId) ? [] : [nodeId as string]);
+    setSelectedNodes(selectedNodes.includes(nodeId) ? [] : [nodeId]);
   }
 
   useEffect(() => {
