@@ -257,7 +257,7 @@ These queries allow you to check for a given AST node type. The JSON AST include
 }
 ```
 
-If none of these work for you there is also a function query type. This is obviously the most expensive to run, so should be avoided where possible.
+If none of these work for you there is also a function query type. This is obviously the most expensive to run, so should be avoided where possible
 
 ## Local development
 
