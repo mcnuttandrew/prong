@@ -187,27 +187,3 @@
     background-color: #dddddd;
     border-radius: 5px;
 }
-
-/*  */
-
-.signal-editor {
-    width: 405px;
-}
-
-.signal-editor-list {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.signal-editor .expression-editor .cm-activeLine {
-    background-color: rgba(102, 51, 153, 0);
-}
-
-.signal-editor .expression-editor .cm-gutters {
-    display: none;
-}
-
-
-.signal-editor .cm-tooltip.cm-tooltip-autocomplete>ul>li {
-    background: gainsboro;
-}
