@@ -22,6 +22,7 @@ module.exports = {
       "warn",
       { allowConstantExport: true },
     ],
+    "@typescript-eslint/no-redundant-type-constituents": 0,
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unsafe-call": "off",
     "@typescript-eslint/ban-ts-comment": 0,

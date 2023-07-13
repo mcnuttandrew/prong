@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react'
-import { Editor, StandardBundle } from 'prong-editor'
-import VegaSchema from '../constants/vega-schema.json'
-import { analyzeVegaCode } from './example-utils'
+import { useState, useEffect } from "react";
 import {
-    SparkType,
-    sparkTypes,
-    sparkPositions,
-    SparkPos,
-    PreComputedHistograms,
-    createHistograms,
-    DataTable,
-    isDataTable,
-    buildSparkProjection,
-} from './histograms'
+  Editor,
+  StandardBundle,
+} from "../../../../packages/prong-editor/src/index";
+import VegaSchema from "../constants/vega-schema.json";
+import { analyzeVegaCode } from "./example-utils";
+import {
+  SparkType,
+  sparkTypes,
+  sparkPositions,
+  SparkPos,
+  PreComputedHistograms,
+  createHistograms,
+  DataTable,
+  isDataTable,
+  buildSparkProjection,
+} from "./histograms";
 
 const connectedScatterPlotSpec = `{
   "marks": [
@@ -83,77 +86,68 @@ const connectedScatterPlotSpec = `{
       "range": [1, 1, -5, 6]
     }
   ]
-}`
+}`;
 
 function InSituFigure1() {
-    const [currentCode, setCurrentCode] = useState(connectedScatterPlotSpec)
-    const [sparkPosition, setSparkPosition] = useState<SparkPos>('right')
-    const [sparkType, setSparkType] = useState<SparkType>('line')
-    const [preComputedHistograms, setPrecomputedHistograms] =
-        useState<PreComputedHistograms>({})
+  const [currentCode, setCurrentCode] = useState(connectedScatterPlotSpec);
+  const [sparkPosition, setSparkPosition] = useState<SparkPos>("right");
+  const [sparkType, setSparkType] = useState<SparkType>("line");
+  const [preComputedHistograms, setPrecomputedHistograms] =
+    useState<PreComputedHistograms>({});
 
-    useEffect(() => {
-        analyzeVegaCode(currentCode, ({ data }) => {
-            const namedPairs = Object.entries(data)
-                .filter(([_key, dataSet]) => isDataTable(dataSet))
-                .map(([key, data]) => [
-                    key,
-                    createHistograms(data as DataTable),
-                ])
-            setPrecomputedHistograms(Object.fromEntries(namedPairs))
-        })
-    }, [currentCode])
+  useEffect(() => {
+    analyzeVegaCode(currentCode, ({ data }) => {
+      const namedPairs = Object.entries(data)
+        .filter(([_key, dataSet]) => isDataTable(dataSet))
+        .map(([key, data]) => [key, createHistograms(data as DataTable)]);
+      setPrecomputedHistograms(Object.fromEntries(namedPairs));
+    });
+  }, [currentCode]);
 
-    return (
-        <div className="App">
-            <div>
-                <h1>Sparkline Config</h1>
-                <div>
-                    <div className="">
-                        <label html-for="spark-pos-picker">Placement</label>
-                        <select
-                            id="spark-pos-picker"
-                            title="Select a position for the spark line"
-                            value={sparkPosition}
-                            onChange={(e) =>
-                                setSparkPosition(e.target.value as SparkPos)
-                            }
-                        >
-                            {sparkPositions.map((val) => (
-                                <option key={val}>{val}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="">
-                        <label html-for="spark-type-picker">Mark type</label>
-                        <select
-                            id="spark-type-picker"
-                            title="Select a position for the spark line"
-                            value={sparkType}
-                            onChange={(e) => setSparkType(e.target.value)}
-                        >
-                            {sparkTypes.map((val) => (
-                                <option key={val}>{val}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <Editor
-                schema={VegaSchema}
-                code={currentCode}
-                onChange={(x) => setCurrentCode(x)}
-                projections={[
-                    ...Object.values(StandardBundle),
-                    buildSparkProjection(
-                        preComputedHistograms,
-                        sparkPosition,
-                        sparkType
-                    ),
-                ]}
-            />{' '}
+  return (
+    <div className="App">
+      <div>
+        <h1>Sparkline Config</h1>
+        <div>
+          <div className="">
+            <label html-for="spark-pos-picker">Placement</label>
+            <select
+              id="spark-pos-picker"
+              title="Select a position for the spark line"
+              value={sparkPosition}
+              onChange={(e) => setSparkPosition(e.target.value as SparkPos)}
+            >
+              {sparkPositions.map((val) => (
+                <option key={val}>{val}</option>
+              ))}
+            </select>
+          </div>
+          <div className="">
+            <label html-for="spark-type-picker">Mark type</label>
+            <select
+              id="spark-type-picker"
+              title="Select a position for the spark line"
+              value={sparkType}
+              onChange={(e) => setSparkType(e.target.value)}
+            >
+              {sparkTypes.map((val) => (
+                <option key={val}>{val}</option>
+              ))}
+            </select>
+          </div>
         </div>
-    )
+      </div>
+      <Editor
+        schema={VegaSchema}
+        code={currentCode}
+        onChange={(x) => setCurrentCode(x)}
+        projections={[
+          ...Object.values(StandardBundle),
+          buildSparkProjection(preComputedHistograms, sparkPosition, sparkType),
+        ]}
+      />{" "}
+    </div>
+  );
 }
 
-export default InSituFigure1
+export default InSituFigure1;

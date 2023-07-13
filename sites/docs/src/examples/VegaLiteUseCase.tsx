@@ -10,7 +10,7 @@ import {
   utils,
   ProjectionProps,
   Projection,
-} from "prong-editor";
+} from "../../../../packages/prong-editor/src/index";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -57,7 +57,10 @@ const Shelf: FC<{
       setCurrentCode(update);
       return { name: "Dustbin" };
     },
-    collect: (m) => ({ isOver: m.isOver(), canDrop: m.canDrop() }),
+    collect: (m) => ({
+      isOver: m.isOver(),
+      canDrop: m.canDrop(),
+    }),
   }));
 
   const isActive = canDrop && isOver;

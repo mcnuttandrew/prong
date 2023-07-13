@@ -30,7 +30,9 @@ function QuietModeCompare() {
             );
           })
       )
-    ).then(([codeMirror, us]) => setExamples({ codeMirror, us }));
+    )
+      .then(([codeMirror, us]) => setExamples({ codeMirror, us }))
+      .catch((e) => console.error(e));
   }, []);
   return (
     <div className="flex" id="quiet-root" style={{ width: "100%" }}>
@@ -47,19 +49,33 @@ function QuietModeCompare() {
         <h3>Lines of code {examples.us.split("\n").length}</h3>
         <QuietModeUs code={code} onChange={setCode} />
         <h3>Raw</h3>
-        <div style={{ height: "100%", overflowY: "scroll" }}>
+        <div
+          style={{
+            height: "100%",
+            overflowY: "scroll",
+          }}
+        >
           <StyledMarkdown content={examples.us} />
         </div>
       </div>
       <div
-        style={{ width: "100%", height: "100%", maxWidth: "50%" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          maxWidth: "50%",
+        }}
         className="flex-down"
       >
         <h1>Vanilla Code Mirror</h1>
         <h3>Lines of code {examples.codeMirror.split("\n").length}</h3>
         <QuietModeCodeMirror code={code} onChange={setCode} />
         <h3>Raw</h3>
-        <div style={{ height: "100%", overflowY: "scroll" }}>
+        <div
+          style={{
+            height: "100%",
+            overflowY: "scroll",
+          }}
+        >
           <StyledMarkdown content={examples.codeMirror} />
         </div>
       </div>
