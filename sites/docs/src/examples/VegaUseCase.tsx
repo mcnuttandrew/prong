@@ -5,7 +5,7 @@ import {
   Projection,
   ProjectionProps,
   utils,
-} from "prong-editor";
+} from "../../../../packages/prong-editor/src/index";
 import VegaSchema from "../constants/vega-schema.json";
 
 import {
@@ -141,10 +141,18 @@ function ExpressionEditorProjection(props: EditorProps) {
     <div className="signal-editor">
       <div
         className="signal-editor-list"
-        style={{ display: "flex", flexWrap: "wrap" }}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+        }}
       >
         {Object.entries(props.signals).map(([key, value]) => (
-          <div key={key} style={{ marginRight: "5px" }}>
+          <div
+            key={key}
+            style={{
+              marginRight: "5px",
+            }}
+          >
             <b>{key}</b>: {JSON.stringify(value)}
           </div>
         ))}

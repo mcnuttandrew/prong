@@ -5,7 +5,7 @@ import {
   prettifier,
   Editor,
   utils,
-} from "prong-editor";
+} from "../../../../packages/prong-editor/src/index";
 import merge from "lodash.merge";
 import {
   dark,
@@ -372,7 +372,10 @@ const setSuggestion = (
   };
 };
 const setKeyPath = (state: ReducerState, action: ActionSetKeyPath) => {
-  return { ...state, keyPath: action.payload.filter((x) => x !== undefined) };
+  return {
+    ...state,
+    keyPath: action.payload.filter((x) => x !== undefined),
+  };
 };
 const actionTable = {
   acceptSuggestion,
@@ -450,7 +453,10 @@ function VegaLiteExampleApp() {
               <button
                 key={themeName}
                 onClick={() =>
-                  dispatch({ type: "setCode", payload: prettifier(theme) })
+                  dispatch({
+                    type: "setCode",
+                    payload: prettifier(theme),
+                  })
                 }
               >
                 {themeName}
@@ -460,13 +466,21 @@ function VegaLiteExampleApp() {
         </div>
         <QueryBar
           executeSearch={(query) =>
-            dispatch({ type: "setQuery", payload: query })
+            dispatch({
+              type: "setQuery",
+              payload: query,
+            })
           }
         >
           {!!state.suggestions.length ? (
             <div>
               <button
-                onClick={() => dispatch({ type: "setSuggestion", payload: [] })}
+                onClick={() =>
+                  dispatch({
+                    type: "setSuggestion",
+                    payload: [],
+                  })
+                }
               >
                 Dismiss Suggestions
               </button>
@@ -481,10 +495,16 @@ function VegaLiteExampleApp() {
           schema={updatedSchema}
           code={state.currentCode}
           onTargetNodeChanged={(newKeyPath) => {
-            dispatch({ type: "setKeyPath", payload: newKeyPath });
+            dispatch({
+              type: "setKeyPath",
+              payload: newKeyPath,
+            });
           }}
           onChange={(newCode) =>
-            dispatch({ type: "setCode", payload: newCode })
+            dispatch({
+              type: "setCode",
+              payload: newCode,
+            })
           }
           height={"400px"}
           projections={
@@ -501,7 +521,10 @@ function VegaLiteExampleApp() {
               {
                 type: "tooltip",
                 name: "Switch to",
-                query: { type: "schemaMatch", query: ["font"] },
+                query: {
+                  type: "schemaMatch",
+                  query: ["font"],
+                },
                 projection: buttonListProjection(fonts, state.currentCode),
               },
               state.suggestions.length &&

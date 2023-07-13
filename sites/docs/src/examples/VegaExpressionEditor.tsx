@@ -20,7 +20,7 @@ import {
   CompletionSource,
   snippet,
 } from "@codemirror/autocomplete";
-import { utils } from "prong-editor";
+import { utils } from "../../../../packages/prong-editor/src/index";
 
 export type SchemaMap = Record<string, any>;
 // vegaExpression.
@@ -323,7 +323,9 @@ function doSyntaxHighlighting(view: EditorView) {
     enter: ({ node, from, to }) => {
       if (colorMap[node.type.name]) {
         const style = `color: ${colorMap[node.type.name]}`;
-        const syntaxHighlight = Decoration.mark({ attributes: { style } });
+        const syntaxHighlight = Decoration.mark({
+          attributes: { style },
+        });
         widgets.push(syntaxHighlight.range(from, to));
       }
     },

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { ProjectionProps, prettifier, utils } from "prong-editor";
+import {
+  ProjectionProps,
+  prettifier,
+  utils,
+} from "../../../../packages/prong-editor/src/index";
 import { extractFieldNames, Table } from "./example-utils";
 
 const letters = ["penguins", "flowers", "wheat", "squids", "dough", "bags"];

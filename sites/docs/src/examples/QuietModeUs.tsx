@@ -1,4 +1,4 @@
-import { Editor } from "prong-editor";
+import { Editor } from "../../../../packages/prong-editor/src/index";
 import { produceSchema } from "./example-data";
 
 const coloring: Record<string, string> = {
@@ -25,9 +25,16 @@ const QuietModeUs = (props: {
       {
         type: "inline",
         mode: "replace",
-        query: { type: "nodeType", query: nodeTypes },
+        query: {
+          type: "nodeType",
+          query: nodeTypes,
+        },
         projection: (props) => (
-          <div style={{ color: coloring[props.node.type.name] || "black" }}>
+          <div
+            style={{
+              color: coloring[props.node.type.name] || "black",
+            }}
+          >
             {trim(props.currentValue).length ? trim(props.currentValue) : '""'}
           </div>
         ),

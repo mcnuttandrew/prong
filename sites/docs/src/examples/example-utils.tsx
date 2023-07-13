@@ -3,7 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import * as vega from "vega";
 import { parse, View } from "vega";
 
-import { utils, ProjectionProps, Projection } from "prong-editor";
+import {
+  utils,
+  ProjectionProps,
+  Projection,
+} from "../../../../packages/prong-editor/src/index";
 const { simpleParse, setIn } = utils;
 
 export const usePersistedState = (name: string, defaultValue: any) => {

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import 'prong-editor/style.css'
+// import '../../../prong-editor/style.css'
+// import '../../../packages/prong-editor/src'
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
@@ -16,7 +17,6 @@ import VegaUseCase from "./examples/VegaUseCase";
 import QuietModeCompare from "./examples/QuietModeCompare";
 
 import StyledMarkdown from "./examples/StyledMarkdown";
-
 
 const routes: {
   name: string;
@@ -97,14 +97,10 @@ function Root() {
     fetch("./README.md")
       .then((x) => x.text())
       .then((x) => {
-        setDocs(
-          x
-        )
-      }
-      )
-      // .catch((e) => console.error(e));
+        setDocs(x);
+      })
+      .catch((e) => console.error(e));
   }, []);
-
 
   return (
     <div className="root">
@@ -121,9 +117,7 @@ function Explanation(props: { explanation: string }) {
     return <></>;
   }
   return (
-    <div
-    className="explanation-container"
-    >
+    <div className="explanation-container">
       <h3 className="">Example Explanation</h3>
       <div style={{ padding: "0 5px", width: "300px" }}>
         <ReactMarkdown>{explanation}</ReactMarkdown>
@@ -133,10 +127,13 @@ function Explanation(props: { explanation: string }) {
 }
 
 function App() {
-  const groups = routes.reduce((acc, row) => {
-    acc[row.zone] = (acc[row.zone] || []).concat(row);
-    return acc;
-  }, {} as Record<string, typeof routes>);
+  const groups = routes.reduce(
+    (acc, row) => {
+      acc[row.zone] = (acc[row.zone] || []).concat(row);
+      return acc;
+    },
+    {} as Record<string, typeof routes>
+  );
   return (
     <HashRouter>
       <div className="flex proot">
@@ -152,10 +149,7 @@ function App() {
           </Link>
           {Object.entries(groups).map(([name, groupRoutes]) => {
             return (
-              <div
-                key={name}
-                className="inner-link-container"
-              >
+              <div key={name} className="inner-link-container">
                 <h3 className="">{name}</h3>
                 {groupRoutes.map(({ name }) => (
                   <div key={name}>

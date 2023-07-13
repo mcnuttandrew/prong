@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { StandardBundle, Projection, utils, Editor } from "prong-editor";
+import {
+  StandardBundle,
+  Projection,
+  utils,
+  Editor,
+} from "../../../../packages/prong-editor/src/index";
 import tracery, { generate, TraceryNode } from "./tracery";
 import "../stylesheets/tracery-example.css";
 
@@ -289,7 +294,9 @@ const Editable = (props: {
           setContent(val);
           setTxt(val);
         }}
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{
+          __html: content,
+        }}
       />
       {outOfSync && <div>Out of Sync</div>}
     </div>
@@ -654,7 +661,10 @@ function TraceryExample() {
             },
             ...inUseKeys.map((query) => ({
               type: "highlight",
-              query: { type: "index", query: query?.keyPath },
+              query: {
+                type: "index",
+                query: query?.keyPath,
+              },
               class: `tracery-in-use tracery-in-use-${query.range.colorIdx}`,
             })),
 
