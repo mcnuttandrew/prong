@@ -57,4 +57,4 @@ dist-ssr
 sites/docs/public/QuietModeCodeMirror.tsx
 sites/docs/public/QuietModeCompare.tsx
 sites/docs/public/QuietModeUs.tsx
-site/docs/public/data/*
+sites/docs/public/data/*
