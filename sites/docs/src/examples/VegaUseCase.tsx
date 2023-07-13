@@ -5,7 +5,7 @@ import {
   Projection,
   ProjectionProps,
   utils,
-} from "prong";
+} from "prong-editor";
 import VegaSchema from "../constants/vega-schema.json";
 
 import {

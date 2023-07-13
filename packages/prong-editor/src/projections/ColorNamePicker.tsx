@@ -223,7 +223,7 @@ function ColorNamePicker(props: {
     <div className="color-name-picker">
       <ul>
         {Object.entries(colorGroups).map(([groupName, colors]) => (
-          <li key={groupName} className="flex-down">
+          <li key={groupName} className="prong-flex-down">
             <span
               className="color-group"
               onClick={() =>

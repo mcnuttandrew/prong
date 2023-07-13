@@ -5,7 +5,7 @@ import { scaleBand, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
 import { interpolateGreens } from "d3-scale-chromatic";
 import { SyntaxNode } from "@lezer/common";
-import { Projection, ProjectionProps, utils } from "prong";
+import { Projection, ProjectionProps, utils } from "prong-editor";
 
 export function isDataTable(input: any): boolean {
   // array

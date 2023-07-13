@@ -1,16 +1,17 @@
 # Prong
 
-This is the repo for the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
+This is the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
 The basic dependencies of this system are code mirror (which we wrap) and react (which we use as means to specify the extensions).
-Additionally a number of libraries have been forked to support this work, see src/lib/vendor (this won't matter to you, its more an acknowledgement of work).
+
+This is described in our upcoming paper "Projectional Editors for JSON DSLs"
 
 ## Quick start example usage
 
 ```tsx
 import { useState } from "react";
 
-import Editor from "../components/Editor";
-import standardBundle from "../projections/standard-bundle";
+import { Editor, StandardBundle } from "prong-editor";
+import "prong-editor/style.css";
 
 const exampleData = `{
     "a": {
@@ -30,13 +31,19 @@ function SimpleExample() {
       schema={{}}
       code={currentCode}
       onChange={(x) => setCurrentCode(x)}
-      projections={Object.values(standardBundle)}
+      projections={Object.values(StandardBundle)}
     />
   );
 }
 ```
 
-Installation instructions hidden for review.
+To install follow the usual methods:
+
+```
+yarn add prong-editor
+```
+
+Dont forget to import our css file!
 
 ## Component
 

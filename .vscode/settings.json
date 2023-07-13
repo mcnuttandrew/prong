@@ -10,6 +10,7 @@
     "keymap",
     "lezer",
     "linebreak",
+    "nodenext",
     "pickr",
     "retarget",
     "Retargeted",

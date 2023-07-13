@@ -99,13 +99,13 @@ export default function Editor(props: {
     // hack :(
     setTimeout(() => {
       view?.dispatch({ effects: [setSchema.of(schema)] });
-    }, 100);
+    }, 300);
   }, [schema, view]);
   useEffect(() => {
     // hack :(
     setTimeout(() => {
       view?.dispatch({ effects: [setProjections.of(projections || [])] });
-    }, 100);
+    }, 300);
   }, [projections, view]);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function Editor(props: {
       // hack :(
       setTimeout(() => {
         simpleUpdate(view, 0, view.state.doc.length, code);
-      }, 100);
+      }, 300);
     }
   }, [code, view]);
   useEffect(() => {

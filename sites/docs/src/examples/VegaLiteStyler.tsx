@@ -1,5 +1,11 @@
 import { useState, useReducer } from "react";
-import { StandardBundle, Projection } from "prong";
+import {
+  StandardBundle,
+  Projection,
+  prettifier,
+  Editor,
+  utils,
+} from "prong-editor";
 import merge from "lodash.merge";
 import {
   dark,
@@ -24,7 +30,6 @@ import { buttonListProjection } from "./example-utils";
 
 import { VegaLite } from "react-vega";
 
-import { prettifier, Editor, utils } from "prong";
 import "../stylesheets/vega-lite-example.css";
 
 import traverse from "@json-schema-tools/traverse";

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import 'prong-editor/style.css'
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
@@ -14,9 +16,8 @@ import VegaUseCase from "./examples/VegaUseCase";
 import QuietModeCompare from "./examples/QuietModeCompare";
 
 import StyledMarkdown from "./examples/StyledMarkdown";
-import ReactMarkdown from "react-markdown";
 
-// import markup from "./demo-page.md";
+
 const routes: {
   name: string;
   Component: () => JSX.Element;
@@ -90,29 +91,24 @@ const routes: {
 ];
 
 function Root() {
-  const [postMarkdown, _setPostMarkdown] = useState("");
   const [docs, setDocs] = useState("");
 
   useEffect(() => {
-    // fetch(markup)
-    //   .then((response) => response.text())
-    //   .then((text) => setPostMarkdown(text));
     fetch("./README.md")
       .then((x) => x.text())
-      .then((x) =>
+      .then((x) => {
         setDocs(
-          x.split(
-            "(this won't matter to you, its more an acknowledgement of work)."
-          )[1]
+          x
         )
+      }
       )
-      .catch((e) => console.error(e));
+      // .catch((e) => console.error(e));
   }, []);
+
 
   return (
     <div className="root">
       <div className="md-container">
-        <StyledMarkdown content={postMarkdown} />
         <StyledMarkdown content={docs} />
       </div>
     </div>
@@ -126,12 +122,7 @@ function Explanation(props: { explanation: string }) {
   }
   return (
     <div
-      style={{
-        marginTop: "30px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
+    className="explanation-container"
     >
       <h3 className="">Example Explanation</h3>
       <div style={{ padding: "0 5px", width: "300px" }}>
@@ -163,12 +154,7 @@ function App() {
             return (
               <div
                 key={name}
-                style={{
-                  marginTop: "15px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
+                className="inner-link-container"
               >
                 <h3 className="">{name}</h3>
                 {groupRoutes.map(({ name }) => (
