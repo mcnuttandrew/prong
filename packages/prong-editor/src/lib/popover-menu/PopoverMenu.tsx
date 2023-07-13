@@ -2,10 +2,11 @@ import { createElement, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { EditorView, TooltipView } from "@codemirror/view";
-import { StateField } from "@codemirror/state";
+import { StateField, EditorState } from "@codemirror/state";
 import { SyntaxNode } from "@lezer/common";
 import { filterContents } from "../search";
 import { cmStatePlugin } from "../cmState";
+import isEqual from "lodash.isequal";
 import {
   classNames,
   codeString,
@@ -33,6 +34,7 @@ import {
   PopoverMenuState,
   buildProjectionsForMenu,
   visibleStates,
+  popOverState,
   maybeFilterToFullProjection,
 } from "./PopoverState";
 
@@ -94,7 +96,7 @@ function PopOverMenuContents(props: {
     ? filterContents(searchTerm, menuContents)
     : menuContents;
   return (
-    <div className={"cm-annotation-menu"}>
+    <div className={"cm-annotation-menu"} key="unique-key">
       <button
         className="cm-annotation-menu-control cm-annotation-menu-control--bottom"
         onClick={() => closeMenu(true)}
@@ -298,15 +300,42 @@ class Tooltip {
       view: this.view,
     });
     // this might be too aggressive a rendering scheme?
-
+    // todo the cache might be sufficient
     ReactDOM.render(element, this.dom);
   }
 }
 
+const mapObj = (obj: Record<string, any>, iterator: (x: any) => any) =>
+  Object.fromEntries(Object.entries(obj).map((x) => [x[0], iterator(x[1])]));
+
+const cacheEqual = (oldCache: any, newCache: any) =>
+  Object.keys(newCache).every((key) => isEqual(newCache[key], oldCache[key]));
+
+const getters: Record<string, (view: EditorView, state: EditorState) => any> = {
+  code: (view) => `${codeString(view, 0)}`,
+  targetNode: (_view, state) => {
+    const node = state.field(popOverState).targetNode;
+    return `${node?.from || 0}-${node?.to || 0}`;
+  },
+  projections: (_view, state) => state.field(cmStatePlugin).projections,
+  schemaTypings: (_view, state) =>
+    Object.keys(state.field(cmStatePlugin).schemaTypings),
+};
+
+let toolTipCache: Tooltip | false = false;
+let cacheKey = mapObj(getters, () => undefined);
 export default function createTooltip(
   stateField: StateField<PopoverMenuState>
 ) {
   return (view: EditorView): TooltipView => {
-    return new Tooltip(view, stateField);
+    const state = view.state;
+    let newCache = mapObj(getters, (getter) => getter(view, state));
+    if (cacheEqual(cacheKey, newCache)) {
+      return toolTipCache as Tooltip;
+    }
+    const newTip = new Tooltip(view, stateField);
+    toolTipCache = newTip;
+    cacheKey = newCache;
+    return newTip;
   };
 }

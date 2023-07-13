@@ -40,8 +40,8 @@ export interface PopoverMenuState {
   hasProjectionContent: boolean;
 }
 export const popoverMenuState: PopoverMenuState = {
-  // menuState: "preFirstUse",
-  menuState: "hardClosed",
+  menuState: "preFirstUse",
+  // menuState: "hardClosed",
   targetNode: null,
   highlightNode: null,
   targetedTypings: [],
