@@ -471,7 +471,7 @@ function VegaLiteExampleApp() {
             })
           }
         >
-          {!!state.suggestions.length ? (
+          {state.suggestions.length ? (
             <div>
               <button
                 onClick={() =>

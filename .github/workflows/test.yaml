@@ -1,7 +1,7 @@
 name: Test and lint
 on: [push]
 jobs:
-  test-and-lint:
+  test-and-lint-package:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -18,3 +18,16 @@ jobs:
       - name: Lint 🧵
         run: yarn lint
         working-directory: ./packages/prong-editor
+  lint-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+
+      - name: Install 🔧
+        run: yarn --ignore-engines
+        working-directory: ./sites/docs
+
+      - name: Lint 🧵
+        run: yarn lint
+        working-directory: ./sites/docs

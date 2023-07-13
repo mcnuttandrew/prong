@@ -136,7 +136,7 @@ const UploadDataset: FC<{
         name="file"
         onChange={(event) => {
           const file = event.target.files![0];
-          var reader = new FileReader();
+          const reader = new FileReader();
           reader.onload = function (event) {
             const result = event.target!.result;
             const inlinedData = utils.simpleParse(result, []);
@@ -248,11 +248,11 @@ function VegaLiteExampleApp() {
                   return (
                     <button
                       key={file}
-                      onClick={() =>
-                        buildFileGet(file, currentCode).then((x) =>
-                          setCurrentCode(x)
-                        )
-                      }
+                      onClick={() => {
+                        buildFileGet(file, currentCode)
+                          .then((x) => setCurrentCode(x))
+                          .catch((e) => console.error(e));
+                      }}
                     >
                       {file}
                     </button>

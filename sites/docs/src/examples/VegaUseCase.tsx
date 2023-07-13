@@ -232,10 +232,7 @@ function VegaUseCase() {
       onChange={(x) => setCurrentCode(x)}
       projections={
         [
-          ...Object.entries(StandardBundle)
-            .filter(([name, _proj]) => name !== "RandomWord")
-            .map(([_name, proj]) => proj),
-
+          ...Object.values(StandardBundle),
           buildSparkProjection(preComputedHistograms, "right", "bar"),
           {
             type: "full-tooltip",
