@@ -6,7 +6,7 @@ function StyledMarkdown(props: { content: string }) {
   return (
     <ReactMarkdown
       components={{
-        code({ node, inline, className, children, ...props }) {
+        code({ inline, className, children, ...props }) {
           return !inline ? (
             <SyntaxHighlighter
               {...props}

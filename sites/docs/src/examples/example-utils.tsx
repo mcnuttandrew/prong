@@ -10,6 +10,13 @@ import {
 } from "../../../../packages/prong-editor/src/index";
 const { simpleParse, setIn } = utils;
 
+export function classNames(input: Record<string, boolean>) {
+  return Object.entries(input)
+    .filter(([_key, value]) => value)
+    .map(([key]) => key)
+    .join(" ");
+}
+
 export const usePersistedState = (name: string, defaultValue: any) => {
   const [value, setValue] = useState(defaultValue);
   const nameRef = useRef(name);

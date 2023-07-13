@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   ProjectionProps,
-  prettifier,
   utils,
 } from "../../../../packages/prong-editor/src/index";
 import { extractFieldNames, Table } from "./example-utils";
@@ -203,7 +202,9 @@ export default function DataTable(props: ExtendedProjectionProps): JSX.Element {
         data={parsed}
         hideTable={hideTable}
         updateData={(newData) => {
-          externalUpdate(utils.setIn(keyPath, prettifier(newData), fullCode));
+          externalUpdate(
+            utils.setIn(keyPath, utils.prettifier(newData), fullCode)
+          );
         }}
       />
     );

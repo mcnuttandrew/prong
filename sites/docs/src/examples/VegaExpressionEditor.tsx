@@ -20,7 +20,6 @@ import {
   CompletionSource,
   snippet,
 } from "@codemirror/autocomplete";
-import { utils } from "../../../../packages/prong-editor/src/index";
 
 export type SchemaMap = Record<string, any>;
 // vegaExpression.
@@ -87,7 +86,11 @@ export default function Editor(props: {
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
-      utils.simpleUpdate(view, 0, view.state.doc.length, code);
+      view.dispatch(
+        view.state.update({
+          changes: { from: 0, to: view.state.doc.length, insert: code },
+        })
+      );
     }
   }, [code, view]);
   return (
