@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "lite-build": "vite build",
+    "build": "tsc && vite build",
     "post-build": "npm run prep-data-prod && npm run cp-quiets && npm run cp-docs",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
