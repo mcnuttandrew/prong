@@ -1,4 +1,3 @@
-import { JSONSchema7 } from "json-schema";
 export const vegaCode = `
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
@@ -209,7 +208,7 @@ export const vegaLiteLinechart = `
 }
 `;
 
-export const produceSchema: JSONSchema7 = {
+export const produceSchema: any = {
   $id: "https://example.com/arrays.schema.json",
   $schema: "https://json-schema.org/draft/2020-12/schema",
   description: "A representation of a person, company, organization, or place",
