@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "scripts": {
     "dev": " vite build --watch --config vite.config.ts",
-    "build": "tsc && vite build",
+    "build": "echo 1 && npm ls --all &&tsc && vite build",
     "preview": "vite preview",
     "test": "jest",
     "lint": "eslint src/"
