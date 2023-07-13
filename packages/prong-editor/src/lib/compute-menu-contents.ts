@@ -82,9 +82,7 @@ export const literalTypes: Record<string, string> = {
 };
 
 export const liminalNodeTypes = new Set(["⚠", "{", "}", "[", "]"]);
-export function retargetToAppropriateNode(
-  node: SyntaxNode | SyntaxNode
-): SyntaxNode | SyntaxNode {
+export function retargetToAppropriateNode(node: SyntaxNode): SyntaxNode {
   let targetNode = node;
   if (liminalNodeTypes.has(node.type.name)) {
     targetNode = node.parent!;
@@ -163,7 +161,7 @@ export function simpleMerge(content: MenuRow[]): MenuRow[] {
 
   return Object.entries(groups).map(
     ([label, elements]) =>
-      ({ label, elements: deduplicate(elements).filter((x) => x) } as MenuRow)
+      ({ label, elements: deduplicate(elements).filter((x) => x) }) as MenuRow
   );
 }
 
