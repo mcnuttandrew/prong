@@ -7,6 +7,7 @@ import {
 } from "../../../../packages/prong-editor/src/index";
 import tracery, { generate, TraceryNode } from "./tracery";
 import "../stylesheets/tracery-example.css";
+import InsertRandomWord from "./RandomWord";
 
 import TracerySchema from "../constants/tracery-schema.json";
 
@@ -496,7 +497,6 @@ function TraceryExample() {
 
   colorIdx = 0;
   const ranges = roots.length ? computeRanges(roots[0]) : [];
-  console.log(roots);
   ranges.forEach((x) => addParentsToRanges(x));
   const inUseKeys = ranges
     .flatMap((range) => nodeToKeyPath(range, grammar))
@@ -585,7 +585,7 @@ function TraceryExample() {
         projections={
           [
             StandardBundle.CleanUp,
-            StandardBundle.InsertRandomWord,
+            InsertRandomWord,
             {
               type: "tooltip",
               query: {
