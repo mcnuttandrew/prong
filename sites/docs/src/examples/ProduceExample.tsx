@@ -51,25 +51,18 @@ const HideMeta: Projection = {
 
 function ProduceExample() {
   const [currentCode, setCurrentCode] = useState(produceExample);
-  const [numRows, setNumRows] = useState(0);
 
   return (
-    <div>
-      {[...new Array(numRows)].map(() => (
-        <h1>ha ha fruit</h1>
-      ))}
-      <Editor
-        schema={produceSchema}
-        code={currentCode}
-        onChange={(x) => setCurrentCode(x)}
-        projections={[
-          ...Object.values(StandardBundle),
-          DestringProjection,
-          HideMeta,
-        ]}
-      />
-      <button onClick={() => setNumRows(numRows + 1)}>Add row</button>
-    </div>
+    <Editor
+      schema={produceSchema}
+      code={currentCode}
+      onChange={(x) => setCurrentCode(x)}
+      projections={[
+        ...Object.values(StandardBundle),
+        DestringProjection,
+        HideMeta,
+      ]}
+    />
   );
 }
 

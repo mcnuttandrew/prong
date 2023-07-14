@@ -15,6 +15,7 @@ type MenuElementRenderer<T> = (props: {
   parentGroup: MenuRow;
 }) => JSX.Element;
 
+const MarkDownMask = ReactMarkdown as any;
 const DisplayElement: MenuElementRenderer<any> = (props) => {
   const isLintError = props.parentGroup.label === "Lint error";
   return (
@@ -26,7 +27,7 @@ const DisplayElement: MenuElementRenderer<any> = (props) => {
       })}
       style={isLintError ? { color: "red" } : {}}
     >
-      <ReactMarkdown>{props.menuElement.content.trim()}</ReactMarkdown>
+      <MarkDownMask>{props.menuElement.content.trim()}</MarkDownMask>
     </div>
   );
 };

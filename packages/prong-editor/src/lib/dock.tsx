@@ -71,7 +71,7 @@ function Content(props: {
             <div>
               <b>Menu</b>
             </div>
-            <div>Click the circle to drag and place this menu!!!</div>
+            <div>Click the circle to drag and place this menu</div>
             <div>
               Press CMD+. to reattach the menu
               {setDock && (
