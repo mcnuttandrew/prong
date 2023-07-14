@@ -10,7 +10,7 @@ cp ./src/examples/Quiet* ./public/
 cp ../../README.md ./public/
 
 # swap to using the published version of prong edtior
-npx tsc &&
+# npx tsc &&
 yarn add prong-editor &&
 npx vite build &&
 yarn remove prong-editor
