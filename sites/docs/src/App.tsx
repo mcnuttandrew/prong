@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-// import '../../../prong-editor/style.css'
-// import '../../../packages/prong-editor/src'
+
+
+import '../../../packages/prong-editor/src/styles.css'
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
@@ -120,6 +121,7 @@ function Explanation(props: { explanation: string }) {
     <div className="explanation-container">
       <h3 className="">Example Explanation</h3>
       <div style={{ padding: "0 5px", width: "300px" }}>
+        {/* @ts-ignore */}
         <ReactMarkdown>{explanation}</ReactMarkdown>
       </div>
     </div>
@@ -138,6 +140,7 @@ function App() {
     <HashRouter>
       <div className="flex proot">
         <div className="link-container">
+          {/* @ts-ignore */}
           <Link to={"/"}>
             <div className="hero">
               <img
@@ -153,14 +156,17 @@ function App() {
                 <h3 className="">{name}</h3>
                 {groupRoutes.map(({ name }) => (
                   <div key={name}>
+                    {/* @ts-ignore */}
                     <Link to={name}>{name}</Link>
                   </div>
                 ))}
               </div>
             );
           })}
+          {/* @ts-ignore */}
           <Routes>
             {routes.map(({ name, explanation }) => (
+              //@ts-ignore
               <Route
                 element={<Explanation explanation={explanation} />}
                 path={name}
@@ -169,10 +175,13 @@ function App() {
             ))}
           </Routes>
         </div>
+        {/* @ts-ignore */}
         <Routes>
           {routes.map(({ name, Component }) => (
+            // @ts-ignore
             <Route element={<Component />} path={name} key={name} />
           ))}
+          {/* @ts-ignore */}
           <Route element={<Root />} path="/" />
         </Routes>
       </div>

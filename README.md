@@ -257,4 +257,13 @@ These queries allow you to check for a given AST node type. The JSON AST include
 }
 ```
 
-If none of these work for you there is also a function query type. This is obviously the most expensive to run, so should be avoided where possible.
+If none of these work for you there is also a function query type. This is obviously the most expensive to run, so should be avoided where possible
+
+## Local development
+
+Clone the repo as you might usually.
+
+1. install package deps (cd packages/prong-editor, yarn)
+2. install docs deps (cd sites/docs, yarn)
+3. run some scripts (cd sites/docs, yarn post-build, yarn prep-data)
+4. Run locally (cd sites/docs, yarn dev)

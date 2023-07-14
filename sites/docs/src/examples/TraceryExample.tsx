@@ -64,7 +64,8 @@ function TraceryCascadeVis(props: {
         onClick(node);
       }}
     >
-      {node.childRule} {"->"} {<div>{node.finishedText}</div>}
+      <span>{`${node.childRule}->`}</span>
+      {<div>{node.finishedText}</div>}
       {children.length ? (
         <div className="flex">
           {children.map((child, idx) => (
@@ -125,7 +126,7 @@ function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
     node,
     from: from || 0,
     to: to || selfLength,
-    text: node.finishedText as string,
+    text: node.finishedText,
     id: node.id,
     children: [],
     parent: undefined,
@@ -253,7 +254,7 @@ const swapAt = (str: string, idx: number, subStr: string) => {
   return str.slice(0, idx) + subStr + str.slice(idx + subStr.length);
 };
 
-function unpeelRoot(root: TraceryNode[]) {
+function unPeelRoot(root: TraceryNode[]) {
   return root.length === 0
     ? {}
     : Object.fromEntries(
@@ -308,7 +309,7 @@ const Editable = (props: {
 const climbToSymbol = (node: TraceryNode): TraceryNode | undefined =>
   node.symbol ? node : node.parent ? climbToSymbol(node.parent) : undefined;
 
-function manualStrat(
+function manualStratification(
   newString: string,
   oldString: string,
   oldCode: string,
@@ -338,7 +339,7 @@ function manualStrat(
     return acc;
   }, undefined);
   if (!minTarget || !ranges.length) {
-    console.log("whoops couldnt find anything");
+    console.log("whoops could not find anything");
     return;
   }
   const raw = ranges[0]?.node?.grammar?.raw;
@@ -414,8 +415,8 @@ function synthChange(
           const newVal = isDelete
             ? deleteAt(val, jdx)
             : isSwap
-            ? swapAt(val, jdx, `${newSub!}`)
-            : insertInto(val, jdx, `${newSub!}`);
+            ? swapAt(val, jdx, `${newSub}`)
+            : insertInto(val, jdx, `${newSub}`);
           const newCode = utils.setIn([key, idx], `"${newVal}"`, oldCode);
           const newRoots = generateRoots(newCode, randomKey);
           if (newRoots.length) {
@@ -430,7 +431,12 @@ function synthChange(
     }
   );
   if (!success) {
-    const result = manualStrat(newString, oldString, oldCode, randomKey);
+    const result = manualStratification(
+      newString,
+      oldString,
+      oldCode,
+      randomKey
+    );
     if (result) {
       console.log("manual worked");
       setCode(result);
@@ -471,7 +477,7 @@ function TraceryExample() {
   const [outOfSync, setOutOfSync] = useState<boolean>(false);
   const [roots, setRoots] = useState<TraceryNode[]>([]);
   const [randomKey, setRandomKey] = useState("tracery is a fun time");
-  const unpeeledRoot = unpeelRoot(roots);
+  const unpeeledRoot = unPeelRoot(roots);
   const grammar = utils.simpleParse(currentCode, {});
   useEffect(() => {
     setRoots(generateRoots(currentCode, randomKey));
