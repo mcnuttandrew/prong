@@ -342,7 +342,11 @@ function manualStratification(
     console.log("whoops could not find anything");
     return;
   }
-  const raw = ranges[0]?.node?.grammar?.raw;
+  // there's clearly a bug here but im not sure what it is,something to do with tracery
+  const raw =
+    ranges[0]?.node?.grammar?.raw ||
+    // @ts-ignore
+    ranges[0]?.node?.node?.grammar?.raw;
   const symbolTarget = climbToSymbol(minTarget.node);
   if (!symbolTarget) {
     console.log("no symbol");
@@ -431,12 +435,12 @@ function synthChange(
     }
   );
   if (!success) {
-    const result = manualStratification(
-      newString,
-      oldString,
-      oldCode,
-      randomKey
-    );
+    let result: any = false;
+    try {
+      result = manualStratification(newString, oldString, oldCode, randomKey);
+    } catch (e) {
+      console.log(e);
+    }
     if (result) {
       console.log("manual worked");
       setCode(result);
@@ -562,7 +566,7 @@ function TraceryExample() {
           <div></div>
         </h1>
       </div>
-      <div>
+      <div className="flex">
         <button
           onClick={() => {
             setRandomKey(`${Math.random()}`);
@@ -571,6 +575,17 @@ function TraceryExample() {
         >
           Update RandomSeed
         </button>
+
+        {outOfSync && (
+          <button
+            onClick={() => {
+              console.log("asd");
+              setOutOfSync(false);
+            }}
+          >
+            Restore
+          </button>
+        )}
       </div>
       {/* {roots.length && (
         <div>
