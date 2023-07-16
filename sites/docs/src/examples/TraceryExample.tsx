@@ -182,11 +182,9 @@ function nodeToKeyPath(
   const index = (grammar[symbol] || []).findIndex(
     (x) => x === range.node.childRule
   );
+  // used to also grab the key, but that adds incorrect coloring
   if (!isNaN(index) && index > -1) {
-    return [
-      { keyPath: [symbol, index], range },
-      // { keyPath: [`${symbol}___key`], range },
-    ];
+    return [{ keyPath: [symbol, index], range }];
   } else {
     return [];
   }
