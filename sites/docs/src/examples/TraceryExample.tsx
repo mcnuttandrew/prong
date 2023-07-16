@@ -226,13 +226,14 @@ const Editable = (props: {
   useEffect(() => {
     setContent(txt);
   }, [txt, outOfSync]);
-  const onContentBlur = useCallback((evt) => {
+  const onContentBlur = useCallback(() => {
     if (outOfSync) {
       setTxt(txt);
       setContent(txt);
     } else {
-      setTxt(evt.currentTarget.innerHTML);
-      setContent(evt.currentTarget.innerHTML);
+      // small bug: every time there is an update focus is lost
+      // setTxt(evt.currentTarget.innerHTML);
+      // setContent(evt.currentTarget.innerHTML);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -556,7 +557,7 @@ function TraceryExample() {
           Update RandomSeed
         </button>
 
-        {/* {outOfSync && (
+        {outOfSync && (
           <button
             onClick={() => {
               console.log("asd");
@@ -565,7 +566,7 @@ function TraceryExample() {
           >
             Restore
           </button>
-        )} */}
+        )}
       </div>
       {/* {roots.length && (
         <div>
