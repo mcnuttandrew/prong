@@ -116,9 +116,7 @@ type Range = {
   id: string;
   children: Range[];
   parent: Range | undefined;
-  colorIdx: number;
 };
-let colorIdx = 0;
 function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
   let offset = 0;
   const selfLength = (node.finishedText || "").length;
@@ -130,26 +128,26 @@ function computeRanges(node: TraceryNode, from?: number, to?: number): Range[] {
     id: node.id,
     children: [],
     parent: undefined,
-    colorIdx,
   };
-  colorIdx = (colorIdx + 1) % 20;
-  const children = (node.children || (node.preactions as any[]) || []).reduce(
-    (acc: Range[], child) => {
-      const childLength: number = (child.finishedText || "").length;
-      const result = computeRanges(
-        child,
-        (from || 0) + offset,
-        (from || 0) + offset + childLength
-      );
-      if (result.length) {
-        target.children.push(result.at(-1)!);
-      }
-      offset += childLength;
-      result.forEach((x: any) => acc.push(x));
-      return acc;
-    },
-    []
-  );
+
+  const targets = [
+    ...(node.children || []),
+    ...(node.preactions || []).map((node) => node.ruleNode).filter((x) => x),
+  ];
+  const children = targets.reduce((acc: Range[], child) => {
+    const childLength: number = (child.finishedText || "").length;
+    const result = computeRanges(
+      child,
+      (from || 0) + offset,
+      (from || 0) + offset + childLength
+    );
+    if (result.length) {
+      target.children.push(result.at(-1)!);
+    }
+    offset += childLength;
+    result.forEach((x: any) => acc.push(x));
+    return acc;
+  }, []);
   return children.concat([target]);
 }
 const addParentsToRanges = (node: Range) => {
@@ -158,54 +156,6 @@ const addParentsToRanges = (node: Range) => {
     addParentsToRanges(child);
   });
 };
-
-// const recurseToRoot = (node: TraceryNode): TraceryNode[] =>
-//   [node].concat(node.parent ? recurseToRoot(node.parent) : []);
-
-// const dedup = (arr: (string | number)[][]) =>
-//   Object.values(
-//     arr.reduce((acc, row) => {
-//       const key = JSON.stringify(row);
-//       if (!acc[key]) {
-//         acc[key] = row;
-//       }
-//       return acc;
-//     }, {} as Record<string, any>)
-//   );
-
-// function assembleHighlight(
-//   nodes: Range[],
-//   grammar: Record<string, string[]>
-// ): Projection[] {
-//   if (!nodes.length) {
-//     return [];
-//   }
-//   const node = nodes[0];
-//   const queries = recurseToRoot(node.node).flatMap((x) => {
-//     const symbol = x.symbol || x.parent?.symbol;
-//     const symbolString = symbol as unknown as string;
-//     if (!symbol || !x.raw) {
-//       return [];
-//     }
-//     const temp: (string | number)[][] = [
-//       [`${symbolString}___key`],
-//       // [symbolString, x.raw],
-//     ];
-//     const idx = (grammar[symbolString] || []).findIndex(
-//       (rule) => rule === x.childRule
-//     );
-//     if (!isNaN(idx) && idx >= 0) {
-//       temp.push([symbolString, idx]);
-//     }
-
-//     return temp;
-//   });
-//   return dedup(queries).map((query) => ({
-//     type: "highlight",
-//     query: { type: "index", query },
-//     class: "example-highlighter",
-//   })) as Projection[];
-// }
 
 function keyPathToNode(
   keyPath: (string | number)[],
@@ -232,11 +182,9 @@ function nodeToKeyPath(
   const index = (grammar[symbol] || []).findIndex(
     (x) => x === range.node.childRule
   );
+  // used to also grab the key, but that adds incorrect coloring
   if (!isNaN(index) && index > -1) {
-    return [
-      { keyPath: [symbol, index], range },
-      { keyPath: [`${symbol}___key`], range },
-    ];
+    return [{ keyPath: [symbol, index], range }];
   } else {
     return [];
   }
@@ -276,19 +224,20 @@ const Editable = (props: {
   useEffect(() => {
     setContent(txt);
   }, [txt, outOfSync]);
-  const onContentBlur = useCallback((evt) => {
+  const onContentBlur = useCallback(() => {
     if (outOfSync) {
       setTxt(txt);
       setContent(txt);
     } else {
-      setTxt(evt.currentTarget.innerHTML);
-      setContent(evt.currentTarget.innerHTML);
+      // small bug: every time there is an update focus is lost
+      // setTxt(evt.currentTarget.innerHTML);
+      // setContent(evt.currentTarget.innerHTML);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div>
+    <div className="tracery-bdx">
       <div
         contentEditable
         onBlur={onContentBlur}
@@ -319,7 +268,6 @@ function manualStratification(
     return;
   }
   const newRoots = generateRoots(oldCode, randomKey);
-  colorIdx = 0;
   const ranges = newRoots.length ? computeRanges(newRoots[0]) : [];
   const idx = newString.split("").findIndex((el, idx) => el !== oldString[idx]);
   const isSwap = newString.length === oldString.length;
@@ -342,7 +290,11 @@ function manualStratification(
     console.log("whoops could not find anything");
     return;
   }
-  const raw = ranges[0]?.node?.grammar?.raw;
+  // there's clearly a bug here but im not sure what it is,something to do with tracery
+  const raw =
+    ranges[0]?.node?.grammar?.raw ||
+    // @ts-ignore
+    ranges[0]?.node?.node?.grammar?.raw;
   const symbolTarget = climbToSymbol(minTarget.node);
   if (!symbolTarget) {
     console.log("no symbol");
@@ -431,12 +383,12 @@ function synthChange(
     }
   );
   if (!success) {
-    const result = manualStratification(
-      newString,
-      oldString,
-      oldCode,
-      randomKey
-    );
+    let result: any = false;
+    try {
+      result = manualStratification(newString, oldString, oldCode, randomKey);
+    } catch (e) {
+      console.log(e);
+    }
     if (result) {
       console.log("manual worked");
       setCode(result);
@@ -447,28 +399,48 @@ function synthChange(
   }
 }
 
-// function findMinNode(rootRange: Range, idx: number): Range | false {
-//   if (!rootRange.children) {
-//     return rootRange.from <= idx && rootRange.to >= idx ? rootRange : false;
-//   }
-//   let bestScore = Infinity;
-//   let bestChoice = rootRange;
-//   rootRange.children.forEach((child) => {
-//     const bestInSubTree = findMinNode(child, idx);
-//     if (!bestInSubTree) {
-//       return;
-//     }
-//     if (bestInSubTree.from <= idx && bestInSubTree.to > idx) {
-//       const width = bestInSubTree.to - bestInSubTree.from;
-//       if (width < bestScore) {
-//         bestScore = width;
-//         bestChoice = bestInSubTree;
-//       }
-//     }
-//   });
+function findMinNode(rootRange: Range, idx: number): Range | false {
+  if (!rootRange.children) {
+    return rootRange.from <= idx && rootRange.to >= idx ? rootRange : false;
+  }
+  let bestScore = Infinity;
+  let bestChoice = rootRange;
+  [
+    ...rootRange.children,
+    ...(rootRange.node.preactions || []).map(
+      (node) => node.node as any as Range
+    ),
+  ].forEach((child) => {
+    const bestInSubTree = findMinNode(child, idx);
+    if (!bestInSubTree) {
+      return;
+    }
+    if (bestInSubTree.from <= idx && bestInSubTree.to > idx) {
+      const width = bestInSubTree.to - bestInSubTree.from;
+      if (width < bestScore) {
+        bestScore = width;
+        bestChoice = bestInSubTree;
+      }
+    }
+  });
 
-//   return bestChoice;
-// }
+  return bestChoice;
+}
+
+const findPath = (
+  node: Range,
+  grammar: Record<string, string[]>
+): [string, number] | false => {
+  const rule = node.node.parent.childRule;
+  let path: [string, number] | false = false;
+  Object.entries(grammar).forEach(([key, values]) => {
+    const idx = values.findIndex((x) => x === rule);
+    if (idx > -1) {
+      path = [key, idx];
+    }
+  });
+  return path;
+};
 
 function TraceryExample() {
   const [currentCode, setCurrentCode] = useState(initialCode);
@@ -501,42 +473,53 @@ function TraceryExample() {
     Object.keys(root.grammar.symbols || {})
   );
 
-  colorIdx = 0;
   const ranges = roots.length ? computeRanges(roots[0]) : [];
   ranges.forEach((x) => addParentsToRanges(x));
   const inUseKeys = ranges
     .flatMap((range) => nodeToKeyPath(range, grammar))
     .filter((x) => x);
   const txt = roots.length ? roots[0].finishedText || "" : "";
-  // const materializedNodes = ranges.filter(({ node }) =>
-  //   selectedNodes.includes(node.id)
-  // );
+
+  const colorMap = {};
+  let colorTicker = 1;
+  const charColoring =
+    (ranges.length > 1 &&
+      txt.split("").map((char, idx) => {
+        // check if there is a min node
+        const minNode = findMinNode(ranges.at(-1)!, idx);
+        if (!minNode) {
+          return { char, idx, colorIdx: -1 };
+        }
+        // check if we can figure out a path from the min node
+        // note this has a bug: duplicate rules will not be colored correctly
+        const path = findPath(minNode, grammar);
+        if (!path) {
+          return { char, idx, colorIdx: -1 };
+        }
+        // create a color for this path if there isn't one
+        if (!(`${path[0]}-${path[1]}` in colorMap)) {
+          colorMap[`${path[0]}-${path[1]}`] = colorTicker;
+          colorTicker += colorTicker % 20;
+        }
+
+        return { char, idx, colorIdx: colorMap[`${path[0]}-${path[1]}`] };
+      })) ||
+    [];
 
   return (
     <div className="flex-down tracery-app-root">
       <div>
         <h1>
-          {/* <div
-            style={{
-              position: "absolute",
-              pointerEvents: "none",
-              opacity: 0.2,
-            }}
-          >
-            {ranges.length > 1 &&
-              txt.split("").map((char, idx) => {
-                const minNode = findMinNode(ranges.at(-1)!, idx);
-                const colorIdx = minNode ? minNode.colorIdx : 0;
-                return (
-                  <span
-                    key={idx}
-                    className={`tracery-in-use tracery-in-use-${colorIdx}`}
-                  >
-                    {char}
-                  </span>
-                );
-              })}
-          </div> */}
+          <div className="tracery-bdx tracery-bdx-container">
+            {charColoring.map((x) => (
+              <span
+                key={x.idx}
+                className={`tracery-in-use tracery-in-use-${x.colorIdx}`}
+              >
+                {x.char}
+              </span>
+            ))}
+          </div>
           <Editable
             txt={txt}
             outOfSync={outOfSync}
@@ -562,7 +545,7 @@ function TraceryExample() {
           <div></div>
         </h1>
       </div>
-      <div>
+      <div className="flex">
         <button
           onClick={() => {
             setRandomKey(`${Math.random()}`);
@@ -571,6 +554,17 @@ function TraceryExample() {
         >
           Update RandomSeed
         </button>
+
+        {outOfSync && (
+          <button
+            onClick={() => {
+              console.log("asd");
+              setOutOfSync(false);
+            }}
+          >
+            Restore
+          </button>
+        )}
       </div>
       {/* {roots.length && (
         <div>
@@ -666,16 +660,22 @@ function TraceryExample() {
                 );
               },
             },
-            ...inUseKeys.map((query) => ({
-              type: "highlight",
-              query: {
-                type: "index",
-                query: query?.keyPath,
-              },
-              class: `tracery-in-use tracery-in-use-${query.range.colorIdx}`,
-            })),
 
-            // ...assembleHighlight(materializedNodes, grammar),
+            ...inUseKeys.reduce((acc, { keyPath }) => {
+              const colorKey = colorMap[`${keyPath[0]}-${keyPath[1]}`];
+              if (!colorKey) {
+                return acc;
+              }
+              acc.push({
+                type: "highlight",
+                query: {
+                  type: "index",
+                  query: keyPath,
+                },
+                class: `tracery-in-use  tracery-in-use-${colorKey}`,
+              });
+              return acc;
+            }, []),
           ] as Projection[]
         }
       />

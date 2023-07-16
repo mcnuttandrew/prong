@@ -24,12 +24,22 @@
     background-color: #0099785d;
 }
 
+
 .example-highlighter {
     background: #004a995d;
 }
 
 .tracery-app-root {
     padding: 50px;
+}
+
+.tracery-bdx {
+    max-width: 800px;
+}
+
+.tracery-bdx-container {
+    position: absolute;
+    pointer-Events: none;
 }
 
 .tracery-in-use-0 {
@@ -50,79 +60,79 @@
 
 
 .tracery-in-use-1 {
-    background: #9ecae9
+    background: #9ecae977;
 }
 
 .tracery-in-use-2 {
-    background: #f58518
+    background: #f5851877;
 }
 
 .tracery-in-use-3 {
-    background: #ffbf79
+    background: #ffbf7977;
 }
 
 .tracery-in-use-4 {
-    background: #54a24b
+    background: #54a24b77;
 }
 
 .tracery-in-use-5 {
-    background: #88d27a
+    background: #88d27a77;
 }
 
 .tracery-in-use-6 {
-    background: #b79a20
+    background: #b79a2077;
 }
 
 .tracery-in-use-7 {
-    background: #f2cf5b
+    background: #f2cf5b77;
 }
 
 .tracery-in-use-8 {
-    background: #439894
+    background: #43989477;
 }
 
 
 .tracery-in-use-9 {
-    background: #83bcb6
+    background: #83bcb677;
 }
 
 .tracery-in-use-10 {
-    background: #e45756
+    background: #e4575677;
 }
 
 .tracery-in-use-11 {
-    background: #ff9d98
+    background: #ff9d9877;
 }
 
 .tracery-in-use-12 {
-    background: #79706e
+    background: #79706e77;
 }
 
 
 .tracery-in-use-13 {
-    background: #bab0ac
+    background: #bab0ac77;
 }
 
 .tracery-in-use-14 {
-    background: #d67195
+    background: #d6719577;
 }
 
 .tracery-in-use-15 {
-    background: #fcbfd2
+    background: #fcbfd277;
 }
 
 .tracery-in-use-16 {
-    background: #b279a2
+    background: #b279a277;
 }
 
 .tracery-in-use-17 {
-    background: #d6a5c9
+    background: #d6a5c977;
 }
 
 .tracery-in-use-18 {
-    background: #9e765f
+    background: #9e765f77;
 }
 
 .tracery-in-use-19 {
-    background: #d8b5a5
+    background: #d8b5a577;
 }
