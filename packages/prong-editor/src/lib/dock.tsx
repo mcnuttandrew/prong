@@ -294,6 +294,7 @@ function panel(view: EditorView): Panel {
         },
         menuContents: docked ? contents : [],
         eventDispatch: () => (menuEvent: MenuEvent) => {
+          console.log(menuEvent);
           const codeUpdate = modifyCodeByCommand(
             menuEvent,
             retargetToAppropriateNode(node!),

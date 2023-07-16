@@ -191,11 +191,12 @@ function computeSeparations(
 ) {
   let text = preText;
   if (hasType(target, "⚠")) {
+    // trim out the error
     text = text.slice(0, target.from) + text.slice(target.to);
   }
   // region has new line
   const regionHasNl = (from: number, to: number) =>
-    text.slice(from, to).includes("\n");
+    text.slice(from, to).trim().includes("\n");
   const prevToTarg = (prev && text.slice(prev.to, target.from)) || "";
   const prevToNext = (prev && next && text.slice(prev.to, next.from)) || "";
   const nextToTarg = (next && text.slice(target.to, next.from)) || "";

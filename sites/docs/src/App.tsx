@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
-
-import '../../../packages/prong-editor/src/styles.css'
+import "../../../packages/prong-editor/src/stylesheets/style.css";
 
 import "./App.css";
 import VegaLiteExampleApp from "./examples/VegaLiteDebug";
@@ -129,13 +128,10 @@ function Explanation(props: { explanation: string }) {
 }
 
 function App() {
-  const groups = routes.reduce(
-    (acc, row) => {
-      acc[row.zone] = (acc[row.zone] || []).concat(row);
-      return acc;
-    },
-    {} as Record<string, typeof routes>
-  );
+  const groups = routes.reduce((acc, row) => {
+    acc[row.zone] = (acc[row.zone] || []).concat(row);
+    return acc;
+  }, {} as Record<string, typeof routes>);
   return (
     <HashRouter>
       <div className="flex proot">

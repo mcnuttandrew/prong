@@ -8,24 +8,24 @@ function myPlugin() {
 
     transform(src, id) {
       if (
-        process.env.NODE_ENV === 'production' && 
+        process.env.NODE_ENV === "production" &&
         id.includes("sites/docs") &&
         !id.includes("node_modules") &&
         (id.endsWith(".ts") || id.endsWith(".tsx"))
       ) {
-
         return {
-          code: src.replaceAll(
-            "../../../../packages/prong-editor/src/index",
-            "prong-editor"
-          ).replaceAll(
-            "../../../packages/prong-editor/src/styles.css", 
-            "prong-editor/style.css"
-          ),
+          code: src
+            .replaceAll(
+              "../../../../packages/prong-editor/src/index",
+              "prong-editor"
+            )
+            .replaceAll(
+              "../../../packages/prong-editor/src/stylesheets/styles.css",
+              "prong-editor/style.css"
+            ),
           map: null,
         };
       }
-
     },
   };
 }

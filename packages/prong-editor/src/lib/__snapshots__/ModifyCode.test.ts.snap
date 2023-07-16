@@ -99,6 +99,29 @@ exports[`modifyCodeByCommand - addObjectKey (boundary effects) 1`] = `
 
 exports[`modifyCodeByCommand - addObjectKey (buggy mark) 1`] = `"{"mark": {"type":"bar",  "color": ""  }} "`;
 
+exports[`modifyCodeByCommand - addObjectKey (buggy vl fill insert) 1`] = `
+"
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "A simple bar chart with embedded data.",
+  "data": {
+    "values": [
+      {"penguins": "A", "flowers": 28}, {"penguins": "B", "flowers": 55}, {"penguins": "C", "flowers": 43},
+      {"penguins": "D", "flowers": 91}, {"penguins": "E", "flowers": 81}, {"penguins": "F", "flowers": 53},
+      {"penguins": "G", "flowers": 19}, {"penguins": "H", "flowers": 87}, {"penguins": "I", "flowers": 52}
+    ]
+  },
+  "mark": {"type": "bar", 
+ "fill": "" 
+ },
+  "encoding": {
+    "x": {"field": "penguins", "type": "nominal", "axis": {"labelAngle": 0}},
+    "y": {"field": "flowers", "type": "quantitative"}
+  }
+}
+"
+`;
+
 exports[`modifyCodeByCommand - addObjectKey (cursorPos fruit) 1`] = `
 "{
   "fruits": [ "apple", "orange", "#c71585" ],
@@ -221,7 +244,7 @@ exports[`modifyCodeByCommand - addObjectKeyEvent (legend insert) 1`] = `
 "
 {
   "padding": 5,
-    "legends": [],
+  "legends": [],
   "signals": []
 }
 "
