@@ -385,3 +385,37 @@ test("modifyCodeByCommand - removeElementFromArray", () => {
     expect(update3).toMatchSnapshot();
   });
 });
+
+test("modifyCodeByCommand - addObjectKey (buggy vl fill insert)", () => {
+  const exampleCode = `
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "A simple bar chart with embedded data.",
+  "data": {
+    "values": [
+      {"penguins": "A", "flowers": 28}, {"penguins": "B", "flowers": 55}, {"penguins": "C", "flowers": 43},
+      {"penguins": "D", "flowers": 91}, {"penguins": "E", "flowers": 81}, {"penguins": "F", "flowers": 53},
+      {"penguins": "G", "flowers": 19}, {"penguins": "H", "flowers": 87}, {"penguins": "I", "flowers": 52}
+    ]
+  },
+  "mark": {"type": "bar", fill},
+  "encoding": {
+    "x": {"field": "penguins", "type": "nominal", "axis": {"labelAngle": 0}},
+    "y": {"field": "flowers", "type": "quantitative"}
+  }
+}
+`;
+  const targetKey = findNodeByText(exampleCode, "fill")!;
+  const cmd = modifyCodeByCommand(
+    {
+      nodeId: "514-518",
+      payload: { key: '"fill"', value: '""' },
+      type: "addObjectKey",
+    },
+    targetKey,
+    exampleCode,
+    targetKey.to
+  )!;
+  expect(insertSwap(exampleCode, cmd)).toMatchSnapshot();
+  expect(true).toBe(true);
+});
