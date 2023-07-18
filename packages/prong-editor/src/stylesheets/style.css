@@ -130,15 +130,40 @@
 
 .cm-number-slider {
     position: relative;
+    /* width: 120px */
+    margin: 0 15px;
+}
+
+.cm-number-slider input {
+    position: relative;
 }
 
 .cm-number-slider-label {
     position: absolute;
     font-size: 8px;
-    top: -5px;
+    /* top: -5px; */
     pointer-events: none;
 }
 
+
+
+.cm-number-slider-magnitude-label {
+    position: absolute;
+    font-size: 8px;
+    bottom: -8px;
+    pointer-events: none;
+}
+
+
+
+.cm-slider-dropzone {
+    position: absolute;
+    background-color: white;
+    border: dotted 1px gray;
+    height: 15px;
+    width: 10px;
+    top: 1px;
+}
 
 /* DOCK */
 

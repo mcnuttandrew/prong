@@ -105,14 +105,19 @@ export default function Editor(props: {
     // hack :(
     setTimeout(() => {
       view?.dispatch({ effects: [setProjections.of(projections || [])] });
-    }, 300);
+    }, 100);
   }, [projections, view]);
 
   useEffect(() => {
     if (view && view.state.doc.toString() !== code) {
       // hack :(
       setTimeout(() => {
-        simpleUpdate(view, 0, view.state.doc.length, code);
+        view.dispatch(
+          view.state.update({
+            changes: { from: 0, to: view.state.doc.length, insert: code },
+            selection: view.state.selection,
+          })
+        );
       }, 300);
     }
   }, [code, view]);
