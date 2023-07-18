@@ -95,6 +95,11 @@ body, html, #root, .proot {
   width: 100%;
 }
 
+.root img {
+  max-width: 100%;
+}
+
+
 .hero {
   position: relative;
   display: flex;
@@ -165,4 +170,43 @@ div[tabindex="-1"]:focus {
   display: flex;
   flex-direction: column;
   align-items: center
+}
+
+/* Handle Mobile stuff */
+
+.mobile-proot {
+  display: none;
+  width: 100%;
+  overflow-x: none;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+.mobile-proot .root {
+  padding: 20px;
+  width: calc(100% - 40px);
+}
+
+.mobile-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #333;
+  color: white;
+}
+
+.mobile-header a:visited, .mobile-header a {
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .proot, #cm-monocle {
+    display: none !important;
+  }
+
+  .mobile-proot {
+    display: block
+  }
 }

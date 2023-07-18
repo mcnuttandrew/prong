@@ -90,7 +90,7 @@ const routes: {
   },
 ];
 
-function Root() {
+function Root(props: { mobileWarning: boolean }) {
   const [docs, setDocs] = useState("");
 
   useEffect(() => {
@@ -102,10 +102,21 @@ function Root() {
       .catch((e) => console.error(e));
   }, []);
 
+  let modifiedDocs = docs;
+  if (props.mobileWarning) {
+    modifiedDocs = modifiedDocs.replaceAll(
+      "# Prong",
+      `
+# Prong
+    
+⚠️ ⚠️ This site and tool are not optimized for mobile. Please view on a desktop. ⚠️ ⚠️ 
+    `
+    );
+  }
   return (
     <div className="root">
       <div className="md-container">
-        <StyledMarkdown content={docs} />
+        <StyledMarkdown content={modifiedDocs} />
       </div>
     </div>
   );
@@ -127,6 +138,20 @@ function Explanation(props: { explanation: string }) {
   );
 }
 
+function MobilePage() {
+  return (
+    <div className="mobile-proot">
+      <div className="mobile-header">
+        <div>Prong</div>
+        <div>
+          <a href="https://github.com/mcnuttandrew/prong">GitHub</a>
+        </div>
+      </div>
+      <Root mobileWarning={true} />
+    </div>
+  );
+}
+
 function App() {
   const groups = routes.reduce((acc, row) => {
     acc[row.zone] = (acc[row.zone] || []).concat(row);
@@ -134,6 +159,8 @@ function App() {
   }, {} as Record<string, typeof routes>);
   return (
     <HashRouter>
+      <MobilePage />
+
       <div className="flex proot">
         <div className="link-container">
           {/* @ts-ignore */}
@@ -146,6 +173,11 @@ function App() {
               <h1>Prong</h1>
             </div>
           </Link>
+          <div className="flex-down">
+            <h3 className="">Meta</h3>
+            <a href="https://github.com/mcnuttandrew/prong">GitHub</a>
+            <a href="https://github.com/mcnuttandrew/prong">Paper</a>
+          </div>
           {Object.entries(groups).map(([name, groupRoutes]) => {
             return (
               <div key={name} className="inner-link-container">
@@ -178,7 +210,7 @@ function App() {
             <Route element={<Component />} path={name} key={name} />
           ))}
           {/* @ts-ignore */}
-          <Route element={<Root />} path="/" />
+          <Route element={<Root mobileWarning={false} />} path="/" />
         </Routes>
       </div>
     </HashRouter>
