@@ -20,7 +20,6 @@ import {
 } from "../lib/cmState";
 import PopoverPlugin from "../lib/popover-menu";
 import ProjectionPlugin from "../lib/projections";
-import { simpleUpdate } from "../lib/utils";
 import Panel from "../lib/dock";
 import { popOverState } from "../lib/popover-menu/PopoverState";
 import { syntaxNodeToKeyPath } from "../lib/utils";

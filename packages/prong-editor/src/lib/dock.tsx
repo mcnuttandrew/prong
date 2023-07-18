@@ -120,7 +120,10 @@ class Monocle extends Component<MonocleProps, { dragging: boolean }> {
   }
 
   componentDidMount() {
-    if (monocleTarget?.getAttribute("style") === "display: block") {
+    if (
+      monocleTarget?.childElementCount &&
+      monocleTarget?.getAttribute("style") === "display: block"
+    ) {
       return;
     }
     while (monocleTarget!.firstChild) {
