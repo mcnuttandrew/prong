@@ -10,6 +10,8 @@ import {
   popoverEffectDispatch,
   buildProjectionsForMenu,
   maybeFilterToFullProjection,
+  popOverSMState,
+  popoverSMEvent,
 } from "./popover-menu/PopoverState";
 import { RenderRow } from "./popover-menu/PopoverMenu";
 import {
@@ -32,16 +34,15 @@ if (!monocleTarget) {
 
 type MonoclePosition = { x: number | null; y: number | null };
 function Content(props: {
-  docked: boolean;
+  menuState: popOverSMState;
   eventDispatch: (e: MenuEvent, shouldClose?: boolean) => void;
   menuContents: MenuRow[];
   searchTerm: string | false;
-  setDock: (setToDocked: boolean) => void;
+  setDock: (transitionStateEvent: popoverSMEvent) => void;
   setSearchTerm: (term: string) => void;
-  isMonocle: boolean;
 }) {
   const {
-    docked,
+    menuState,
     eventDispatch,
     menuContents,
     searchTerm,
@@ -53,22 +54,38 @@ function Content(props: {
     : menuContents;
 
   // todo also support other actions from the dock
-  if (!docked) {
-    return (
-      <div className="cm-dock">
-        <div className="cm-dock-label">
-          Press Escape to dock the menu
-          {setDock && (
-            <button onClick={() => setDock(true)}>or click here</button>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // if (menuState === "monocleOpen") {
+  //   return (
+  //     <div className="cm-dock">
+  //       <div className="cm-dock-label">
+  //         Press Escape to dock the menu
+  //         {setDock && (
+  //           <button onClick={() => setDock("switchToDocked")}>
+  //             or click here
+  //           </button>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  const docked = menuState === "dockOpen";
+  const monocled = menuState === "monocleOpen";
   return (
     <div className="cm-dock">
       <div className="cm-dock-label">
-        {docked && (
+        {!docked && !monocled && (
+          <div className="cm-dock">
+            <div className="cm-dock-label">
+              Press Escape to free the menu
+              {setDock && (
+                <button onClick={() => setDock("switchToDocked")}>
+                  or click here to dock it
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        {monocled && (
           <div className="prong-flex-down">
             <div>
               <b>Menu</b>
@@ -77,7 +94,21 @@ function Content(props: {
             <div>
               Press Escape to reattach the menu
               {setDock && (
-                <button onClick={() => setDock(false)}>or click here</button>
+                <button onClick={() => setDock("switchToDocked")}>
+                  or click here dock it
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        {docked && (
+          <div className="cm-dock">
+            <div className="cm-dock-label">
+              Press Escape to free the menu
+              {setDock && (
+                <button onClick={() => setDock("switchToTooltip")}>
+                  or click here to reattach it
+                </button>
               )}
             </div>
           </div>
@@ -112,7 +143,7 @@ function Content(props: {
 interface MonocleProps {
   monoclePos: MonoclePosition;
   setMonoclePos: (monocle: string) => void;
-  docked: boolean;
+  menuState: popOverSMState;
 }
 class Monocle extends Component<MonocleProps, { dragging: boolean }> {
   el: HTMLDivElement;
@@ -159,7 +190,7 @@ class Monocle extends Component<MonocleProps, { dragging: boolean }> {
         }}
       >
         <div className="position-relative">
-          {this.props.docked && (
+          {this.props.menuState === "monocleOpen" && (
             <div
               className="cm-monocle-drag-target"
               onMouseDown={() => {
@@ -190,58 +221,53 @@ function RenderPopoverDocked(props: {
     binder: (props: {
       menuContents: MenuRow[];
       eventDispatch: any;
-      docked: boolean;
-      setDock: (setToDocked: boolean) => void;
+      menuState: popOverSMState;
+      setDock: (transitionStateEvent: popoverSMEvent) => void;
     }) => void
   ) => void;
 }) {
   const { buildTriggerRerender } = props;
   const [monoclePos, setMonoclePos] = usePersistedState(
     "cm-monocle-position",
-    `{
-    x: 300,
-    y: 300,
-  }`
+    `{x: 300, y: 300}`
   );
   const [menuContents, setMenuContents] = useState<MenuRow[]>([]);
   const [eventDispatch, setEventDispatch] = useState<
     (e: MenuEvent, shouldClose?: boolean) => void
   >(() => {});
-  const [docked, setDockedState] = useState(false);
+  const [menuState, setMenuState] = useState<popOverSMState | false>(false);
   const [searchTerm, setSearchTerm] = useState<false | string>(false);
-  const [setDock, bindSetDock] = useState<(setToDocked: boolean) => void>(
-    () => {}
-  );
+  const [setDock, bindSetDock] = useState<
+    (transitionStateEvent: popoverSMEvent) => void
+  >(() => {});
   useEffect(() => {
     buildTriggerRerender((props) => {
-      setDockedState(props.docked);
+      setMenuState(props.menuState);
       setMenuContents(props.menuContents);
       setEventDispatch(props.eventDispatch);
       bindSetDock(props.setDock);
       setSearchTerm(false);
     });
   }, [buildTriggerRerender]);
-  // TODO dock mode removed for now
-  const isMonocle = true;
+  if (!menuState) {
+    return <></>;
+  }
   const content = (
     <Content
       menuContents={menuContents}
       eventDispatch={eventDispatch}
-      docked={docked}
+      menuState={menuState}
       searchTerm={searchTerm}
       setDock={setDock}
       setSearchTerm={setSearchTerm}
-      isMonocle={isMonocle}
     />
   );
-  // if (isMonocle) {
-  if (docked) {
+  if (menuState === "monocleOpen") {
     return (
-      // @ts-ignore
       <Monocle
-        monoclePos={simpleParse(monoclePos, { x: 0, y: 0 })}
+        monoclePos={simpleParse(monoclePos, { x: 300, y: 300 })}
         setMonoclePos={setMonoclePos}
-        docked={docked}
+        menuState={menuState}
       >
         {content}
       </Monocle>
@@ -266,15 +292,14 @@ function panel(view: EditorView): Panel {
     dom,
     update: (update) => {
       const popState = update.state.field(popOverState);
-      const docked = popState.menuState === "monocleOpen";
       const node = popState.targetNode;
 
       const fullCode = codeString(view, 0);
       const currentCodeSlice = codeString(view, node?.from || 0, node?.to || 0);
       // todo make this rerender less frequently
-      let contents: MenuRow[] = [];
+      let menuContents: MenuRow[] = [];
       try {
-        contents = simpleMerge(
+        menuContents = simpleMerge(
           maybeFilterToFullProjection([
             ...update.state.field(popOverState).menuContents,
             ...buildProjectionsForMenu({
@@ -289,15 +314,19 @@ function panel(view: EditorView): Panel {
       } catch (e) {
         console.log("error building docked contents", e);
       }
+      if (!new Set(["monocleOpen", "dockOpen"]).has(popState.menuState)) {
+        menuContents = [];
+      }
       triggerRerender({
-        docked,
-        setDock: () => (setToDocked: boolean) => {
-          const effect = popoverEffectDispatch.of(
-            setToDocked ? "switchToMonocle" : "switchToTooltip"
-          );
+        menuState: popState.menuState,
+        setDock: () => (transitionStateEvent: popoverSMEvent) => {
+          // const effect = popoverEffectDispatch.of(
+          //   setToDocked ? "switchToMonocle" : "switchToTooltip"
+          // );
+          const effect = popoverEffectDispatch.of(transitionStateEvent);
           update.view.dispatch({ effects: [effect] });
         },
-        menuContents: docked ? contents : [],
+        menuContents,
         eventDispatch: () => (menuEvent: MenuEvent) => {
           const codeUpdate = modifyCodeByCommand(
             menuEvent,

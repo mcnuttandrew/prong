@@ -91,11 +91,13 @@ export type popoverSMEvent =
   | "stopUsingTooltip"
   | "switchToMonocle"
   | "switchToTooltip"
+  | "switchToDocked"
   | "useTooltip";
 
 export type popOverSMState =
   | "monocleOpen"
   | "tooltipOpen"
+  | "dockOpen"
   | "tooltipClosed"
   | "tooltipInUse"
   | "preFirstUse";
@@ -111,18 +113,25 @@ const stateMap: Record<
   popOverSMState,
   PartialRecord<popoverSMEvent, popOverSMState>
 > = {
+  dockOpen: {
+    switchToMonocle: "monocleOpen",
+    switchToTooltip: "tooltipOpen",
+  },
   monocleOpen: {
+    switchToDocked: "dockOpen",
     switchToTooltip: "tooltipOpen",
   },
   tooltipClosed: {
     openTooltip: "tooltipOpen",
   },
   tooltipOpen: {
+    switchToDocked: "dockOpen",
     switchToMonocle: "monocleOpen",
     closeTooltip: "tooltipClosed",
     useTooltip: "tooltipInUse",
   },
   tooltipInUse: {
+    switchToDocked: "dockOpen",
     switchToMonocle: "monocleOpen",
     stopUsingTooltip: "tooltipOpen",
     closeTooltip: "tooltipClosed",
