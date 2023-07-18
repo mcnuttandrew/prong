@@ -266,7 +266,7 @@ function panel(view: EditorView): Panel {
     dom,
     update: (update) => {
       const popState = update.state.field(popOverState);
-      const docked = popState.menuState === "hardClosed";
+      const docked = popState.menuState === "monocleOpen";
       const node = popState.targetNode;
 
       const fullCode = codeString(view, 0);
@@ -293,7 +293,7 @@ function panel(view: EditorView): Panel {
         docked,
         setDock: () => (setToDocked: boolean) => {
           const effect = popoverEffectDispatch.of(
-            setToDocked ? "forceClose" : "forceOpen"
+            setToDocked ? "switchToMonocle" : "switchToTooltip"
           );
           update.view.dispatch({ effects: [effect] });
         },

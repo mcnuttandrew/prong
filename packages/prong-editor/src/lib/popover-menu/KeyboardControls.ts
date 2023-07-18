@@ -17,7 +17,7 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
   const { menuState, selectedRouting, menuContents } =
     view.state.field(popOverState);
   // pop over not actively in use
-  if (menuState !== "inUse") {
+  if (menuState !== "tooltipInUse") {
     return false;
   }
 
@@ -28,7 +28,7 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
   );
   const effect = updatedCursor
     ? setRouting.of(updatedCursor)
-    : popoverEffectDispatch.of("stopUsing");
+    : popoverEffectDispatch.of("stopUsingTooltip");
   view.dispatch({ effects: [effect] });
 
   return true;
@@ -102,7 +102,10 @@ function runSelection(view: EditorView) {
     }
 
     view.dispatch({
-      effects: [popoverEffectDispatch.of("close"), setRouting.of([0, 0])],
+      effects: [
+        popoverEffectDispatch.of("closeTooltip"),
+        setRouting.of([0, 0]),
+      ],
     });
   }
   return true;
@@ -111,13 +114,14 @@ const simpleDispatch = (view: EditorView, action: popoverSMEvent) =>
   view.dispatch({ effects: [popoverEffectDispatch.of(action)] });
 
 function engageWithPopover(view: EditorView) {
-  simpleDispatch(view, "use");
+  simpleDispatch(view, "useTooltip");
   return true;
 }
 
 function toggleForce(view: EditorView) {
   const { menuState } = view.state.field(popOverState);
-  const action = menuState === "hardClosed" ? "forceOpen" : "forceClose";
+  const action =
+    menuState === "monocleOpen" ? "switchToTooltip" : "switchToMonocle";
   simpleDispatch(view, action);
   return true;
 }

@@ -260,9 +260,13 @@ class Tooltip {
     const codeUpdate = (codeUpdate: UpdateDispatch) => {
       simpleUpdate(this.view, codeUpdate.from, codeUpdate.to, codeUpdate.value);
     };
-    const closeMenu = (hardClose?: boolean) =>
+    const closeMenu = (switchToMonocle?: boolean) =>
       this.view.dispatch({
-        effects: [popoverEffectDispatch.of(hardClose ? "forceClose" : "close")],
+        effects: [
+          popoverEffectDispatch.of(
+            switchToMonocle ? "switchToMonocle" : "closeTooltip"
+          ),
+        ],
       });
 
     const setSelectedRouting = (route: [number, number]) => {
@@ -294,7 +298,7 @@ class Tooltip {
       codeUpdate,
       menuContents: fullMenuContents,
       projections,
-      selectedRouting: menuState === "inUse" ? selectedRouting : false,
+      selectedRouting: menuState === "tooltipInUse" ? selectedRouting : false,
       setSelectedRouting,
       syntaxNode: targetNode,
       view: this.view,
