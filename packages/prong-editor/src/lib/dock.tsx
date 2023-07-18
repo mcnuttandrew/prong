@@ -57,8 +57,10 @@ function Content(props: {
     return (
       <div className="cm-dock">
         <div className="cm-dock-label">
-          Press Escape to dock the menu or{" "}
-          {setDock && <button onClick={() => setDock(true)}>click here</button>}
+          Press Escape to dock the menu
+          {setDock && (
+            <button onClick={() => setDock(true)}>or click here</button>
+          )}
         </div>
       </div>
     );
@@ -73,7 +75,7 @@ function Content(props: {
             </div>
             <div>Click the circle to drag and place this menu</div>
             <div>
-              Press CMD+. to reattach the menu
+              Press Escape to reattach the menu
               {setDock && (
                 <button onClick={() => setDock(false)}>or click here</button>
               )}
