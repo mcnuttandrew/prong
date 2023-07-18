@@ -105,7 +105,7 @@ export default function Editor(props: {
     // hack :(
     setTimeout(() => {
       view?.dispatch({ effects: [setProjections.of(projections || [])] });
-    }, 300);
+    }, 100);
   }, [projections, view]);
 
   useEffect(() => {

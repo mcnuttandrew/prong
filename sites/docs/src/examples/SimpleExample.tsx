@@ -11,7 +11,7 @@ const exampleData = `{
       "c": true,
     },
     "d": null,
-    "e": [{ "f": 4, "g": 5 }],
+    "e": [{ "f": -4, "g": 0 }],
     "I": "example",
   }`;
 

@@ -87,13 +87,11 @@ function widgetBuilder(
 ) {
   const widgets: Range<Decoration>[] = [];
   const { schemaTypings, codeUpdateHook } = state.field(cmStatePlugin);
-  const logger = new Set();
   syntaxTree(state).iterate({
     from: 0,
     to: state.doc.length,
     enter: ({ node, from, to }) => {
       const currentCodeSlice = codeStringState(state, from, to);
-      logger.add(`${from}-${to}`);
       projectionsInUse
         .filter((x) => x.from === from && x.to === to)
         .forEach((projection) => {
@@ -104,7 +102,6 @@ function widgetBuilder(
             schemaTypings[`${node.from}-${node.to}`],
             codeUpdateHook
           );
-
           projWidget
             .addNode(state, from, to, node)
             .forEach((w) => widgets.push(w));
@@ -148,7 +145,10 @@ export const projectionView = ViewPlugin.fromClass(
         update.startState.field(projectionState),
         update.state.field(projectionState)
       );
-      if (update.viewportChanged || stateValuesChanged) {
+      const codeUpdated =
+        codeStringState(update.view.state, 0) !==
+        codeStringState(update.startState, 0);
+      if (update.viewportChanged || stateValuesChanged || codeUpdated) {
         const { projectionsInUse } = update.view.state.field(projectionState);
         this.decorations = widgetBuilder(projectionsInUse, update.view.state);
       }
