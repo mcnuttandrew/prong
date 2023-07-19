@@ -133,19 +133,20 @@ function synthesizeSuggestions(
       schema?.description,
       schema?.$$labeledType,
       schema?.$$refName,
-      ...(schema?.enum || []),
-    ].filter((x) => {
-      if (!x || !x.length) {
-        return false;
-      }
-      return x.toLowerCase().includes(query.toLowerCase());
-    });
+    ].filter(
+      (x) => x && x.length && x.toLowerCase().includes(query.toLowerCase())
+    );
     if (queryMatches.length) {
       matches.push({ schema: parent, path });
     }
+    // handle enums specially
+    (schema?.enum || []).forEach((x) => {
+      if (x && x.length && x.toLowerCase().includes(query.toLowerCase())) {
+        matches.push({ schema: { ...parent, enum: [x] }, path });
+      }
+    });
   });
   const suggestions = matches
-    // hack, just remove all the array ones
     .filter((x) => {
       const suggestedKeyPath = pathToKeyPath(x.path);
       // intentional that keyPath can be shorter than suggestedKeyPath and get through

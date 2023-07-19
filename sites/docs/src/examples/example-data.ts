@@ -234,7 +234,6 @@ export const produceSchema: any = {
     veggie: {
       type: "object",
       required: ["veggieName", "veggieLike"],
-      additionalproperties: false,
       properties: {
         veggieName: {
           type: "string",
