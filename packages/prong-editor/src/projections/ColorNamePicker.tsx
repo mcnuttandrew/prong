@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Projection } from "../lib/projections";
 import { colorNames, setIn } from "../lib/utils";
-import "../stylesheets/color-name-picker.css";
 
 // https://www.w3schools.com/colors/colors_groups.asp
 
