@@ -4,7 +4,7 @@ This is the Prong editor framework. The goal of this system is to provide a simp
 The core ideas are two: if you have taken the trouble to write a JSON Schema the we should be able to provide you with a nice structure editing style experience, and second if you want to just write react components that should be enough to insert them into a JSON editor.
 Based on this premise, we provide a projectional editor system that allows for the simple creation of editors for any task that has a JSON Schema (ie many JSON DSLs).
 
-![Example image of the prong editor framework instantiated for a vega-lite style application](./public/example.png)
+![Example image of the prong editor framework instantiated for a vega-lite style application](./example.png)
 
 This is described in our upcoming paper "Projectional Editors for JSON-DSLs". Please note that this is research grade software, so there are bugs and issues throughout.
 

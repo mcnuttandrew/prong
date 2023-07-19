@@ -165,16 +165,13 @@ function App() {
         <div className="link-container">
           {/* @ts-ignore */}
           <Link to={"/"}>
-            <div className="hero">
-              <img
-                src={"./logo.png"}
-                alt="logo for prong. black and white bird face surrounded by white splatters."
-              />
-              <h1>Prong</h1>
-            </div>
+            <img
+              src={"./logo.png"}
+              alt="logo for prong. black and white bird face surrounded by white splatters."
+            />
           </Link>
+          <h1>Prong</h1>
           <div className="flex-down">
-            <h3 className="">Meta</h3>
             <a href="https://github.com/mcnuttandrew/prong">GitHub</a>
             <a href="https://github.com/mcnuttandrew/prong">Paper</a>
           </div>
