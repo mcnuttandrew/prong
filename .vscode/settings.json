@@ -17,6 +17,7 @@
     "keymap",
     "lezer",
     "linebreak",
+    "markclip",
     "nodenext",
     "pickr",
     "postactions",
@@ -30,6 +31,7 @@
     "simonwep",
     "subgrammars",
     "Symlog",
-    "tabindex"
+    "tabindex",
+    "targ"
   ]
 }
