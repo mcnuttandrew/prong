@@ -53,21 +53,6 @@ function Content(props: {
     ? filterContents(searchTerm, menuContents)
     : menuContents;
 
-  // todo also support other actions from the dock
-  // if (menuState === "monocleOpen") {
-  //   return (
-  //     <div className="cm-dock">
-  //       <div className="cm-dock-label">
-  //         Press Escape to dock the menu
-  //         {setDock && (
-  //           <button onClick={() => setDock("switchToDocked")}>
-  //             or click here
-  //           </button>
-  //         )}
-  //       </div>
-  //     </div>
-  //   );
-  // }
   const docked = menuState === "dockOpen";
   const monocled = menuState === "monocleOpen";
   return (
@@ -320,9 +305,6 @@ function panel(view: EditorView): Panel {
       triggerRerender({
         menuState: popState.menuState,
         setDock: () => (transitionStateEvent: popoverSMEvent) => {
-          // const effect = popoverEffectDispatch.of(
-          //   setToDocked ? "switchToMonocle" : "switchToTooltip"
-          // );
           const effect = popoverEffectDispatch.of(transitionStateEvent);
           update.view.dispatch({ effects: [effect] });
         },
