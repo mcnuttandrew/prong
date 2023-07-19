@@ -377,10 +377,6 @@
 
 /* COLOR NAME PICKER */
 
-.color-name-picker {
-    width: 300px;
-}
-
 .color-name-picker ul {
     list-style-type: none;
     padding: 0;
@@ -401,6 +397,16 @@
     cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
+}
+
+.color-name-picker .color-group-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-name-picker .color-group-options {
+    width: 100%;
 }
 
 .color-name-picker .color-item {

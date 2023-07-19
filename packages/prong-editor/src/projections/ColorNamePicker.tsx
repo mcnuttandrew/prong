@@ -8,163 +8,161 @@ const titleCase = (x: string) =>
   `${x[0].toUpperCase()}${x.slice(1).toLowerCase()}`;
 
 export const colorGroups: Record<string, string[]> = {
-  pink: [
-    "pink",
-    "lightpink",
-    "hotpink",
-    "deeppink",
-    "palevioletred",
-    "mediumvioletred",
-  ],
-  purple: [
-    "lavender",
-    "thistle",
-    "plum",
-    "orchid",
-    "violet",
-    "fuchsia",
-    "magenta",
-    "mediumorchid",
-    "darkorchid",
-    "darkviolet",
-    "blueviolet",
-    "darkmagenta",
-    "purple",
-    "mediumpurple",
-    "mediumslateblue",
-    "slateblue",
-    "darkslateblue",
-    "rebeccapurple",
-    "indigo",
-  ],
-  red: [
-    "lightsalmon",
-    "salmon",
-    "darksalmon",
-    "lightcoral",
-    "indianred",
-    "crimson",
-    "red",
-    "firebrick",
-    "darkred",
-  ],
-  orange: ["orange", "darkorange", "coral", "tomato", "orangered"],
-  yellow: [
-    "gold",
-    "yellow",
-    "lightyellow",
-    "lemonchiffon",
-    "lightgoldenrodyellow",
-    "papayawhip",
-    "moccasin",
-    "peachpuff",
-    "palegoldenrod",
-    "khaki",
-    "darkkhaki",
-  ],
-  green: [
-    "greenyellow",
-    "chartreuse",
-    "lawngreen",
-    "lime",
-    "limegreen",
-    "palegreen",
-    "lightgreen",
-    "mediumspringgreen",
-    "springgreen",
-    "mediumseagreen",
-    "seagreen",
-    "forestgreen",
-    "green",
-    "darkgreen",
-    "yellowgreen",
-    "olivedrab",
-    "darkolivegreen",
-    "mediumaquamarine",
-    "darkseagreen",
-    "lightseagreen",
-    "darkcyan",
-    "teal",
-  ],
-  // maybe display cyan as part of blue
-  cyan: [
-    "aqua",
-    "cyan",
-    "lightcyan",
-    "paleturquoise",
-    "aquamarine",
-    "turquoise",
-    "mediumturquoise",
-    "darkturquoise",
-  ],
   blue: [
-    "cadetblue",
+    "navy",
+    "darkblue",
+    "midnightblue",
+    "mediumblue",
+    "blue",
+    "royalblue",
     "steelblue",
-    "lightsteelblue",
-    "lightblue",
-    "powderblue",
-    "lightskyblue",
-    "skyblue",
+    "dodgerblue",
+    "cadetblue",
     "cornflowerblue",
     "deepskyblue",
-    "dodgerblue",
-    "royalblue",
-    "blue",
-    "mediumblue",
-    "darkblue",
-    "navy",
-    "midnightblue",
+    "darkturquoise",
+    "mediumturquoise",
+    "lightsteelblue",
+    "skyblue",
+    "lightskyblue",
+    "turquoise",
+    "lightblue",
+    "powderblue",
+    "paleturquoise",
+    "cyan",
+    "aquamarine",
+    "lightcyan",
   ],
   brown: [
-    "cornsilk",
-    "blanchedalmond",
-    "bisque",
-    "navajowhite",
-    "wheat",
-    "burlywood",
-    "tan",
-    "rosybrown",
-    "sandybrown",
-    "goldenrod",
+    "maroon",
+    "saddlebrown",
+    "brown",
+    "sienna",
+    "olive",
+    "chocolate",
     "darkgoldenrod",
     "peru",
-    "chocolate",
-    "olive",
-    "saddlebrown",
-    "sienna",
-    "brown",
-    "maroon",
-  ],
-  white: [
-    "white",
-    "snow",
-    "honeydew",
-    "mintcream",
-    "azure",
-    "aliceblue",
-    "ghostwhite",
-    "whitesmoke",
-    "seashell",
-    "beige",
-    "oldlace",
-    "floralwhite",
-    "ivory",
-    "antiquewhite",
-    "linen",
-    "lavenderblush",
-    "mistyrose",
+    "rosybrown",
+    "goldenrod",
+    "sandybrown",
+    "tan",
+    "burlywood",
+    "wheat",
+    "navajowhite",
+    "bisque",
+    "blanchedalmond",
+    "cornsilk",
   ],
   gray: [
-    "gainsboro",
-    "lightgray",
-    "silver",
-    "darkgray",
+    "black",
+    "darkslategray",
     "dimgray",
+    "slategray",
     "gray",
     "lightslategray",
-    "slategray",
-    "darkslategray",
-    "black",
+    "darkgray",
+    "silver",
+    "lightgray",
+    "gainsboro",
+  ],
+  green: [
+    "darkgreen",
+    "darkolivegreen",
+    "green",
+    "teal",
+    "forestgreen",
+    "seagreen",
+    "darkcyan",
+    "olivedrab",
+    "mediumseagreen",
+    "lightseagreen",
+    "darkseagreen",
+    "limegreen",
+    "mediumaquamarine",
+    "yellowgreen",
+    "lightgreen",
+    "mediumspringgreen",
+    "lime",
+    "springgreen",
+    "lawngreen",
+    "chartreuse",
+    "palegreen",
+    "greenyellow",
+  ],
+  purple: [
+    "indigo",
+    "purple",
+    "darkslateblue",
+    "rebeccapurple",
+    "darkmagenta",
+    "darkviolet",
+    "blueviolet",
+    "darkorchid",
+    "slateblue",
+    "mediumslateblue",
+    "mediumorchid",
+    "mediumpurple",
+    "magenta",
+    "fuchsia",
+    "orchid",
+    "violet",
+    "plum",
+    "thistle",
+    "lavender",
+  ],
+  red: [
+    "darkred",
+    "firebrick",
+    "mediumvioletred",
+    "crimson",
+    "indianred",
+    "red",
+    "deeppink",
+    "orangered",
+    "palevioletred",
+    "tomato",
+    "hotpink",
+    "lightcoral",
+    "salmon",
+    "coral",
+    "darkorange",
+    "darksalmon",
+    "lightsalmon",
+    "orange",
+    "lightpink",
+    "pink",
+  ],
+  white: [
+    "mistyrose",
+    "antiquewhite",
+    "linen",
+    "beige",
+    "lavenderblush",
+    "whitesmoke",
+    "oldlace",
+    "aliceblue",
+    "seashell",
+    "ghostwhite",
+    "floralwhite",
+    "honeydew",
+    "snow",
+    "azure",
+    "mintcream",
+    "ivory",
+    "white",
+  ],
+  yellow: [
+    "darkkhaki",
+    "gold",
+    "peachpuff",
+    "khaki",
+    "palegoldenrod",
+    "moccasin",
+    "papayawhip",
+    "lightgoldenrodyellow",
+    "yellow",
+    "lemonchiffon",
+    "lightyellow",
   ],
 };
 
@@ -223,28 +221,32 @@ function ColorNamePicker(props: {
       <ul>
         {Object.entries(colorGroups).map(([groupName, colors]) => (
           <li key={groupName} className="prong-flex-down">
-            <span
-              className="color-group"
-              onClick={() =>
-                setState({ ...state, [groupName]: !state[groupName] })
-              }
-            >
-              {/* https://en.wikipedia.org/wiki/Geometric_Shapes */}
-              {(state[groupName] ? "▾ " : "▿ ") + titleCase(groupName)}
-            </span>
-            <span>
-              {colors.map((color) => (
-                <span
-                  key={`${color}-swatch`}
-                  className="color-swatch"
-                  onClick={() => cb(color)}
-                  style={{
-                    background: color,
-                    borderColor: color === initColor ? "black" : "white",
-                  }}
-                ></span>
-              ))}
-            </span>
+            <div className="prong-flex color-group-container">
+              <span
+                className="color-group"
+                onClick={() =>
+                  setState({ ...state, [groupName]: !state[groupName] })
+                }
+              >
+                {/* https://en.wikipedia.org/wiki/Geometric_Shapes */}
+                {(state[groupName] ? "▲" : "▼") + titleCase(groupName)}
+              </span>
+              <span className="color-group-options">
+                {colors.map((color) => (
+                  <span
+                    key={`${color}-swatch`}
+                    className="color-swatch"
+                    onClick={() => cb(color)}
+                    title={color}
+                    style={{
+                      background: color,
+                      border: "none",
+                      // borderColor: color === initColor ? "black" : "none",
+                    }}
+                  ></span>
+                ))}
+              </span>
+            </div>
             {state[groupName] && (
               <ul>
                 {colors.map((color) => (
