@@ -1,3 +1,95 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`filterContents 1`] = `[]`;
+exports[`filterContents 1`] = `
+[
+  {
+    "elements": [
+      {
+        "content": "grid",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""grid"",
+            "value": "true",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      {
+        "content": "gridCap",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""gridCap"",
+            "value": """",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      {
+        "content": "gridColor",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""gridColor"",
+            "value": "null",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      {
+        "content": "gridDash",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""gridDash"",
+            "value": "{}",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      {
+        "content": "gridDashOffset",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""gridDashOffset"",
+            "value": "0",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      {
+        "content": "gridOpacity",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""gridOpacity"",
+            "value": "0",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+      {
+        "content": "gridWidth",
+        "onSelect": {
+          "nodeId": "10-13",
+          "payload": {
+            "key": ""gridWidth"",
+            "value": "0",
+          },
+          "type": "addObjectKey",
+        },
+        "type": "button",
+      },
+    ],
+    "label": "Add Field",
+  },
+]
+`;

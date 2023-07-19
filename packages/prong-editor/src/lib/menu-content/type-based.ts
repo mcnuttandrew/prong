@@ -243,6 +243,8 @@ const typeBasedComponents: Record<string, TypeComponent> = {
   ...Object.fromEntries(["[", "]"].map((el) => [el, bracketComponent])),
   ...Object.fromEntries(["{", "}"].map((el) => [el, curlyBracketComponent])),
   "⚠": makeSimpleComponent("⚠"),
+
+  JsonText: () => [],
 };
 
 export function evalTypeBasedContent(
