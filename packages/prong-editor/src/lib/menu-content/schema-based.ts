@@ -209,7 +209,7 @@ export function materializeAnyOfOption(content: JSONSchema7): string {
       (content?.anyOf && flattenAnyOf(content.anyOf)) || [
         content,
       ]) as JSONSchema7[]
-  ).filter((x) => x.type);
+  ).filter((x) => x && x.type);
   const targ = targOptions[0];
   if (!targ) {
     return "null";

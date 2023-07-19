@@ -243,6 +243,8 @@ const typeBasedComponents: Record<string, TypeComponent> = {
   ...Object.fromEntries(["[", "]"].map((el) => [el, bracketComponent])),
   ...Object.fromEntries(["{", "}"].map((el) => [el, curlyBracketComponent])),
   "⚠": makeSimpleComponent("⚠"),
+
+  JsonText: () => [],
 };
 
 export function evalTypeBasedContent(
@@ -259,11 +261,11 @@ export function evalTypeBasedContent(
   if (typeBasedProperty) {
     typeBasedProperty(componentProps).forEach((x) => output.push(x));
   } else if (!schemaChunk) {
-    console.log("missing imp for", type);
+    // console.log("missing imp for", type);
   } else if (!typeBasedProperty) {
     console.log("missing type imp for", type);
   }
-  // handle the weird case of property vaues
+  // handle the weird case of property values
   if (
     syntaxNode.parent?.type.name === "Property" &&
     syntaxNode.type.name !== "PropertyName"
@@ -284,8 +286,12 @@ export function evalParentBasedContent(
   schemaChunk: JSONSchema7[],
   code: string
 ) {
-  const parentType = retargetToAppropriateNode(syntaxNode).parent!.type.name;
-  const parentProp = parentResponses[parentType];
+  const newTarget = retargetToAppropriateNode(syntaxNode);
+  const parent = newTarget?.parent;
+  if (!parent) {
+    return [];
+  }
+  const parentProp = parentResponses[parent.type.name];
   const output = (schemaChunk || []).flatMap((chunk) => {
     const componentProps = {
       content: chunk,
