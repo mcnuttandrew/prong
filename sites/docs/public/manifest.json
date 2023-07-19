@@ -1,9 +1,15 @@
 {
   "short_name": "prong-editor",
   "name": "prong-editor",
-  "icons": [],
+  "icons": [
+    {
+      "src": "/logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#ffffff",
+  "background_color": "#3333"
 }
