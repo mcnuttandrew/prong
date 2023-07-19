@@ -1,7 +1,10 @@
 # Prong
 
 This is the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
-The basic dependencies of this system are code mirror (which we wrap) and react (which we use as means to specify the extensions).
+The core ideas are two: if you have taken the trouble to write a JSON Schema the we should be able to provide you with a nice structure editing style experience, and second if you want to just write react components that should be enough to insert them into a JSON editor.
+Based on this premise, we provide a projectional editor system that allows for the simple creation of editors for any task that has a JSON Schema (ie many JSON DSLs).
+
+![Example image of the prong editor framework instantiated for a vega-lite style application](./public/example.png)
 
 This is described in our upcoming paper "Projectional Editors for JSON-DSLs". Please note that this is research grade software, so there are bugs and issues throughout.
 
@@ -47,7 +50,7 @@ Dont forget to import our css file!
 
 ### What about authoring my own projections??
 
-Authoring your own projections is also reasonably straightforward. We have a number of examples throughout the code base that you might look at for inspiration of how to define ad hoc projections (cf sites/docs/src/examples/) as well as more structured repeatable ones (cf packages/prong-editor/projections/). But should you want a quick start, here's an example projection that will appear in the floating tooltip menu
+Authoring your own projections is also reasonably straightforward. We have a number of examples throughout the code base that you might look at for inspiration of how to define ad hoc projections (cf [sites/docs/src/examples/](https://github.com/mcnuttandrew/prong/tree/main/sites/docs/src/examples)) as well as more structured repeatable ones (cf [packages/prong-editor/projections/](https://github.com/mcnuttandrew/prong/tree/main/packages/prong-editor/src/projections)). But should you want a quick start, here's an example projection that will appear in the floating tooltip menu
 
 ```tsx
 import { utils, Projection } from "prong-editor";
@@ -80,7 +83,13 @@ const RandomWordProjection: Projection = {
 export default RandomWordProjection;
 ```
 
-See below for [additional details](#projections) on the semantics of defin
+See below for [additional details](#projections) on the semantics of projection definition.
+
+### Gotchas
+
+- We don't automatically import schemas. Its very easy to import a schema (they are just JSON after all) and so we would prefer not to create an import dep for you
+
+- The editor excepts a string! It is very easy to accidentally forget and hand it a parsed object rather than a string describing a json object.
 
 ## Component
 

@@ -14,8 +14,6 @@ function QuietModeCompare() {
         fetch(el)
           .then((x) => x.text())
           .then((x) => {
-            console.log(x);
-            // return x;
             return (
               "```tsx" +
               x

@@ -41,7 +41,7 @@ export interface PopoverMenuState {
 }
 export const popoverMenuState: PopoverMenuState = {
   // menuState: "preFirstUse",
-  menuState: "hardClosed",
+  menuState: "monocleOpen",
   targetNode: null,
   highlightNode: null,
   targetedTypings: [],
@@ -64,14 +64,6 @@ function cursorBehaviorIsValid(tr: Transaction) {
   return !(moreThanOneSelection || selectionWiderThanOne);
 }
 
-// function selectionInsideProjection(tr: Transaction, pos: number) {
-//   const { projectionsInUse } = tr.state.field(projectionState);
-//   const posInsideOfInUseRange = projectionsInUse.some(
-//     ({ from, to }) => pos >= from && pos <= to
-//   );
-//   return posInsideOfInUseRange;
-// }
-
 function handleSimpleUpdate(
   state: PopoverMenuState,
   tr: Transaction
@@ -93,45 +85,59 @@ function handleSimpleUpdate(
 }
 
 export type popoverSMEvent =
-  | "forceClose"
-  | "forceOpen"
-  | "open"
-  | "close"
-  | "use"
-  | "stopUsing"
-  | "firstUse";
+  | "closeTooltip"
+  | "firstUse"
+  | "openTooltip"
+  | "stopUsingTooltip"
+  | "switchToMonocle"
+  | "switchToTooltip"
+  | "switchToDocked"
+  | "useTooltip";
+
 export type popOverSMState =
-  | "hardClosed"
-  | "hidden"
-  | "open"
-  | "inUse"
+  | "monocleOpen"
+  | "tooltipOpen"
+  | "dockOpen"
+  | "tooltipClosed"
+  | "tooltipInUse"
   | "preFirstUse";
-export const visibleStates = new Set<popOverSMState>(["open", "inUse"]);
+export const visibleStates = new Set<popOverSMState>([
+  "tooltipOpen",
+  "tooltipInUse",
+]);
 type PartialRecord<K extends keyof any, T> = {
   [P in K]?: T;
 };
+
 const stateMap: Record<
   popOverSMState,
   PartialRecord<popoverSMEvent, popOverSMState>
 > = {
-  hardClosed: {
-    forceOpen: "open",
+  dockOpen: {
+    switchToMonocle: "monocleOpen",
+    switchToTooltip: "tooltipOpen",
   },
-  hidden: {
-    open: "open",
+  monocleOpen: {
+    switchToDocked: "dockOpen",
+    switchToTooltip: "tooltipOpen",
   },
-  open: {
-    forceClose: "hardClosed",
-    close: "hidden",
-    use: "inUse",
+  tooltipClosed: {
+    openTooltip: "tooltipOpen",
   },
-  inUse: {
-    forceClose: "hardClosed",
-    stopUsing: "open",
-    close: "hidden",
+  tooltipOpen: {
+    switchToDocked: "dockOpen",
+    switchToMonocle: "monocleOpen",
+    closeTooltip: "tooltipClosed",
+    useTooltip: "tooltipInUse",
+  },
+  tooltipInUse: {
+    switchToDocked: "dockOpen",
+    switchToMonocle: "monocleOpen",
+    stopUsingTooltip: "tooltipOpen",
+    closeTooltip: "tooltipClosed",
   },
   preFirstUse: {
-    firstUse: "hidden",
+    firstUse: "tooltipClosed",
   },
 };
 
@@ -301,7 +307,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
     const selectedRouting: SelectionRoute = nodeIsActuallyNew
       ? [0, 0]
       : state.selectedRouting;
-    const menuState = PopoverStateMachine(state.menuState, "open");
+    const menuState = PopoverStateMachine(state.menuState, "openTooltip");
 
     // TODO ADD CACHEING FOR THE MENU HERE, cachekey: targetNode (from, to), code, ?
 

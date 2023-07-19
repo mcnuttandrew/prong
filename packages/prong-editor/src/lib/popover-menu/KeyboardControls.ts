@@ -17,7 +17,7 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
   const { menuState, selectedRouting, menuContents } =
     view.state.field(popOverState);
   // pop over not actively in use
-  if (menuState !== "inUse") {
+  if (menuState !== "tooltipInUse") {
     return false;
   }
 
@@ -28,7 +28,7 @@ const changeSelectionRoute = (direction: dir) => (view: EditorView) => {
   );
   const effect = updatedCursor
     ? setRouting.of(updatedCursor)
-    : popoverEffectDispatch.of("stopUsing");
+    : popoverEffectDispatch.of("stopUsingTooltip");
   view.dispatch({ effects: [effect] });
 
   return true;
@@ -102,7 +102,10 @@ function runSelection(view: EditorView) {
     }
 
     view.dispatch({
-      effects: [popoverEffectDispatch.of("close"), setRouting.of([0, 0])],
+      effects: [
+        popoverEffectDispatch.of("closeTooltip"),
+        setRouting.of([0, 0]),
+      ],
     });
   }
   return true;
@@ -110,25 +113,22 @@ function runSelection(view: EditorView) {
 const simpleDispatch = (view: EditorView, action: popoverSMEvent) =>
   view.dispatch({ effects: [popoverEffectDispatch.of(action)] });
 
-function forceClose(view: EditorView) {
-  simpleDispatch(view, "forceClose");
-  return true;
-}
-
-function forceOpen(view: EditorView) {
-  simpleDispatch(view, "forceOpen");
-  return true;
-}
-
 function engageWithPopover(view: EditorView) {
-  simpleDispatch(view, "use");
+  simpleDispatch(view, "useTooltip");
+  return true;
+}
+
+function toggleForce(view: EditorView) {
+  const { menuState } = view.state.field(popOverState);
+  const action =
+    menuState === "monocleOpen" ? "switchToTooltip" : "switchToMonocle";
+  simpleDispatch(view, action);
   return true;
 }
 
 export const popOverCompletionKeymap: readonly KeyBinding[] = [
-  //   { key: "Ctrl-Space", run: startCompletion },
-  { key: "Cmd-.", run: forceOpen },
-  { key: "Escape", run: forceClose },
+  { key: "Cmd-.", run: toggleForce },
+  { key: "Escape", run: toggleForce },
   { key: "Cmd-ArrowDown", run: engageWithPopover, preventDefault: true },
   { key: "ArrowDown", run: changeSelectionRoute("down") },
   { key: "ArrowUp", run: changeSelectionRoute("up") },

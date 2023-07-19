@@ -5,6 +5,7 @@ import {
   ProjectionProps,
   Projection,
   utils,
+  StandardBundle,
 } from "../../../../packages/prong-editor/src/index";
 
 export const vegaLiteCode = `
@@ -21,7 +22,8 @@ export const vegaLiteCode = `
   "mark": {"type": "bar"},
   "encoding": {
     "x": {"field": "penguins", "type": "nominal", "axis": {"labelAngle": 0}},
-    "y": {"field": "flowers", "type": "quantitative"}
+    "y": {"field": "flowers", "type": "quantitative"},
+    "color": {"field": "penguins", "scale": { "scheme": "" } }
   }
 }
 `;
@@ -37,7 +39,7 @@ function CounterProjection(_props: ProjectionProps) {
 
 function VegaLiteExampleApp() {
   const [currentCode, setCurrentCode] = useState(vegaLiteCode);
-  const [clockRunning, setClockRunning] = useState<boolean>(true);
+  const [clockRunning, setClockRunning] = useState<boolean>(false);
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {
@@ -68,6 +70,7 @@ function VegaLiteExampleApp() {
         onChange={(x) => setCurrentCode(x)}
         projections={
           [
+            ...Object.values(StandardBundle),
             {
               query: {
                 type: "index",
