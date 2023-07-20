@@ -5,6 +5,8 @@ import { simpleParse } from "../lib/utils";
 const CleanUp: Projection = {
   query: { type: "nodeType", query: ["Object", "Array", "[", "]", "{", "}"] },
   type: "tooltip",
+  name: "Clean Up",
+  group: "Utils",
   projection: (props) => {
     return (
       <button
@@ -21,7 +23,6 @@ const CleanUp: Projection = {
       </button>
     );
   },
-  name: "Utils",
 };
 
 export default CleanUp;

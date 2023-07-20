@@ -106,6 +106,8 @@ function ColorPicker(props: {
 const ColorProjection: Projection = {
   query: { type: "regex", query: colorRegex },
   type: "tooltip",
+  name: "Color Picker",
+  group: "Color Picker",
   projection: ({ keyPath, currentValue, setCode, fullCode }) => {
     return (
       <ColorPicker
@@ -116,6 +118,5 @@ const ColorProjection: Projection = {
       />
     );
   },
-  name: "ColorProjection",
 };
 export default ColorProjection;

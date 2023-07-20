@@ -26,7 +26,8 @@ const SortObject: Projection = {
       </button>
     );
   },
-  name: "Utils",
+  name: "Sort Object",
+  group: "Utils",
 };
 
 export default SortObject;

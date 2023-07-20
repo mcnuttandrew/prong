@@ -11,7 +11,8 @@ const looksLikeItMightBeAQuotesError = (value: string) => {
 };
 const HeuristicJSONFixes: Projection = {
   type: "tooltip",
-  name: "Utils",
+  name: "JSON Fixes",
+  group: "Utils",
   projection: (props) => {
     const val = props.currentValue;
     if (looksLikeItMightBeAQuotesError(val)) {

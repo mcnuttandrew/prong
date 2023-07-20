@@ -25,6 +25,7 @@ const QuietModeUs = (props: {
       {
         type: "inline",
         mode: "replace",
+        name: "Quiet Mode",
         query: {
           type: "nodeType",
           query: nodeTypes,

@@ -241,7 +241,8 @@ function VegaUseCase() {
             buildInlineDropDownProjection(
               mapProjections,
               mapProjectionTypes[idx],
-              ["projections", idx, "type", "type___value"]
+              ["projections", idx, "type", "type___value"],
+              "Map Projection Dropdown"
             )
           ),
           {

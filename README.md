@@ -181,7 +181,10 @@ This projection creates a menu item that will appear in the tooltip, monocle, or
 
 ```tsx
 {
+  // the name of the projection, used to opt in/opt out
   name: string;
+  // the heading that the projection will appear under
+  group: string;
   projection: (props: ProjectionProps) => JSX.Element;
   query: ProjectionQuery;
   type: "tooltip";
@@ -229,7 +232,11 @@ Use this projection type to place projections into the editor itself.
 
 ```tsx
 {
+  // the name of the projection, used to opt in/opt out
+  name: string;
+  // whether or not the react component has internal state, more aggressively removed it does not have internal state
   hasInternalState: boolean;
+  // if a projection requires multiple lines of a DSL (say bc you are replacing a multiline data set or something) you must use replace-multiline
   mode: "replace" | "prefix" | "suffix" | "replace-multiline";
   projection: (props: ProjectionProps) => JSX.Element;
   query: ProjectionQuery;
@@ -243,6 +250,8 @@ This simplest of the projections allows you to add a css class to whatever eleme
 
 ```tsx
 {
+  // the name of the projection, used to opt in/opt out
+  name: string;
   class: string;
   query: ProjectionQuery;
   type: "highlight";

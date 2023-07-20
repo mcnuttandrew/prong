@@ -47,13 +47,14 @@ export interface ProjectionProps {
 }
 
 interface ProjectionBase {
+  name: string;
   query: ProjectionQuery;
   projection: (props: ProjectionProps) => JSX.Element;
 }
 
 export interface ProjectionTooltip extends ProjectionBase {
   type: "tooltip";
-  name: string;
+  group: string;
   takeOverMenu?: boolean;
 }
 

@@ -4,6 +4,7 @@ const BooleanTarget: Projection = {
   query: { type: "nodeType", query: ["True", "False"] },
   type: "inline",
   mode: "prefix",
+  name: "boolean",
   projection: (props) => {
     const isChecked = props.node.type.name === "True";
     return (

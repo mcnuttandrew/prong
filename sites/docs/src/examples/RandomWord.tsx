@@ -14,6 +14,8 @@ function generateName() {
 const RandomWordProjection: Projection = {
   query: { type: "regex", query: /".*"/ },
   type: "tooltip",
+  name: "Random Word",
+  group: "Utils",
   projection: ({ keyPath, setCode, fullCode }) => {
     return (
       <button
@@ -25,7 +27,6 @@ const RandomWordProjection: Projection = {
       </button>
     );
   },
-  name: "Utils",
 };
 
 export default RandomWordProjection;

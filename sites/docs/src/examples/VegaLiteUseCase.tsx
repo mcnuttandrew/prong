@@ -166,6 +166,7 @@ const UploadDataset: FC<{
 function BuildUploadAndInline(path: (string | number)[]): Projection {
   return {
     name: "upload-and-inline",
+    group: "upload-and-inline",
     query: { query: path, type: "index" },
     projection: (props: ProjectionProps) => <UploadAndInline {...props} />,
     type: "tooltip",
@@ -316,7 +317,8 @@ function VegaLiteExampleApp() {
                       </div>
                     );
                   },
-                  name: "Switch to",
+                  name: "Switch to field",
+                  group: "Switch to",
                 } as Projection,
                 showDataTable && {
                   query: {
@@ -360,7 +362,8 @@ function VegaLiteExampleApp() {
                       "tick",
                     ],
                     markType,
-                    ["mark", "mark___value"]
+                    ["mark", "mark___value"],
+                    "mark-type-dropdown"
                   ),
 
                 BuildUploadAndInline(["data"]),

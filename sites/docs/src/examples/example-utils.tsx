@@ -114,12 +114,14 @@ export const buttonListProjection =
 export const buildInlineDropDownProjection = (
   options: string[],
   currentValue: string,
-  indexTarget: (string | number)[]
+  indexTarget: (string | number)[],
+  name: string
 ): Projection => ({
   query: { type: "index", query: indexTarget },
   type: "inline",
   hasInternalState: false,
   mode: "replace",
+  name,
   projection: ({ setCode, fullCode }) => {
     return (
       <select

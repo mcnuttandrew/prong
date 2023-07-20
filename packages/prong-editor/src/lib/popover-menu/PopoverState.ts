@@ -216,7 +216,7 @@ export function buildProjectionsForMenu(props: {
   }
   const keyPath = syntaxNodeToKeyPath(node, fullCode);
   return getProjectionContents(state, node, currentCodeSlice).map((proj) => ({
-    label: (proj as ProjectionTooltip).name,
+    label: (proj as ProjectionTooltip).group,
     elements: [
       {
         type: "projection",
