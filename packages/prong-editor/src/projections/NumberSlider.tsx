@@ -85,6 +85,7 @@ const NumberSlider: Projection = {
   query: { type: "nodeType", query: ["Number"] },
   type: "inline",
   mode: "prefix",
+  name: "number slider",
   projection: (props) => <FancySlider {...props} />,
   hasInternalState: false,
 };

@@ -400,6 +400,7 @@ function BuildSuggestionProjection(
     type: "inline",
     mode: "replace-multiline",
     hasInternalState: false,
+    name: "suggestion-taker",
     query: {
       type: "multi-index",
       query: state.suggestions.map((x) => pathToKeyPath(x.path)),
@@ -520,7 +521,8 @@ function VegaLiteExampleApp() {
                 .map(([_, x]) => x),
               {
                 type: "tooltip",
-                name: "Switch to",
+                name: "Switch to font",
+                group: "Switch to",
                 query: {
                   type: "schemaMatch",
                   query: ["font"],

@@ -2,6 +2,7 @@ import { Projection } from "../lib/projections";
 const Debugger: Projection = {
   type: "tooltip",
   name: "debug",
+  group: "Utils",
   projection: (props) => {
     const types = (props.typings || [])
       .flatMap((typ) => [typ.$$labeledType, typ.type, typ.$$refName])

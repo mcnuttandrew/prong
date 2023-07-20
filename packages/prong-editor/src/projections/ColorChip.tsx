@@ -16,6 +16,7 @@ const ColorChip: Projection = {
   },
   type: "inline",
   mode: "prefix",
+  name: "color chip",
   projection: (props) => {
     const value = maybeTrim(props.currentValue);
     return (

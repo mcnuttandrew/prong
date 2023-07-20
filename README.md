@@ -175,32 +175,26 @@ The central design abstraction in Prong are projections. These are lightweight w
 
 There are four types of projections.
 
-### Tooltip Projection/ Full Tooltip Projection
+### Tooltip Projection Projection
 
-The two types of projections are closely related, both of them create a menu item that will appear in the tooltip or the dock (depending on what the user wants in a given moment).
-Here are the types for each of the objects
+This projection creates a menu item that will appear in the tooltip, monocle, or dock (depending on what the user wants in a given moment).
 
 ```tsx
 {
+  // the name of the projection, used to opt in/opt out
   name: string;
+  // the heading that the projection will appear under
+  group: string;
   projection: (props: ProjectionProps) => JSX.Element;
   query: ProjectionQuery;
   type: "tooltip";
+  // whether or not this projection takes over the whole menu
+  // note that the first provided projections takes precedence
+  takeOverMenu?: boolean;
 }
 ```
 
-(Note that `Projection` and `ProjectionProps` are both exported types)
-
-```tsx
-{
-  name: string;
-  projection: (props: ProjectionProps) => JSX.Element;
-  query: ProjectionQuery;
-  type: "full-tooltip";
-}
-```
-
-See [Queries](asddsa) below for an example of the query system.
+See [Queries](#queries) below for an example of the query system.
 The name describe which heading the projection will be grouped into.
 The projection creates the specific element that inserted into the menu, it expects a function that returns a react component. It gets props like
 
@@ -238,7 +232,11 @@ Use this projection type to place projections into the editor itself.
 
 ```tsx
 {
+  // the name of the projection, used to opt in/opt out
+  name: string;
+  // whether or not the react component has internal state, more aggressively removed it does not have internal state
   hasInternalState: boolean;
+  // if a projection requires multiple lines of a DSL (say bc you are replacing a multiline data set or something) you must use replace-multiline
   mode: "replace" | "prefix" | "suffix" | "replace-multiline";
   projection: (props: ProjectionProps) => JSX.Element;
   query: ProjectionQuery;
@@ -252,6 +250,8 @@ This simplest of the projections allows you to add a css class to whatever eleme
 
 ```tsx
 {
+  // the name of the projection, used to opt in/opt out
+  name: string;
   class: string;
   query: ProjectionQuery;
   type: "highlight";

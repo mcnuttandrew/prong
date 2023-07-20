@@ -668,6 +668,7 @@ function TraceryExample() {
               }
               acc.push({
                 type: "highlight",
+                name: "highlight-connector",
                 query: {
                   type: "index",
                   query: keyPath,

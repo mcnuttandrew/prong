@@ -21,6 +21,7 @@ const coloring: Record<string, string> = {
 const DestringProjection: Projection = {
   type: "inline",
   mode: "replace",
+  name: "destring",
   query: {
     type: "nodeType",
     query: ["PropertyName", "Number", "String", "Null", "False", "True"],
@@ -43,6 +44,7 @@ const DestringProjection: Projection = {
 
 const HideMeta: Projection = {
   type: "inline",
+  name: "hide meta",
   mode: "replace",
   query: { type: "index", query: ["meta"] },
   projection: () => <div></div>,

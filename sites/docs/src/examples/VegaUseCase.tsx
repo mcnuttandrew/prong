@@ -226,7 +226,8 @@ function VegaUseCase() {
           ...Object.values(StandardBundle),
           buildSparkProjection(preComputedHistograms, "right", "bar"),
           {
-            type: "full-tooltip",
+            type: "tooltip",
+            takeOverMenu: true,
             query: {
               type: "schemaMatch",
               query: ["exprString", "signal", "expr"],
@@ -240,7 +241,8 @@ function VegaUseCase() {
             buildInlineDropDownProjection(
               mapProjections,
               mapProjectionTypes[idx],
-              ["projections", idx, "type", "type___value"]
+              ["projections", idx, "type", "type___value"],
+              "Map Projection Dropdown"
             )
           ),
           {

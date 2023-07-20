@@ -25,6 +25,7 @@ export type MenuElement =
   | {
       type: "projection";
       projectionType: Projection["type"];
+      takeOverMenu?: boolean;
       label?: string;
       element: JSX.Element;
     };
@@ -161,7 +162,7 @@ export function simpleMerge(content: MenuRow[]): MenuRow[] {
 
   return Object.entries(groups).map(
     ([label, elements]) =>
-      ({ label, elements: deduplicate(elements).filter((x) => x) }) as MenuRow
+      ({ label, elements: deduplicate(elements).filter((x) => x) } as MenuRow)
   );
 }
 

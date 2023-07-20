@@ -249,6 +249,7 @@ function RenderPopoverDocked(props: {
   );
   if (menuState === "monocleOpen") {
     return (
+      // @ts-ignore
       <Monocle
         monoclePos={simpleParse(monoclePos, { x: 300, y: 300 })}
         setMonoclePos={setMonoclePos}
