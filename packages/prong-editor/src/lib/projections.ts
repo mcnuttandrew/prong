@@ -54,12 +54,7 @@ interface ProjectionBase {
 export interface ProjectionTooltip extends ProjectionBase {
   type: "tooltip";
   name: string;
-}
-
-// am: should tooltip and full-tooltip merge and have a mode?
-export interface ProjectionFullTooltip extends ProjectionBase {
-  type: "full-tooltip";
-  name: string;
+  takeOverMenu?: boolean;
 }
 
 export interface ProjectionInline extends ProjectionBase {
@@ -78,7 +73,6 @@ export interface ProjectionHighlight {
 export type Projection =
   | ProjectionInline
   | ProjectionTooltip
-  | ProjectionFullTooltip
   | ProjectionHighlight;
 
 function widgetBuilder(

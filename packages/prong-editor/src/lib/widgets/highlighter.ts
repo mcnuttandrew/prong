@@ -40,7 +40,7 @@ export const targTypes = new Set([
   "False",
   "True",
 ]);
-export function pickNodetoHighlight(node: SyntaxNode): SyntaxNode {
+export function pickNodeToHighlight(node: SyntaxNode): SyntaxNode {
   const type = node.type.name;
   if (toParents.has(type)) {
     return node.parent!;

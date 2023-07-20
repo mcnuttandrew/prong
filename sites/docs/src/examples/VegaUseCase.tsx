@@ -226,7 +226,8 @@ function VegaUseCase() {
           ...Object.values(StandardBundle),
           buildSparkProjection(preComputedHistograms, "right", "bar"),
           {
-            type: "full-tooltip",
+            type: "tooltip",
+            takeOverMenu: true,
             query: {
               type: "schemaMatch",
               query: ["exprString", "signal", "expr"],

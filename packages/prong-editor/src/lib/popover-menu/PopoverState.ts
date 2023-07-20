@@ -12,13 +12,9 @@ import {
 } from "../utils";
 import { potentiallyFilterContentForGesture } from "../search";
 import { runProjectionQuery } from "../query";
-import {
-  Projection,
-  ProjectionFullTooltip,
-  ProjectionTooltip,
-} from "../projections";
+import { Projection, ProjectionTooltip } from "../projections";
 import { prepDiagnostics } from "../compute-menu-contents";
-import { pickNodetoHighlight } from "../widgets/highlighter";
+import { pickNodeToHighlight } from "../widgets/highlighter";
 
 import {
   generateMenuContent,
@@ -182,7 +178,6 @@ function getTypings(tr: Transaction, targetNode: SyntaxNode) {
   return schemaTypings[`${targetNode.from}-${targetNode.to}`] || [];
 }
 
-const tooltipTypes = new Set(["tooltip", "full-tooltip"]);
 function getProjectionContents(
   state: EditorState,
   targetNode: SyntaxNode,
@@ -204,7 +199,7 @@ function getProjectionContents(
         proj.id
       )
     )
-    .filter((proj) => tooltipTypes.has(proj.type));
+    .filter((proj) => proj.type == "tooltip");
 }
 
 export function buildProjectionsForMenu(props: {
@@ -221,30 +216,29 @@ export function buildProjectionsForMenu(props: {
   }
   const keyPath = syntaxNodeToKeyPath(node, fullCode);
   return getProjectionContents(state, node, currentCodeSlice).map((proj) => ({
-    label: (proj as ProjectionFullTooltip | ProjectionTooltip).name,
+    label: (proj as ProjectionTooltip).name,
     elements: [
       {
         type: "projection",
         projectionType: proj.type,
-        element: (proj as ProjectionFullTooltip | ProjectionTooltip).projection(
-          {
-            node,
-            keyPath,
-            currentValue: currentCodeSlice,
-            setCode: (code) => {
-              view.dispatch({
-                changes: { from: 0, to: fullCode.length, insert: code },
-                // selection: state.selection,
-              });
-            },
-            fullCode,
-            diagnosticErrors: diagnostics.filter(
-              (x) => x.from === node.from && x.to === node.to
-            ),
-            typings: schemaTypings[`${node.from}-${node.to}`],
-            cursorPositions: [...view.state.selection.ranges],
-          }
-        ),
+        takeOverMenu: proj.type === "tooltip" && proj.takeOverMenu,
+        element: (proj as ProjectionTooltip).projection({
+          node,
+          keyPath,
+          currentValue: currentCodeSlice,
+          setCode: (code) => {
+            view.dispatch({
+              changes: { from: 0, to: fullCode.length, insert: code },
+              // selection: state.selection,
+            });
+          },
+          fullCode,
+          diagnosticErrors: diagnostics.filter(
+            (x) => x.from === node.from && x.to === node.to
+          ),
+          typings: schemaTypings[`${node.from}-${node.to}`],
+          cursorPositions: [...view.state.selection.ranges],
+        }),
       },
     ],
   }));
@@ -256,7 +250,11 @@ export function maybeFilterToFullProjection(menuRows: MenuRow[]): MenuRow[] {
   let projLabel: null | string = null;
   menuRows.forEach((row) =>
     row.elements.forEach((el) => {
-      if (el.type === "projection" && el.projectionType === "full-tooltip") {
+      if (
+        el.type === "projection" &&
+        el.projectionType === "tooltip" &&
+        el?.takeOverMenu
+      ) {
         noFullProjection = false;
         projection = el;
         projLabel = row.label;
@@ -332,7 +330,7 @@ export const popOverState: StateField<PopoverMenuState> = StateField.define({
       menuState,
       selectedRouting,
       targetNode,
-      highlightNode: pickNodetoHighlight(targetNode),
+      highlightNode: pickNodeToHighlight(targetNode),
       targetedTypings: getTypings(tr, targetNode),
       tooltip: {
         pos,
