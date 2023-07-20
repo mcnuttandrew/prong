@@ -1,12 +1,19 @@
 # Prong
 
-This is the Prong editor framework. The goal of this system is to provide a simple way to create in-situ editor extensions for in-browser editors of JSON domain specific languages.
-The core ideas are two: if you have taken the trouble to write a JSON Schema the we should be able to provide you with a nice structure editing style experience, and second if you want to just write react components that should be enough to insert them into a JSON editor.
-Based on this premise, we provide a projectional editor system that allows for the simple creation of editors for any task that has a JSON Schema (ie many JSON DSLs).
+Prong is an editor framework for creating bespoke in-browser editors for JSON-based domain-specific languages (such as [Vega](https://vega.github.io/vega/), [Vega-Lite](https://vega.github.io/vega-lite/), [Tracery](https://tracery.io/), and [many others](https://vis-json-dsls.netlify.app/)). These editors allow for things like drag-and-drop interactions, inline-interactive spreadsheets, in-situ recommenders and sparklines, and many more elements that would require significant engineering effort to create otherwise.
+
+Prong is a projectional editing system, which we see as being made up of two pieces:
+
+1. Structure editing, which allows you to manipulate text without requiring that you manually type out that text (we mostly do this through a special floating menu that is aware of the types of the DSLs). We achieve this by asking that you hand us a [JSON schema](https://json-schema.org/) describing your language.
+2. Alternative views (which we generally refer to as projections) that re-present parts of the text in means that are more meaningful to the domain at hand (like adding a dropdown for an field that has only a fixed set of options). We achieve this by asking you describe your projections using a little query language (see [below](#queries)) and plain ol react components.
+
+In tandem this allows for some pretty interesting editing experiences to be made pretty easily, for instance:
 
 ![Example image of the prong editor framework instantiated for a vega-lite style application](./example.png)
 
-This is described in our upcoming paper "Projectional Editors for JSON-DSLs". Please note that this is research grade software, so there are bugs and issues throughout.
+See the [docs site](https://prong-editor.netlify.app/) (where you may already be) to see a variety of examples. Please note that this is research grade software, so there are bugs and issues throughout, but we welcome any help or contributions you might wish to provide.
+
+This work is described in much greater depth in our upcoming paper "Projectional Editors for JSON-based DSLs".
 
 ## Quick start example usage
 
