@@ -1,6 +1,6 @@
 # Prong
 
-Prong (PRpojectional jsON Gui) is an editor framework for creating bespoke in-browser editors for JSON-based domain-specific languages (such as [Vega](https://vega.github.io/vega/), [Vega-Lite](https://vega.github.io/vega-lite/), [Tracery](https://tracery.io/), and [many others](https://vis-json-dsls.netlify.app/)). These editors allow for things like drag-and-drop interactions, inline-interactive spreadsheets, in-situ recommenders and sparklines, and many more elements that would require significant engineering effort to create otherwise.
+Prong (PRojectional jsON Gui) is an editor framework for creating bespoke in-browser editors for JSON-based domain-specific languages (such as [Vega](https://vega.github.io/vega/), [Vega-Lite](https://vega.github.io/vega-lite/), [Tracery](https://tracery.io/), and [many others](https://vis-json-dsls.netlify.app/)). These editors allow for things like drag-and-drop interactions, inline-interactive spreadsheets, in-situ recommenders and sparklines, and many more elements that would require significant engineering effort to create otherwise.
 
 Prong is a projectional editing system, which we see as being made up of two pieces:
 
