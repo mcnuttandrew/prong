@@ -9,7 +9,7 @@ Prong is a projectional editing system, which we see as being made up of two pie
 
 In tandem this allows for some pretty interesting editing experiences to be made pretty easily, for instance:
 
-![Example image of the prong editor framework instantiated for a vega-lite style application](./example.png)
+![Example image of the prong editor framework instantiated for a vega-lite style application](https://github.com/mcnuttandrew/prong/raw/main/example.png)
 
 See the [docs site](https://prong-editor.netlify.app/) (where you may already be) to see a variety of examples. Please note that this is research grade software, so there are bugs and issues throughout, but we welcome any help or contributions you might wish to provide.
 

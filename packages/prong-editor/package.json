@@ -3,7 +3,8 @@
   "version": "0.0.6",
   "scripts": {
     "dev": " vite build --watch --config vite.config.ts",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && npm run cp-docs",
+    "cp-docs": "cp ../../README.md ./dist/",
     "preview": "vite preview",
     "test": "jest",
     "lint": "eslint src/"
