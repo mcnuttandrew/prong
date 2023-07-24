@@ -58,3 +58,5 @@ sites/docs/public/QuietModeCodeMirror.tsx
 sites/docs/public/QuietModeCompare.tsx
 sites/docs/public/QuietModeUs.tsx
 sites/docs/public/data/*
+
+packages/prong-editor/README.md
