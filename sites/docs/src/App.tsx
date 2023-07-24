@@ -173,7 +173,7 @@ function App() {
           <h1>Prong</h1>
           <div className="flex-down">
             <a href="https://github.com/mcnuttandrew/prong">GitHub</a>
-            <a href="https://github.com/mcnuttandrew/prong">Paper</a>
+            <a href="http://arxiv.org/abs/2307.11260">Paper</a>
           </div>
           {Object.entries(groups).map(([name, groupRoutes]) => {
             return (
