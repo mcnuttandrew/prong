@@ -224,6 +224,12 @@
 
 /* POPOVER STUFF */
 
+
+.cm-annotation-widget-popover-container {
+    max-width: 420px;
+    outline: none;
+}
+
 .cm-tooltip-autocomplete.cm-tooltip {
     max-width: 400px
 }
