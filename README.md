@@ -98,7 +98,7 @@ See below for [additional details](#projections) on the semantics of projection 
 
 - The editor excepts a string! It is very easy to accidentally forget and hand it a parsed object rather than a string describing a json object.
 
-- This system isn't really for interacting with data. There are lots of other great systems for wranging JSON data of various kinds (such as [JSON Crack](https://jsoncrack.com/), [jq](https://jqlang.github.io/jq/), and many others), it's just for DSL style usage. The affordances required for each type of usage are related, but are someonewhat distinct!
+- This system isn't really for interacting with data. There are lots of other great systems for wrangling JSON data of various kinds (such as [JSON Crack](https://jsoncrack.com/), [jq](https://jqlang.github.io/jq/), and many others), it's just for DSL style usage. The affordances required for each type of usage are related, but are somewhat distinct!
 
 ## Component
 

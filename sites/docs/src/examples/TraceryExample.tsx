@@ -594,6 +594,7 @@ function TraceryExample() {
                   "PropertyName" === type && unpeeledRoot[utils.maybeTrim(val)],
               },
               name: "TraceryEditor",
+              group: "Tracery Editor",
               projection: (props) => {
                 const key = `${props.keyPath[0]}`.split("___")[0];
                 if (unpeeledRoot[key]) {
@@ -617,12 +618,12 @@ function TraceryExample() {
                 type: "nodeType",
                 query: ["Number", "String", "Null", "False", "True"],
               },
-              name: "TraceryEditor",
+              name: "ref insert",
+              group: "Insert reference to",
               projection: (props) => {
                 // todo this part should turn into an autocomplete right?
                 return (
                   <div>
-                    <span>Insert reference to</span>
                     {availableSymbols.map((key) => (
                       <button
                         key={key}
