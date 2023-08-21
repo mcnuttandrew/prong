@@ -80,7 +80,7 @@ function Content(props: {
               Press Escape to reattach the menu
               {setDock && (
                 <button onClick={() => setDock("switchToDocked")}>
-                  or click here dock it
+                  or click here to dock it
                 </button>
               )}
             </div>
