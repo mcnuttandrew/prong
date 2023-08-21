@@ -245,7 +245,7 @@ function ColorNamePicker(props: {
                     className={`color-item ${
                       color === initColor ? "selected" : ""
                     }`}
-                    onClick={() => cb(color)}
+                    onClick={() => changeColor(color)}
                     style={{
                       background: color,
                       color: isTooDark(color) ? "white" : "black",
