@@ -35,9 +35,12 @@ export interface PopoverMenuState {
   menuContents: MenuRow[];
   hasProjectionContent: boolean;
 }
+
 export const popoverMenuState: PopoverMenuState = {
-  // menuState: "preFirstUse",
-  menuState: "monocleOpen",
+  // menuState: "preFirstUse","monocleOpen"
+  menuState:
+    (localStorage.getItem("popoverMenuState") as popOverSMState) ||
+    "monocleOpen",
   targetNode: null,
   highlightNode: null,
   targetedTypings: [],
@@ -71,6 +74,7 @@ function handleSimpleUpdate(
       didUpdate = true;
       const newMenuState = PopoverStateMachine(state.menuState, effect.value);
       newState = simpleSet("menuState", newMenuState, state);
+      localStorage.setItem("popoverMenuState", newState.menuState);
     }
     if (effect.is(setRouting)) {
       didUpdate = true;
