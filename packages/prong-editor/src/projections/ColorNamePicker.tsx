@@ -32,6 +32,7 @@ export const colorGroups: Record<string, string[]> = {
     "cyan",
     "aquamarine",
     "lightcyan",
+    "aqua",
   ],
   brown: [
     "maroon",
@@ -199,22 +200,11 @@ const initialState = Object.fromEntries(
 const stripColor = (color: string) => color.slice(1, color.length - 1);
 
 function ColorNamePicker(props: {
-  cb: (color: string | null) => void;
+  changeColor: (color: string | null) => void;
   initColor: string;
 }): JSX.Element {
-  const { cb, initColor } = props;
-  const strippedInitColor = stripColor(initColor);
-  const initColorGroup = Object.entries(colorGroups).find(
-    (x) => x[1].includes(initColor) || x[1].includes(strippedInitColor)
-  );
-  if (!initColorGroup) {
-    throw new Error("Invalid color passed to the color name picker");
-  }
-  const [state, setState] = useState({
-    ...initialState,
-    // to initially expand the group of initColor, set the following to true
-    [initColorGroup[0]]: false,
-  });
+  const { changeColor, initColor } = props;
+  const [state, setState] = useState({ ...initialState });
 
   return (
     <div className="color-name-picker">
@@ -236,7 +226,7 @@ function ColorNamePicker(props: {
                   <span
                     key={`${color}-swatch`}
                     className="color-swatch"
-                    onClick={() => cb(color)}
+                    onClick={() => changeColor(color)}
                     title={color}
                     style={{
                       background: color,
@@ -251,10 +241,10 @@ function ColorNamePicker(props: {
               <ul>
                 {colors.map((color) => (
                   <li
-                    key={color + "-item"}
-                    className={
-                      "color-item " + (color === initColor ? "selected" : "")
-                    }
+                    key={`${color}-item`}
+                    className={`color-item ${
+                      color === initColor ? "selected" : ""
+                    }`}
                     onClick={() => cb(color)}
                     style={{
                       background: color,
@@ -279,7 +269,7 @@ export const ColorNameProjection: Projection = {
   projection: ({ keyPath, currentValue, setCode, fullCode }) => {
     return (
       <ColorNamePicker
-        cb={(newColor) => {
+        changeColor={(newColor) => {
           setCode(setIn(keyPath, `"${newColor!}"`, fullCode));
         }}
         initColor={currentValue}
