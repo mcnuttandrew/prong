@@ -56,15 +56,17 @@ function prepareHighlightString(view: EditorView, node: SyntaxNode) {
     .filter(
       (proj) =>
         proj.type === "highlight" && // todo covert these args to named args
-        runProjectionQuery(
-          proj.query,
+        runProjectionQuery({
+          query: proj.query,
           keyPath,
-          codeString(view, node.from, node.to),
-          schemaTypings[`${node.from}-${node.to}`],
-          node.type.name,
+          nodeValue: codeString(view, node.from, node.to),
+          typings: schemaTypings[`${node.from}-${node.to}`],
+          nodeType: node.type.name,
           // @ts-ignore
-          proj.id
-        )
+          projId: proj.id,
+          cursorPosition: view.state.selection.ranges[0].from,
+          nodePos: { start: node.from, end: node.to },
+        })
     )
     .map((x: any) => x.class);
   return highlights.join(" ");

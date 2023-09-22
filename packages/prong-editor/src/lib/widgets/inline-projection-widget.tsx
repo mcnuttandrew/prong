@@ -89,15 +89,17 @@ const ProjectionWidgetFactory = (
       currentNode.from,
       currentNode.to
     );
-    return runProjectionQuery(
-      projection.query,
+    return runProjectionQuery({
+      query: projection.query,
       keyPath,
-      currentCodeSlice,
+      nodeValue: currentCodeSlice,
       typings,
-      currentNode.type.name,
+      nodeType: currentNode.type.name,
       // @ts-ignore
-      projection.id
-    );
+      projId: projection.id,
+      cursorPosition: state.selection.ranges[0].from,
+      nodePos: { start: syntaxNode.from, end: syntaxNode.to },
+    });
   },
   addNode: (state, from, to) => {
     const widget = new InlineProjectionWidget(

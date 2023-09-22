@@ -199,15 +199,17 @@ function shouldAddProjectionPreGuard(
     syntaxNode.to
   );
 
-  const result = runProjectionQuery(
-    projection.query,
+  const result = runProjectionQuery({
+    query: projection.query,
     keyPath,
-    currentCodeSlice,
+    nodeValue: currentCodeSlice,
     typings,
-    syntaxNode.type.name,
+    nodeType: syntaxNode.type.name,
     // @ts-ignore
-    projection.id
-  );
+    projId: projection.id,
+    cursorPosition: state.selection.ranges[0].from,
+    nodePos: { start: syntaxNode.from, end: syntaxNode.to },
+  });
   return result;
 }
 

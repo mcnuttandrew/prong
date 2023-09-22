@@ -193,15 +193,17 @@ function getProjectionContents(
   return projections
     .filter((proj) =>
       // todo covert these args to named args
-      runProjectionQuery(
-        proj.query,
+      runProjectionQuery({
+        query: proj.query,
         keyPath,
-        targetNodeValue,
+        nodeValue: targetNodeValue,
         typings,
-        targetNode.type.name,
+        nodeType: targetNode.type.name,
         // @ts-ignore
-        proj.id
-      )
+        projId: proj.id,
+        cursorPosition: state.selection.ranges[0].from,
+        nodePos: { start: targetNode.from, end: targetNode.to },
+      })
     )
     .filter((proj) => proj.type == "tooltip");
 }

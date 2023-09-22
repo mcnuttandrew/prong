@@ -5,13 +5,13 @@ import {
   utils,
   Editor,
 } from "../../../../packages/prong-editor/src/index";
-import tracery, { generate, TraceryNode } from "./tracery";
+import tracery, { generate, TraceryNode, modifierNames } from "./tracery";
 import "../stylesheets/tracery-example.css";
 import InsertRandomWord from "./RandomWord";
 
 import TracerySchema from "../constants/tracery-schema.json";
 
-const initialCode = `
+const landScape = `
 {
     "origin":["[myPlace:#path#]#line#"],
     "line":[
@@ -24,6 +24,73 @@ const initialCode = `
     "move":["spiral", "twirl", "curl", "dance", "twine", "weave", "meander", "wander", "flow"]
 }`;
 
+const vlhccCode = `
+{
+  "origin": [ "Reimagining #topic# with #adjective# #element#", "Exploring #aspect# in #domain# with #tool#", 
+    "Enhancing #topic# using #element# in #domain#", "Investigating #topic# in #domain# with #tool#", 
+    "The Impact of #element# on #topic# in #domain#"],
+  "topic": [ "End-user programming", "Debugger Usage", "Visual Language Design", "Educational Tangibles", 
+    "Human-Centric Computing", "Data Visualization", "Paper-Based Tangibles", "Low-Code Notebooks", 
+    "Interactive Data Analysis", "Collaborative Learning", "Data Wrangling Pipelines", 
+    "Programming Concepts", "Programming Environments", "Data Science Communication"],
+  "adjective": [ "Innovative", "Effective", "Transformative", "User-Centered", 
+    "Inclusive", "Adaptive", "Responsive", "Data-Driven", "Collaborative", "Streamlined", "Intuitive", "Accessible"],
+  "element": [ "IoT", "Tangible Programming", "AI-Assisted", "Probabilistic Programming", 
+    "Visual Notations", "Low-Code Tools", "API Design", "Visual Language", "Layout Generation", "Block-based Learning"],
+  "aspect": [ "Usability", "Accessibility", "Collaboration", "Innovation", "Debugging", "Learning", 
+    "Interactivity", "Efficiency", "Effectiveness", "Communication", "Problem Solving"],
+  "domain": [ "Education", "Healthcare", "Data Science", "Software Development", 
+    "Collaborative Environments", "Data Analysis", "Programming Education", "Tech Hiring", "Document Authoring", "Software IDEs"],
+  "tool": [ "Visual Languages", "Tangible Programming", "Functional Debuggers", 
+    "AI-Generated Tools", "Layout Generation Techniques", "Interactive Notebooks", "REST API Practices", 
+    "Educational Tools", "Data Wrangling Support", "Low-Code Platforms"]
+}
+`;
+
+const obliqueStrategies = `
+{
+  "origin": ["Consider the #concept# of #noun#.", "Emulate the process of #action# while #mood#.", 
+    "Take inspiration from #source# and apply it to #context#.", "Work with #noun.s# to explore #concept#.", 
+    "Incorporate elements of #adjective# #noun.s# into your #medium#.", "Transform #noun# into a #noun#.", 
+    "Distill your idea into a single #noun#.", "Combine #adjective# #noun.s# with #noun.s#.", 
+    "Imagine a world where #noun.s# are #adjective#.", "Use #noun.a# as a starting point for #noun.a#.",
+    "Explore the connection between #noun# and #noun#.", "Embrace the feeling of #emotion# in your #medium#.", 
+    "Capture the essence of #noun# in your #medium#.", "Think of #noun# as a metaphor for #concept#.", 
+    "Find beauty in the imperfections of #noun#.", "Build a narrative around #noun# and #noun#.", 
+    "Express #emotion# through the lens of #noun#.", "Exaggerate #noun# to emphasize #concept#.", 
+    "Simplify your approach by focusing on #noun#.", "Create a dialogue between #noun# and #noun#.", 
+    "Play with the idea of #concept# using #noun#.", "Imagine your work as a conversation between #noun# and #noun#.", 
+    "Seek inspiration from the #noun# of #artist#.", "Experiment with #noun# to convey #emotion#.", 
+    "Use #noun# to subvert traditional notions of #noun#.", "Meditate on the relationship between #noun# and #noun#.", 
+    "Consider the absence of #noun# in your #medium#.", "Channel the energy of #noun# into your #noun#.", 
+    "Find harmony in the juxtaposition of #noun.s# and #noun.s#."],
+  "concept": ["chaos", "order", "ambiguity", "serenity", "transition", "contrast", "imperfection", "complexity", 
+    "simplicity", "movement", "reflection", "fragmentation", "growth", "decay", "infinity", "chance", 
+    "silence", "noise", "light", "shadow"],
+  "noun": ["color", "texture", "sound", "shape", "space", "line", "gesture", "form", "pattern", "time", 
+    "emotion", "memory", "dream", "journey", "identity", "landscape", "architecture", "nature", "technology", "ritual"],
+  "action": ["exploring", "contemplating", "evolving", "disrupting", "assembling", "deconstructing", 
+    "repeating", "transforming", "absorbing", "observing", "connecting", "revealing", "concealing", 
+    "reimagining", "collaging", "juxtaposing", "emulating", "transcending", "harmonizing", "dissonating"],
+  "mood": ["intently", "playfully", "seriously", "subtly", "boldly", "quietly", "chaotically", 
+    "harmoniously", "abstractly", "vividly", "ethereally", "thoughtfully", "dreamily", "meditatively", 
+    "reflectively", "urgently", "delicately", "energetically", "passionately"],
+  "source": ["nature", "literature", "architecture", "music", "science", "philosophy", "dreams", "mythology", 
+    "history", "technology", "culture", "emotion", "randomness", "chaos", "serendipity", "silence"],
+  "context": ["your current project", "your daily life", "your surroundings", "the world at large", "the creative process", 
+    "your emotions", "your dreams", "your memories", "your relationships", "the future", "the past", "the present moment"],
+  "adjective": ["subtle", "bold", "ambiguous", "vibrant", "minimalist", "experimental", "nostalgic", "futuristic",
+    "playful", "surreal", "provocative", "evocative", "transcendent", "ethereal", "disruptive", "resonant", "immersive", "enigmatic", "dynamic"],
+  "medium": ["art", "music", "writing", "design", "film", "photography", "architecture", "dance", 
+    "performance", "installation", "technology", "interaction", "craft", "sound"],
+  "emotion": ["awe", "wonder", "melancholy", "euphoria", "desolation", "hope", "doubt", "excitement", 
+    "reflection", "serenity", "fear", "curiosity", "tranquility", "passion", "intimacy", "confusion", "inspiration", "rebellion", "reverence", "nostalgia"],
+  "artist": ["Da Vinci", "Kandinsky", "Bach", "Woolf", "Einstein", "Kubrick", "O'Keeffe", "Tesla", 
+    "Picasso", "Kafka", "Dali", "Hemingway", "Tarkovsky", "Frida", "Wright", "Hitchcock", "Warhol", "Nietzsche", "Beethoven"]
+}
+`;
+
+const codeOptions = { vlhccCode, landScape, obliqueStrategies };
 const classnames = (inp: Record<string, boolean>) =>
   Object.entries(inp)
     .filter(([_, x]) => x)
@@ -443,7 +510,7 @@ const findPath = (
 };
 
 function TraceryExample() {
-  const [currentCode, setCurrentCode] = useState(initialCode);
+  const [currentCode, setCurrentCode] = useState(codeOptions.vlhccCode);
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
   const [keyPath, setKeyPath] = useState<(string | number)[]>([]);
   const [outOfSync, setOutOfSync] = useState<boolean>(false);
@@ -558,13 +625,17 @@ function TraceryExample() {
         {outOfSync && (
           <button
             onClick={() => {
-              console.log("asd");
               setOutOfSync(false);
             }}
           >
             Restore
           </button>
         )}
+        {Object.keys(codeOptions).map((key) => (
+          <button onClick={() => setCurrentCode(codeOptions[key])} key={key}>
+            {key}
+          </button>
+        ))}
       </div>
       {/* {roots.length && (
         <div>
@@ -586,6 +657,74 @@ function TraceryExample() {
           [
             StandardBundle.CleanUp,
             InsertRandomWord,
+            {
+              type: "tooltip",
+              query: {
+                type: "function",
+                query: (
+                  value: string,
+                  _nodeType: any,
+                  _keyPath: any,
+                  cursorPos: number,
+                  nodePos: { start: number; end: number }
+                ) => {
+                  const splitPoint = cursorPos - nodePos.start;
+                  const count = value
+                    .slice(splitPoint)
+                    .split("")
+                    .reduce((acc: number, x) => acc + (x === "#" ? 1 : 0), 0);
+                  const insideKey = count % 2 === 1;
+                  return insideKey;
+                },
+              },
+              name: "modifiers",
+              group: "Modifiers",
+              projection: (props) => {
+                const current = props.currentValue;
+                const cursorPos =
+                  props.cursorPositions[0].from - props.node.from;
+                const idx =
+                  (current.lastIndexOf("#", cursorPos - 1) as number) + 1;
+                const jdx = current.indexOf("#", cursorPos);
+
+                const target = current.substring(idx, jdx);
+                const [pureTarget, ...modifiers] = target.split(".");
+
+                return (
+                  <div>
+                    {modifierNames.map((name) => {
+                      const alreadyPresent = modifiers.find((x) => x === name);
+                      return (
+                        <button
+                          onClick={() => {
+                            const newModifiers = (
+                              alreadyPresent
+                                ? modifiers.filter((x) => x !== name)
+                                : [...modifiers, name]
+                            ).join(".");
+                            const prefix = newModifiers.length ? "." : "";
+                            const newTarget = `${pureTarget}${prefix}${newModifiers}`;
+                            const beforeSplit = current.substring(0, idx);
+                            const afterSplit = current.substring(jdx);
+                            const newCode = `${beforeSplit}${newTarget}${afterSplit}`;
+                            props.setCode(
+                              utils.setIn(
+                                props.keyPath,
+                                newCode,
+                                props.fullCode
+                              )
+                            );
+                          }}
+                          key={name}
+                        >
+                          {alreadyPresent ? "Remove" : "Add"} {name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              },
+            },
             {
               type: "tooltip",
               query: {

@@ -314,11 +314,17 @@ These queries allow you to check for a given AST node type. The JSON AST include
 ```tsx
 {
   type: "function";
-  query: (value: string, nodeType: NodeType, keyPath: KeyPath) => boolean;
+  query: (
+    value: string,
+    nodeType: NodeType,
+    keyPath: KeyPath,
+    cursorPos: number,
+    nodePos: { start: number; end: number }
+  ) => boolean;
 }
 ```
 
-If none of these work for you there is also a function query type. This is obviously the most expensive to run, so should be avoided where possible
+If none of these work for you there is also a function query type. This is obviously the most expensive to run, so should be avoided where possible. Useful for doing checks within a string.
 
 ## Local development
 

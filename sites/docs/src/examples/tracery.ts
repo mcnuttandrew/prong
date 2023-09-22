@@ -119,6 +119,7 @@ const baseEngModifiers: Record<string, Modifier> = {
     }
   },
 };
+export const modifierNames = Object.keys(baseEngModifiers);
 
 type TraceryNodeType = -1 | 0 | 1 | 2;
 export class TraceryNode {

@@ -5,7 +5,9 @@ type NodeType = SyntaxNode["type"]["name"];
 type functionQueryType = (
   value: string,
   nodeType: NodeType,
-  keyPath: (string | number)[]
+  keyPath: (string | number)[],
+  cursorPosition: number,
+  nodePos: { start: number; end: number }
 ) => boolean;
 export type ProjectionQuery =
   | { type: "function"; query: functionQueryType }
@@ -40,14 +42,10 @@ function valueQuery(query: string[], nodeValue: string): boolean {
   return !!query.find((x) => x === strippedVal);
 }
 
-function functionQuery(
+const functionQuery = (
   query: functionQueryType,
-  nodeValue: string,
-  nodeType: NodeType,
-  keyPath: (string | number)[]
-) {
-  return query(nodeValue, nodeType, keyPath);
-}
+  ...args: Parameters<functionQueryType>
+) => query(...args);
 
 function regexQuery(query: RegExp, nodeValue: string) {
   return !!nodeValue.match(query);
@@ -82,20 +80,66 @@ const simpleMatchers = {
   function: functionQuery,
 };
 const cache: Record<string, boolean> = {};
-export function runProjectionQuery(
+function buildCacheKey(
   query: ProjectionQuery,
   keyPath: (string | number)[],
-  nodeValue: string,
-  typings: any[],
-  nodeType: SyntaxNode["type"]["name"],
-  projId: number
-): boolean {
-  const queryStr =
-    query.type === "regex"
-      ? JSON.stringify({ ...query, query: query.query.toString() })
-      : JSON.stringify(query);
+  nodeValue: any,
+  projId: number,
+  cursorPos: number
+) {
   const keyPathStr = JSON.stringify(keyPath);
-  const cacheKey = `${queryStr}-${keyPathStr}-${nodeValue}}-${projId}`;
+
+  switch (query.type) {
+    case "function": {
+      const queryStr = JSON.stringify(query);
+      return `${queryStr}-${keyPathStr}-${nodeValue}}-${projId}-${cursorPos}`;
+    }
+    case "regex": {
+      const queryReg = JSON.stringify({
+        ...query,
+        query: query.query.toString(),
+      });
+      return `${queryReg}-${keyPathStr}-${nodeValue}}-${projId}`;
+    }
+    case "multi-index":
+    case "index":
+    case "nodeType":
+    case "value":
+    case "schemaMatch":
+    default: {
+      const queryStr = JSON.stringify(query);
+      return `${queryStr}-${keyPathStr}-${nodeValue}}-${projId}`;
+    }
+  }
+}
+export function runProjectionQuery(props: {
+  query: ProjectionQuery;
+  keyPath: (string | number)[];
+  nodeValue: string;
+  typings: any[];
+  nodeType: SyntaxNode["type"]["name"];
+  projId: number;
+  cursorPosition: number;
+  nodePos: { start: number; end: number };
+}): boolean {
+  const {
+    query,
+    keyPath,
+    nodeValue,
+    projId,
+    nodeType,
+    typings,
+    cursorPosition,
+    nodePos,
+  } = props;
+
+  const cacheKey = buildCacheKey(
+    query,
+    keyPath,
+    nodeValue,
+    projId,
+    cursorPosition
+  );
   if (cache[cacheKey]) {
     return cache[cacheKey];
   }
@@ -108,7 +152,14 @@ export function runProjectionQuery(
       pass = keyPathMatchesQuery(query.query, keyPath);
       break;
     case "function":
-      pass = functionQuery(query.query as any, nodeValue, nodeType, keyPath);
+      pass = functionQuery(
+        query.query as any,
+        nodeValue,
+        nodeType,
+        keyPath,
+        cursorPosition,
+        nodePos
+      );
       break;
     case "nodeType":
       pass = nodeTypeMatch(query.query, nodeType);
