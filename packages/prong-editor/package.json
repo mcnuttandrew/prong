@@ -1,6 +1,6 @@
 {
   "name": "prong-editor",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "scripts": {
     "dev": " vite build --watch --config vite.config.ts",
     "build": "tsc && vite build && npm run cp-docs",
