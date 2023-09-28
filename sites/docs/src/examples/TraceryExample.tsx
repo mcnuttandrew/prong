@@ -131,7 +131,7 @@ function TraceryCascadeVis(props: {
         onClick(node);
       }}
     >
-      <span>{`${node.childRule}->`}</span>
+      <span>{node.childRule ? `${node.raw}→` : ""}</span>
       {<div>{node.finishedText}</div>}
       {children.length ? (
         <div className="flex">

@@ -31,11 +31,7 @@ const QuietModeUs = (props: {
           query: nodeTypes,
         },
         projection: (props) => (
-          <div
-            style={{
-              color: coloring[props.node.type.name] || "black",
-            }}
-          >
+          <div style={{color: coloring[props.node.type.name] || "black"}}>
             {trim(props.currentValue).length ? trim(props.currentValue) : '""'}
           </div>
         ),

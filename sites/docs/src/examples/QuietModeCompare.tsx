@@ -45,7 +45,9 @@ function QuietModeCompare() {
       >
         <h1>Prong</h1>
         <h3>Lines of code {examples.us.split("\n").length}</h3>
-        <QuietModeUs code={code} onChange={setCode} />
+        <div style={{ height: "500px" }}>
+          <QuietModeUs code={code} onChange={setCode} />
+        </div>
         <h3>Raw</h3>
         <div
           style={{
@@ -66,7 +68,9 @@ function QuietModeCompare() {
       >
         <h1>Vanilla Code Mirror</h1>
         <h3>Lines of code {examples.codeMirror.split("\n").length}</h3>
-        <QuietModeCodeMirror code={code} onChange={setCode} />
+        <div style={{ height: "500px" }}>
+          <QuietModeCodeMirror code={code} onChange={setCode} />
+        </div>
         <h3>Raw</h3>
         <div
           style={{
