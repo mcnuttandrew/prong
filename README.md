@@ -84,7 +84,8 @@ const RandomWordProjection: Projection = {
     return <button onClick={click}>Random Word</button>;
   },
   // what group should the projection appear in
-  name: "Utils",
+  group: "Utils",
+  name: "Random Word"
 };
 
 export default RandomWordProjection;
